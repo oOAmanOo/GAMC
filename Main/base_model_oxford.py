@@ -635,7 +635,7 @@ def train():
         plt.plot(test_losses_D, label='test_D')
         plt.legend()
         # save plot
-        plt.savefig('D:/MemeGAN/Model/' + save_name + "/" + save_name + '_loss.png')
+        plt.savefig('./Model/' + save_name + "/" + save_name + '_loss.png')
         plt.show()
         ######################################  Save ######################################
 
