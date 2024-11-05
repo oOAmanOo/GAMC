@@ -34,13 +34,13 @@ class OxfordDataset(torch.utils.data.Dataset):
 
 def train():
     epochs = 30
-    batch_size = 50
+    batch_size = 40
     optimizer_G_lr = 1e-5
     optimizer_D_lr = 1e-5
-    save_name = '20241101_1e-5'
-    # save_name = '20241028'
+    save_name = '20241105_20wan_dOnly_base_110110wan'
     if not os.path.exists('./Model/' + save_name):
         os.makedirs('./Model/' + save_name)
+        os.makedirs('D:/MemeGAN/Model/' + save_name)
 
 
     # if args.img - dir == 'Oxford_HIC':
@@ -51,7 +51,8 @@ def train():
     # load data
     data = pd.read_csv(dirPath)
     print("shape of data: ", data.shape)
-    data = data.sample(n=50000, random_state=42, replace=True).reset_index(drop=True)
+    # data = data.sample(n=100000, random_state=42, replace=True).reset_index(drop=True)
+    data = data.sample(n=150000, replace=True).reset_index(drop=True)
     # frac = 0.05 ==> 5% of the data = 169904
     # n = 169920 ==> 72 * 2360 = 169920 (F2G)
     # n = 169988 ==> 91 * 1868 = 169988 (G2F)
@@ -407,10 +408,10 @@ def train():
     d_unc_f_loss_list = []
     d_unc_m_loss_list = []
 
-    checkpoint = False
+    checkpoint = True
     if checkpoint:
-        checkpoint_G = torch.load('./Model/test_save/test_save_2NetG.pth')
-        checkpoint_D = torch.load('./Model/test_save/test_save_2NetD.pth')
+        checkpoint_G = torch.load('D:/MemeGAN/Model/20241101_10wan/20241101_10wan_NetG_13.pth')
+        checkpoint_D = torch.load('D:/MemeGAN/Model/20241101_10wan/20241101_10wan_NetD_19.pth')
         NetG.load_state_dict(checkpoint_G['model_state_dict'])
         NetD.load_state_dict(checkpoint_D['model_state_dict'])
         optimizer_G.load_state_dict(checkpoint_G['optimizer_state_dict'])
@@ -477,7 +478,6 @@ def train():
         ###################################### Train ######################################
         with tqdm(train_loader, unit="batch", leave=True) as tepoch:
             for idx, (text, image, funny_score) in enumerate(tepoch):
-                # tepoch.set_postfix({'Now': tepoch.format_dict['elapsed'], 'Status': " New batch preprocessing"})
                 if idx == 0:
                     startTime = tepoch.format_dict['elapsed']
                 elif idx == 1:
@@ -488,8 +488,6 @@ def train():
                 text = textExtraction(tokenizer, gemmaConfig, text).to(torch.bfloat16)
                 image = image.to(torch.bfloat16)
                 funny_score = funny_score.to(torch.bfloat16)
-                # print(text.dtype, image.dtype, funny_score.dtype)
-                # print(text.shape, image.shape, funny_score.shape)
                 # torch.Size([32, 64, 768]) torch.Size([32, 64, 768]) torch.Size([32, 1])
                 textExtractionTime += tepoch.format_dict['elapsed'] - pre
                 pre = tepoch.format_dict['elapsed']
@@ -497,28 +495,23 @@ def train():
                 # (1) Update Generator network
                 ######################################################
                 optimizer_G.zero_grad()
-                # tepoch.set_postfix({'Now': tepoch.format_dict['elapsed'], 'Status': " Generator Forward"})
                 logits, output_funny_score = NetG(text.to(device), image.to(device))
-                g_con_logits, g_unc_logits = NetD(text.to(device), logits, image.to(device), "G")
+                # g_con_logits, g_unc_logits = NetD(text.to(device), logits, image.to(device), "G")
                 GeneratorForwardTime += tepoch.format_dict['elapsed'] - pre
                 pre = tepoch.format_dict['elapsed']
 
-                # tepoch.set_postfix({'Now': tepoch.format_dict['elapsed'], 'Status': " Generator Backward - Generator"})
-                loss_G = generatorLoss(g_con_logits.to(device), g_unc_logits.to(device)) + (
-                            100 * funnyScoreLoss(output_funny_score.to(device), funny_score.to(device)))
-                loss_G.backward(retain_graph=True)
-                train_loss_G += loss_G.item()
-                optimizer_G.step()
+                # loss_G = generatorLoss(g_con_logits.to(device), g_unc_logits.to(device)) + (
+                #             100 * funnyScoreLoss(output_funny_score.to(device), funny_score.to(device)))
+                # loss_G.backward(retain_graph=True)
+                # train_loss_G += loss_G.item()
+                # optimizer_G.step()
                 GeneratorBackwardGTime += tepoch.format_dict['elapsed'] - pre
                 pre = tepoch.format_dict['elapsed']
                 ######################################################
                 # (4) Update Discriminator network
                 ######################################################
                 optimizer_D.zero_grad()
-                # tepoch.set_postfix({'Now': tepoch.format_dict['elapsed'], 'Status': " Discriminator Forward"})
-                d_con_logits, d_unc_logits = NetD(text.to(device).detach(), logits.detach(), image.to(device).detach(),
-                                                  "D")
-                # tepoch.set_postfix({'Now': tepoch.format_dict['elapsed'], 'Status': " Discriminator Backward"})
+                d_con_logits, d_unc_logits = NetD(text.to(device).detach(), logits.detach(), image.to(device).detach(), "D")
                 DiscriminatorForwardTime += tepoch.format_dict['elapsed'] - pre
                 pre = tepoch.format_dict['elapsed']
                 loss_D = discriminatorLoss(d_con_logits.to(device), d_unc_logits.to(device))
@@ -535,9 +528,9 @@ def train():
                                     'DiscriminatorForward': DiscriminatorForwardTime / (idx + 1),
                                     'DiscriminatorBackward': DiscriminatorBackwardTime / (idx + 1)})
                 sepateLoss = pd.DataFrame()
-                sepateLoss['g_fc_loss'] = g_fc_loss_list
-                sepateLoss['g_con_loss'] = g_con_loss_list
-                sepateLoss['g_unc_loss'] = g_unc_loss_list
+                # sepateLoss['g_fc_loss'] = g_fc_loss_list
+                # sepateLoss['g_con_loss'] = g_con_loss_list
+                # sepateLoss['g_unc_loss'] = g_unc_loss_list
                 sepateLoss['d_con_r2f_loss'] = d_con_r2f_loss_list
                 sepateLoss['d_con_f2r_loss'] = d_con_f2r_loss_list
                 sepateLoss['d_con_f_loss'] = d_con_f_loss_list
@@ -547,9 +540,9 @@ def train():
                 sepateLoss['d_unc_m_loss'] = d_unc_m_loss_list
                 sepateLoss.to_csv('./Model/' + save_name + "/" + save_name + '_sepateLoss.csv', index=False)
                 ######################################################
-        train_loss_G /= len(train_loader)
+        # train_loss_G /= len(train_loader)
         train_loss_D /= len(train_loader)
-        train_losses_G.append(train_loss_G)
+        # train_losses_G.append(train_loss_G)
         train_losses_D.append(train_loss_D)
         ###################################### Train ######################################
 
@@ -562,19 +555,20 @@ def train():
                 # Generator
                 logits, output_funny_score = NetG(text.to(device), image.to(device))
                 # Discriminator
-                g_con_logits, g_unc_logits = NetD(text.to(device), logits, image.to(device), "G")
+                # g_con_logits, g_unc_logits = NetD(text.to(device), logits, image.to(device), "G")
                 d_con_logits, d_unc_logits = NetD(text.to(device).detach(), logits.detach(), image.to(device).detach(),"D")
                 # loss
-                loss_G = generatorLoss(g_con_logits.to(device), g_unc_logits.to(device)) + (
-                            100 * funnyScoreLoss(output_funny_score.to(device), funny_score.to(device)))
+                # loss_G = generatorLoss(g_con_logits.to(device), g_unc_logits.to(device)) + (
+                #             100 * funnyScoreLoss(output_funny_score.to(device), funny_score.to(device)))
                 loss_D = discriminatorLoss(d_con_logits, d_unc_logits)
-                test_loss_G += loss_G.item()
+                # test_loss_G += loss_G.item()
                 test_loss_D += loss_D.item()
-                tepoch.set_postfix({'G_loss': test_loss_G / (idx + 1),
-                                    'D_loss': test_loss_D / (idx + 1)})
-        test_loss_G /= len(test_loader)
+                # tepoch.set_postfix({'G_loss': test_loss_G / (idx + 1),
+                #                     'D_loss': test_loss_D / (idx + 1)})
+                tepoch.set_postfix({'D_loss': test_loss_D / (idx + 1)})
+        # test_loss_G /= len(test_loader)
         test_loss_D /= len(test_loader)
-        test_losses_G.append(test_loss_G)
+        # test_losses_G.append(test_loss_G)
         test_losses_D.append(test_loss_D)
         ######################################  Test ######################################
 
@@ -589,16 +583,18 @@ def train():
                 'epoch': epoch + present_epoch,
                 'model_state_dict': NetG.state_dict(),
                 'optimizer_state_dict': optimizer_G.state_dict(),
-                'G_loss': loss_G,
+                # 'G_loss': loss_G,
+                'G_loss': checkpoint_G['G_loss'],
                 'D_loss': loss_D,
-            }, './Model/' + save_name + "/" + save_name + '_NetG_' + str(epoch + present_epoch) + '.pth')
+            }, 'D:/MemeGAN/Model/' + save_name + "/" + save_name + '_NetG_' + str(epoch + present_epoch) + '.pth')
             torch.save({
                 'epoch': epoch + present_epoch,
                 'model_state_dict': NetD.state_dict(),
                 'optimizer_state_dict': optimizer_D.state_dict(),
-                'G_loss': loss_G,
+                # 'G_loss': loss_G,
+                'G_loss': checkpoint_G['G_loss'],
                 'D_loss': loss_D,
-            }, './Model/' + save_name + "/" + save_name + '_NetD_' + str(epoch + present_epoch) + '.pth')
+            }, 'D:/MemeGAN//Model/' + save_name + "/" + save_name + '_NetD_' + str(epoch + present_epoch) + '.pth')
         if train_loss_D < best_train_loss_D and test_loss_D < best_test_loss_D:
             best_train_loss_D = train_loss_D
             best_test_loss_D = test_loss_D
@@ -607,16 +603,18 @@ def train():
                 'epoch': epoch + present_epoch,
                 'model_state_dict': NetG.state_dict(),
                 'optimizer_state_dict': optimizer_G.state_dict(),
-                'G_loss': loss_G,
+                # 'G_loss': loss_G,
+                'G_loss': checkpoint_G['G_loss'],
                 'D_loss': loss_D,
-            }, './Model/' + save_name + "/" + save_name + '_NetG_' + str(epoch + present_epoch) + '.pth')
+            }, 'D:/MemeGAN/Model/' + save_name + "/" + save_name + '_NetG_' + str(epoch + present_epoch) + '.pth')
             torch.save({
                 'epoch': epoch + present_epoch,
                 'model_state_dict': NetD.state_dict(),
                 'optimizer_state_dict': optimizer_D.state_dict(),
-                'G_loss': loss_G,
+                # 'G_loss': loss_G,
+                'G_loss': checkpoint_G['G_loss'],
                 'D_loss': loss_D,
-            }, './Model/' + save_name + "/" + save_name + '_NetD_' + str(epoch + present_epoch) + '.pth')
+            }, 'D:/MemeGAN/Model/' + save_name + "/" + save_name + '_NetD_' + str(epoch + present_epoch) + '.pth')
 
         if hasSaved:
             save.append("V")
@@ -624,21 +622,21 @@ def train():
             save.append(" ")
 
         loss_data = pd.DataFrame()
-        loss_data['train_G'] = train_losses_G
+        # loss_data['train_G'] = train_losses_G
         loss_data['train_D'] = train_losses_D
-        loss_data['test_G'] = test_losses_G
+        # loss_data['test_G'] = test_losses_G
         loss_data['test_D'] = test_losses_D
         loss_data['save'] = save
-        loss_data.to_csv('./Model/' + save_name + "/" + save_name + '_loss.csv', index=False)
+        loss_data.to_csv('D:/MemeGAN/Model/' + save_name + "/" + save_name + '_loss.csv', index=False)
 
-        plt.plot(train_losses_G, label='train_G')
+        # plt.plot(train_losses_G, label='train_G')
         plt.plot(train_losses_D, label='train_D')
-        plt.plot(test_losses_G, label='test_G')
+        # plt.plot(test_losses_G, label='test_G')
         plt.plot(test_losses_D, label='test_D')
         plt.legend()
-        plt.show()
         # save plot
-        plt.savefig('./Model/' + save_name + "/" + save_name + '_loss.png')
+        plt.savefig('D:/MemeGAN/Model/' + save_name + "/" + save_name + '_loss.png')
+        plt.show()
         ######################################  Save ######################################
 
 if __name__ == '__main__':
