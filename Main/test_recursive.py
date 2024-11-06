@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader
 from transformers import AutoConfig, AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 # from local_gemma import LocalGemma2ForCausalLM
 
-from extractor import addImagePath, textExtraction, imageExtraction, textExtractReverse
+from extractor import addImagePath, textExtraction, imageExtraction, textExtractReverse, textExtractReverseRecursive
 eps = torch.finfo(torch.bfloat16).eps
 batch_size = 50
 ### 官方的Gemma #########################################################################################
@@ -140,13 +140,13 @@ class Generator(nn.Module):
 
             # get max value of each row, total 32*64
             top_k_values, top_k_indices = torch.topk(x2, 1, dim=2, largest=True)
-            toGemma = textExtractReverse(gemma, tokenizer, top_k_indices, Test=True).to(device)
+            toGemma = textExtractReverseRecursive(gemma, tokenizer, top_k_indices, Test=True).to(device)
             # 使用gemma作為model的一部分
             output = self.gemma(toGemma)
             # output[0] = last_hidden_state
             # output[1] = past_key_values
 
-        return output[0]
+        return output[0], toGemma
 
     def forward(self, text, image):
         # max_seq_len = max(text.shape[1], image.shape[1])
@@ -188,8 +188,7 @@ class Generator(nn.Module):
         generated_tokens.append(2)  # <bos> = 2
         text = torch.zeros_like(image).to(device)
         text = text.transpose(0, 1).to(torch.bfloat16)
-        image = image.transpose(0, 1)
-        tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
+        image = image.transpose(0, 1).to(torch.bfloat16)
         depth = len(self.layers_self_multi)
 
         # 有時後空格會失效，所以手動插入空格 <pad> = 0
@@ -199,7 +198,9 @@ class Generator(nn.Module):
             return zeros
 
         lastTurn = False
+        generated_caption = ""
         with torch.no_grad():
+
             # Transformer
             for i in range(depth):
                 # self attention
@@ -217,11 +218,35 @@ class Generator(nn.Module):
             # funny score
             output_funny_score = self.FunnyScorelinear1(feature_fusion).squeeze(-1)
             output_funny_score = self.FunnyScorelinear2(output_funny_score).squeeze(-1)
-            print("GT funny score: ", output_funny_score)
+            # print("GT funny score: ", output_funny_score)
 
             # gemma generate
-            last_hidden_state = self.gemmaGenerate(feature_fusion)
+            last_hidden_state, generated_tokens = self.gemmaGenerate(feature_fusion)
             output_text = self.gemmaLm_head(last_hidden_state)
+            generated_tokens = generated_tokens[0].squeeze(-1).tolist()
+
+            for _ in range(max_length + 1):
+                next_token_logits = output_text[:, -1, :]
+                next_token_probs = torch.softmax(next_token_logits, dim=-1)
+                next_token_id = torch.argmax(next_token_probs, dim=-1).item()
+                generated_tokens.append(next_token_id)
+
+                generated_caption = insert_zeros(generated_tokens)
+                generated_caption = tokenizer.decode(generated_caption, skip_special_tokens=False)
+                generated_caption = generated_caption.replace("<pad>", " ").replace("  ", " ").split()
+                generated_caption = [word for word in generated_caption if word[0] != "<"]
+                generated_caption = " ".join(generated_caption)
+
+                if next_token_id == gemmaConfig.eos_token_id or len(generated_caption.split()) > max_length:
+                    # <eos> = 1; <end_of_turn> = 107
+                    print(generated_caption)
+                    break
+                else:
+                    temp = tokenizer([generated_caption], truncation=True, padding='max_length', max_length=64,
+                                     return_tensors='pt').to(device)
+                    last_hidden_state = temp['input_ids']
+                    output_text = self.gemma(last_hidden_state)[0]
+                    output_text = self.gemmaLm_head(output_text)
 
             avg_pool = nn.AdaptiveAvgPool1d(768)
             text = avg_pool(output_text)
@@ -244,7 +269,6 @@ class Generator(nn.Module):
             # funny score
             output_funny_score = self.FunnyScorelinear1(feature_fusion).squeeze(-1)
             output_funny_score = self.FunnyScorelinear2(output_funny_score).squeeze(-1)
-
             return output_text, output_funny_score
 
 
