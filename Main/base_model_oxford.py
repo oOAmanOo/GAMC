@@ -1,4 +1,5 @@
 import os
+import gc
 import pandas as pd
 from tqdm import tqdm
 import matplotlib.pyplot as plt
@@ -34,7 +35,7 @@ class OxfordDataset(torch.utils.data.Dataset):
 
 def train():
     epochs = 30
-    batch_size = 40
+    batch_size = 50
     optimizer_G_lr = 1e-5
     optimizer_D_lr = 1e-5
     save_name = '20241105_20wan_dOnly_base_110110wan'
@@ -419,6 +420,10 @@ def train():
         train_losses_G.append(checkpoint_G['G_loss'])
         train_losses_D.append(checkpoint_G['D_loss'])
         present_epoch = checkpoint_G['epoch'] + 1
+        g_loss_checkpoint = checkpoint_G['G_loss']
+        del checkpoint_G
+        del checkpoint_D
+        gc.collect()
 
     def funnyScoreLoss(output_funny_score, funny_score):
         loss = nn.MSELoss()(output_funny_score, funny_score)
@@ -494,7 +499,7 @@ def train():
                 ######################################################
                 # (1) Update Generator network
                 ######################################################
-                optimizer_G.zero_grad()
+                # optimizer_G.zero_grad()
                 logits, output_funny_score = NetG(text.to(device), image.to(device))
                 # g_con_logits, g_unc_logits = NetD(text.to(device), logits, image.to(device), "G")
                 GeneratorForwardTime += tepoch.format_dict['elapsed'] - pre
@@ -528,9 +533,9 @@ def train():
                                     'DiscriminatorForward': DiscriminatorForwardTime / (idx + 1),
                                     'DiscriminatorBackward': DiscriminatorBackwardTime / (idx + 1)})
                 sepateLoss = pd.DataFrame()
-                # sepateLoss['g_fc_loss'] = g_fc_loss_list
-                # sepateLoss['g_con_loss'] = g_con_loss_list
-                # sepateLoss['g_unc_loss'] = g_unc_loss_list
+                sepateLoss['g_fc_loss'] = g_fc_loss_list
+                sepateLoss['g_con_loss'] = g_con_loss_list
+                sepateLoss['g_unc_loss'] = g_unc_loss_list
                 sepateLoss['d_con_r2f_loss'] = d_con_r2f_loss_list
                 sepateLoss['d_con_f2r_loss'] = d_con_f2r_loss_list
                 sepateLoss['d_con_f_loss'] = d_con_f_loss_list
@@ -575,26 +580,26 @@ def train():
         ######################################  Save ######################################
         hasSaved = False
         # 任一個loss小於最佳loss就存檔
-        if train_loss_G < best_train_loss_G and test_loss_G < best_test_loss_G:
-            best_train_loss_G = train_loss_G
-            best_test_loss_G = test_loss_G
-            hasSaved = True
-            torch.save({
-                'epoch': epoch + present_epoch,
-                'model_state_dict': NetG.state_dict(),
-                'optimizer_state_dict': optimizer_G.state_dict(),
-                # 'G_loss': loss_G,
-                'G_loss': checkpoint_G['G_loss'],
-                'D_loss': loss_D,
-            }, 'D:/MemeGAN/Model/' + save_name + "/" + save_name + '_NetG_' + str(epoch + present_epoch) + '.pth')
-            torch.save({
-                'epoch': epoch + present_epoch,
-                'model_state_dict': NetD.state_dict(),
-                'optimizer_state_dict': optimizer_D.state_dict(),
-                # 'G_loss': loss_G,
-                'G_loss': checkpoint_G['G_loss'],
-                'D_loss': loss_D,
-            }, 'D:/MemeGAN//Model/' + save_name + "/" + save_name + '_NetD_' + str(epoch + present_epoch) + '.pth')
+        # if train_loss_G < best_train_loss_G and test_loss_G < best_test_loss_G:
+        #     best_train_loss_G = train_loss_G
+        #     best_test_loss_G = test_loss_G
+        #     hasSaved = True
+        #     torch.save({
+        #         'epoch': epoch + present_epoch,
+        #         'model_state_dict': NetG.state_dict(),
+        #         'optimizer_state_dict': optimizer_G.state_dict(),
+        #         # 'G_loss': loss_G,
+        #         'G_loss': checkpoint_G['G_loss'],
+        #         'D_loss': loss_D,
+        #     }, 'D:/MemeGAN/Model/' + save_name + "/" + save_name + '_NetG_' + str(epoch + present_epoch) + '.pth')
+        #     torch.save({
+        #         'epoch': epoch + present_epoch,
+        #         'model_state_dict': NetD.state_dict(),
+        #         'optimizer_state_dict': optimizer_D.state_dict(),
+        #         # 'G_loss': loss_G,
+        #         'G_loss': checkpoint_G['G_loss'],
+        #         'D_loss': loss_D,
+        #     }, 'D:/MemeGAN//Model/' + save_name + "/" + save_name + '_NetD_' + str(epoch + present_epoch) + '.pth')
         if train_loss_D < best_train_loss_D and test_loss_D < best_test_loss_D:
             best_train_loss_D = train_loss_D
             best_test_loss_D = test_loss_D
@@ -604,7 +609,7 @@ def train():
                 'model_state_dict': NetG.state_dict(),
                 'optimizer_state_dict': optimizer_G.state_dict(),
                 # 'G_loss': loss_G,
-                'G_loss': checkpoint_G['G_loss'],
+                'G_loss': g_loss_checkpoint,
                 'D_loss': loss_D,
             }, 'D:/MemeGAN/Model/' + save_name + "/" + save_name + '_NetG_' + str(epoch + present_epoch) + '.pth')
             torch.save({
@@ -612,7 +617,7 @@ def train():
                 'model_state_dict': NetD.state_dict(),
                 'optimizer_state_dict': optimizer_D.state_dict(),
                 # 'G_loss': loss_G,
-                'G_loss': checkpoint_G['G_loss'],
+                'G_loss': g_loss_checkpoint,
                 'D_loss': loss_D,
             }, 'D:/MemeGAN/Model/' + save_name + "/" + save_name + '_NetD_' + str(epoch + present_epoch) + '.pth')
 
