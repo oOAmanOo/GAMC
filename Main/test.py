@@ -331,9 +331,11 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 #load model
 NetG = Generator().to(torch.bfloat16).to(device)
 NetD = Discriminator().to(torch.bfloat16).to(device)
+
 checkpoint_name = '20241101_15wan_1e-7d'
 checkpoint_G = torch.load('D:/MemeGAN/Model/' + checkpoint_name + '/' + checkpoint_name + '_NetG_17.pth')
 checkpoint_D = torch.load('D:/MemeGAN/Model/' + checkpoint_name + '/' + checkpoint_name + '_NetD_17.pth')
+
 NetG.load_state_dict(checkpoint_G['model_state_dict'])
 NetD.load_state_dict(checkpoint_D['model_state_dict'])
 # optimizer_G.load_state_dict(checkpoint_G['optimizer_state_dict'])
