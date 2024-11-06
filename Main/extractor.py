@@ -63,6 +63,30 @@ def textExtractReverse(gemma, tokenizer, data, Test = False):
         tokens.append(temp['input_ids'])
     return torch.cat(tokens)
 
+def textExtractReverseRecursive(gemma, tokenizer, data, Test = False):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # 有時後空格會失效，所以手動插入空格 <pad> = 0
+    def insert_zeros(tensor):
+        zeros = torch.zeros(tensor.shape[0], tensor.shape[1] * 2 - 1)
+        zeros[:, ::2] = tensor
+        zeros = zeros.to(int)
+        return zeros
+
+    reverse_data = insert_zeros(data.squeeze(-1))
+    # reverse the token
+    reverse = tokenizer.batch_decode(reverse_data, skip_special_tokens=False)
+    # tokenize with gemma-2b
+    prompt = "Write a humor memetic post for Instagram with the following elements: "
+    tokens = []
+    for i, text in enumerate(reverse):
+        text = text.replace("<pad>", " ").replace("  ", " ")
+        text = set(text.split())
+        text = ', '.join(text)
+        reverse[i] = prompt + text + "."
+        temp = tokenizer(reverse[i], truncation=True, padding='max_length', max_length=64, return_tensors='pt').to(device)
+        tokens.append(temp['input_ids'])
+    return torch.cat(tokens)
+
 # 定義批量處理和提取特徵的函數
 def imageExtraction(image_data):
     # 加載 Swinv2 模型和處理器
