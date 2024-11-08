@@ -14,7 +14,7 @@ def addImagePath(data, imgPath):
 
 def textExtraction(tokenizer, gemmaConfig, text_data):
     # tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
-    gemmaConfig = AutoConfig.from_pretrained('google/gemma-2-2b-it')
+    # gemmaConfig = AutoConfig.from_pretrained('google/gemma-2-2b-it')
     vocab_size = gemmaConfig.vocab_size  # 詞彙表大小
 
     embedding_dim = 768  # 嵌入维度，與你的圖片嵌入维度相同
@@ -34,6 +34,35 @@ def textExtraction(tokenizer, gemmaConfig, text_data):
         all_features.append(output.detach())
             # pbar.update(1)
     return torch.cat(all_features)
+
+def textExtraction_D(gemma, tokenizer, gemmaConfig, text_data):
+    # tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
+    # gemmaConfig = AutoConfig.from_pretrained('google/gemma-2-2b-it')
+    vocab_size = gemmaConfig.vocab_size  # 詞彙表大小
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    embedding_dim = 2304  # 嵌入维度，與你的圖片嵌入维度相同
+    text_embedding = nn.Embedding(vocab_size, embedding_dim)
+    gemmaLm_head = nn.Sequential(*list(gemma.children())[-1:]).to(device)
+    avg_pool = nn.AdaptiveAvgPool1d(64)
+
+    all_features = []
+    # with tqdm.tqdm (total=len(text_data)) as pbar:
+    for text in (text_data):
+        tokens = tokenizer(text, padding='longest', return_tensors='pt', )
+        output = text_embedding(tokens['input_ids'])
+        if output.shape[1] > 64:
+            output = avg_pool(output.transpose(1, 2)).transpose(1, 2)
+        elif output.shape[1] < 64:
+            padding = torch.zeros(output.shape[0], 64 - output.shape[1], embedding_dim)
+            output = torch.cat((output, padding), dim=1)
+        torch.no_grad()
+        all_features.append(output.detach())
+            # pbar.update(1)
+    with torch.no_grad():
+        output = torch.cat(all_features).to(device).to(torch.bfloat16)
+        output = gemmaLm_head(output)
+    return output
 
 def textExtractReverse(gemma, tokenizer, data, Test = False):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
