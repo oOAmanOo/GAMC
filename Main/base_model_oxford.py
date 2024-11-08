@@ -38,7 +38,7 @@ def train():
     batch_size = 50
     optimizer_G_lr = 1e-5
     optimizer_D_lr = 1e-5
-    save_name = '20241105_10wan_base_20241105_15wan_dOnly'
+    save_name = 'share_weight'
     if not os.path.exists('./Model/' + save_name):
         os.makedirs('./Model/' + save_name)
         os.makedirs('D:/MemeGAN/Model/' + save_name)
@@ -201,8 +201,9 @@ def train():
                 output = self.gemma(toGemma)
                 # output[0] = last_hidden_state
                 # output[1] = past_key_values
+                output_text = self.gemmaLm_head(output[0])
 
-            return output[0]
+            return output_text
 
         def forward(self, text, image):
             # max_seq_len = max(text.shape[1], image.shape[1])
@@ -225,8 +226,7 @@ def train():
             feature_fusion_final = feature_fusion_final.squeeze(-1)
             feature_fusion_final = feature_fusion_final.transpose(0, 1)
             ####################### gemma  generate #######################
-            last_hidden_state = self.gemmaGenerate(feature_fusion_final)
-            output_text = self.gemmaLm_head(last_hidden_state)
+            output_text = self.gemmaGenerate(feature_fusion_final)
             ###############################################################
             # output_text = self.gemmaLm_headbf(feature_fusion_final)
             # output_text = self.gemmaLm_head(output_text)
@@ -272,8 +272,7 @@ def train():
                     feature_fusion = feature_fusion.transpose(0, 1)
 
                     # gemma generate
-                    last_hidden_state = self.gemmaGenerate(feature_fusion)
-                    output_text = self.gemmaLm_head(last_hidden_state)
+                    output_text = self.gemmaGenerate(feature_fusion)
 
                     # funny score
                     output_funny_score = self.FunnyScorelinear1(feature_fusion).squeeze(-1)
@@ -318,20 +317,34 @@ def train():
             self.d_unc_mlp1 = nn.Linear(768, 1)
             self.d_unc_mlp2 = nn.Linear(64, 1)
 
+            self.con_mlp1 = nn.Linear(1536, 2)
+            self.con_mlp2 = nn.Linear(64, 1)
+            self.unc_mlp1 = nn.Linear(768, 1)
+            self.unc_mlp2 = nn.Linear(64, 1)
+
         def forward(self, real_text, fake_text, image, GorD):
             # real_text = [batch_size, 64, 768]
             # fake_text = [batch_size, 64, 256000]
             # image = [batch_size, 64, 768]
             fake_text = self.linearFake(fake_text)
             if GorD == "G":
+                # g_C_g = torch.cat((fake_text, image), dim=-1)
+                # ########################  conditional  ########################
+                # g_C_g = self.g_con_mlp1(g_C_g)
+                # g_C_g = self.g_con_mlp2(g_C_g.transpose(1, 2)).squeeze(-1)
+                # ###############################################################
+                # ######################## unconditional ########################
+                # g_UC_g = self.g_unc_mlp1(fake_text).squeeze(-1)
+                # g_UC_g = self.g_unc_mlp2(g_UC_g).squeeze(-1)
+                # ###############################################################
                 g_C_g = torch.cat((fake_text, image), dim=-1)
                 ########################  conditional  ########################
-                g_C_g = self.g_con_mlp1(g_C_g)
-                g_C_g = self.g_con_mlp2(g_C_g.transpose(1, 2)).squeeze(-1)
+                g_C_g = self.con_mlp1(g_C_g)
+                g_C_g = self.con_mlp2(g_C_g.transpose(1, 2)).squeeze(-1)
                 ###############################################################
                 ######################## unconditional ########################
-                g_UC_g = self.g_unc_mlp1(fake_text).squeeze(-1)
-                g_UC_g = self.g_unc_mlp2(g_UC_g).squeeze(-1)
+                g_UC_g = self.unc_mlp1(fake_text).squeeze(-1)
+                g_UC_g = self.unc_mlp2(g_UC_g).squeeze(-1)
                 ###############################################################
                 return g_C_g, g_UC_g
 
@@ -346,16 +359,47 @@ def train():
                 d_C_r2f = torch.cat((cd_C_r, cd_C_g.transpose(0, 1)), dim=-1)
                 d_C_f2r = torch.cat((cd_C_g, cd_C_r.transpose(0, 1)), dim=-1)
 
+                # ######################## conditional ########################
+                # d_C_r2f = self.d_con_mlp1_cd(d_C_r2f)
+                # d_C_f2r = self.d_con_mlp1_cd(d_C_f2r)
+                # d_C_g = self.d_con_mlp1(C_g)
+                # d_C_m = self.d_con_mlp1(C_m)
+                #
+                # d_C_r2f = self.d_con_mlp2_cd(d_C_r2f.transpose(2,3)).squeeze(-1).unsqueeze(0)
+                # d_C_f2r = self.d_con_mlp2_cd(d_C_f2r.transpose(2,3)).squeeze(-1).unsqueeze(0)
+                # d_C_g = self.d_con_mlp2(d_C_g.transpose(1,2)).squeeze(-1).unsqueeze(0)
+                # d_C_m = self.d_con_mlp2(d_C_m.transpose(1,2)).squeeze(-1).unsqueeze(0)
+                #
+                # d_C_r2f = nn.LogSoftmax(dim=-1)(d_C_r2f)
+                # d_C_f2r = nn.LogSoftmax(dim=-1)(d_C_f2r)
+                # d_C_r2f = torch.mean(d_C_r2f, dim=-2)
+                # d_C_f2r = torch.mean(d_C_f2r, dim=-2)
+                #
+                # d_con_output = torch.cat((d_C_r2f, d_C_f2r, d_C_g, d_C_m), dim=0)
+                # ###############################################################
+                #
+                # ######################## unconditional ########################
+                # d_UC_r = self.d_unc_mlp1(real_text).squeeze(-1)
+                # d_UC_g = self.d_unc_mlp1(fake_text).squeeze(-1)
+                # d_UC_m = self.d_unc_mlp1(mismatched_text).squeeze(-1)
+                #
+                # d_UC_r = self.d_unc_mlp2(d_UC_r).squeeze(-1).unsqueeze(0)
+                # d_UC_g = self.d_unc_mlp2(d_UC_g).squeeze(-1).unsqueeze(0)
+                # d_UC_m = self.d_unc_mlp2(d_UC_m).squeeze(-1).unsqueeze(0)
+                #
+                # d_unc_output = torch.cat((d_UC_r, d_UC_g, d_UC_m), dim=0)
+                # ###############################################################
+
                 ######################## conditional ########################
                 d_C_r2f = self.d_con_mlp1_cd(d_C_r2f)
                 d_C_f2r = self.d_con_mlp1_cd(d_C_f2r)
-                d_C_g = self.d_con_mlp1(C_g)
-                d_C_m = self.d_con_mlp1(C_m)
+                d_C_g = self.con_mlp1(C_g)
+                d_C_m = self.con_mlp1(C_m)
 
-                d_C_r2f = self.d_con_mlp2_cd(d_C_r2f.transpose(2,3)).squeeze(-1).unsqueeze(0)
-                d_C_f2r = self.d_con_mlp2_cd(d_C_f2r.transpose(2,3)).squeeze(-1).unsqueeze(0)
-                d_C_g = self.d_con_mlp2(d_C_g.transpose(1,2)).squeeze(-1).unsqueeze(0)
-                d_C_m = self.d_con_mlp2(d_C_m.transpose(1,2)).squeeze(-1).unsqueeze(0)
+                d_C_r2f = self.d_con_mlp2_cd(d_C_r2f.transpose(2, 3)).squeeze(-1).unsqueeze(0)
+                d_C_f2r = self.d_con_mlp2_cd(d_C_f2r.transpose(2, 3)).squeeze(-1).unsqueeze(0)
+                d_C_g = self.con_mlp2(d_C_g.transpose(1, 2)).squeeze(-1).unsqueeze(0)
+                d_C_m = self.con_mlp2(d_C_m.transpose(1, 2)).squeeze(-1).unsqueeze(0)
 
                 d_C_r2f = nn.LogSoftmax(dim=-1)(d_C_r2f)
                 d_C_f2r = nn.LogSoftmax(dim=-1)(d_C_f2r)
@@ -366,13 +410,13 @@ def train():
                 ###############################################################
 
                 ######################## unconditional ########################
-                d_UC_r = self.d_unc_mlp1(real_text).squeeze(-1)
-                d_UC_g = self.d_unc_mlp1(fake_text).squeeze(-1)
-                d_UC_m = self.d_unc_mlp1(mismatched_text).squeeze(-1)
+                d_UC_r = self.unc_mlp1(real_text).squeeze(-1)
+                d_UC_g = self.unc_mlp1(fake_text).squeeze(-1)
+                d_UC_m = self.unc_mlp1(mismatched_text).squeeze(-1)
 
-                d_UC_r = self.d_unc_mlp2(d_UC_r).squeeze(-1).unsqueeze(0)
-                d_UC_g = self.d_unc_mlp2(d_UC_g).squeeze(-1).unsqueeze(0)
-                d_UC_m = self.d_unc_mlp2(d_UC_m).squeeze(-1).unsqueeze(0)
+                d_UC_r = self.unc_mlp2(d_UC_r).squeeze(-1).unsqueeze(0)
+                d_UC_g = self.unc_mlp2(d_UC_g).squeeze(-1).unsqueeze(0)
+                d_UC_m = self.unc_mlp2(d_UC_m).squeeze(-1).unsqueeze(0)
 
                 d_unc_output = torch.cat((d_UC_r, d_UC_g, d_UC_m), dim=0)
                 ###############################################################
@@ -427,8 +471,8 @@ def train():
         return loss
 
     def generatorLoss(condition_logits, uncondition_logits):
-        result_fake_con = torch.zeros(condition_logits.shape[0]).to(torch.long).to(device)
-        result_fake_unc = torch.FloatTensor(condition_logits.shape[0]).to(torch.bfloat16).uniform_(0.0, 0.1).to(device)
+        result_fake_con = torch.ones(condition_logits.shape[0]).to(torch.long).to(device) # 111 share weight
+        result_fake_unc = torch.FloatTensor(condition_logits.shape[0]).to(torch.bfloat16).uniform_(0.9, 1.0).to(device)
         con_loss = CrossEntropyLoss(label_smoothing=0.1)(condition_logits, result_fake_con)
         unc_loss = BCEWithLogitsLoss()(uncondition_logits, result_fake_unc)
         g_con_loss_list.append(con_loss.item())
@@ -575,7 +619,7 @@ def train():
 
         ######################################  Save ######################################
         hasSaved = False
-        任一個loss小於最佳loss就存檔
+        # 任一個loss小於最佳loss就存檔
         if train_loss_G < best_train_loss_G and test_loss_G < best_test_loss_G:
             best_train_loss_G = train_loss_G
             best_test_loss_G = test_loss_G
