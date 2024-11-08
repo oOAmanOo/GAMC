@@ -13,7 +13,7 @@ from torch.utils.data import DataLoader
 from transformers import AutoConfig, AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 # from local_gemma import LocalGemma2ForCausalLM
 
-from extractor import addImagePath, textExtraction, imageExtraction, textExtractReverse
+from extractor import addImagePath, textExtraction, imageExtraction, textExtractReverse, textExtraction_D
 eps = torch.finfo(torch.bfloat16).eps
 
 class OxfordDataset(torch.utils.data.Dataset):
@@ -35,10 +35,10 @@ class OxfordDataset(torch.utils.data.Dataset):
 
 def train():
     epochs = 30
-    batch_size = 50
+    batch_size = 30
     optimizer_G_lr = 1e-5
     optimizer_D_lr = 1e-5
-    save_name = 'share_weight'
+    save_name = 'share_weight_256K'
     if not os.path.exists('./Model/' + save_name):
         os.makedirs('./Model/' + save_name)
         os.makedirs('D:/MemeGAN/Model/' + save_name)
@@ -326,7 +326,10 @@ def train():
             # real_text = [batch_size, 64, 768]
             # fake_text = [batch_size, 64, 256000]
             # image = [batch_size, 64, 768]
+            mismatched_text = torch.roll(real_text, 1, 0)
+            real_text = self.linearFake(real_text)
             fake_text = self.linearFake(fake_text)
+            mismatched_text = self.linearFake(mismatched_text)
             if GorD == "G":
                 # g_C_g = torch.cat((fake_text, image), dim=-1)
                 # ########################  conditional  ########################
@@ -349,7 +352,6 @@ def train():
                 return g_C_g, g_UC_g
 
             elif GorD == "D":
-                mismatched_text = torch.roll(real_text, 1, 0)
                 C_r = torch.cat((real_text, image), dim=-1)
                 C_g = torch.cat((fake_text, image), dim=-1)
                 C_m = torch.cat((mismatched_text, image), dim=-1)
@@ -530,7 +532,8 @@ def train():
                 else:
                     startTime += tepoch.format_dict['elapsed'] - pre
                 pre = tepoch.format_dict['elapsed']
-                text = textExtraction(tokenizer, gemmaConfig, text).to(torch.bfloat16)
+                text_g = textExtraction(tokenizer, gemmaConfig, text).to(torch.bfloat16)
+
                 image = image.to(torch.bfloat16)
                 funny_score = funny_score.to(torch.bfloat16)
                 # torch.Size([32, 64, 768]) torch.Size([32, 64, 768]) torch.Size([32, 1])
@@ -540,8 +543,11 @@ def train():
                 # (1) Update Generator network
                 ######################################################
                 optimizer_G.zero_grad()
-                logits, output_funny_score = NetG(text.to(device), image.to(device))
-                g_con_logits, g_unc_logits = NetD(text.to(device), logits, image.to(device), "G")
+                logits, output_funny_score = NetG(text_g.to(device), image.to(device))
+                del text_g
+                gc.collect()
+                text_d = textExtraction_D(gemma, tokenizer, gemmaConfig, text).to(torch.bfloat16)
+                g_con_logits, g_unc_logits = NetD(text_d.to(device), logits, image.to(device), "G")
                 GeneratorForwardTime += tepoch.format_dict['elapsed'] - pre
                 pre = tepoch.format_dict['elapsed']
 
@@ -556,7 +562,7 @@ def train():
                 # (4) Update Discriminator network
                 ######################################################
                 optimizer_D.zero_grad()
-                d_con_logits, d_unc_logits = NetD(text.to(device).detach(), logits.detach(), image.to(device).detach(), "D")
+                d_con_logits, d_unc_logits = NetD(text_d.to(device).detach(), logits.detach(), image.to(device).detach(), "D")
                 DiscriminatorForwardTime += tepoch.format_dict['elapsed'] - pre
                 pre = tepoch.format_dict['elapsed']
                 loss_D = discriminatorLoss(d_con_logits.to(device), d_unc_logits.to(device))
