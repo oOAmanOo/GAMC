@@ -64,8 +64,14 @@ def textExtraction_D(gemma, tokenizer, gemmaConfig, text_data):
         output = gemmaLm_head(output)
     return output
 
-def textExtractReverse(gemma, tokenizer, data, Test = False):
+def textExtractReverse(gemma, tokenizer, gemmaConfig, data, Test = False):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    vocab_size = gemmaConfig.vocab_size  # 詞彙表大小
+
+    embedding_dim = 768  # 嵌入维度，與你的圖片嵌入维度相同
+    text_embedding = nn.Embedding(vocab_size, embedding_dim)
+    avg_pool = nn.AdaptiveAvgPool1d(64)
+
     # 有時後空格會失效，所以手動插入空格 <pad> = 0
     def insert_zeros(tensor):
         zeros = torch.zeros(tensor.shape[0], tensor.shape[1] * 2 - 1)
@@ -84,13 +90,17 @@ def textExtractReverse(gemma, tokenizer, data, Test = False):
         text = set(text.split())
         text = ', '.join(text)
         reverse[i] = prompt + text + "."
-        temp = tokenizer(reverse[i], truncation=True, padding='max_length', max_length=64, return_tensors='pt').to(device)
-        if Test:
-            outputs = gemma.generate(**temp, max_new_tokens=1000)
-            outputs = tokenizer.decode(outputs[0])
-            print(outputs)
-        tokens.append(temp['input_ids'])
-    return torch.cat(tokens)
+    input_ids = tokenizer(reverse, truncation=True, padding='max_length', max_length=64, return_tensors='pt').to(device)
+    outputs = gemma.generate(**input_ids, max_new_tokens=1000)
+    #remove the same as input
+    outputs = outputs[:, len(input_ids['input_ids'][0]):]
+    outputs = text_embedding(outputs)  # embedding
+    if outputs.shape[1] > 64:
+        outputs = avg_pool(outputs.transpose(1, 2)).transpose(1, 2)
+    elif outputs.shape[1] < 64:
+        padding = torch.zeros(outputs.shape[0], 64 - outputs.shape[1], 768)
+        outputs = torch.cat((outputs, padding), dim=1)
+    return outputs
 
 def textExtractReverseRecursive(gemma, tokenizer, data, Test = False):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -112,7 +122,7 @@ def textExtractReverseRecursive(gemma, tokenizer, data, Test = False):
         text = set(text.split())
         text = ', '.join(text)
         reverse[i] = prompt + text + "."
-        temp = tokenizer(reverse[i], truncation=True, padding='max_length', max_length=64, return_tensors='pt').to(device)
+        temp = tokenizer(reverse, truncation=True, padding='max_length', max_length=64, return_tensors='pt').to(device)
         tokens.append(temp['input_ids'])
     return torch.cat(tokens)
 
