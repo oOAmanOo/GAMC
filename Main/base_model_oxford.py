@@ -38,7 +38,7 @@ def train():
     batch_size = 30
     optimizer_G_lr = 1e-5
     optimizer_D_lr = 1e-5
-    save_name = 'share_weight_256K'
+    save_name = '20241110_gemma_generate'
     if not os.path.exists('./Model/' + save_name):
         os.makedirs('./Model/' + save_name)
         os.makedirs('D:/MemeGAN/Model/' + save_name)
@@ -196,12 +196,12 @@ def train():
 
                 # get max value of each row, total 32*64
                 top_k_values, top_k_indices = torch.topk(x2, 1, dim=2, largest=True)
-                toGemma = textExtractReverse(gemma, tokenizer,top_k_indices).to(device)
+                output_text = textExtractReverse(gemma, tokenizer,top_k_indices).to(device)
                 # 使用gemma作為model的一部分
-                output = self.gemma(toGemma)
+                # output = self.gemma(toGemma)
                 # output[0] = last_hidden_state
                 # output[1] = past_key_values
-                output_text = self.gemmaLm_head(output[0])
+                # output_text = self.gemmaLm_head(output[0])
 
             return output_text
 
@@ -327,28 +327,28 @@ def train():
             # fake_text = [batch_size, 64, 256000]
             # image = [batch_size, 64, 768]
             mismatched_text = torch.roll(real_text, 1, 0)
-            real_text = self.linearFake(real_text)
-            fake_text = self.linearFake(fake_text)
-            mismatched_text = self.linearFake(mismatched_text)
+            # real_text = self.linearFake(real_text)
+            # fake_text = self.linearFake(fake_text)
+            # mismatched_text = self.linearFake(mismatched_text)
             if GorD == "G":
-                # g_C_g = torch.cat((fake_text, image), dim=-1)
-                # ########################  conditional  ########################
-                # g_C_g = self.g_con_mlp1(g_C_g)
-                # g_C_g = self.g_con_mlp2(g_C_g.transpose(1, 2)).squeeze(-1)
-                # ###############################################################
-                # ######################## unconditional ########################
-                # g_UC_g = self.g_unc_mlp1(fake_text).squeeze(-1)
-                # g_UC_g = self.g_unc_mlp2(g_UC_g).squeeze(-1)
-                # ###############################################################
                 g_C_g = torch.cat((fake_text, image), dim=-1)
                 ########################  conditional  ########################
-                g_C_g = self.con_mlp1(g_C_g)
-                g_C_g = self.con_mlp2(g_C_g.transpose(1, 2)).squeeze(-1)
+                g_C_g = self.g_con_mlp1(g_C_g)
+                g_C_g = self.g_con_mlp2(g_C_g.transpose(1, 2)).squeeze(-1)
                 ###############################################################
                 ######################## unconditional ########################
-                g_UC_g = self.unc_mlp1(fake_text).squeeze(-1)
-                g_UC_g = self.unc_mlp2(g_UC_g).squeeze(-1)
+                g_UC_g = self.g_unc_mlp1(fake_text).squeeze(-1)
+                g_UC_g = self.g_unc_mlp2(g_UC_g).squeeze(-1)
                 ###############################################################
+                # g_C_g = torch.cat((fake_text, image), dim=-1)
+                # ########################  conditional  ########################
+                # g_C_g = self.con_mlp1(g_C_g)
+                # g_C_g = self.con_mlp2(g_C_g.transpose(1, 2)).squeeze(-1)
+                # ###############################################################
+                # ######################## unconditional ########################
+                # g_UC_g = self.unc_mlp1(fake_text).squeeze(-1)
+                # g_UC_g = self.unc_mlp2(g_UC_g).squeeze(-1)
+                # ###############################################################
                 return g_C_g, g_UC_g
 
             elif GorD == "D":
@@ -361,47 +361,16 @@ def train():
                 d_C_r2f = torch.cat((cd_C_r, cd_C_g.transpose(0, 1)), dim=-1)
                 d_C_f2r = torch.cat((cd_C_g, cd_C_r.transpose(0, 1)), dim=-1)
 
-                # ######################## conditional ########################
-                # d_C_r2f = self.d_con_mlp1_cd(d_C_r2f)
-                # d_C_f2r = self.d_con_mlp1_cd(d_C_f2r)
-                # d_C_g = self.d_con_mlp1(C_g)
-                # d_C_m = self.d_con_mlp1(C_m)
-                #
-                # d_C_r2f = self.d_con_mlp2_cd(d_C_r2f.transpose(2,3)).squeeze(-1).unsqueeze(0)
-                # d_C_f2r = self.d_con_mlp2_cd(d_C_f2r.transpose(2,3)).squeeze(-1).unsqueeze(0)
-                # d_C_g = self.d_con_mlp2(d_C_g.transpose(1,2)).squeeze(-1).unsqueeze(0)
-                # d_C_m = self.d_con_mlp2(d_C_m.transpose(1,2)).squeeze(-1).unsqueeze(0)
-                #
-                # d_C_r2f = nn.LogSoftmax(dim=-1)(d_C_r2f)
-                # d_C_f2r = nn.LogSoftmax(dim=-1)(d_C_f2r)
-                # d_C_r2f = torch.mean(d_C_r2f, dim=-2)
-                # d_C_f2r = torch.mean(d_C_f2r, dim=-2)
-                #
-                # d_con_output = torch.cat((d_C_r2f, d_C_f2r, d_C_g, d_C_m), dim=0)
-                # ###############################################################
-                #
-                # ######################## unconditional ########################
-                # d_UC_r = self.d_unc_mlp1(real_text).squeeze(-1)
-                # d_UC_g = self.d_unc_mlp1(fake_text).squeeze(-1)
-                # d_UC_m = self.d_unc_mlp1(mismatched_text).squeeze(-1)
-                #
-                # d_UC_r = self.d_unc_mlp2(d_UC_r).squeeze(-1).unsqueeze(0)
-                # d_UC_g = self.d_unc_mlp2(d_UC_g).squeeze(-1).unsqueeze(0)
-                # d_UC_m = self.d_unc_mlp2(d_UC_m).squeeze(-1).unsqueeze(0)
-                #
-                # d_unc_output = torch.cat((d_UC_r, d_UC_g, d_UC_m), dim=0)
-                # ###############################################################
-
                 ######################## conditional ########################
                 d_C_r2f = self.d_con_mlp1_cd(d_C_r2f)
                 d_C_f2r = self.d_con_mlp1_cd(d_C_f2r)
-                d_C_g = self.con_mlp1(C_g)
-                d_C_m = self.con_mlp1(C_m)
+                d_C_g = self.d_con_mlp1(C_g)
+                d_C_m = self.d_con_mlp1(C_m)
 
-                d_C_r2f = self.d_con_mlp2_cd(d_C_r2f.transpose(2, 3)).squeeze(-1).unsqueeze(0)
-                d_C_f2r = self.d_con_mlp2_cd(d_C_f2r.transpose(2, 3)).squeeze(-1).unsqueeze(0)
-                d_C_g = self.con_mlp2(d_C_g.transpose(1, 2)).squeeze(-1).unsqueeze(0)
-                d_C_m = self.con_mlp2(d_C_m.transpose(1, 2)).squeeze(-1).unsqueeze(0)
+                d_C_r2f = self.d_con_mlp2_cd(d_C_r2f.transpose(2,3)).squeeze(-1).unsqueeze(0)
+                d_C_f2r = self.d_con_mlp2_cd(d_C_f2r.transpose(2,3)).squeeze(-1).unsqueeze(0)
+                d_C_g = self.d_con_mlp2(d_C_g.transpose(1,2)).squeeze(-1).unsqueeze(0)
+                d_C_m = self.d_con_mlp2(d_C_m.transpose(1,2)).squeeze(-1).unsqueeze(0)
 
                 d_C_r2f = nn.LogSoftmax(dim=-1)(d_C_r2f)
                 d_C_f2r = nn.LogSoftmax(dim=-1)(d_C_f2r)
@@ -412,16 +381,47 @@ def train():
                 ###############################################################
 
                 ######################## unconditional ########################
-                d_UC_r = self.unc_mlp1(real_text).squeeze(-1)
-                d_UC_g = self.unc_mlp1(fake_text).squeeze(-1)
-                d_UC_m = self.unc_mlp1(mismatched_text).squeeze(-1)
+                d_UC_r = self.d_unc_mlp1(real_text).squeeze(-1)
+                d_UC_g = self.d_unc_mlp1(fake_text).squeeze(-1)
+                d_UC_m = self.d_unc_mlp1(mismatched_text).squeeze(-1)
 
-                d_UC_r = self.unc_mlp2(d_UC_r).squeeze(-1).unsqueeze(0)
-                d_UC_g = self.unc_mlp2(d_UC_g).squeeze(-1).unsqueeze(0)
-                d_UC_m = self.unc_mlp2(d_UC_m).squeeze(-1).unsqueeze(0)
+                d_UC_r = self.d_unc_mlp2(d_UC_r).squeeze(-1).unsqueeze(0)
+                d_UC_g = self.d_unc_mlp2(d_UC_g).squeeze(-1).unsqueeze(0)
+                d_UC_m = self.d_unc_mlp2(d_UC_m).squeeze(-1).unsqueeze(0)
 
                 d_unc_output = torch.cat((d_UC_r, d_UC_g, d_UC_m), dim=0)
                 ###############################################################
+
+                # ######################## conditional ########################
+                # d_C_r2f = self.d_con_mlp1_cd(d_C_r2f)
+                # d_C_f2r = self.d_con_mlp1_cd(d_C_f2r)
+                # d_C_g = self.con_mlp1(C_g)
+                # d_C_m = self.con_mlp1(C_m)
+                #
+                # d_C_r2f = self.d_con_mlp2_cd(d_C_r2f.transpose(2, 3)).squeeze(-1).unsqueeze(0)
+                # d_C_f2r = self.d_con_mlp2_cd(d_C_f2r.transpose(2, 3)).squeeze(-1).unsqueeze(0)
+                # d_C_g = self.con_mlp2(d_C_g.transpose(1, 2)).squeeze(-1).unsqueeze(0)
+                # d_C_m = self.con_mlp2(d_C_m.transpose(1, 2)).squeeze(-1).unsqueeze(0)
+                #
+                # d_C_r2f = nn.LogSoftmax(dim=-1)(d_C_r2f)
+                # d_C_f2r = nn.LogSoftmax(dim=-1)(d_C_f2r)
+                # d_C_r2f = torch.mean(d_C_r2f, dim=-2)
+                # d_C_f2r = torch.mean(d_C_f2r, dim=-2)
+                #
+                # d_con_output = torch.cat((d_C_r2f, d_C_f2r, d_C_g, d_C_m), dim=0)
+                # ###############################################################
+                #
+                # ######################## unconditional ########################
+                # d_UC_r = self.unc_mlp1(real_text).squeeze(-1)
+                # d_UC_g = self.unc_mlp1(fake_text).squeeze(-1)
+                # d_UC_m = self.unc_mlp1(mismatched_text).squeeze(-1)
+                #
+                # d_UC_r = self.unc_mlp2(d_UC_r).squeeze(-1).unsqueeze(0)
+                # d_UC_g = self.unc_mlp2(d_UC_g).squeeze(-1).unsqueeze(0)
+                # d_UC_m = self.unc_mlp2(d_UC_m).squeeze(-1).unsqueeze(0)
+                #
+                # d_unc_output = torch.cat((d_UC_r, d_UC_g, d_UC_m), dim=0)
+                # ###############################################################
                 return d_con_output, d_unc_output
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu" )
@@ -532,7 +532,7 @@ def train():
                 else:
                     startTime += tepoch.format_dict['elapsed'] - pre
                 pre = tepoch.format_dict['elapsed']
-                text_g = textExtraction(tokenizer, gemmaConfig, text).to(torch.bfloat16)
+                text = textExtraction(tokenizer, gemmaConfig, text).to(torch.bfloat16)
 
                 image = image.to(torch.bfloat16)
                 funny_score = funny_score.to(torch.bfloat16)
@@ -543,11 +543,8 @@ def train():
                 # (1) Update Generator network
                 ######################################################
                 optimizer_G.zero_grad()
-                logits, output_funny_score = NetG(text_g.to(device), image.to(device))
-                del text_g
-                gc.collect()
-                text_d = textExtraction_D(gemma, tokenizer, gemmaConfig, text).to(torch.bfloat16)
-                g_con_logits, g_unc_logits = NetD(text_d.to(device), logits, image.to(device), "G")
+                logits, output_funny_score = NetG(text.to(device), image.to(device))
+                g_con_logits, g_unc_logits = NetD(text.to(device), logits, image.to(device), "G")
                 GeneratorForwardTime += tepoch.format_dict['elapsed'] - pre
                 pre = tepoch.format_dict['elapsed']
 
@@ -562,7 +559,7 @@ def train():
                 # (4) Update Discriminator network
                 ######################################################
                 optimizer_D.zero_grad()
-                d_con_logits, d_unc_logits = NetD(text_d.to(device).detach(), logits.detach(), image.to(device).detach(), "D")
+                d_con_logits, d_unc_logits = NetD(text.to(device).detach(), logits.detach(), image.to(device).detach(), "D")
                 DiscriminatorForwardTime += tepoch.format_dict['elapsed'] - pre
                 pre = tepoch.format_dict['elapsed']
                 loss_D = discriminatorLoss(d_con_logits.to(device), d_unc_logits.to(device))
