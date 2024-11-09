@@ -37,8 +37,7 @@ def train():
     batch_size = 50
     optimizer_G_lr = 1e-5
     optimizer_D_lr = 1e-5
-    save_name = '20241029_correct_reverse_generate2'
-    # save_name = '20241028'
+    save_name = '20241110_gemma_generate'
     if not os.path.exists('./Model/' + save_name):
         os.makedirs('./Model/' + save_name)
 
@@ -51,7 +50,7 @@ def train():
     # load data
     data = pd.read_csv(dirPath)
     print("shape of data: ", data.shape)
-    data = data.sample(n=50000, random_state=42, replace=True).reset_index(drop=True)
+    data = data.sample(n=100000, random_state=42, replace=True).reset_index(drop=True)
     # frac = 0.05 ==> 5% of the data = 169904
     # n = 169920 ==> 72 * 2360 = 169920 (F2G)
     # n = 169988 ==> 91 * 1868 = 169988 (G2F)
@@ -179,13 +178,13 @@ def train():
 
                 # get max value of each row, total 32*64
                 top_k_values, top_k_indices = torch.topk(x2, 1, dim=2, largest=True)
-                toGemma = textExtractReverse(gemma, tokenizer, gemmaConfig, top_k_indices, test, max_new_tokens).to(device)
+                output_text = textExtractReverse(gemma, tokenizer, gemmaConfig,top_k_indices).to(device)
                 # 使用gemma作為model的一部分
                 # output = self.gemma(toGemma)
                 # output[0] = last_hidden_state
                 # output[1] = past_key_values
-
-            return toGemma
+                # output_text = self.gemmaLm_head(output[0])
+            return output_text
 
         def forward(self, text, image):
             # max_seq_len = max(text.shape[1], image.shape[1])
@@ -274,7 +273,7 @@ def train():
     class Discriminator(nn.Module):
         def __init__(self):
             super(Discriminator, self).__init__()
-            # self.linearFake = nn.Linear(gemmaConfig.vocab_size, 768)
+            self.linearFake = nn.Linear(gemmaConfig.vocab_size, 768)
             # Generator
             self.g_con_mlp1 = nn.Linear(1536, 2)
             self.g_con_mlp2 = nn.Linear(64, 1)
@@ -282,26 +281,27 @@ def train():
             self.g_unc_mlp2 = nn.Linear(64, 1)
             # Discriminator
             self.d_linearFake = nn.Linear(gemmaConfig.vocab_size, 768)
-            self.d_con_mlp1_r2f = nn.Linear(3072, 2)
-            self.d_con_mlp2_r2f = nn.Linear(64, 1)
-            self.d_con_mlp1_f2r = nn.Linear(3072, 2)
-            self.d_con_mlp2_f2r = nn.Linear(64, 1)
-            self.d_con_mlp1_g = nn.Linear(1536, 2)
-            self.d_con_mlp2_g = nn.Linear(64, 1)
-            self.d_con_mlp1_m = nn.Linear(1536, 2)
-            self.d_con_mlp2_m = nn.Linear(64, 1)
-            self.d_unc_mlp1_r = nn.Linear(768, 1)
-            self.d_unc_mlp2_r = nn.Linear(64, 1)
-            self.d_unc_mlp1_g = nn.Linear(768, 1)
-            self.d_unc_mlp2_g = nn.Linear(64, 1)
-            self.d_unc_mlp1_m = nn.Linear(768, 1)
-            self.d_unc_mlp2_m = nn.Linear(64, 1)
+            self.d_con_mlp1_cd = nn.Linear(3072, 2)
+            self.d_con_mlp2_cd = nn.Linear(64, 1)
+            self.d_con_mlp1 = nn.Linear(1536, 2)
+            self.d_con_mlp2 = nn.Linear(64, 1)
+            self.d_unc_mlp1 = nn.Linear(768, 1)
+            self.d_unc_mlp2 = nn.Linear(64, 1)
+
+            self.con_mlp1 = nn.Linear(1536, 2)
+            self.con_mlp2 = nn.Linear(64, 1)
+            self.unc_mlp1 = nn.Linear(768, 1)
+            self.unc_mlp2 = nn.Linear(64, 1)
 
         def forward(self, real_text, fake_text, image, GorD):
             # real_text = [batch_size, 64, 768]
             # fake_text = [batch_size, 64, 256000]
             # image = [batch_size, 64, 768]
+
+            mismatched_text = torch.roll(real_text, 1, 0)
+            # real_text = self.linearFake(real_text)
             # fake_text = self.linearFake(fake_text)
+            # mismatched_text = self.linearFake(mismatched_text)
             if GorD == "G":
                 g_C_g = torch.cat((fake_text, image), dim=-1)
                 ########################  conditional  ########################
@@ -312,10 +312,18 @@ def train():
                 g_UC_g = self.g_unc_mlp1(fake_text).squeeze(-1)
                 g_UC_g = self.g_unc_mlp2(g_UC_g).squeeze(-1)
                 ###############################################################
+                # g_C_g = torch.cat((fake_text, image), dim=-1)
+                # ########################  conditional  ########################
+                # g_C_g = self.con_mlp1(g_C_g)
+                # g_C_g = self.con_mlp2(g_C_g.transpose(1, 2)).squeeze(-1)
+                # ###############################################################
+                # ######################## unconditional ########################
+                # g_UC_g = self.unc_mlp1(fake_text).squeeze(-1)
+                # g_UC_g = self.unc_mlp2(g_UC_g).squeeze(-1)
+                # ###############################################################
                 return g_C_g, g_UC_g
 
             elif GorD == "D":
-                mismatched_text = torch.roll(real_text, 1, 0)
                 C_r = torch.cat((real_text, image), dim=-1)
                 C_g = torch.cat((fake_text, image), dim=-1)
                 C_m = torch.cat((mismatched_text, image), dim=-1)
@@ -326,15 +334,15 @@ def train():
                 d_C_f2r = torch.cat((cd_C_g, cd_C_r.transpose(0, 1)), dim=-1)
 
                 ######################## conditional ########################
-                d_C_r2f = self.d_con_mlp1_r2f(d_C_r2f)
-                d_C_f2r = self.d_con_mlp1_f2r(d_C_f2r)
-                d_C_g = self.d_con_mlp1_g(C_g)
-                d_C_m = self.d_con_mlp1_m(C_m)
+                d_C_r2f = self.d_con_mlp1_cd(d_C_r2f)
+                d_C_f2r = self.d_con_mlp1_cd(d_C_f2r)
+                d_C_g = self.d_con_mlp1(C_g)
+                d_C_m = self.d_con_mlp1(C_m)
 
-                d_C_r2f = self.d_con_mlp2_r2f(d_C_r2f.transpose(2,3)).squeeze(-1).unsqueeze(0)
-                d_C_f2r = self.d_con_mlp2_r2f(d_C_f2r.transpose(2,3)).squeeze(-1).unsqueeze(0)
-                d_C_g = self.d_con_mlp2_g(d_C_g.transpose(1,2)).squeeze(-1).unsqueeze(0)
-                d_C_m = self.d_con_mlp2_m(d_C_m.transpose(1,2)).squeeze(-1).unsqueeze(0)
+                d_C_r2f = self.d_con_mlp2_cd(d_C_r2f.transpose(2,3)).squeeze(-1).unsqueeze(0)
+                d_C_f2r = self.d_con_mlp2_cd(d_C_f2r.transpose(2,3)).squeeze(-1).unsqueeze(0)
+                d_C_g = self.d_con_mlp2(d_C_g.transpose(1,2)).squeeze(-1).unsqueeze(0)
+                d_C_m = self.d_con_mlp2(d_C_m.transpose(1,2)).squeeze(-1).unsqueeze(0)
 
                 d_C_r2f = torch.mean(d_C_r2f, dim=-2)
                 d_C_f2r = torch.mean(d_C_f2r, dim=-2)
@@ -343,16 +351,47 @@ def train():
                 ###############################################################
 
                 ######################## unconditional ########################
-                d_UC_r = self.d_unc_mlp1_r(real_text).squeeze(-1)
-                d_UC_g = self.d_unc_mlp1_g(fake_text).squeeze(-1)
-                d_UC_m = self.d_unc_mlp1_m(mismatched_text).squeeze(-1)
+                d_UC_r = self.d_unc_mlp1(real_text).squeeze(-1)
+                d_UC_g = self.d_unc_mlp1(fake_text).squeeze(-1)
+                d_UC_m = self.d_unc_mlp1(mismatched_text).squeeze(-1)
 
-                d_UC_r = self.d_unc_mlp2_r(d_UC_r).squeeze(-1).unsqueeze(0)
-                d_UC_g = self.d_unc_mlp2_g(d_UC_g).squeeze(-1).unsqueeze(0)
-                d_UC_m = self.d_unc_mlp2_m(d_UC_m).squeeze(-1).unsqueeze(0)
+                d_UC_r = self.d_unc_mlp2(d_UC_r).squeeze(-1).unsqueeze(0)
+                d_UC_g = self.d_unc_mlp2(d_UC_g).squeeze(-1).unsqueeze(0)
+                d_UC_m = self.d_unc_mlp2(d_UC_m).squeeze(-1).unsqueeze(0)
 
                 d_unc_output = torch.cat((d_UC_r, d_UC_g, d_UC_m), dim=0)
                 ###############################################################
+
+                # ######################## conditional ########################
+                # d_C_r2f = self.d_con_mlp1_cd(d_C_r2f)
+                # d_C_f2r = self.d_con_mlp1_cd(d_C_f2r)
+                # d_C_g = self.con_mlp1(C_g)
+                # d_C_m = self.con_mlp1(C_m)
+                #
+                # d_C_r2f = self.d_con_mlp2_cd(d_C_r2f.transpose(2, 3)).squeeze(-1).unsqueeze(0)
+                # d_C_f2r = self.d_con_mlp2_cd(d_C_f2r.transpose(2, 3)).squeeze(-1).unsqueeze(0)
+                # d_C_g = self.con_mlp2(d_C_g.transpose(1, 2)).squeeze(-1).unsqueeze(0)
+                # d_C_m = self.con_mlp2(d_C_m.transpose(1, 2)).squeeze(-1).unsqueeze(0)
+                #
+                # d_C_r2f = nn.LogSoftmax(dim=-1)(d_C_r2f)
+                # d_C_f2r = nn.LogSoftmax(dim=-1)(d_C_f2r)
+                # d_C_r2f = torch.mean(d_C_r2f, dim=-2)
+                # d_C_f2r = torch.mean(d_C_f2r, dim=-2)
+                #
+                # d_con_output = torch.cat((d_C_r2f, d_C_f2r, d_C_g, d_C_m), dim=0)
+                # ###############################################################
+                #
+                # ######################## unconditional ########################
+                # d_UC_r = self.unc_mlp1(real_text).squeeze(-1)
+                # d_UC_g = self.unc_mlp1(fake_text).squeeze(-1)
+                # d_UC_m = self.unc_mlp1(mismatched_text).squeeze(-1)
+                #
+                # d_UC_r = self.unc_mlp2(d_UC_r).squeeze(-1).unsqueeze(0)
+                # d_UC_g = self.unc_mlp2(d_UC_g).squeeze(-1).unsqueeze(0)
+                # d_UC_m = self.unc_mlp2(d_UC_m).squeeze(-1).unsqueeze(0)
+                #
+                # d_unc_output = torch.cat((d_UC_r, d_UC_g, d_UC_m), dim=0)
+                # ###############################################################
                 return d_con_output, d_unc_output
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu" )
@@ -475,7 +514,6 @@ def train():
                 # (1) Update Generator network
                 ######################################################
                 optimizer_G.zero_grad()
-                # tepoch.set_postfix({'Now': tepoch.format_dict['elapsed'], 'Status': " Generator Forward"})
                 logits, output_funny_score = NetG(text.to(device), image.to(device))
                 g_con_logits, g_unc_logits = NetD(text.to(device), logits, image.to(device), "G")
                 GeneratorForwardTime += tepoch.format_dict['elapsed'] - pre
@@ -493,10 +531,7 @@ def train():
                 # (4) Update Discriminator network
                 ######################################################
                 optimizer_D.zero_grad()
-                # tepoch.set_postfix({'Now': tepoch.format_dict['elapsed'], 'Status': " Discriminator Forward"})
-                d_con_logits, d_unc_logits = NetD(text.to(device).detach(), logits.detach(), image.to(device).detach(),
-                                                  "D")
-                # tepoch.set_postfix({'Now': tepoch.format_dict['elapsed'], 'Status': " Discriminator Backward"})
+                d_con_logits, d_unc_logits = NetD(text.to(device).detach(), logits.detach(), image.to(device).detach(), "D")
                 DiscriminatorForwardTime += tepoch.format_dict['elapsed'] - pre
                 pre = tepoch.format_dict['elapsed']
                 loss_D = discriminatorLoss(d_con_logits.to(device), d_unc_logits.to(device))

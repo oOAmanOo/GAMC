@@ -35,9 +35,10 @@ def textExtraction(tokenizer, gemmaConfig, text_data):
             # pbar.update(1)
     return torch.cat(all_features)
 
-def textExtractReverse(gemma, tokenizer, gemmaConfig, data, test, max_new_tokens=200):
+def textExtractReverse(gemma, tokenizer, gemmaConfig, data, max_new_tokens=1000):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     vocab_size = gemmaConfig.vocab_size  # 詞彙表大小
+
     embedding_dim = 768  # 嵌入维度，與你的圖片嵌入维度相同
     text_embedding = nn.Embedding(vocab_size, embedding_dim).to(device)
     avg_pool = nn.AdaptiveAvgPool1d(64).to(device)
@@ -55,45 +56,44 @@ def textExtractReverse(gemma, tokenizer, gemmaConfig, data, test, max_new_tokens
     # tokenize with gemma-2b
     prompt = "Write a humor memetic post for Instagram with the following elements: "
     tokens = []
-    with tqdm.tqdm(total=len(reverse)) as pbar:
-        pre = -1
-        reverse_time = 0
-        output_time = 0
-        embedd_time = 0
-        for i, text in enumerate(reverse):
-            text = text.replace("<pad>", " ").replace("  ", " ")
-            text = set(text.split())
-            text = ', '.join(text)
-            reverse[i] = prompt + text + "."
-            if pre == -1:
-                pre += 1
-                reverse_time = 1
-            elif pre == 0:
-                pre += 1
-                reverse_time = pbar.format_dict['elapsed']*2
-            else:
-                reverse_time += pbar.format_dict['elapsed'] - pre
-            pre = pbar.format_dict['elapsed']
-            input_ids = tokenizer(reverse[i], truncation=True, padding='max_length', max_length=64, return_tensors='pt').to(
-                device)
-            outputs = gemma.generate(**input_ids, max_new_tokens=max_new_tokens)
-            output_time += pbar.format_dict['elapsed'] - pre
-            pre = pbar.format_dict['elapsed']
-            if test == True:
-                tokens.append(outputs)
-                pbar.update(1)
-            else:
-                embedded = text_embedding(outputs)
-                if embedded.shape[1] > 64:
-                    embedded = avg_pool(embedded.transpose(1, 2)).transpose(1, 2)
-                elif embedded.shape[1] < 64:
-                    padding = torch.zeros(embedded.shape[0], 64 - embedded.shape[1], 768)
-                    embedded = torch.cat((embedded, padding), dim=1)
-                tokens.append(embedded.detach())
-                embedd_time += pbar.format_dict['elapsed'] - pre
-                pre = pbar.format_dict['elapsed']
-                pbar.update(1)
-                pbar.postfix = {'reverse_time': reverse_time/(i+1), 'output_time': output_time/(i+1), 'embedd_time': embedd_time/(i+1)}
+    for i, text in enumerate(reverse):
+        text = text.replace("<pad>", " ").replace("  ", " ")
+        text = set(text.split())
+        text = ', '.join(text)
+        reverse[i] = prompt + text + "."
+    input_ids = tokenizer(reverse, truncation=True, padding='max_length', max_length=64, return_tensors='pt').to(device)
+    outputs = gemma.generate(**input_ids, max_new_tokens=max_new_tokens)
+    #remove the same as input
+    outputs = outputs[:, len(input_ids['input_ids'][0]):]
+    outputs = text_embedding(outputs)  # embedding
+    if outputs.shape[1] > 64:
+        outputs = avg_pool(outputs.transpose(1, 2)).transpose(1, 2)
+    elif outputs.shape[1] < 64:
+        padding = torch.zeros(outputs.shape[0], 64 - outputs.shape[1], embedding_dim)
+    return outputs
+
+def textExtractReverseRecursive(gemma, tokenizer, data, Test = False):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # 有時後空格會失效，所以手動插入空格 <pad> = 0
+    def insert_zeros(tensor):
+        zeros = torch.zeros(tensor.shape[0], tensor.shape[1] * 2 - 1)
+        zeros[:, ::2] = tensor
+        zeros = zeros.to(int)
+        return zeros
+
+    reverse_data = insert_zeros(data.squeeze(-1))
+    # reverse the token
+    reverse = tokenizer.batch_decode(reverse_data, skip_special_tokens=False)
+    # tokenize with gemma-2b
+    prompt = "Write a humor memetic post for Instagram with the following elements: "
+    tokens = []
+    for i, text in enumerate(reverse):
+        text = text.replace("<pad>", " ").replace("  ", " ")
+        text = set(text.split())
+        text = ', '.join(text)
+        reverse[i] = prompt + text + "."
+        temp = tokenizer(reverse, truncation=True, padding='max_length', max_length=64, return_tensors='pt').to(device)
+        tokens.append(temp['input_ids'])
     return torch.cat(tokens)
 
 # 定義批量處理和提取特徵的函數
