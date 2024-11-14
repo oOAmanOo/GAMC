@@ -11,7 +11,6 @@ def addImagePath(data, imgPath):
     data['image_id'] = data['image_id'].apply(lambda x: imgPath + str(x) + '.jpg')
     return data
 
-
 def textExtraction(tokenizer, gemmaConfig, text_data):
     # tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
     # gemmaConfig = AutoConfig.from_pretrained('google/gemma-2-2b-it')
@@ -35,7 +34,7 @@ def textExtraction(tokenizer, gemmaConfig, text_data):
             # pbar.update(1)
     return torch.cat(all_features)
 
-def textExtractReverse(gemma, tokenizer, gemmaConfig, data, max_new_tokens=1000):
+def textExtractReverse(gemma, tokenizer, gemmaConfig, data, max_new_tokens=100):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     vocab_size = gemmaConfig.vocab_size  # 詞彙表大小
 
@@ -54,8 +53,7 @@ def textExtractReverse(gemma, tokenizer, gemmaConfig, data, max_new_tokens=1000)
     # reverse the token
     reverse = tokenizer.batch_decode(reverse_data, skip_special_tokens=False)
     # tokenize with gemma-2b
-    prompt = "Write a humor memetic post for Instagram with the following elements: "
-    tokens = []
+    prompt = "Answer with only 100 words, only answer, no explain. Write a humor memetic post for Instagram with the following elements: "
     for i, text in enumerate(reverse):
         text = text.replace("<pad>", " ").replace("  ", " ")
         text = set(text.split())
@@ -64,12 +62,14 @@ def textExtractReverse(gemma, tokenizer, gemmaConfig, data, max_new_tokens=1000)
     input_ids = tokenizer(reverse, truncation=True, padding='max_length', max_length=64, return_tensors='pt').to(device)
     outputs = gemma.generate(**input_ids, max_new_tokens=max_new_tokens)
     #remove the same as input
+    # print(tokenizer.decode(outputs[0]))
     outputs = outputs[:, len(input_ids['input_ids'][0]):]
     outputs = text_embedding(outputs)  # embedding
     if outputs.shape[1] > 64:
         outputs = avg_pool(outputs.transpose(1, 2)).transpose(1, 2)
     elif outputs.shape[1] < 64:
         padding = torch.zeros(outputs.shape[0], 64 - outputs.shape[1], embedding_dim)
+        outputs = torch.cat((outputs, padding), dim=1)
     return outputs
 
 def textExtractReverseRecursive(gemma, tokenizer, data, Test = False):
