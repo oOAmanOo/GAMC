@@ -246,14 +246,7 @@ def train():
             text = torch.zeros_like(image).to(device)
             text = text.transpose(0, 1).to(torch.bfloat16)
             image = image.transpose(0, 1)
-            tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
             depth = len(self.layers_self_multi)
-
-            # 有時後空格會失效，所以手動插入空格 <pad> = 0
-            def insert_zeros(list):
-                zeros = [0] * (2 * len(list) - 1)
-                zeros[::2] = list
-                return zeros
 
             with torch.no_grad():
                 # Transformer
@@ -270,17 +263,9 @@ def train():
                 feature_fusion_final = feature_fusion_final.squeeze(-1)
                 feature_fusion_final = feature_fusion_final.transpose(0, 1)
 
-                # funny score
-                output_funny_score = self.FunnyScorelinear1(feature_fusion_final).squeeze(-1)
-                output_funny_score = self.FunnyScorelinear2(output_funny_score).squeeze(-1)
-
                 # gemma generate
                 output_text = self.gemmaGenerate(feature_fusion_final).to(torch.bfloat16)
-                # last_hidden_state = self.gemmaGenerate(feature_fusion)
-                # output_text = self.gemmaLm_head(last_hidden_state)
 
-                # avg_pool = nn.AdaptiveAvgPool1d(768)
-                # text = avg_pool(output_text)
                 text = output_text.transpose(0, 1)
 
                 # Transformer
@@ -551,7 +536,7 @@ def train():
                 pre = tepoch.format_dict['elapsed']
 
                 loss_G = generatorLoss(g_con_logits.to(device), g_unc_logits.to(device)) + (
-                            100 * funnyScoreLoss(output_funny_score.to(device), funny_score.to(device)))
+                        100 * funnyScoreLoss(output_funny_score.to(device), funny_score.to(device)))
                 loss_G.backward(retain_graph=True)
                 train_loss_G += loss_G.item()
                 optimizer_G.step()
@@ -609,7 +594,7 @@ def train():
                 d_con_logits, d_unc_logits = NetD(text.to(device).detach(), logits.detach(), image.to(device).detach(),"D")
                 # loss
                 loss_G = generatorLoss(g_con_logits.to(device), g_unc_logits.to(device)) + (
-                            100 * funnyScoreLoss(output_funny_score.to(device), funny_score.to(device)))
+                        100 * funnyScoreLoss(output_funny_score.to(device), funny_score.to(device)))
                 loss_D = discriminatorLoss(d_con_logits, d_unc_logits)
                 test_loss_G += loss_G.item()
                 test_loss_D += loss_D.item()
