@@ -39,7 +39,7 @@ def train():
     load_num = 0
     epochs = 30
     batch_size = 40
-    optimizer_F_lr = 1e-4
+    optimizer_F_lr = 1e-5
     save_name = 'ift_test'
     if not os.path.exists('./Model/' + save_name):
         os.makedirs('./Model/' + save_name)
@@ -95,10 +95,9 @@ def train():
     #     quantization_config=quantization_config,
     # )
     ########################################################################################################
-
-    class text_module(nn.Module):
+    class Prefix(nn.Module):
         def __init__(self):
-            super(text_module, self).__init__()
+            super(Prefix, self).__init__()
             # multihead attention
             self.multiheadAttentionMultihead = nn.MultiheadAttention(768, 8)
             self.multiheadAttentionLinear1 = nn.Linear(768, 768)
@@ -106,92 +105,90 @@ def train():
             self.multiheadAttentionLinear2 = nn.Linear(768, 768)
             self.multiheadAttentionLayerNorm = nn.LayerNorm(768, eps=eps)
 
-        def forward(self, text):
-            # multihead attention module
+            # self attention
+            # self.selfAttentionMultihead = nn.MultiheadAttention(768, 1)
+            # self.selfAttentionLayerNorm = nn.LayerNorm(768, eps=eps)
+            # self.selfAttentionLinear1 = nn.Linear(768, 768)
+            # self.selfAttentionRelu = nn.ReLU()
+            # self.selfAttentionLinear2 = nn.Linear(768, 768)
+            # self.selfAttentionLayerNorm2 = nn.LayerNorm(768, eps=eps)
+
+            # co-attention const 10
+            self.prefix_const = nn.Parameter(torch.randn(64, 768), requires_grad=True)
+            self.coAttentionMultihead = nn.MultiheadAttention(768, 1)
+            self.coAttentionLinear1 = nn.Linear(768, 768)
+            self.coAttentionRelu = nn.ReLU()
+            self.coAttentionLinear2 = nn.Linear(768, 768)
+            self.coAttentionLayerNorm = nn.LayerNorm(768, eps=eps)
+
+            # # co-attention const 10
+            # self.prefix_const = nn.Parameter(torch.randn(64, 768), requires_grad=True)
+            # self.coAttentionTextMultihead = nn.MultiheadAttention(768, 1)
+            # self.coAttentionTextLinear1 = nn.Linear(768, 768)
+            # self.coAttentionTextRelu = nn.ReLU()
+            # self.coAttentionTextLinear2 = nn.Linear(768, 768)
+            # self.coAttentionTextLayerNorm = nn.LayerNorm(768, eps=eps)
+            #
+            # # co-attention image
+            # self.coAttentionImageMultihead = nn.MultiheadAttention(768, 1)
+            # self.coAttentionImageLinear1 = nn.Linear(768, 768)
+            # self.coAttentionImageRelu = nn.ReLU()
+            # self.coAttentionImageLinear2 = nn.Linear(768, 768)
+            # self.coAttentionImageLayerNorm = nn.LayerNorm(768, eps=eps)
+
+            # feed forward
+            self.feedForwardLinear = nn.Linear(768, 768)
+            self.feedForwardLayerNorm = nn.LayerNorm(768, eps=eps)
+
+        def forward(self, text, image):
             multi_out = self.multiheadAttentionMultihead(text, text, text)[0]
             multi_out = self.multiheadAttentionLinear1(multi_out)
             multi_out = self.multiheadAttentionRelu(multi_out)
             multi_out = self.multiheadAttentionLinear2(multi_out)
             multi_out = self.multiheadAttentionLayerNorm(multi_out + text)
 
-            return multi_out
-
-    class image_module(nn.Module):
-        def __init__(self):
-            super(image_module, self).__init__()
-            # self attention
-            self.selfAttentionMultihead = nn.MultiheadAttention(768, 1)
-            self.selfAttentionLayerNorm = nn.LayerNorm(768, eps=eps)
-            self.selfAttentionLinear1 = nn.Linear(768, 768)
-            self.selfAttentionRelu = nn.ReLU()
-            self.selfAttentionLinear2 = nn.Linear(768, 768)
-            self.selfAttentionLayerNorm2 = nn.LayerNorm(768, eps=eps)
-
-            # co-attention const 10
-            self.prefix_const = nn.Parameter(torch.randn(64, 768), requires_grad=True)
-            self.coAttentionTextMultihead = nn.MultiheadAttention(768, 1)
-            self.coAttentionTextLinear1 = nn.Linear(768, 768)
-            self.coAttentionTextRelu = nn.ReLU()
-            self.coAttentionTextLinear2 = nn.Linear(768, 768)
-            self.coAttentionTextLayerNorm = nn.LayerNorm(768, eps=eps)
-
-            # co-attention image
-            self.coAttentionImageMultihead = nn.MultiheadAttention(768, 1)
-            self.coAttentionImageLinear1 = nn.Linear(768, 768)
-            self.coAttentionImageRelu = nn.ReLU()
-            self.coAttentionImageLinear2 = nn.Linear(768, 768)
-            self.coAttentionImageLayerNorm = nn.LayerNorm(768, eps=eps)
-
-            # feed forward
-            self.feedForwardLinear = nn.Linear(768, 768)
-            self.feedForwardLayerNorm = nn.LayerNorm(768, eps=eps)
-
-        def forward(self, image):
             prefix = self.prefix_const.unsqueeze(0).expand(image.shape[1], -1, -1).transpose(0, 1).to(device).to(torch.bfloat16)
 
             # self attention module
-            self_out = self.selfAttentionMultihead(image, image, image)[0]
-            self_out = self.selfAttentionLinear1(self_out)
-            self_out = self.selfAttentionRelu(self_out)
-            self_out = self.selfAttentionLinear2(self_out)
-            self_out = self.selfAttentionLayerNorm(self_out + image)
+            self_out = self.multiheadAttentionMultihead(image, image, image)[0]
+            self_out = self.multiheadAttentionLinear1(self_out)
+            self_out = self.multiheadAttentionRelu(self_out)
+            self_out = self.multiheadAttentionLinear2(self_out)
+            self_out = self.multiheadAttentionLayerNorm(self_out + image)
 
             # co-attention image module
-            visual_attending_textual = self.coAttentionImageMultihead(self_out, prefix, prefix)[0]
-            visual_attending_textual = self.coAttentionImageLinear1(visual_attending_textual)
-            visual_attending_textual = self.coAttentionImageRelu(visual_attending_textual)
-            visual_attending_textual = self.coAttentionImageLinear2(visual_attending_textual)
-            visual_attending_textual = self.coAttentionImageLayerNorm(visual_attending_textual + self_out)
+            visual_attending_textual = self.coAttentionMultihead(self_out, prefix, prefix)[0]
+            visual_attending_textual = self.coAttentionLinear1(visual_attending_textual)
+            visual_attending_textual = self.coAttentionRelu(visual_attending_textual)
+            visual_attending_textual = self.coAttentionLinear2(visual_attending_textual)
+            visual_attending_textual = self.coAttentionLayerNorm(visual_attending_textual + self_out)
 
             # co-attention text module
-            textual_attending_visual = self.coAttentionTextMultihead(prefix, self_out, self_out)[0]
-            textual_attending_visual = self.coAttentionTextLinear1(textual_attending_visual)
-            textual_attending_visual = self.coAttentionTextRelu(textual_attending_visual)
-            textual_attending_visual = self.coAttentionTextLinear2(textual_attending_visual)
-            textual_attending_visual = self.coAttentionTextLayerNorm(textual_attending_visual + prefix)
+            textual_attending_visual = self.coAttentionMultihead(prefix, self_out, self_out)[0]
+            textual_attending_visual = self.coAttentionLinear1(textual_attending_visual)
+            textual_attending_visual = self.coAttentionRelu(textual_attending_visual)
+            textual_attending_visual = self.coAttentionLinear2(textual_attending_visual)
+            textual_attending_visual = self.coAttentionLayerNorm(textual_attending_visual + prefix)
 
             # feature fusion
             feature_fusion = visual_attending_textual + textual_attending_visual
             feature_fusionFF = self.feedForwardLinear(feature_fusion)
             feature_fusion_final = self.feedForwardLayerNorm(feature_fusion + feature_fusionFF)
 
-            return feature_fusion_final
+            return multi_out, feature_fusion_final
 
     class Former(nn.Module):
         def __init__(self, depth=12):
             super(Former, self).__init__()
-            self.layers_text = nn.ModuleList([text_module() for _ in range(depth)])
-            self.layers_image = nn.ModuleList([image_module() for _ in range(depth)])
+            self.layers= nn.ModuleList([Prefix() for _ in range(depth)])
 
         def forward(self, text, image):
             text = text.transpose(0, 1)
             image = image.transpose(0, 1)
 
             ######################### Transformer #########################
-            for text_module, image_module in zip(self.layers_text, self.layers_image):
-                # self attention
-                text = text_module(text)
-                image = image_module(image)
+            for layer in self.layers:
+                text, image = layer(text, image)
             ###############################################################
             return text, image
 
