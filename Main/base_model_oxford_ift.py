@@ -35,14 +35,15 @@ class OxfordDataset(torch.utils.data.Dataset):
 
 def train():
     checkpoint = False
-    load_name = '20241110_gemma_generate_onlyd'
+    load_name = 'none'
     load_num = 0
     epochs = 30
-    batch_size = 40
+    batch_size = 128
     optimizer_F_lr = 1e-5
-    save_name = 'ift_test'
+    save_name = '20241122_ift_noshare'
     if not os.path.exists('./Model/' + save_name):
         os.makedirs('./Model/' + save_name)
+        os.makedirs('D:/MemeGAN/Model/' + save_name)
 
 
     # if args.img - dir == 'Oxford_HIC':
@@ -71,29 +72,16 @@ def train():
     test_dataset = OxfordDataset(test_text, test_image, test_funny_score)
     # train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True, num_workers=20)
     # test_loader = DataLoader(test_dataset, batch_size=128, shuffle=True, num_workers=20)
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=1, pin_memory=True, drop_last=True)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, num_workers=1, pin_memory=True, drop_last=True)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=20, pin_memory=True, drop_last=True)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, num_workers=20, pin_memory=True, drop_last=True)
 
     ### 官方的Gemma #########################################################################################
     # 2b = 2304, 9b = 3584, 27b = 4608
-    gemma_hiddenstate_size = 2304
+    # gemma_hiddenstate_size = 2304
     tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
     gemmaConfig = AutoConfig.from_pretrained('google/gemma-2-2b-it')
     ### gemma float32 / bfloat16
-    gemma = AutoModelForCausalLM.from_pretrained("google/gemma-2-2b-it", device_map="auto", torch_dtype=torch.bfloat16)
-    ### Local gemma
-    # gemma = LocalGemma2ForCausalLM.from_pretrained("google/gemma-2-2b-it", preset="auto", torch_dtype=torch.bfloat16)
-    ### gemma int4 / int8
-    # quantization_config = BitsAndBytesConfig(load_in_4bit=True)
-    # quantization_config = BitsAndBytesConfig(load_in_8bit=True)
-    # gemma = AutoModelForCausalLM.from_pretrained(
-    #     "google/gemma-2-27b-it",
-    #     quantization_config=quantization_config,
-    # )
-    # gemma = LocalGemma2ForCausalLM.from_pretrained(
-    #     "google/gemma-2-2b-it",
-    #     quantization_config=quantization_config,
-    # )
+    # gemma = AutoModelForCausalLM.from_pretrained("google/gemma-2-2b-it", device_map="auto", torch_dtype=torch.bfloat16)
     ########################################################################################################
     class Prefix(nn.Module):
         def __init__(self):
@@ -106,35 +94,35 @@ def train():
             self.multiheadAttentionLayerNorm = nn.LayerNorm(768, eps=eps)
 
             # self attention
-            # self.selfAttentionMultihead = nn.MultiheadAttention(768, 1)
-            # self.selfAttentionLayerNorm = nn.LayerNorm(768, eps=eps)
-            # self.selfAttentionLinear1 = nn.Linear(768, 768)
-            # self.selfAttentionRelu = nn.ReLU()
-            # self.selfAttentionLinear2 = nn.Linear(768, 768)
-            # self.selfAttentionLayerNorm2 = nn.LayerNorm(768, eps=eps)
+            self.selfAttentionMultihead = nn.MultiheadAttention(768, 1)
+            self.selfAttentionLayerNorm = nn.LayerNorm(768, eps=eps)
+            self.selfAttentionLinear1 = nn.Linear(768, 768)
+            self.selfAttentionRelu = nn.ReLU()
+            self.selfAttentionLinear2 = nn.Linear(768, 768)
+            self.selfAttentionLayerNorm2 = nn.LayerNorm(768, eps=eps)
+
+            # co-attention const 10
+            # self.prefix_const = nn.Parameter(torch.randn(64, 768), requires_grad=True)
+            # self.coAttentionMultihead = nn.MultiheadAttention(768, 8)
+            # self.coAttentionLinear1 = nn.Linear(768, 768)
+            # self.coAttentionRelu = nn.ReLU()
+            # self.coAttentionLinear2 = nn.Linear(768, 768)
+            # self.coAttentionLayerNorm = nn.LayerNorm(768, eps=eps)
 
             # co-attention const 10
             self.prefix_const = nn.Parameter(torch.randn(64, 768), requires_grad=True)
-            self.coAttentionMultihead = nn.MultiheadAttention(768, 1)
-            self.coAttentionLinear1 = nn.Linear(768, 768)
-            self.coAttentionRelu = nn.ReLU()
-            self.coAttentionLinear2 = nn.Linear(768, 768)
-            self.coAttentionLayerNorm = nn.LayerNorm(768, eps=eps)
+            self.coAttentionTextMultihead = nn.MultiheadAttention(768, 8)
+            self.coAttentionTextLinear1 = nn.Linear(768, 768)
+            self.coAttentionTextRelu = nn.ReLU()
+            self.coAttentionTextLinear2 = nn.Linear(768, 768)
+            self.coAttentionTextLayerNorm = nn.LayerNorm(768, eps=eps)
 
-            # # co-attention const 10
-            # self.prefix_const = nn.Parameter(torch.randn(64, 768), requires_grad=True)
-            # self.coAttentionTextMultihead = nn.MultiheadAttention(768, 1)
-            # self.coAttentionTextLinear1 = nn.Linear(768, 768)
-            # self.coAttentionTextRelu = nn.ReLU()
-            # self.coAttentionTextLinear2 = nn.Linear(768, 768)
-            # self.coAttentionTextLayerNorm = nn.LayerNorm(768, eps=eps)
-            #
-            # # co-attention image
-            # self.coAttentionImageMultihead = nn.MultiheadAttention(768, 1)
-            # self.coAttentionImageLinear1 = nn.Linear(768, 768)
-            # self.coAttentionImageRelu = nn.ReLU()
-            # self.coAttentionImageLinear2 = nn.Linear(768, 768)
-            # self.coAttentionImageLayerNorm = nn.LayerNorm(768, eps=eps)
+            # co-attention image
+            self.coAttentionImageMultihead = nn.MultiheadAttention(768, 8)
+            self.coAttentionImageLinear1 = nn.Linear(768, 768)
+            self.coAttentionImageRelu = nn.ReLU()
+            self.coAttentionImageLinear2 = nn.Linear(768, 768)
+            self.coAttentionImageLayerNorm = nn.LayerNorm(768, eps=eps)
 
             # feed forward
             self.feedForwardLinear = nn.Linear(768, 768)
@@ -150,25 +138,25 @@ def train():
             prefix = self.prefix_const.unsqueeze(0).expand(image.shape[1], -1, -1).transpose(0, 1).to(device).to(torch.bfloat16)
 
             # self attention module
-            self_out = self.multiheadAttentionMultihead(image, image, image)[0]
-            self_out = self.multiheadAttentionLinear1(self_out)
-            self_out = self.multiheadAttentionRelu(self_out)
-            self_out = self.multiheadAttentionLinear2(self_out)
-            self_out = self.multiheadAttentionLayerNorm(self_out + image)
+            self_out = self.selfAttentionMultihead(image, image, image)[0]
+            self_out = self.selfAttentionLinear1(self_out)
+            self_out = self.selfAttentionRelu(self_out)
+            self_out = self.selfAttentionLinear2(self_out)
+            self_out = self.selfAttentionLayerNorm(self_out + image)
 
             # co-attention image module
-            visual_attending_textual = self.coAttentionMultihead(self_out, prefix, prefix)[0]
-            visual_attending_textual = self.coAttentionLinear1(visual_attending_textual)
-            visual_attending_textual = self.coAttentionRelu(visual_attending_textual)
-            visual_attending_textual = self.coAttentionLinear2(visual_attending_textual)
-            visual_attending_textual = self.coAttentionLayerNorm(visual_attending_textual + self_out)
+            visual_attending_textual = self.coAttentionImageMultihead(prefix, self_out, self_out)[0]
+            visual_attending_textual = self.coAttentionImageLinear1(visual_attending_textual)
+            visual_attending_textual = self.coAttentionImageRelu(visual_attending_textual)
+            visual_attending_textual = self.coAttentionImageLinear2(visual_attending_textual)
+            visual_attending_textual = self.coAttentionImageLayerNorm(visual_attending_textual + self_out)
 
             # co-attention text module
-            textual_attending_visual = self.coAttentionMultihead(prefix, self_out, self_out)[0]
-            textual_attending_visual = self.coAttentionLinear1(textual_attending_visual)
-            textual_attending_visual = self.coAttentionRelu(textual_attending_visual)
-            textual_attending_visual = self.coAttentionLinear2(textual_attending_visual)
-            textual_attending_visual = self.coAttentionLayerNorm(textual_attending_visual + prefix)
+            textual_attending_visual = self.coAttentionTextMultihead(self_out, prefix, prefix)[0]
+            textual_attending_visual = self.coAttentionTextLinear1(textual_attending_visual)
+            textual_attending_visual = self.coAttentionTextRelu(textual_attending_visual)
+            textual_attending_visual = self.coAttentionTextLinear2(textual_attending_visual)
+            textual_attending_visual = self.coAttentionTextLayerNorm(textual_attending_visual + prefix)
 
             # feature fusion
             feature_fusion = visual_attending_textual + textual_attending_visual
