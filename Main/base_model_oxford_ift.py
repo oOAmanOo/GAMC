@@ -231,8 +231,8 @@ def train():
     test_losses_F = []
     save = []
     present_epoch = 1
-    best_train_loss_F = 9999
-    best_test_loss_F = 9999
+    best_train_loss_F = 9999999999
+    best_test_loss_F = 9999999999
 
 
     if checkpoint:
