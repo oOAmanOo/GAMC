@@ -11,7 +11,6 @@ import torch.optim as optim
 from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss, BCELoss
 from torch.utils.data import DataLoader
 from transformers import AutoConfig, AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
-from transformers import BertLMHeadModel, BertTokenizer
 # from local_gemma import LocalGemma2ForCausalLM
 
 from extractor import addImagePath, textExtraction, imageExtraction, textExtractReverse, textExtraction_IFT
@@ -36,15 +35,14 @@ class OxfordDataset(torch.utils.data.Dataset):
 
 def train():
     checkpoint = False
-    load_name = 'none'
+    load_name = '20241110_gemma_generate_onlyd'
     load_num = 0
     epochs = 30
-    batch_size = 128
+    batch_size = 40
     optimizer_F_lr = 1e-5
-    save_name = '20241121_ift_test'
+    save_name = 'ift_test'
     if not os.path.exists('./Model/' + save_name):
         os.makedirs('./Model/' + save_name)
-        os.makedirs('D:/MemeGAN/Model/' + save_name)
 
 
     # if args.img - dir == 'Oxford_HIC':
@@ -73,27 +71,47 @@ def train():
     test_dataset = OxfordDataset(test_text, test_image, test_funny_score)
     # train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True, num_workers=20)
     # test_loader = DataLoader(test_dataset, batch_size=128, shuffle=True, num_workers=20)
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=20, pin_memory=True, drop_last=True)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, num_workers=20, pin_memory=True, drop_last=True)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=1, pin_memory=True, drop_last=True)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, num_workers=1, pin_memory=True, drop_last=True)
 
     ### 官方的Gemma #########################################################################################
-    Fformer = BertLMHeadModel.from_pretrained("bert-base-uncased", is_decoder=True)
-    tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
-    config = AutoConfig.from_pretrained('bert-base-uncased')
     # 2b = 2304, 9b = 3584, 27b = 4608
-    # gemma_hiddenstate_size = 2304
-    # tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
-    # gemmaConfig = AutoConfig.from_pretrained('google/gemma-2-2b-it')
-    # gemma = AutoModelForCausalLM.from_pretrained("google/gemma-2-2b-it", device_map="auto", torch_dtype=torch.bfloat16)
+    gemma_hiddenstate_size = 2304
+    tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
+    gemmaConfig = AutoConfig.from_pretrained('google/gemma-2-2b-it')
+    ### gemma float32 / bfloat16
+    gemma = AutoModelForCausalLM.from_pretrained("google/gemma-2-2b-it", device_map="auto", torch_dtype=torch.bfloat16)
+    ### Local gemma
+    # gemma = LocalGemma2ForCausalLM.from_pretrained("google/gemma-2-2b-it", preset="auto", torch_dtype=torch.bfloat16)
+    ### gemma int4 / int8
+    # quantization_config = BitsAndBytesConfig(load_in_4bit=True)
+    # quantization_config = BitsAndBytesConfig(load_in_8bit=True)
+    # gemma = AutoModelForCausalLM.from_pretrained(
+    #     "google/gemma-2-27b-it",
+    #     quantization_config=quantization_config,
+    # )
+    # gemma = LocalGemma2ForCausalLM.from_pretrained(
+    #     "google/gemma-2-2b-it",
+    #     quantization_config=quantization_config,
+    # )
     ########################################################################################################
     class Prefix(nn.Module):
         def __init__(self):
             super(Prefix, self).__init__()
-            # init
-            self.Fformer = Fformer
-            self.Fformer.resize_token_embeddings(len(tokenizer))
-            self.query_tokens = nn.Parameter(torch.zeros(1, 64, 768), requires_grad=True)
-            self.query_tokens.data.normal_(mean=0.0, std=0.02)
+            # multihead attention
+            self.multiheadAttentionMultihead = nn.MultiheadAttention(768, 8)
+            self.multiheadAttentionLinear1 = nn.Linear(768, 768)
+            self.multiheadAttentionRelu = nn.ReLU()
+            self.multiheadAttentionLinear2 = nn.Linear(768, 768)
+            self.multiheadAttentionLayerNorm = nn.LayerNorm(768, eps=eps)
+
+            # self attention
+            # self.selfAttentionMultihead = nn.MultiheadAttention(768, 1)
+            # self.selfAttentionLayerNorm = nn.LayerNorm(768, eps=eps)
+            # self.selfAttentionLinear1 = nn.Linear(768, 768)
+            # self.selfAttentionRelu = nn.ReLU()
+            # self.selfAttentionLinear2 = nn.Linear(768, 768)
+            # self.selfAttentionLayerNorm2 = nn.LayerNorm(768, eps=eps)
 
             # co-attention const 10
             self.prefix_const = nn.Parameter(torch.randn(64, 768), requires_grad=True)
@@ -123,32 +141,30 @@ def train():
             self.feedForwardLayerNorm = nn.LayerNorm(768, eps=eps)
 
         def forward(self, text, image):
-            text_output = self.Fformer.bert(
-                inputs_embeds=text,
-                return_dict=True,
-            )
-            text_feat = nn.functional.normalize(text_output['last_hidden_state'], p=2, dim=-1)
+            multi_out = self.multiheadAttentionMultihead(text, text, text)[0]
+            multi_out = self.multiheadAttentionLinear1(multi_out)
+            multi_out = self.multiheadAttentionRelu(multi_out)
+            multi_out = self.multiheadAttentionLinear2(multi_out)
+            multi_out = self.multiheadAttentionLayerNorm(multi_out + text)
 
-            image_atts = torch.ones(image.shape[:1], dtype=torch.long).to(device)
-            query_tokens = self.query_tokens.expand(image.shape[0], -1, -1).to(device).to(torch.bfloat16)
+            prefix = self.prefix_const.unsqueeze(0).expand(image.shape[1], -1, -1).transpose(0, 1).to(device).to(torch.bfloat16)
 
-            query_output = self.Fformer.bert(
-                inputs_embeds=query_tokens,
-                use_cache=True,
-                return_dict=True,
-            )
-            image_hidden = query_output['last_hidden_state'].transpose(0, 1)
-            prefix = self.prefix_const.unsqueeze(0).expand(image.shape[0], -1, -1).transpose(0, 1).to(device).to(torch.bfloat16)
+            # self attention module
+            self_out = self.multiheadAttentionMultihead(image, image, image)[0]
+            self_out = self.multiheadAttentionLinear1(self_out)
+            self_out = self.multiheadAttentionRelu(self_out)
+            self_out = self.multiheadAttentionLinear2(self_out)
+            self_out = self.multiheadAttentionLayerNorm(self_out + image)
 
             # co-attention image module
-            visual_attending_textual = self.coAttentionMultihead(image_hidden, prefix, prefix)[0]
+            visual_attending_textual = self.coAttentionMultihead(self_out, prefix, prefix)[0]
             visual_attending_textual = self.coAttentionLinear1(visual_attending_textual)
             visual_attending_textual = self.coAttentionRelu(visual_attending_textual)
             visual_attending_textual = self.coAttentionLinear2(visual_attending_textual)
-            visual_attending_textual = self.coAttentionLayerNorm(visual_attending_textual + image_hidden)
+            visual_attending_textual = self.coAttentionLayerNorm(visual_attending_textual + self_out)
 
             # co-attention text module
-            textual_attending_visual = self.coAttentionMultihead(prefix, image_hidden, image_hidden)[0]
+            textual_attending_visual = self.coAttentionMultihead(prefix, self_out, self_out)[0]
             textual_attending_visual = self.coAttentionLinear1(textual_attending_visual)
             textual_attending_visual = self.coAttentionRelu(textual_attending_visual)
             textual_attending_visual = self.coAttentionLinear2(textual_attending_visual)
@@ -157,11 +173,24 @@ def train():
             # feature fusion
             feature_fusion = visual_attending_textual + textual_attending_visual
             feature_fusionFF = self.feedForwardLinear(feature_fusion)
-            feature_fusion_final = self.feedForwardLayerNorm(feature_fusion + feature_fusionFF).transpose(0, 1)
+            feature_fusion_final = self.feedForwardLayerNorm(feature_fusion + feature_fusionFF)
 
-            image_feat = nn.functional.normalize(feature_fusion_final, p=2, dim=-1)
+            return multi_out, feature_fusion_final
 
-            return text_feat, image_feat
+    class Former(nn.Module):
+        def __init__(self, depth=12):
+            super(Former, self).__init__()
+            self.layers= nn.ModuleList([Prefix() for _ in range(depth)])
+
+        def forward(self, text, image):
+            text = text.transpose(0, 1)
+            image = image.transpose(0, 1)
+
+            ######################### Transformer #########################
+            for layer in self.layers:
+                text, image = layer(text, image)
+            ###############################################################
+            return text, image
 
     class IFormer(nn.Module):
         def __init__(self, depth=12):
@@ -170,8 +199,12 @@ def train():
 
         def forward(self, Former, text, image):
             text, image = Former(text, image)
-            sim_q2t = torch.matmul(image, text.transpose(1, 2))
-            sim_t2q = torch.matmul(text, image.transpose(1, 2))
+            text = nn.functional.normalize(text.transpose(0, 1), p=2, dim=-1)
+            image = nn.functional.normalize(image.transpose(0, 1), p=2, dim=-1)
+            c_text = text.unsqueeze(2).expand(-1, -1, image.shape[1], -1).to(torch.bfloat16)
+            c_image = image.unsqueeze(2).expand(-1, -1, text.shape[1], -1).to(torch.bfloat16)
+            sim_q2t = torch.einsum('bijk,bjik->bij', c_image, c_text)
+            sim_t2q = torch.einsum('bijk,bjik->bij', c_text, c_image)
             img2txt, _ = torch.max(sim_q2t, dim=-1)
             txt2img, _ = torch.max(sim_t2q, dim=-1)
             img2txt = img2txt / self.temp
@@ -189,7 +222,7 @@ def train():
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu" )
 
-    Net_Prefix = Prefix().to(device).to(torch.bfloat16)
+    Net_Former = Former().to(device).to(torch.bfloat16)
     Net_IFormer = IFormer().to(device).to(torch.bfloat16)
     optimizer_F = optim.Adam(Net_IFormer.parameters(), lr=optimizer_F_lr)
 
@@ -201,13 +234,13 @@ def train():
     best_test_loss_F = 9999999999
 
 
-    # if checkpoint:
-    #     checkpoint_F = torch.load('./Model/' + load_name + "/" + load_name + '_NetIFormer_' + str(load_num) + '.pth')
-    #     Net_Former.load_state_dict(checkpoint_F['model_state_dict'])
-    #     optimizer_F.load_state_dict(checkpoint_F['optimizer_state_dict'])
-    #     present_epoch = checkpoint_F['epoch'] + 1
-    #     del checkpoint_F
-    #     gc.collect()
+    if checkpoint:
+        checkpoint_F = torch.load('./Model/' + load_name + "/" + load_name + '_NetIFormer_' + str(load_num) + '.pth')
+        Net_Former.load_state_dict(checkpoint_F['model_state_dict'])
+        optimizer_F.load_state_dict(checkpoint_F['optimizer_state_dict'])
+        present_epoch = checkpoint_F['epoch'] + 1
+        del checkpoint_F
+        gc.collect()
 
     startTime = 0
     textExtractionTime = 0
@@ -231,7 +264,7 @@ def train():
                 else:
                     startTime += tepoch.format_dict['elapsed'] - pre
                 pre = tepoch.format_dict['elapsed']
-                text = textExtraction_IFT(tokenizer, config, text)
+                text = textExtraction_IFT(tokenizer, gemmaConfig, text).to(torch.bfloat16)
                 image = image.to(torch.bfloat16)
                 textExtractionTime += tepoch.format_dict['elapsed'] - pre
                 pre = tepoch.format_dict['elapsed']
@@ -239,7 +272,7 @@ def train():
                 # (1) Update Generator network
                 ######################################################
                 optimizer_F.zero_grad()
-                loss_F = Net_IFormer(Net_Prefix, text.to(device), image.to(device))
+                loss_F = Net_IFormer(Net_Former, text.to(device), image.to(device))
                 train_loss_F += loss_F.item()
                 GeneratorForwardTime += tepoch.format_dict['elapsed'] - pre
                 pre = tepoch.format_dict['elapsed']
@@ -260,10 +293,10 @@ def train():
         ######################################  Test ######################################
         with tqdm(test_loader, unit="batch", leave=True) as tepoch:
             for idx, (text, image, funny_score) in enumerate(tepoch):
-                text = textExtraction_IFT(tokenizer, config, text)
+                text = textExtraction_IFT(tokenizer, gemmaConfig, text).to(torch.bfloat16)
                 image = image.to(torch.bfloat16)
                 # Generator
-                loss_F = Net_IFormer(Net_Prefix, text.to(device), image.to(device))
+                loss_F = Net_IFormer(Net_Former, text.to(device), image.to(device))
                 test_loss_F += loss_F.item()
                 tepoch.set_postfix({'test_loss_F': test_loss_F / (idx + 1)})
         test_loss_F /= len(test_loader)
@@ -278,10 +311,10 @@ def train():
             best_test_loss_F = test_loss_F
             torch.save({
                 'epoch': epoch + present_epoch,
-                'model_state_dict': Net_Prefix.state_dict(),
+                'model_state_dict': Net_Former.state_dict(),
                 'optimizer_state_dict': optimizer_F.state_dict(),
                 'loss': train_loss_F,
-            }, './Model/' + save_name + "/" + save_name + '_NetPrefix_' + str(epoch + present_epoch) + '.pth')
+            }, './Model/' + save_name + "/" + save_name + '_NetFormer_' + str(epoch + present_epoch) + '.pth')
             hasSaved = True
 
         if hasSaved:
