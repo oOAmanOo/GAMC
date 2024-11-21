@@ -1,7 +1,6 @@
 import gc
 import os
 import pandas as pd
-from functorch.dim import use_c
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
@@ -37,14 +36,15 @@ class OxfordDataset(torch.utils.data.Dataset):
 
 def train():
     checkpoint = False
-    load_name = '20241110_gemma_generate_onlyd'
+    load_name = 'none'
     load_num = 0
     epochs = 30
-    batch_size = 40
+    batch_size = 128
     optimizer_F_lr = 1e-5
-    save_name = 'ift_test'
+    save_name = '20241121_ift_test'
     if not os.path.exists('./Model/' + save_name):
         os.makedirs('./Model/' + save_name)
+        os.makedirs('D:/MemeGAN/Model/' + save_name)
 
 
     # if args.img - dir == 'Oxford_HIC':
@@ -73,8 +73,8 @@ def train():
     test_dataset = OxfordDataset(test_text, test_image, test_funny_score)
     # train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True, num_workers=20)
     # test_loader = DataLoader(test_dataset, batch_size=128, shuffle=True, num_workers=20)
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=1, pin_memory=True, drop_last=True)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, num_workers=1, pin_memory=True, drop_last=True)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=20, pin_memory=True, drop_last=True)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, num_workers=20, pin_memory=True, drop_last=True)
 
     ### 官方的Gemma #########################################################################################
     Fformer = BertLMHeadModel.from_pretrained("bert-base-uncased", is_decoder=True)
@@ -83,7 +83,7 @@ def train():
     # 2b = 2304, 9b = 3584, 27b = 4608
     # gemma_hiddenstate_size = 2304
     # tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
-    # config = AutoConfig.from_pretrained('google/gemma-2-2b-it')
+    # gemmaConfig = AutoConfig.from_pretrained('google/gemma-2-2b-it')
     # gemma = AutoModelForCausalLM.from_pretrained("google/gemma-2-2b-it", device_map="auto", torch_dtype=torch.bfloat16)
     ########################################################################################################
     class Prefix(nn.Module):
