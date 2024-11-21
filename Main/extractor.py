@@ -11,7 +11,7 @@ def addImagePath(data, imgPath):
     data['image_id'] = data['image_id'].apply(lambda x: imgPath + str(x) + '.jpg')
     return data
 
-def textExtraction(tokenizer, gemmaConfig, text_data):
+def textExtraction_IFT(tokenizer, gemmaConfig, text_data):
     # tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
     # gemmaConfig = AutoConfig.from_pretrained('google/gemma-2-2b-it')
     vocab_size = gemmaConfig.vocab_size  # 詞彙表大小
@@ -32,7 +32,32 @@ def textExtraction(tokenizer, gemmaConfig, text_data):
             output = torch.cat((output, padding), dim=1)
         all_features.append(output.detach())
             # pbar.update(1)
-    return torch.cat(all_features)
+    return torch.cat(all_features).to(torch.bfloat16)
+
+def textExtraction(tokenizer, gemmaConfig, text_data):
+    # tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
+    # gemmaConfig = AutoConfig.from_pretrained('google/gemma-2-2b-it')
+    vocab_size = gemmaConfig.vocab_size  # 詞彙表大小
+
+    embedding_dim = 768  # 嵌入维度，與你的圖片嵌入维度相同
+    text_embedding = nn.Embedding(vocab_size, embedding_dim)
+    avg_pool = nn.AdaptiveAvgPool1d(64)
+
+    token_ids = []
+    all_features = []
+    # with tqdm.tqdm (total=len(text_data)) as pbar:
+    for text in (text_data):
+        tokens = tokenizer(text, padding='longest', return_tensors='pt', )
+        token_ids.append(tokens['input_ids'])
+        output = text_embedding(tokens['input_ids'])
+        if output.shape[1] > 64:
+            output = avg_pool(output.transpose(1, 2)).transpose(1, 2)
+        elif output.shape[1] < 64:
+            padding = torch.zeros(output.shape[0], 64 - output.shape[1], 768)
+            output = torch.cat((output, padding), dim=1)
+        all_features.append(output.detach())
+            # pbar.update(1)
+    return torch.cat(token_ids).to(torch.bfloat16), torch.cat(all_features).to(torch.bfloat16)
 
 def textExtractReverse(gemma, tokenizer, gemmaConfig, data, max_new_tokens=100):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -60,16 +85,7 @@ def textExtractReverse(gemma, tokenizer, gemmaConfig, data, max_new_tokens=100):
         text = ', '.join(text)
         reverse[i] = prompt + text + "."
     input_ids = tokenizer(reverse, truncation=True, padding='max_length', max_length=64, return_tensors='pt').to(device)
-    outputs = gemma.generate(**input_ids, max_new_tokens=max_new_tokens)
-    #remove the same as input
-    # print(tokenizer.decode(outputs[0]))
-    outputs = outputs[:, len(input_ids['input_ids'][0]):]
-    outputs = text_embedding(outputs)  # embedding
-    if outputs.shape[1] > 64:
-        outputs = avg_pool(outputs.transpose(1, 2)).transpose(1, 2)
-    elif outputs.shape[1] < 64:
-        padding = torch.zeros(outputs.shape[0], 64 - outputs.shape[1], embedding_dim)
-        outputs = torch.cat((outputs, padding), dim=1)
+
     return outputs
 
 def textExtractReverseRecursive(gemma, tokenizer, data, Test = False):
