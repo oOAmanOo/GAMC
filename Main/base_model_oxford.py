@@ -41,8 +41,8 @@ def train():
     load_num = 0
     epochs = 30
     batch_size = 128
-    optimizer_F_lr = 1e-7
-    save_name = '20241122_bita_loss_10wan'
+    optimizer_F_lr = 1e-5
+    save_name = '20241125_bita_bita'
     if not os.path.exists('./Model/' + save_name):
         os.makedirs('./Model/' + save_name)
         os.makedirs('D:/MemeGAN/Model/' + save_name)
