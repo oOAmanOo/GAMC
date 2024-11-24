@@ -11,9 +11,11 @@ import torch.optim as optim
 from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss, BCELoss
 from torch.utils.data import DataLoader
 from transformers import AutoConfig, AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
+from transformers import BertLMHeadModel, BertTokenizer
 # from local_gemma import LocalGemma2ForCausalLM
 
-from extractor import addImagePath, textExtraction, imageExtraction, textExtractReverse
+from extractor import addImagePath, textExtraction, imageExtraction, textExtractReverse, textExtraction_IFT
+from Main.BITA.models.base_model import BaseModel
 eps = torch.finfo(torch.bfloat16).eps
 
 class OxfordDataset(torch.utils.data.Dataset):
@@ -34,14 +36,16 @@ class OxfordDataset(torch.utils.data.Dataset):
 
 
 def train():
+    checkpoint = False
+    load_name = 'none'
+    load_num = 0
     epochs = 30
-    batch_size = 40
-    optimizer_G_lr = 1e-5
-    optimizer_D_lr = 1e-5
-    save_name = '20241112_gemma_generate_base_20241110_gemma_generate_onlyd'
+    batch_size = 128
+    optimizer_F_lr = 1e-7
+    save_name = '20241122_bita_loss_10wan'
     if not os.path.exists('./Model/' + save_name):
         os.makedirs('./Model/' + save_name)
-        os.makedirs('D;/MemeGAN/Model/' + save_name)
+        os.makedirs('D:/MemeGAN/Model/' + save_name)
 
 
     # if args.img - dir == 'Oxford_HIC':
@@ -74,441 +78,164 @@ def train():
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, num_workers=20, pin_memory=True, drop_last=True)
 
     ### 官方的Gemma #########################################################################################
+    Fformer = BertLMHeadModel.from_pretrained("bert-base-uncased", is_decoder=True)
+    tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+    config = AutoConfig.from_pretrained('bert-base-uncased')
     # 2b = 2304, 9b = 3584, 27b = 4608
-    gemma_hiddenstate_size = 2304
-    tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
-    gemmaConfig = AutoConfig.from_pretrained('google/gemma-2-2b-it')
-    ### gemma float32 / bfloat16
-    gemma = AutoModelForCausalLM.from_pretrained("google/gemma-2-2b-it", device_map="auto", torch_dtype=torch.bfloat16)
-    ### Local gemma
-    # gemma = LocalGemma2ForCausalLM.from_pretrained("google/gemma-2-2b-it", preset="auto", torch_dtype=torch.bfloat16)
-    ### gemma int4 / int8
-    # quantization_config = BitsAndBytesConfig(load_in_4bit=True)
-    # quantization_config = BitsAndBytesConfig(load_in_8bit=True)
-    # gemma = AutoModelForCausalLM.from_pretrained(
-    #     "google/gemma-2-27b-it",
-    #     quantization_config=quantization_config,
-    # )
-    # gemma = LocalGemma2ForCausalLM.from_pretrained(
-    #     "google/gemma-2-2b-it",
-    #     quantization_config=quantization_config,
-    # )
+    # gemma_hiddenstate_size = 2304
+    # tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
+    # gemmaConfig = AutoConfig.from_pretrained('google/gemma-2-2b-it')
+    # gemma = AutoModelForCausalLM.from_pretrained("google/gemma-2-2b-it", device_map="auto", torch_dtype=torch.bfloat16)
     ########################################################################################################
-
-    class self_multi(nn.Module):
+    class Prefix(nn.Module):
         def __init__(self):
-            super(self_multi, self).__init__()
-            # self attention
-            self.selfAttentionMultihead = nn.MultiheadAttention(768, 1)
-            self.selfAttentionLayerNorm = nn.LayerNorm(768, eps=eps)
-            self.selfAttentionLinear1 = nn.Linear(768, 768)
-            self.selfAttentionRelu = nn.ReLU()
-            self.selfAttentionLinear2 = nn.Linear(768, 768)
-            self.selfAttentionLayerNorm2 = nn.LayerNorm(768, eps=eps)
+            super(Prefix, self).__init__()
+            # init
+            self.Fformer, self.query_tokens = self.init_IFT(
+                num_query_token=64, vision_width=768
+            )
+            self.Fformer.resize_token_embeddings(len(tokenizer))
+            state_dict = self.Fformer.state_dict()
+            for name, param in self.Fformer.named_parameters():
+                if "_query" in name:
+                    key_orig = name.replace("_query", "")
+                    param.data.copy_(state_dict[key_orig])
+            self.query_tokens = nn.Parameter(torch.zeros(1, 64, 768), requires_grad=True)
+            self.query_tokens.data.normal_(mean=0.0, std=0.02)
 
-            # multihead attention
-            self.multiheadAttentionMultihead = nn.MultiheadAttention(768, 8)
-            self.multiheadAttentionLinear1 = nn.Linear(768, 768)
-            self.multiheadAttentionRelu = nn.ReLU()
-            self.multiheadAttentionLinear2 = nn.Linear(768, 768)
-            self.multiheadAttentionLayerNorm = nn.LayerNorm(768, eps=eps)
+            # co-attention const 10
+            self.prefix_const = nn.Parameter(torch.randn(64, 768), requires_grad=True)
+            self.coAttentionMultihead = nn.MultiheadAttention(768, 1)
+            self.coAttentionLinear1 = nn.Linear(768, 768)
+            self.coAttentionRelu = nn.ReLU()
+            self.coAttentionLinear2 = nn.Linear(768, 768)
+            self.coAttentionLayerNorm = nn.LayerNorm(768, eps=eps)
 
-        def forward(self, image, text):
-            # self attention module
-            self_out = self.selfAttentionMultihead(image, image, image)[0]
-            self_out = self.selfAttentionLinear1(self_out)
-            self_out = self.selfAttentionRelu(self_out)
-            self_out = self.selfAttentionLinear2(self_out)
-            self_out = self.selfAttentionLayerNorm(self_out + image)
-
-            # multihead attention module
-            multi_out = self.multiheadAttentionMultihead(text, text, text)[0]
-            multi_out = self.multiheadAttentionLinear1(multi_out)
-            multi_out = self.multiheadAttentionRelu(multi_out)
-            multi_out = self.multiheadAttentionLinear2(multi_out)
-            multi_out = self.multiheadAttentionLayerNorm(multi_out + text)
-
-            return self_out, multi_out
-
-    class co_attention(nn.Module):
-        def __init__(self):
-            super(co_attention, self).__init__()
-            # co-attention text
-            self.coAttentionTextMultihead = nn.MultiheadAttention(768, 1)
-            self.coAttentionTextLinear1 = nn.Linear(768, 768)
-            self.coAttentionTextRelu = nn.ReLU()
-            self.coAttentionTextLinear2 = nn.Linear(768, 768)
-            self.coAttentionTextLayerNorm = nn.LayerNorm(768, eps=eps)
-
-            # co-attention image
-            self.coAttentionImageMultihead = nn.MultiheadAttention(768, 1)
-            self.coAttentionImageLinear1 = nn.Linear(768, 768)
-            self.coAttentionImageRelu = nn.ReLU()
-            self.coAttentionImageLinear2 = nn.Linear(768, 768)
-            self.coAttentionImageLayerNorm = nn.LayerNorm(768, eps=eps)
-
-        def forward(self, image, text):
-            # co-attention image module
-            visual_attending_textual = self.coAttentionTextMultihead(image, text, text)[0]
-            visual_attending_textual = self.coAttentionTextLinear1(visual_attending_textual)
-            visual_attending_textual = self.coAttentionTextRelu(visual_attending_textual)
-            visual_attending_textual = self.coAttentionTextLinear2(visual_attending_textual)
-            visual_attending_textual = self.coAttentionTextLayerNorm(visual_attending_textual + image)
-
-            # co-attention text module
-            textual_attending_visual = self.coAttentionTextMultihead(text, image, image)[0]
-            textual_attending_visual = self.coAttentionTextLinear1(textual_attending_visual)
-            textual_attending_visual = self.coAttentionTextRelu(textual_attending_visual)
-            textual_attending_visual = self.coAttentionTextLinear2(textual_attending_visual)
-            textual_attending_visual = self.coAttentionTextLayerNorm(textual_attending_visual + text)
-
-            return visual_attending_textual, textual_attending_visual
-
-    class Generator(nn.Module):
-        def __init__(self, depth=12):
-            super(Generator, self).__init__()
-            self.layers_self_multi = nn.ModuleList([self_multi() for _ in range(depth)])
-            self.layers_co_attention = nn.ModuleList([co_attention() for _ in range(depth)])
+            # # co-attention const 10
+            # self.prefix_const = nn.Parameter(torch.randn(64, 768), requires_grad=True)
+            # self.coAttentionTextMultihead = nn.MultiheadAttention(768, 1)
+            # self.coAttentionTextLinear1 = nn.Linear(768, 768)
+            # self.coAttentionTextRelu = nn.ReLU()
+            # self.coAttentionTextLinear2 = nn.Linear(768, 768)
+            # self.coAttentionTextLayerNorm = nn.LayerNorm(768, eps=eps)
+            #
+            # # co-attention image
+            # self.coAttentionImageMultihead = nn.MultiheadAttention(768, 1)
+            # self.coAttentionImageLinear1 = nn.Linear(768, 768)
+            # self.coAttentionImageRelu = nn.ReLU()
+            # self.coAttentionImageLinear2 = nn.Linear(768, 768)
+            # self.coAttentionImageLayerNorm = nn.LayerNorm(768, eps=eps)
 
             # feed forward
             self.feedForwardLinear = nn.Linear(768, 768)
             self.feedForwardLayerNorm = nn.LayerNorm(768, eps=eps)
 
-            # gemma
-            self.gemmaLinearMaxTokens = nn.Linear(64, 16)
-            self.gemmaLinearBefore = nn.Linear(768, gemmaConfig.vocab_size)
-            self.gemmaSoftmax = nn.Softmax(dim=2)
-            self.gemma = nn.Sequential(*list(gemma.children())[:-1])
-            # self.gemmaLm_head = nn.Sequential(*list(gemma.children())[1:])
-            self.gemmaLm_headbf = nn.Linear(768, gemma_hiddenstate_size)
-            self.gemmaLm_head = nn.Linear(gemma_hiddenstate_size, gemmaConfig.vocab_size)
-
-            # funny score
-            self.FunnyScorelinear1 = nn.Linear(768, 1)
-            self.FunnyScorelinear2 = nn.Linear(64, 1)
-
-        def gemmaGenerate(self, x):
-            with torch.no_grad():
-                # maximum 32 tokens
-                x = self.gemmaLinearMaxTokens(x.transpose(1, 2)).transpose(1, 2)
-                x = self.gemmaLinearBefore(x)
-                x2 = self.gemmaSoftmax(x + eps)
-
-                # get max value of each row, total 32*64
-                top_k_values, top_k_indices = torch.topk(x2, 1, dim=2, largest=True)
-                output_text = textExtractReverse(gemma, tokenizer, gemmaConfig, top_k_indices).to(device)
-                # toGemma = textExtractReverse(gemma, tokenizer, top_k_indices, Test=True).to(device)
-                # 使用gemma作為model的一部分
-                # output = self.gemma(toGemma)
-                # output[0] = last_hidden_state
-                # output[1] = past_key_values
-
-            return output_text
-
         def forward(self, text, image):
-            # max_seq_len = max(text.shape[1], image.shape[1])
-            # text = nn.functional.pad(text, (0, 0, 0, max_seq_len - text.shape[1]))
-            # image = nn.functional.pad(image, (0, 0, 0, max_seq_len - image.shape[1]))
-            text = text.transpose(0, 1)
-            image = image.transpose(0, 1)
+            text_attention_mask = torch.ones(text.shape[:2], dtype=torch.long).to(device)
+            text_output = self.Fformer.bert(
+                inputs_embeds=text,
+                attention_mask=text_attention_mask,
+                return_dict=True,
+            )
+            text_feat = nn.functional.normalize(text_output['last_hidden_state'], p=2, dim=-1)
 
-            ######################### Transformer #########################
-            for self_multi_layer in self.layers_self_multi:
-                image, text = self_multi_layer(image, text)
-            for co_attention_layer in self.layers_co_attention:
-                image, text = co_attention_layer(image, text)
-            ###############################################################
+            image_atts = torch.ones(image.shape[:1], dtype=torch.long).to(device)
+            query_tokens = self.query_tokens.expand(image.shape[0], -1, -1).to(device).to(torch.bfloat16)
 
-            # feature fusion
-            feature_fusion = image + text  # visual_attending_textual + textual_attending_visual
-            feature_fusionFF = self.feedForwardLinear(feature_fusion)
-            feature_fusion_final = self.feedForwardLayerNorm(feature_fusion + feature_fusionFF)
-            feature_fusion_final = feature_fusion_final.squeeze(-1)
-            feature_fusion_final = feature_fusion_final.transpose(0, 1)
-            ####################### gemma  generate #######################
-            last_hidden_state = self.gemmaGenerate(feature_fusion_final)
-            output_text = self.gemmaLm_head(last_hidden_state)
-            ###############################################################
-            # output_text = self.gemmaLm_headbf(feature_fusion_final)
-            # output_text = self.gemmaLm_head(output_text)
-            ###############################################################
-            output_text = output_text.to(torch.bfloat16)
-            ######################### funny score #########################
-            output_funny_score = self.FunnyScorelinear1(feature_fusion_final).squeeze(-1)
-            output_funny_score = self.FunnyScorelinear2(output_funny_score).squeeze(-1)
-            ###############################################################
+            query_output = self.Fformer.bert(
+                query_embeds=query_tokens,
+                encoder_hidden_states=image,
+                encoder_attention_mask=image_atts,
+                use_cache=True,
+                return_dict=True,
+            )
+            image_feat = nn.functional.normalize(query_output['last_hidden_state'], p=2, dim=-1)
+            # image_hidden = query_output['last_hidden_state'].transpose(0, 1)
+            # prefix = self.prefix_const.unsqueeze(0).expand(image.shape[0], -1, -1).transpose(0, 1).to(device).to(torch.bfloat16)
 
-            return output_text, output_funny_score
+            # # co-attention image module
+            # visual_attending_textual = self.coAttentionMultihead(image_hidden, prefix, prefix)[0]
+            # visual_attending_textual = self.coAttentionLinear1(visual_attending_textual)
+            # visual_attending_textual = self.coAttentionRelu(visual_attending_textual)
+            # visual_attending_textual = self.coAttentionLinear2(visual_attending_textual)
+            # visual_attending_textual = self.coAttentionLayerNorm(visual_attending_textual + image_hidden)
+            #
+            # # co-attention text module
+            # textual_attending_visual = self.coAttentionMultihead(prefix, image_hidden, image_hidden)[0]
+            # textual_attending_visual = self.coAttentionLinear1(textual_attending_visual)
+            # textual_attending_visual = self.coAttentionRelu(textual_attending_visual)
+            # textual_attending_visual = self.coAttentionLinear2(textual_attending_visual)
+            # textual_attending_visual = self.coAttentionLayerNorm(textual_attending_visual + prefix)
+            #
+            # # feature fusion
+            # feature_fusion = visual_attending_textual + textual_attending_visual
+            # feature_fusionFF = self.feedForwardLinear(feature_fusion)
+            # feature_fusion_final = self.feedForwardLayerNorm(feature_fusion + feature_fusionFF).transpose(0, 1)
+            #
+            # image_feat = nn.functional.normalize(feature_fusion_final, p=2, dim=-1)
 
-        def generate(self, text, image):
-            generated_tokens = []
-            generated_tokens.append(2)  # <bos> = 2
-            text = torch.zeros_like(image).to(device)
-            text = text.transpose(0, 1).to(torch.bfloat16)
-            image = image.transpose(0, 1)
-            depth = len(self.layers_self_multi)
+            return text_feat, image_feat
 
-            with torch.no_grad():
-                # Transformer
-                for i in range(depth):
-                    # self attention
-                    image, text = self.layers_self_multi[i](image, text)
-                    # co-attention
-                    image, text = self.layers_co_attention[i](image, text)
+    class IFormer(nn.Module):
+        def __init__(self, depth=12):
+            super(IFormer, self).__init__()
+            self.temp = nn.Parameter(0.07 * torch.ones(1), requires_grad=True)
 
-                # feature fusion
-                feature_fusion = image + text  # visual_attending_textual + textual_attending_visual
-                feature_fusionFF = self.feedForwardLinear(feature_fusion)
-                feature_fusion_final = self.feedForwardLayerNorm(feature_fusion + feature_fusionFF)
-                feature_fusion_final = feature_fusion_final.squeeze(-1)
-                feature_fusion_final = feature_fusion_final.transpose(0, 1)
+        def forward(self, Former, text, image):
+            text, image = Former(text, image)
+            text = nn.functional.normalize(text, p=2, dim=-1)
+            image = nn.functional.normalize(image, p=2, dim=-1)
+            c_text = text.unsqueeze(2).expand(-1, -1, image.shape[1], -1).to(torch.bfloat16)
+            c_image = image.unsqueeze(2).expand(-1, -1, text.shape[1], -1).to(torch.bfloat16)
+            sim_q2t = torch.einsum('bijk,bjik->bij', c_image, c_text)
+            sim_t2q = torch.einsum('bijk,bjik->bij', c_text, c_image)
+            img2txt, _ = torch.max(sim_q2t, dim=-1)
+            txt2img, _ = torch.max(sim_t2q, dim=-1)
+            img2txt = img2txt / self.temp
+            txt2img = txt2img / self.temp
 
-                # gemma generate
-                output_text = self.gemmaGenerate(feature_fusion_final).to(torch.bfloat16)
+            loss = 0
+            for i in range(img2txt.shape[0]):
+                targets = torch.arange(0, img2txt.shape[1], dtype=torch.bfloat16).to(device) # 0, 1, 2, ..., 63
+                loss_itc = (CrossEntropyLoss(label_smoothing=0.1)(img2txt[i], targets) + CrossEntropyLoss(label_smoothing=0.1)(txt2img[i], targets)) / 2
+                loss += loss_itc
+            loss /= img2txt.shape[0]
 
-                text = output_text.transpose(0, 1)
+            return loss
 
-                # Transformer
-                for i in range(depth):
-                    # self attention
-                    image, text = self.layers_self_multi[i](image, text)
-                    # co-attention
-                    image, text = self.layers_co_attention[i](image, text)
-
-                    # feature fusion
-                    feature_fusion = image + text  # visual_attending_textual + textual_attending_visual
-                    feature_fusionFF = self.feedForwardLinear(feature_fusion)
-                    feature_fusion_final = self.feedForwardLayerNorm(feature_fusion + feature_fusionFF)
-                    feature_fusion_final = feature_fusion_final.squeeze(-1)
-                    feature_fusion_final = feature_fusion_final.transpose(0, 1)
-
-                # funny score
-                output_funny_score = self.FunnyScorelinear1(feature_fusion_final).squeeze(-1)
-                output_funny_score = self.FunnyScorelinear2(output_funny_score).squeeze(-1)
-
-            return output_text, output_funny_score
-
-    class Discriminator(nn.Module):
-        def __init__(self):
-            super(Discriminator, self).__init__()
-            self.linearFake = nn.Linear(gemmaConfig.vocab_size, 768)
-            # Generator
-            self.g_con_mlp1 = nn.Linear(1536, 2)
-            self.g_con_mlp2 = nn.Linear(64, 1)
-            self.g_unc_mlp1 = nn.Linear(768, 1)
-            self.g_unc_mlp2 = nn.Linear(64, 1)
-            # Discriminator
-            self.d_linearFake = nn.Linear(gemmaConfig.vocab_size, 768)
-            self.d_con_mlp1_cd = nn.Linear(3072, 2)
-            self.d_con_mlp2_cd = nn.Linear(64, 1)
-            self.d_con_mlp1 = nn.Linear(1536, 2)
-            self.d_con_mlp2 = nn.Linear(64, 1)
-            self.d_unc_mlp1 = nn.Linear(768, 1)
-            self.d_unc_mlp2 = nn.Linear(64, 1)
-
-            self.con_mlp1 = nn.Linear(1536, 2)
-            self.con_mlp2 = nn.Linear(64, 1)
-            self.unc_mlp1 = nn.Linear(768, 1)
-            self.unc_mlp2 = nn.Linear(64, 1)
-
-        def forward(self, real_text, fake_text, image, GorD):
-            # real_text = [batch_size, 64, 768]
-            # fake_text = [batch_size, 64, 256000]
-            # image = [batch_size, 64, 768]
-
-            mismatched_text = torch.roll(real_text, 1, 0)
-            # real_text = self.linearFake(real_text)
-            # fake_text = self.linearFake(fake_text)
-            # mismatched_text = self.linearFake(mismatched_text)
-            if GorD == "G":
-                g_C_g = torch.cat((fake_text, image), dim=-1)
-                ########################  conditional  ########################
-                g_C_g = self.g_con_mlp1(g_C_g)
-                g_C_g = self.g_con_mlp2(g_C_g.transpose(1, 2)).squeeze(-1)
-                ###############################################################
-                ######################## unconditional ########################
-                g_UC_g = self.g_unc_mlp1(fake_text).squeeze(-1)
-                g_UC_g = self.g_unc_mlp2(g_UC_g).squeeze(-1)
-                ###############################################################
-                # g_C_g = torch.cat((fake_text, image), dim=-1)
-                # ########################  conditional  ########################
-                # g_C_g = self.con_mlp1(g_C_g)
-                # g_C_g = self.con_mlp2(g_C_g.transpose(1, 2)).squeeze(-1)
-                # ###############################################################
-                # ######################## unconditional ########################
-                # g_UC_g = self.unc_mlp1(fake_text).squeeze(-1)
-                # g_UC_g = self.unc_mlp2(g_UC_g).squeeze(-1)
-                # ###############################################################
-                return g_C_g, g_UC_g
-
-            elif GorD == "D":
-                C_r = torch.cat((real_text, image), dim=-1)
-                C_g = torch.cat((fake_text, image), dim=-1)
-                C_m = torch.cat((mismatched_text, image), dim=-1)
-                # contrastive discriminator
-                cd_C_r = C_r.unsqueeze(0).expand(C_r.shape[0], -1, -1, -1)
-                cd_C_g = C_g.unsqueeze(0).expand(C_g.shape[0], -1, -1, -1)
-                d_C_r2f = torch.cat((cd_C_r, cd_C_g.transpose(0, 1)), dim=-1)
-                d_C_f2r = torch.cat((cd_C_g, cd_C_r.transpose(0, 1)), dim=-1)
-
-                ######################## conditional ########################
-                d_C_r2f = self.d_con_mlp1_cd(d_C_r2f)
-                d_C_f2r = self.d_con_mlp1_cd(d_C_f2r)
-                d_C_g = self.d_con_mlp1(C_g)
-                d_C_m = self.d_con_mlp1(C_m)
-
-                d_C_r2f = self.d_con_mlp2_cd(d_C_r2f.transpose(2,3)).squeeze(-1).unsqueeze(0)
-                d_C_f2r = self.d_con_mlp2_cd(d_C_f2r.transpose(2,3)).squeeze(-1).unsqueeze(0)
-                d_C_g = self.d_con_mlp2(d_C_g.transpose(1,2)).squeeze(-1).unsqueeze(0)
-                d_C_m = self.d_con_mlp2(d_C_m.transpose(1,2)).squeeze(-1).unsqueeze(0)
-
-                d_C_r2f = torch.mean(d_C_r2f, dim=-2)
-                d_C_f2r = torch.mean(d_C_f2r, dim=-2)
-
-                d_con_output = torch.cat((d_C_r2f, d_C_f2r, d_C_g, d_C_m), dim=0)
-                ###############################################################
-
-                ######################## unconditional ########################
-                d_UC_r = self.d_unc_mlp1(real_text).squeeze(-1)
-                d_UC_g = self.d_unc_mlp1(fake_text).squeeze(-1)
-                d_UC_m = self.d_unc_mlp1(mismatched_text).squeeze(-1)
-
-                d_UC_r = self.d_unc_mlp2(d_UC_r).squeeze(-1).unsqueeze(0)
-                d_UC_g = self.d_unc_mlp2(d_UC_g).squeeze(-1).unsqueeze(0)
-                d_UC_m = self.d_unc_mlp2(d_UC_m).squeeze(-1).unsqueeze(0)
-
-                d_unc_output = torch.cat((d_UC_r, d_UC_g, d_UC_m), dim=0)
-                ###############################################################
-
-                # ######################## conditional ########################
-                # d_C_r2f = self.d_con_mlp1_cd(d_C_r2f)
-                # d_C_f2r = self.d_con_mlp1_cd(d_C_f2r)
-                # d_C_g = self.con_mlp1(C_g)
-                # d_C_m = self.con_mlp1(C_m)
-                #
-                # d_C_r2f = self.d_con_mlp2_cd(d_C_r2f.transpose(2, 3)).squeeze(-1).unsqueeze(0)
-                # d_C_f2r = self.d_con_mlp2_cd(d_C_f2r.transpose(2, 3)).squeeze(-1).unsqueeze(0)
-                # d_C_g = self.con_mlp2(d_C_g.transpose(1, 2)).squeeze(-1).unsqueeze(0)
-                # d_C_m = self.con_mlp2(d_C_m.transpose(1, 2)).squeeze(-1).unsqueeze(0)
-                #
-                # d_C_r2f = nn.LogSoftmax(dim=-1)(d_C_r2f)
-                # d_C_f2r = nn.LogSoftmax(dim=-1)(d_C_f2r)
-                # d_C_r2f = torch.mean(d_C_r2f, dim=-2)
-                # d_C_f2r = torch.mean(d_C_f2r, dim=-2)
-                #
-                # d_con_output = torch.cat((d_C_r2f, d_C_f2r, d_C_g, d_C_m), dim=0)
-                # ###############################################################
-                #
-                # ######################## unconditional ########################
-                # d_UC_r = self.unc_mlp1(real_text).squeeze(-1)
-                # d_UC_g = self.unc_mlp1(fake_text).squeeze(-1)
-                # d_UC_m = self.unc_mlp1(mismatched_text).squeeze(-1)
-                #
-                # d_UC_r = self.unc_mlp2(d_UC_r).squeeze(-1).unsqueeze(0)
-                # d_UC_g = self.unc_mlp2(d_UC_g).squeeze(-1).unsqueeze(0)
-                # d_UC_m = self.unc_mlp2(d_UC_m).squeeze(-1).unsqueeze(0)
-                #
-                # d_unc_output = torch.cat((d_UC_r, d_UC_g, d_UC_m), dim=0)
-                # ###############################################################
-                return d_con_output, d_unc_output
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu" )
 
-    NetG = Generator().to(torch.bfloat16).to(device)
-    NetD = Discriminator().to(torch.bfloat16).to(device)
-    optimizer_G = optim.Adam(NetG.parameters(), lr=optimizer_G_lr)
-    optimizer_D = optim.Adam(NetD.parameters(), lr=optimizer_D_lr)
+    Net_Prefix = Prefix().to(device).to(torch.bfloat16)
+    Net_IFormer = IFormer().to(device).to(torch.bfloat16)
+    optimizer_F = optim.Adam(Net_IFormer.parameters(), lr=optimizer_F_lr)
 
-    train_losses_G = []
-    train_losses_D = []
-    test_losses_G = []
-    test_losses_D = []
+    train_losses_F = []
+    test_losses_F = []
     save = []
     present_epoch = 1
-    best_train_loss_G = 9999
-    best_train_loss_D = 9999
-    best_test_loss_G = 9999
-    best_test_loss_D = 9999
-
-    # separate loss
-    g_fc_loss_list = []
-    g_con_loss_list = []
-    g_unc_loss_list = []
-    d_con_r2f_loss_list = []
-    d_con_f2r_loss_list = []
-    d_con_f_loss_list = []
-    d_con_m_loss_list = []
-    d_unc_r_loss_list = []
-    d_unc_f_loss_list = []
-    d_unc_m_loss_list = []
-
-    checkpoint = True
-    if checkpoint:
-        checkpoint_G = torch.load('D:/MemeGAN/Model/20241110_gemma_generate_onlyd/20241110_gemma_generate_onlyd_NetG_2.pth')
-        checkpoint_D = torch.load('D:/MemeGAN/Model/20241110_gemma_generate_onlyd/20241110_gemma_generate_onlyd_NetD_2.pth')
-        NetG.load_state_dict(checkpoint_G['model_state_dict'])
-        NetD.load_state_dict(checkpoint_D['model_state_dict'])
-        optimizer_G.load_state_dict(checkpoint_G['optimizer_state_dict'])
-        optimizer_D.load_state_dict(checkpoint_D['optimizer_state_dict'])
-        present_epoch = checkpoint_G['epoch'] + 1
-        del checkpoint_G
-        del checkpoint_D
-        gc.collect()
-
-    def funnyScoreLoss(output_funny_score, funny_score):
-        loss = nn.MSELoss()(output_funny_score, funny_score)
-        g_fc_loss_list.append(loss.item())
-        return loss
-
-    def generatorLoss(condition_logits, uncondition_logits):
-        result_fake_con = torch.ones(condition_logits.shape[0]).to(torch.long).to(device)
-        result_fake_unc = torch.FloatTensor(condition_logits.shape[0]).to(torch.bfloat16).uniform_(0.9, 1.0).to(device)
-        con_loss = CrossEntropyLoss(label_smoothing=0.1)(condition_logits, result_fake_con)
-        unc_loss = BCEWithLogitsLoss()(uncondition_logits, result_fake_unc)
-        g_con_loss_list.append(con_loss.item())
-        g_unc_loss_list.append(unc_loss.item())
-        loss = con_loss + unc_loss
-        return loss
-
-    def discriminatorLoss(condition_logits, uncondition_logits):
-        result_true = torch.FloatTensor(uncondition_logits[0].shape[0]).to(torch.bfloat16).uniform_(0.9, 1.0).to(device)
-        result_fake_ce = torch.zeros(uncondition_logits[0].shape[0]).to(torch.long).to(device)
-        result_fake_unc_f = torch.FloatTensor(uncondition_logits[1].shape[0]).to(torch.bfloat16).uniform_(0.0, 0.1).to(device)
-        result_fake_unc_m = torch.FloatTensor(uncondition_logits[2].shape[0]).to(torch.bfloat16).uniform_(0.0, 0.1).to(device)
-
-        con_r2f = CrossEntropyLoss(label_smoothing=0.1)(condition_logits[0], result_fake_ce)
-        con_f2r = CrossEntropyLoss(label_smoothing=0.1)(condition_logits[1], result_fake_ce)
-        con_f = CrossEntropyLoss(label_smoothing=0.1)(condition_logits[2], result_fake_ce)
-        con_m = CrossEntropyLoss(label_smoothing=0.1)(condition_logits[3], result_fake_ce)
-        unc_r = BCEWithLogitsLoss()(uncondition_logits[0], result_true)
-        unc_f = BCEWithLogitsLoss()(uncondition_logits[1], result_fake_unc_f)
-        unc_m = BCEWithLogitsLoss()(uncondition_logits[2], result_fake_unc_m)
-        d_con_r2f_loss_list.append(con_r2f.item())
-        d_con_f2r_loss_list.append(con_f2r.item())
-        d_con_f_loss_list.append(con_f.item())
-        d_con_m_loss_list.append(con_m.item())
-        d_unc_r_loss_list.append(unc_r.item())
-        d_unc_f_loss_list.append(unc_f.item())
-        d_unc_m_loss_list.append(unc_m.item())
-        loss = ((con_r2f + con_f2r) / 2) + ((con_f + con_m) / 2) + unc_r + ((unc_f + unc_m) / 2)
-        return loss
+    best_train_loss_F = 9999999999
+    best_test_loss_F = 9999999999
 
 
+    # if checkpoint:
+    #     checkpoint_F = torch.load('./Model/' + load_name + "/" + load_name + '_NetIFormer_' + str(load_num) + '.pth')
+    #     Net_Former.load_state_dict(checkpoint_F['model_state_dict'])
+    #     optimizer_F.load_state_dict(checkpoint_F['optimizer_state_dict'])
+    #     present_epoch = checkpoint_F['epoch'] + 1
+    #     del checkpoint_F
+    #     gc.collect()
 
     startTime = 0
     textExtractionTime = 0
     GeneratorForwardTime = 0
-    GeneratorBackwardGTime = 0
-    DiscriminatorForwardTime = 0
-    DiscriminatorBackwardTime = 0
+    GeneratorBackwardTime = 0
     torch.autograd.set_detect_anomaly(True)
     for epoch in range(epochs):
         print("---------------------------------------- epoch " + str(
             epoch + present_epoch) + " ---------------------------------------")
-        train_loss_G = 0
-        train_loss_D = 0
-        test_loss_G = 0
-        test_loss_D = 0
+        train_loss_F = 0
+        test_loss_F = 0
         pre = 0
         ###################################### Train ######################################
         with tqdm(train_loader, unit="batch", leave=True) as tepoch:
@@ -521,122 +248,58 @@ def train():
                 else:
                     startTime += tepoch.format_dict['elapsed'] - pre
                 pre = tepoch.format_dict['elapsed']
-                text = textExtraction(tokenizer, gemmaConfig, text).to(torch.bfloat16)
+                text = textExtraction_IFT(tokenizer, config, text)
                 image = image.to(torch.bfloat16)
-                funny_score = funny_score.to(torch.bfloat16)
                 textExtractionTime += tepoch.format_dict['elapsed'] - pre
                 pre = tepoch.format_dict['elapsed']
                 ######################################################
                 # (1) Update Generator network
                 ######################################################
-                optimizer_G.zero_grad()
-                logits, output_funny_score = NetG(text.to(device), image.to(device))
-                g_con_logits, g_unc_logits = NetD(text.to(device), logits, image.to(device), "G")
+                optimizer_F.zero_grad()
+                loss_F = Net_IFormer(Net_Prefix, text.to(device), image.to(device))
+                train_loss_F += loss_F.item()
                 GeneratorForwardTime += tepoch.format_dict['elapsed'] - pre
                 pre = tepoch.format_dict['elapsed']
-
-                loss_G = generatorLoss(g_con_logits.to(device), g_unc_logits.to(device)) + (
-                        100 * funnyScoreLoss(output_funny_score.to(device), funny_score.to(device)))
-                loss_G.backward(retain_graph=True)
-                train_loss_G += loss_G.item()
-                optimizer_G.step()
-                GeneratorBackwardGTime += tepoch.format_dict['elapsed'] - pre
+                loss_F.backward()
+                optimizer_F.step()
+                GeneratorBackwardTime += tepoch.format_dict['elapsed'] - pre
                 pre = tepoch.format_dict['elapsed']
-                ######################################################
-                # (4) Update Discriminator network
-                ######################################################
-                optimizer_D.zero_grad()
-                d_con_logits, d_unc_logits = NetD(text.to(device).detach(), logits.detach(), image.to(device).detach(), "D")
-                DiscriminatorForwardTime += tepoch.format_dict['elapsed'] - pre
-                pre = tepoch.format_dict['elapsed']
-                loss_D = discriminatorLoss(d_con_logits.to(device), d_unc_logits.to(device))
-                loss_D.backward()
-                DiscriminatorBackwardTime += tepoch.format_dict['elapsed'] - pre
-                pre = tepoch.format_dict['elapsed']
-                optimizer_D.step()
-                train_loss_D += loss_D.item()
                 ######################################################
                 # tepoch.set_postfix({'FC_loss': train_loss_FC/ (idx+1), 'G_loss': train_loss_G/ (idx+1), 'D_loss': train_loss_D/ (idx+1)})
                 tepoch.set_postfix({'start': startTime / (idx + 1), 'textExtraction': textExtractionTime / (idx + 1),
                                     'GeneratorForward': GeneratorForwardTime / (idx + 1),
-                                    'GeneratorBackwardG': GeneratorBackwardGTime / (idx + 1),
-                                    'DiscriminatorForward': DiscriminatorForwardTime / (idx + 1),
-                                    'DiscriminatorBackward': DiscriminatorBackwardTime / (idx + 1)})
-                sepateLoss = pd.DataFrame()
-                sepateLoss['g_fc_loss'] = g_fc_loss_list
-                sepateLoss['g_con_loss'] = g_con_loss_list
-                sepateLoss['g_unc_loss'] = g_unc_loss_list
-                sepateLoss['d_con_r2f_loss'] = d_con_r2f_loss_list
-                sepateLoss['d_con_f2r_loss'] = d_con_f2r_loss_list
-                sepateLoss['d_con_f_loss'] = d_con_f_loss_list
-                sepateLoss['d_con_m_loss'] = d_con_m_loss_list
-                sepateLoss['d_unc_r_loss'] = d_unc_r_loss_list
-                sepateLoss['d_unc_f_loss'] = d_unc_f_loss_list
-                sepateLoss['d_unc_m_loss'] = d_unc_m_loss_list
-                sepateLoss.to_csv('./Model/' + save_name + "/" + save_name + '_sepateLoss.csv', index=False)
+                                    'GeneratorBackwardG': GeneratorBackwardTime / (idx + 1)})
                 ######################################################
-        train_loss_G /= len(train_loader)
-        train_loss_D /= len(train_loader)
-        train_losses_G.append(train_loss_G)
-        train_losses_D.append(train_loss_D)
+        train_loss_F /= len(train_loader)
+        train_losses_F.append(train_loss_F)
         ###################################### Train ######################################
 
         ######################################  Test ######################################
         with tqdm(test_loader, unit="batch", leave=True) as tepoch:
             for idx, (text, image, funny_score) in enumerate(tepoch):
-                text = textExtraction(tokenizer, gemmaConfig, text).to(torch.bfloat16)
+                text = textExtraction_IFT(tokenizer, config, text)
                 image = image.to(torch.bfloat16)
-                funny_score = funny_score.to(torch.bfloat16)
                 # Generator
-                logits, output_funny_score = NetG(text.to(device), image.to(device))
-                # Discriminator
-                g_con_logits, g_unc_logits = NetD(text.to(device), logits, image.to(device), "G")
-                d_con_logits, d_unc_logits = NetD(text.to(device).detach(), logits.detach(), image.to(device).detach(),"D")
-                # loss
-                loss_G = generatorLoss(g_con_logits.to(device), g_unc_logits.to(device)) + (
-                        100 * funnyScoreLoss(output_funny_score.to(device), funny_score.to(device)))
-                loss_D = discriminatorLoss(d_con_logits, d_unc_logits)
-                test_loss_G += loss_G.item()
-                test_loss_D += loss_D.item()
-                tepoch.set_postfix({'G_loss': test_loss_G / (idx + 1),
-                                    'D_loss': test_loss_D / (idx + 1)})
-        test_loss_G /= len(test_loader)
-        test_loss_D /= len(test_loader)
-        test_losses_G.append(test_loss_G)
-        test_losses_D.append(test_loss_D)
+                loss_F = Net_IFormer(Net_Prefix, text.to(device), image.to(device))
+                test_loss_F += loss_F.item()
+                tepoch.set_postfix({'test_loss_F': test_loss_F / (idx + 1)})
+        test_loss_F /= len(test_loader)
+        test_losses_F.append(test_loss_F)
         ######################################  Test ######################################
 
         ######################################  Save ######################################
         hasSaved = False
         # 任一個loss小於最佳loss就存檔
-        if train_loss_G < best_train_loss_G and test_loss_G < best_test_loss_G:
-            best_train_loss_G = train_loss_G
-            best_test_loss_G = test_loss_G
+        if best_train_loss_F > train_loss_F and best_test_loss_F > test_loss_F:
+            best_train_loss_F = train_loss_F
+            best_test_loss_F = test_loss_F
+            torch.save({
+                'epoch': epoch + present_epoch,
+                'model_state_dict': Net_Prefix.state_dict(),
+                'optimizer_state_dict': optimizer_F.state_dict(),
+                'loss': train_loss_F,
+            }, './Model/' + save_name + "/" + save_name + '_NetPrefix_' + str(epoch + present_epoch) + '.pth')
             hasSaved = True
-            torch.save({
-                'epoch': epoch + present_epoch,
-                'model_state_dict': NetG.state_dict(),
-                'optimizer_state_dict': optimizer_G.state_dict(),
-            }, './Model/' + save_name + "/" + save_name + '_NetG_' + str(epoch + present_epoch) + '.pth')
-            torch.save({
-                'epoch': epoch + present_epoch,
-                'model_state_dict': NetD.state_dict(),
-                'optimizer_state_dict': optimizer_D.state_dict(),
-            }, './Model/' + save_name + "/" + save_name + '_NetD_' + str(epoch + present_epoch) + '.pth')
-        if train_loss_D < best_train_loss_D and test_loss_D < best_test_loss_D:
-            best_train_loss_D = train_loss_D
-            best_test_loss_D = test_loss_D
-            hasSaved = True
-            torch.save({
-                'epoch': epoch + present_epoch,
-                'model_state_dict': NetG.state_dict(),
-                'optimizer_state_dict': optimizer_G.state_dict(),
-            }, './Model/' + save_name + "/" + save_name + '_NetG_' + str(epoch + present_epoch) + '.pth')
-            torch.save({
-                'epoch': epoch + present_epoch,
-                'model_state_dict': NetD.state_dict(),
-                'optimizer_state_dict': optimizer_D.state_dict(),
-            }, './Model/' + save_name + "/" + save_name + '_NetD_' + str(epoch + present_epoch) + '.pth')
 
         if hasSaved:
             save.append("V")
@@ -644,21 +307,21 @@ def train():
             save.append(" ")
 
         loss_data = pd.DataFrame()
-        loss_data['train_G'] = train_losses_G
-        loss_data['train_D'] = train_losses_D
-        loss_data['test_G'] = test_losses_G
-        loss_data['test_D'] = test_losses_D
+        loss_data['train_F'] = train_losses_F
+        loss_data['test_F'] = test_losses_F
         loss_data['save'] = save
         loss_data.to_csv('./Model/' + save_name + "/" + save_name + '_loss.csv', index=False)
 
-        plt.plot(train_losses_G, label='train_G')
-        plt.plot(train_losses_D, label='train_D')
-        plt.plot(test_losses_G, label='test_G')
-        plt.plot(test_losses_D, label='test_D')
+        plt.figure()
+        plt.plot(train_losses_F, label='train_F')
+        plt.plot(test_losses_F, label='test_F')
+        plt.xlabel('Epoch')
+        plt.ylabel('Loss')
         plt.legend()
-        plt.show()
         # save plot
         plt.savefig('./Model/' + save_name + "/" + save_name + '_loss.png')
+        plt.show()
+
         ######################################  Save ######################################
 
 if __name__ == '__main__':
