@@ -40,7 +40,7 @@ def train():
     epochs = 30
     batch_size = 128
     optimizer_F_lr = 1e-5
-    save_name = '20241122_ift_noshare'
+    save_name = '20241125_noCoAttention_share'
     if not os.path.exists('./Model/' + save_name):
         os.makedirs('./Model/' + save_name)
         os.makedirs('D:/MemeGAN/Model/' + save_name)
@@ -138,32 +138,38 @@ def train():
             prefix = self.prefix_const.unsqueeze(0).expand(image.shape[1], -1, -1).transpose(0, 1).to(device).to(torch.bfloat16)
 
             # self attention module
-            self_out = self.selfAttentionMultihead(image, image, image)[0]
-            self_out = self.selfAttentionLinear1(self_out)
-            self_out = self.selfAttentionRelu(self_out)
-            self_out = self.selfAttentionLinear2(self_out)
-            self_out = self.selfAttentionLayerNorm(self_out + image)
+            self_temp = self.selfAttentionMultihead(image, image, image)[0]
+            self_temp = self.selfAttentionLayerNorm(self_temp + image)
+            self_out = self.multiheadAttentionLinear1(self_temp)
+            self_out = self.multiheadAttentionRelu(self_out)
+            self_out = self.multiheadAttentionLinear2(self_out)
+            self_out = self.multiheadAttentionLayerNorm(self_out + self_temp)
+            # self_out = self.selfAttentionLinear1(self_temp)
+            # self_out = self.selfAttentionRelu(self_out)
+            # self_out = self.selfAttentionLinear2(self_out)
+            # self_out = self.selfAttentionLayerNorm2(self_out + self_temp)
 
-            # co-attention image module
-            visual_attending_textual = self.coAttentionImageMultihead(prefix, self_out, self_out)[0]
-            visual_attending_textual = self.coAttentionImageLinear1(visual_attending_textual)
-            visual_attending_textual = self.coAttentionImageRelu(visual_attending_textual)
-            visual_attending_textual = self.coAttentionImageLinear2(visual_attending_textual)
-            visual_attending_textual = self.coAttentionImageLayerNorm(visual_attending_textual + self_out)
 
-            # co-attention text module
-            textual_attending_visual = self.coAttentionTextMultihead(self_out, prefix, prefix)[0]
-            textual_attending_visual = self.coAttentionTextLinear1(textual_attending_visual)
-            textual_attending_visual = self.coAttentionTextRelu(textual_attending_visual)
-            textual_attending_visual = self.coAttentionTextLinear2(textual_attending_visual)
-            textual_attending_visual = self.coAttentionTextLayerNorm(textual_attending_visual + prefix)
+            # # co-attention image module
+            # visual_attending_textual = self.coAttentionImageMultihead(prefix, self_out, self_out)[0]
+            # visual_attending_textual = self.coAttentionImageLinear1(visual_attending_textual)
+            # visual_attending_textual = self.coAttentionImageRelu(visual_attending_textual)
+            # visual_attending_textual = self.coAttentionImageLinear2(visual_attending_textual)
+            # visual_attending_textual = self.coAttentionImageLayerNorm(visual_attending_textual + self_out)
+            #
+            # # co-attention text module
+            # textual_attending_visual = self.coAttentionTextMultihead(self_out, prefix, prefix)[0]
+            # textual_attending_visual = self.coAttentionTextLinear1(textual_attending_visual)
+            # textual_attending_visual = self.coAttentionTextRelu(textual_attending_visual)
+            # textual_attending_visual = self.coAttentionTextLinear2(textual_attending_visual)
+            # textual_attending_visual = self.coAttentionTextLayerNorm(textual_attending_visual + prefix)
+            #
+            # # feature fusion
+            # feature_fusion = visual_attending_textual + textual_attending_visual
+            # feature_fusionFF = self.feedForwardLinear(feature_fusion)
+            # feature_fusion_final = self.feedForwardLayerNorm(feature_fusion + feature_fusionFF)
 
-            # feature fusion
-            feature_fusion = visual_attending_textual + textual_attending_visual
-            feature_fusionFF = self.feedForwardLinear(feature_fusion)
-            feature_fusion_final = self.feedForwardLayerNorm(feature_fusion + feature_fusionFF)
-
-            return multi_out, feature_fusion_final
+            return multi_out, self_out
 
     class Former(nn.Module):
         def __init__(self, depth=12):
@@ -322,9 +328,10 @@ def train():
         plt.xlabel('Epoch')
         plt.ylabel('Loss')
         plt.legend()
-        plt.show()
+
         # save plot
         plt.savefig('./Model/' + save_name + "/" + save_name + '_loss.png')
+        plt.show()
         ######################################  Save ######################################
 
 if __name__ == '__main__':
