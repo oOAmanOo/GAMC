@@ -13,7 +13,7 @@ from collections import defaultdict, deque
 import torch
 import torch.distributed as dist
 
-from BITA.common import dist_utils
+from Main.BITA.common import dist_utils
 
 
 class SmoothedValue(object):

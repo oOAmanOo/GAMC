@@ -45,7 +45,7 @@ def train():
     save_name = '20241125_bita_bita'
     if not os.path.exists('./Model/' + save_name):
         os.makedirs('./Model/' + save_name)
-        os.makedirs('D:/MemeGAN/Model/' + save_name)
+        # os.makedirs('D:/MemeGAN/Model/' + save_name)
 
 
     # if args.img - dir == 'Oxford_HIC':
@@ -78,7 +78,7 @@ def train():
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, num_workers=20, pin_memory=True, drop_last=True)
 
     ### 官方的Gemma #########################################################################################
-    Fformer = BertLMHeadModel.from_pretrained("bert-base-uncased", is_decoder=True)
+    # Fformer = BertLMHeadModel.from_pretrained("bert-base-uncased", is_decoder=True)
     tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
     config = AutoConfig.from_pretrained('bert-base-uncased')
     # 2b = 2304, 9b = 3584, 27b = 4608
@@ -87,7 +87,7 @@ def train():
     # gemmaConfig = AutoConfig.from_pretrained('google/gemma-2-2b-it')
     # gemma = AutoModelForCausalLM.from_pretrained("google/gemma-2-2b-it", device_map="auto", torch_dtype=torch.bfloat16)
     ########################################################################################################
-    class Prefix(nn.Module):
+    class Prefix(B):
         def __init__(self):
             super(Prefix, self).__init__()
             # init

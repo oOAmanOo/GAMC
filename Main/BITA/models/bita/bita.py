@@ -15,8 +15,8 @@ from Main.BITA.common.utils import is_url
 from Main.BITA.common.logger import MetricLogger
 from Main.BITA.models.base_model import BaseModel
 from Main.BITA.models.bita.IFT import BertConfig, BertLMHeadModel
-from Main.BITA.models.eva_vit import create_eva_vit_g
-from Main.BITA.models.clip_vit import create_clip_vit_L
+# from Main.BITA.models.eva_vit import create_eva_vit_g
+# from Main.BITA.models.clip_vit import create_clip_vit_L
 from transformers import BertTokenizer
 
 
@@ -39,7 +39,7 @@ class BITABase(BaseModel):
 
     @classmethod
     def init_IFT(cls, num_query_token, vision_width):
-        encoder_config = BertConfig.from_pretrained("bert-base-uncased")
+        encoder_config = BertConfig.from_pretrained("bert-base-uncased", is_decoder = True)
         encoder_config.encoder_width = vision_width
         # insert cross-attention layer every other block
         encoder_config.add_cross_attention = True
@@ -55,27 +55,27 @@ class BITABase(BaseModel):
         query_tokens.data.normal_(mean=0.0, std=encoder_config.initializer_range)
         return Fformer, query_tokens
 
-    def init_vision_encoder(
-        self, model_name, img_size, drop_path_rate, use_grad_checkpoint, precision
-    ):
-        assert model_name in [
-            "eva_clip_g",
-            "eva2_clip_L",
-            "clip_L",
-        ], "vit model must be eva_clip_g, eva2_clip_L or clip_L"
-        if model_name == "eva_clip_g":
-            visual_encoder = create_eva_vit_g(
-                img_size, drop_path_rate, use_grad_checkpoint, precision
-            )
-#         elif model_name == "eva2_clip_L":
-#             visual_encoder = create_eva2_vit_L(
+#     def init_vision_encoder(
+#         self, model_name, img_size, drop_path_rate, use_grad_checkpoint, precision
+#     ):
+#         assert model_name in [
+#             "eva_clip_g",
+#             "eva2_clip_L",
+#             "clip_L",
+#         ], "vit model must be eva_clip_g, eva2_clip_L or clip_L"
+#         if model_name == "eva_clip_g":
+#             visual_encoder = create_eva_vit_g(
 #                 img_size, drop_path_rate, use_grad_checkpoint, precision
 #             )
-        elif model_name == "clip_L":
-            visual_encoder = create_clip_vit_L(img_size, use_grad_checkpoint, precision)
-        ln_vision = LayerNorm(visual_encoder.num_features)
-        self.vit_name = model_name
-        return visual_encoder, ln_vision
+# #         elif model_name == "eva2_clip_L":
+# #             visual_encoder = create_eva2_vit_L(
+# #                 img_size, drop_path_rate, use_grad_checkpoint, precision
+# #             )
+#         elif model_name == "clip_L":
+#             visual_encoder = create_clip_vit_L(img_size, use_grad_checkpoint, precision)
+#         ln_vision = LayerNorm(visual_encoder.num_features)
+#         self.vit_name = model_name
+#         return visual_encoder, ln_vision
 
     def load_from_pretrained(self, url_or_filename):
         if is_url(url_or_filename):
