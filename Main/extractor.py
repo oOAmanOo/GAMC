@@ -86,7 +86,16 @@ def textExtractReverse(gemma, tokenizer, gemmaConfig, data, max_new_tokens=100):
         text = ', '.join(text)
         reverse[i] = prompt + text + "."
     input_ids = tokenizer(reverse, truncation=True, padding='max_length', max_length=64, return_tensors='pt').to(device)
-
+    outputs = gemma.generate(**input_ids, max_new_tokens=max_new_tokens)
+    #remove the same as input
+    # print(tokenizer.decode(outputs[0]))
+    outputs = outputs[:, len(input_ids['input_ids'][0]):]
+    outputs = text_embedding(outputs)  # embedding
+    if outputs.shape[1] > 64:
+        outputs = avg_pool(outputs.transpose(1, 2)).transpose(1, 2)
+    elif outputs.shape[1] < 64:
+        padding = torch.zeros(outputs.shape[0], 64 - outputs.shape[1], embedding_dim)
+        outputs = torch.cat((outputs, padding), dim=1)
     return outputs
 
 def textExtractReverseRecursive(gemma, tokenizer, data, Test = False):
