@@ -47,17 +47,21 @@ def textExtraction(tokenizer, gemmaConfig, text_data):
     all_features = []
     # with tqdm.tqdm (total=len(text_data)) as pbar:
     for text in (text_data):
-        tokens = tokenizer(text, padding='longest', return_tensors='pt', )
+        tokens = tokenizer(text, padding="max_length",
+            truncation=True,
+            max_length=100,
+            return_tensors="pt",)
         token_ids.append(tokens['input_ids'])
-        output = text_embedding(tokens['input_ids'])
-        if output.shape[1] > 64:
-            output = avg_pool(output.transpose(1, 2)).transpose(1, 2)
-        elif output.shape[1] < 64:
-            padding = torch.zeros(output.shape[0], 64 - output.shape[1], 768)
-            output = torch.cat((output, padding), dim=1)
-        all_features.append(output.detach())
+        all_features.append(tokens['attention_mask'])
+        # output = text_embedding(tokens['input_ids'])
+        # if output.shape[1] > 64:
+        #     output = avg_pool(output.transpose(1, 2)).transpose(1, 2)
+        # elif output.shape[1] < 64:
+        #     padding = torch.zeros(output.shape[0], 64 - output.shape[1], 768)
+        #     output = torch.cat((output, padding), dim=1)
+        # all_features.append(output.detach())
             # pbar.update(1)
-    return torch.cat(token_ids).to(torch.bfloat16), torch.cat(all_features).to(torch.bfloat16)
+    return torch.cat(token_ids), torch.cat(all_features)
 
 def textExtractReverse(gemma, tokenizer, gemmaConfig, data, max_new_tokens=100):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

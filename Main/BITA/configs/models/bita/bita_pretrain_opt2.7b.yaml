@@ -1,0 +1,38 @@
+model:
+  arch: pretrain_opt2.7b
+  load_finetuned: False
+
+  pretrained: "/usr/code/BITA/BITA_weights/Stage1/checkpoint_best.pth"
+  finetuned: ""
+
+  # vit encoder
+  vit_model: "clip_L"
+  image_size: 224
+  drop_path_rate: 0
+  use_grad_checkpoint: False
+  vit_precision: "fp16"
+  freeze_vit: True
+
+  # IFT
+  num_query_token: 32
+
+  # OPT
+  opt_model: "facebook/opt-2.7b"
+
+  # generation configs
+  prompt: ""
+
+
+preprocess:
+    vis_processor:
+        train:
+          name: "bita_image_train"
+          image_size: 224
+        eval:
+          name: "bita_image_eval"
+          image_size: 224
+    text_processor:
+        train:
+          name: "bita_caption"
+        eval:
+          name: "bita_caption"
