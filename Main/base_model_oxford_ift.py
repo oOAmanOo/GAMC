@@ -37,7 +37,7 @@ def train():
     epochs = 30
     batch_size = 128
     optimizer_Former_lr = 1e-5
-    save_name = '20241125_old_IFT_coAttention_ver2'
+    save_name = '20241125_old_IFT_blipLoss'
     if not os.path.exists('./Model/' + save_name):
         os.makedirs('./Model/' + save_name)
         os.makedirs('D:/MemeGAN/Model/' + save_name)
@@ -236,12 +236,35 @@ def train():
             c_image = image.unsqueeze(2).expand(-1, -1, text.shape[1], -1).to(torch.bfloat16)
             sim_q2t = torch.einsum('bijk,bjik->bij', c_image, c_text)
             sim_t2q = torch.einsum('bijk,bjik->bij', c_text, c_image)
-            img2txt, _ = torch.max(sim_q2t, dim=-1)
-            txt2img, _ = torch.max(sim_t2q, dim=-1)
-            img2txt = img2txt / self.temp
-            txt2img = txt2img / self.temp
+            ################ BITA Loss ################
+            # img2txt, _ = torch.max(sim_q2t, dim=-1)
+            # txt2img, _ = torch.max(sim_t2q, dim=-1)
+            # img2txt = img2txt / self.temp
+            # txt2img = txt2img / self.temp
 
-            return img2txt, txt2img
+            # loss = 0
+            # for i in range(img2txt.shape[0]):
+            #     sim_targets = torch.zeros(img2txt.size()).to(image.device)
+            #     sim_targets.fill_diagonal_(1)
+            #     targets = torch.arange(0, img2txt.shape[1], dtype=torch.bfloat16).to(device)
+            #     loss_itc = (CrossEntropyLoss(label_smoothing=0.1)(img2txt[i], targets) + CrossEntropyLoss(
+            #         label_smoothing=0.1)(txt2img[i], targets)) / 2
+            #     loss += loss_itc
+            # loss /= img2txt.shape[0]
+
+            ################ Blip Loss ################
+            img2txt, img2txt_idx = torch.max(sim_q2t, dim=-1, keepdim=True)
+            txt2img, txt2img_idx = torch.max(sim_t2q, dim=-1, keepdim=True)
+
+            img2txt_target = torch.zeros_like(sim_q2t, dtype=torch.bfloat16)
+            txt2img_target = torch.zeros_like(sim_t2q, dtype=torch.bfloat16)
+            img2txt_target.scatter_(-1, img2txt_idx, 1)
+            txt2img_target.scatter_(-1, txt2img_idx, 1)
+
+            img2txt_loss = CrossEntropyLoss()(sim_q2t, img2txt_target)
+            txt2img_loss = CrossEntropyLoss()(sim_t2q, txt2img_target)
+            loss = (img2txt_loss + txt2img_loss) / 2
+            return loss
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu" )
     NetFormer = Former().to(torch.bfloat16).to(device)
@@ -264,18 +287,6 @@ def train():
         del checkpoint_Former
         gc.collect()
 
-    def lossIFT(img2txt, txt2img):
-        loss = 0
-        for i in range(img2txt.shape[0]):
-            sim_targets = torch.zeros(img2txt.size()).to(image.device)
-            sim_targets.fill_diagonal_(1)
-            targets = torch.arange(0, img2txt.shape[1], dtype=torch.bfloat16).to(device)
-            loss_itc = (CrossEntropyLoss(label_smoothing=0.1)(img2txt[i], targets) + CrossEntropyLoss(
-                label_smoothing=0.1)(txt2img[i], targets)) / 2
-            loss += loss_itc
-        loss /= img2txt.shape[0]
-        return loss
-
     torch.autograd.set_detect_anomaly(True)
     for epoch in range(epochs):
         print("---------------------------------------- epoch " + str(
@@ -289,8 +300,7 @@ def train():
                 image = image.to(torch.bfloat16)
                 optimizer_Former.zero_grad()
                 image, text = NetFormer(text.to(device), image.to(device))
-                img2txt, txt2img = NetIFormer(text.to(device), image.to(device))
-                loss = lossIFT(img2txt, txt2img)
+                loss = NetIFormer(text.to(device), image.to(device))
                 loss.backward()
                 optimizer_Former.step()
                 train_loss_Former += loss.item()
@@ -303,8 +313,7 @@ def train():
                 text = textExtraction(tokenizer, gemmaConfig, text).to(torch.bfloat16)
                 image = image.to(torch.bfloat16)
                 image, text = NetFormer(text.to(device), image.to(device))
-                img2txt, txt2img = NetIFormer(text.to(device), image.to(device))
-                loss = lossIFT(img2txt, txt2img)
+                loss = NetIFormer(text.to(device), image.to(device))
                 test_loss_Former += loss.item()
                 tepoch.set_postfix(loss=test_loss_Former / (idx + 1))
         test_loss_Former /= len(test_loader)
