@@ -14,6 +14,7 @@ from transformers import AutoConfig, AutoTokenizer, AutoModelForCausalLM, BitsAn
 # from local_gemma import LocalGemma2ForCausalLM
 
 from extractor import addImagePath, textExtraction, imageExtraction, textExtractReverse, textExtraction_IFT
+from Main.BITA.models.bita import BITABase
 eps = torch.finfo(torch.bfloat16).eps
 
 class OxfordDataset(torch.utils.data.Dataset):
@@ -43,7 +44,7 @@ def train():
     save_name = '20241122_ift_noshare'
     if not os.path.exists('./Model/' + save_name):
         os.makedirs('./Model/' + save_name)
-        os.makedirs('D:/MemeGAN/Model/' + save_name)
+        # os.makedirs('D:/MemeGAN/Model/' + save_name)
 
 
     # if args.img - dir == 'Oxford_HIC':
@@ -72,8 +73,8 @@ def train():
     test_dataset = OxfordDataset(test_text, test_image, test_funny_score)
     # train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True, num_workers=20)
     # test_loader = DataLoader(test_dataset, batch_size=128, shuffle=True, num_workers=20)
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=20, pin_memory=True, drop_last=True)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, num_workers=20, pin_memory=True, drop_last=True)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=1, pin_memory=True, drop_last=True)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, num_workers=1, pin_memory=True, drop_last=True)
 
     ### 官方的Gemma #########################################################################################
     # 2b = 2304, 9b = 3584, 27b = 4608
@@ -83,7 +84,7 @@ def train():
     ### gemma float32 / bfloat16
     # gemma = AutoModelForCausalLM.from_pretrained("google/gemma-2-2b-it", device_map="auto", torch_dtype=torch.bfloat16)
     ########################################################################################################
-    class Prefix(nn.Module):
+    class Prefix(BITABase):
         def __init__(self):
             super(Prefix, self).__init__()
             # multihead attention
