@@ -7,7 +7,7 @@
 
 import math
 
-from BITA.common.registry import Registry
+from Main.BITA.common.registry import Registry
 
 
 @Registry.register_lr_scheduler("linear_warmup_step_lr")
