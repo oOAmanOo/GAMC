@@ -15,7 +15,7 @@ from transformers import BertLMHeadModel, BertTokenizer
 # from local_gemma import LocalGemma2ForCausalLM
 
 from extractor import addImagePath, textExtraction, imageExtraction, textExtractReverse, textExtraction_IFT
-from Main.BITA.models.base_model import BaseModel
+from Main.BITA.models.bita import BITABase
 eps = torch.finfo(torch.bfloat16).eps
 
 class OxfordDataset(torch.utils.data.Dataset):
@@ -56,7 +56,7 @@ def train():
     # load data
     data = pd.read_csv(dirPath)
     print("shape of data: ", data.shape)
-    data = data.sample(n=100000, random_state=42, replace=True).reset_index(drop=True)
+    data = data.sample(n=10000, random_state=42, replace=True).reset_index(drop=True)
     # frac = 0.05 ==> 5% of the data = 169904
     # n = 169920 ==> 72 * 2360 = 169920 (F2G)
     # n = 169988 ==> 91 * 1868 = 169988 (G2F)
@@ -74,8 +74,8 @@ def train():
     test_dataset = OxfordDataset(test_text, test_image, test_funny_score)
     # train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True, num_workers=20)
     # test_loader = DataLoader(test_dataset, batch_size=128, shuffle=True, num_workers=20)
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=20, pin_memory=True, drop_last=True)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, num_workers=20, pin_memory=True, drop_last=True)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=1, pin_memory=True, drop_last=True)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, num_workers=1, pin_memory=True, drop_last=True)
 
     ### 官方的Gemma #########################################################################################
     # Fformer = BertLMHeadModel.from_pretrained("bert-base-uncased", is_decoder=True)
@@ -87,7 +87,7 @@ def train():
     # gemmaConfig = AutoConfig.from_pretrained('google/gemma-2-2b-it')
     # gemma = AutoModelForCausalLM.from_pretrained("google/gemma-2-2b-it", device_map="auto", torch_dtype=torch.bfloat16)
     ########################################################################################################
-    class Prefix(B):
+    class Prefix(BITABase):
         def __init__(self):
             super(Prefix, self).__init__()
             # init
@@ -131,15 +131,15 @@ def train():
             self.feedForwardLayerNorm = nn.LayerNorm(768, eps=eps)
 
         def forward(self, text, image):
-            text_attention_mask = torch.ones(text.shape[:2], dtype=torch.long).to(device)
+            # text_attention_mask = torch.ones(text[0].shape[:2], dtype=torch.long).to(device)
             text_output = self.Fformer.bert(
-                inputs_embeds=text,
-                attention_mask=text_attention_mask,
+                text[0].to(device),
+                attention_mask=text[1].to(device),
                 return_dict=True,
             )
             text_feat = nn.functional.normalize(text_output['last_hidden_state'], p=2, dim=-1)
 
-            image_atts = torch.ones(image.shape[:1], dtype=torch.long).to(device)
+            image_atts = torch.ones(image.shape[:-1], dtype=torch.long).to(device)
             query_tokens = self.query_tokens.expand(image.shape[0], -1, -1).to(device).to(torch.bfloat16)
 
             query_output = self.Fformer.bert(
@@ -150,6 +150,7 @@ def train():
                 return_dict=True,
             )
             image_feat = nn.functional.normalize(query_output['last_hidden_state'], p=2, dim=-1)
+
             # image_hidden = query_output['last_hidden_state'].transpose(0, 1)
             # prefix = self.prefix_const.unsqueeze(0).expand(image.shape[0], -1, -1).transpose(0, 1).to(device).to(torch.bfloat16)
 
@@ -248,7 +249,7 @@ def train():
                 else:
                     startTime += tepoch.format_dict['elapsed'] - pre
                 pre = tepoch.format_dict['elapsed']
-                text = textExtraction_IFT(tokenizer, config, text)
+                text = textExtraction(tokenizer, config, text)
                 image = image.to(torch.bfloat16)
                 textExtractionTime += tepoch.format_dict['elapsed'] - pre
                 pre = tepoch.format_dict['elapsed']
@@ -256,7 +257,7 @@ def train():
                 # (1) Update Generator network
                 ######################################################
                 optimizer_F.zero_grad()
-                loss_F = Net_IFormer(Net_Prefix, text.to(device), image.to(device))
+                loss_F = Net_IFormer(Net_Prefix, text, image.to(device))
                 train_loss_F += loss_F.item()
                 GeneratorForwardTime += tepoch.format_dict['elapsed'] - pre
                 pre = tepoch.format_dict['elapsed']
@@ -277,10 +278,10 @@ def train():
         ######################################  Test ######################################
         with tqdm(test_loader, unit="batch", leave=True) as tepoch:
             for idx, (text, image, funny_score) in enumerate(tepoch):
-                text = textExtraction_IFT(tokenizer, config, text)
+                text = textExtraction(tokenizer, config, text)
                 image = image.to(torch.bfloat16)
                 # Generator
-                loss_F = Net_IFormer(Net_Prefix, text.to(device), image.to(device))
+                loss_F = Net_IFormer(Net_Prefix, text, image.to(device))
                 test_loss_F += loss_F.item()
                 tepoch.set_postfix({'test_loss_F': test_loss_F / (idx + 1)})
         test_loss_F /= len(test_loader)

@@ -45,7 +45,7 @@ class BITABase(BaseModel):
         encoder_config.add_cross_attention = True
         # encoder_config.cross_attention_freq = cross_attention_freq
         encoder_config.query_length = num_query_token
-        print(encoder_config.cross_attention_freq)
+        # print(encoder_config.cross_attention_freq)
         Fformer = BertLMHeadModel.from_pretrained(
             "bert-base-uncased", config=encoder_config
         )
