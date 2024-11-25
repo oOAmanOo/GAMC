@@ -76,8 +76,8 @@ class FNetFourierTransform(nn.Module):
         self.output = FNetBasicOutput(config)
 
     def forward(self, hidden_states):
-        self_outputs = self.self(hidden_states)
-        fourier_output = self.output(self_outputs[0], hidden_states)
+        self_outputs = self.self(hidden_states.to(torch.float32))
+        fourier_output = self.output(self_outputs[0].to(torch.bfloat16), hidden_states)
         outputs = (fourier_output,)
         return outputs
     
@@ -108,6 +108,7 @@ class BertEmbeddings(nn.Module):
         )
 
         self.config = config
+        self.avg_pool = nn.AdaptiveAvgPool1d(64)
 
     def forward(
         self,
@@ -128,6 +129,7 @@ class BertEmbeddings(nn.Module):
 
         if input_ids is not None:
             embeddings = self.word_embeddings(input_ids)
+
             if self.position_embedding_type == "absolute":
                 position_embeddings = self.position_embeddings(position_ids)
                 embeddings = embeddings + position_embeddings
@@ -137,6 +139,8 @@ class BertEmbeddings(nn.Module):
         else:
             embeddings = query_embeds
 
+        if embeddings.shape[1] > 64:
+            embeddings = self.avg_pool(embeddings.transpose(1, 2)).transpose(1, 2)
         embeddings = self.LayerNorm(embeddings)
         embeddings = self.dropout(embeddings)
         return embeddings
