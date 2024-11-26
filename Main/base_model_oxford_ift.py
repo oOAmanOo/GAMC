@@ -37,7 +37,7 @@ def train():
     epochs = 30
     batch_size = 128
     optimizer_Former_lr = 1e-5
-    save_name = '20241125_old_IFT_blipLoss'
+    save_name = '20241125_old_IFT_blipLoss_shareWeight'
     if not os.path.exists('./Model/' + save_name):
         os.makedirs('./Model/' + save_name)
         os.makedirs('D:/MemeGAN/Model/' + save_name)
@@ -130,10 +130,10 @@ def train():
 
             # multihead attention module
             multi_out = self.multiheadAttentionMultihead(text, text, text)[0]
-            multi_out = self.multiheadAttentionLinear1(multi_out)
-            multi_out = self.multiheadAttentionRelu(multi_out)
-            multi_out = self.multiheadAttentionLinear2(multi_out)
-            multi_out = self.multiheadAttentionLayerNorm(multi_out + text)
+            multi_out = self.selfAttentionLinear1(multi_out)
+            multi_out = self.selfAttentionRelu(multi_out)
+            multi_out = self.selfAttentionLinear2(multi_out)
+            multi_out = self.selfAttentionLayerNorm(multi_out + text)
 
             prefix = self.prefix_const.unsqueeze(0).expand(image.shape[1], -1, -1).transpose(0, 1).to(device).to(
                 torch.bfloat16)
@@ -236,6 +236,19 @@ def train():
             c_image = image.unsqueeze(2).expand(-1, -1, text.shape[1], -1).to(torch.bfloat16)
             sim_q2t = torch.einsum('bijk,bjik->bij', c_image, c_text)
             sim_t2q = torch.einsum('bijk,bjik->bij', c_text, c_image)
+
+            img2txt, img2txt_idx = torch.max(sim_q2t, dim=-1, keepdim=True)
+            txt2img, txt2img_idx = torch.max(sim_t2q, dim=-1, keepdim=True)
+
+            img2txt_target = torch.zeros_like(sim_q2t, dtype=torch.bfloat16)
+            txt2img_target = torch.zeros_like(sim_t2q, dtype=torch.bfloat16)
+            img2txt_target.scatter_(-1, img2txt_idx, 1)
+            txt2img_target.scatter_(-1, txt2img_idx, 1)
+
+            img2txt_loss = CrossEntropyLoss()(sim_q2t, img2txt_target)
+            txt2img_loss = CrossEntropyLoss()(sim_t2q, txt2img_target)
+            loss = (img2txt_loss + txt2img_loss) / 2
+            return loss
             ################ BITA Loss ################
             # img2txt, _ = torch.max(sim_q2t, dim=-1)
             # txt2img, _ = torch.max(sim_t2q, dim=-1)
@@ -253,18 +266,7 @@ def train():
             # loss /= img2txt.shape[0]
 
             ################ Blip Loss ################
-            img2txt, img2txt_idx = torch.max(sim_q2t, dim=-1, keepdim=True)
-            txt2img, txt2img_idx = torch.max(sim_t2q, dim=-1, keepdim=True)
 
-            img2txt_target = torch.zeros_like(sim_q2t, dtype=torch.bfloat16)
-            txt2img_target = torch.zeros_like(sim_t2q, dtype=torch.bfloat16)
-            img2txt_target.scatter_(-1, img2txt_idx, 1)
-            txt2img_target.scatter_(-1, txt2img_idx, 1)
-
-            img2txt_loss = CrossEntropyLoss()(sim_q2t, img2txt_target)
-            txt2img_loss = CrossEntropyLoss()(sim_t2q, txt2img_target)
-            loss = (img2txt_loss + txt2img_loss) / 2
-            return loss
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu" )
     NetFormer = Former().to(torch.bfloat16).to(device)
