@@ -37,7 +37,7 @@ def train():
     epochs = 30
     batch_size = 128
     optimizer_Former_lr = 1e-5
-    save_name = '20241125_old_IFT_blipLoss'
+    save_name = '20241125_old_IFT_blipLoss_wo_co_attention_shareWeight'
     if not os.path.exists('./Model/' + save_name):
         os.makedirs('./Model/' + save_name)
         os.makedirs('D:/MemeGAN/Model/' + save_name)
@@ -130,32 +130,32 @@ def train():
 
             # multihead attention module
             multi_out = self.multiheadAttentionMultihead(text, text, text)[0]
-            multi_out = self.multiheadAttentionLinear1(multi_out)
-            multi_out = self.multiheadAttentionRelu(multi_out)
-            multi_out = self.multiheadAttentionLinear2(multi_out)
-            multi_out = self.multiheadAttentionLayerNorm(multi_out + text)
+            multi_out = self.selfAttentionLinear1(multi_out)
+            multi_out = self.selfAttentionRelu(multi_out)
+            multi_out = self.selfAttentionLinear2(multi_out)
+            multi_out = self.selfAttentionLayerNorm(multi_out + text)
 
-            prefix = self.prefix_const.unsqueeze(0).expand(image.shape[1], -1, -1).transpose(0, 1).to(device).to(
-                torch.bfloat16)
-            # co-attention image module
-            visual_attending_textual = self.coAttentionTextMultihead(self_out, prefix, prefix)[0]
-            visual_attending_textual = self.coAttentionTextLinear1(visual_attending_textual)
-            visual_attending_textual = self.coAttentionTextRelu(visual_attending_textual)
-            visual_attending_textual = self.coAttentionTextLinear2(visual_attending_textual)
-            visual_attending_textual = self.coAttentionTextLayerNorm(visual_attending_textual + self_out)
+            # prefix = self.prefix_const.unsqueeze(0).expand(image.shape[1], -1, -1).transpose(0, 1).to(device).to(
+            #     torch.bfloat16)
+            # # co-attention image module
+            # visual_attending_textual = self.coAttentionTextMultihead(self_out, prefix, prefix)[0]
+            # visual_attending_textual = self.coAttentionTextLinear1(visual_attending_textual)
+            # visual_attending_textual = self.coAttentionTextRelu(visual_attending_textual)
+            # visual_attending_textual = self.coAttentionTextLinear2(visual_attending_textual)
+            # visual_attending_textual = self.coAttentionTextLayerNorm(visual_attending_textual + self_out)
+            #
+            # # co-attention text module
+            # textual_attending_visual = self.coAttentionTextMultihead(prefix, self_out, self_out)[0]
+            # textual_attending_visual = self.coAttentionTextLinear1(textual_attending_visual)
+            # textual_attending_visual = self.coAttentionTextRelu(textual_attending_visual)
+            # textual_attending_visual = self.coAttentionTextLinear2(textual_attending_visual)
+            # textual_attending_visual = self.coAttentionTextLayerNorm(textual_attending_visual + prefix)
+            #
+            # output = self.feedForwardLinear1(visual_attending_textual + textual_attending_visual)
+            # output = self.feedForwardRelu(output)
+            # output = self.feedForwardLinear2(output)
 
-            # co-attention text module
-            textual_attending_visual = self.coAttentionTextMultihead(prefix, self_out, self_out)[0]
-            textual_attending_visual = self.coAttentionTextLinear1(textual_attending_visual)
-            textual_attending_visual = self.coAttentionTextRelu(textual_attending_visual)
-            textual_attending_visual = self.coAttentionTextLinear2(textual_attending_visual)
-            textual_attending_visual = self.coAttentionTextLayerNorm(textual_attending_visual + prefix)
-
-            output = self.feedForwardLinear1(visual_attending_textual + textual_attending_visual)
-            output = self.feedForwardRelu(output)
-            output = self.feedForwardLinear2(output)
-
-            return output, multi_out
+            return self_out, multi_out
 
     # class co_attention(nn.Module):
     #     def __init__(self):
