@@ -140,13 +140,14 @@ class Generator(nn.Module):
 
             # get max value of each row, total 32*64
             top_k_values, top_k_indices = torch.topk(x2, 1, dim=2, largest=True)
-            toGemma = textExtractReverse(gemma, tokenizer, top_k_indices, Test=True).to(device)
+            output_text = textExtractReverse(gemma, tokenizer, gemmaConfig, top_k_indices).to(device)
+            # toGemma = textExtractReverse(gemma, tokenizer, top_k_indices, Test=True).to(device)
             # 使用gemma作為model的一部分
-            output = self.gemma(toGemma)
+            # output = self.gemma(toGemma)
             # output[0] = last_hidden_state
             # output[1] = past_key_values
 
-        return output[0]
+        return output_text
 
     def forward(self, text, image):
         # max_seq_len = max(text.shape[1], image.shape[1])
@@ -183,7 +184,7 @@ class Generator(nn.Module):
 
         return output_text, output_funny_score
 
-    def generate(self, text, image, max_length=100):
+    def generate(self, text, image):
         generated_tokens = []
         generated_tokens.append(2)  # <bos> = 2
         text = torch.zeros_like(image).to(device)
@@ -198,7 +199,6 @@ class Generator(nn.Module):
             zeros[::2] = list
             return zeros
 
-        lastTurn = False
         with torch.no_grad():
             # Transformer
             for i in range(depth):
@@ -209,23 +209,23 @@ class Generator(nn.Module):
 
             # feature fusion
             feature_fusion = image + text  # visual_attending_textual + textual_attending_visual
-            feature_fusion = self.feedForwardLinear(feature_fusion)
-            feature_fusion = self.feedForwardLayerNorm(feature_fusion + feature_fusion)
-            feature_fusion = feature_fusion.squeeze(-1)
-            feature_fusion = feature_fusion.transpose(0, 1)
+            feature_fusionFF = self.feedForwardLinear(feature_fusion)
+            feature_fusion_final = self.feedForwardLayerNorm(feature_fusion + feature_fusionFF)
+            feature_fusion_final = feature_fusion_final.squeeze(-1)
+            feature_fusion_final = feature_fusion_final.transpose(0, 1)
 
             # funny score
-            output_funny_score = self.FunnyScorelinear1(feature_fusion).squeeze(-1)
+            output_funny_score = self.FunnyScorelinear1(feature_fusion_final).squeeze(-1)
             output_funny_score = self.FunnyScorelinear2(output_funny_score).squeeze(-1)
-            print("GT funny score: ", output_funny_score)
 
             # gemma generate
-            last_hidden_state = self.gemmaGenerate(feature_fusion)
-            output_text = self.gemmaLm_head(last_hidden_state)
+            output_text = self.gemmaGenerate(feature_fusion_final).to(torch.bfloat16)
+            # last_hidden_state = self.gemmaGenerate(feature_fusion)
+            # output_text = self.gemmaLm_head(last_hidden_state)
 
-            avg_pool = nn.AdaptiveAvgPool1d(768)
-            text = avg_pool(output_text)
-            text = text.transpose(0, 1)
+            # avg_pool = nn.AdaptiveAvgPool1d(768)
+            # text = avg_pool(output_text)
+            text = output_text.transpose(0, 1)
 
             # Transformer
             for i in range(depth):
@@ -234,18 +234,18 @@ class Generator(nn.Module):
                 # co-attention
                 image, text = self.layers_co_attention[i](image, text)
 
-            # feature fusion
-            feature_fusion = image + text  # visual_attending_textual + textual_attending_visual
-            feature_fusion = self.feedForwardLinear(feature_fusion)
-            feature_fusion = self.feedForwardLayerNorm(feature_fusion + feature_fusion)
-            feature_fusion = feature_fusion.squeeze(-1)
-            feature_fusion = feature_fusion.transpose(0, 1)
+                # feature fusion
+                feature_fusion = image + text  # visual_attending_textual + textual_attending_visual
+                feature_fusionFF = self.feedForwardLinear(feature_fusion)
+                feature_fusion_final = self.feedForwardLayerNorm(feature_fusion + feature_fusionFF)
+                feature_fusion_final = feature_fusion_final.squeeze(-1)
+                feature_fusion_final = feature_fusion_final.transpose(0, 1)
 
             # funny score
-            output_funny_score = self.FunnyScorelinear1(feature_fusion).squeeze(-1)
+            output_funny_score = self.FunnyScorelinear1(feature_fusion_final).squeeze(-1)
             output_funny_score = self.FunnyScorelinear2(output_funny_score).squeeze(-1)
 
-            return output_text, output_funny_score
+        return output_text, output_funny_score
 
 
 class Discriminator(nn.Module):
@@ -330,14 +330,14 @@ class Discriminator(nn.Module):
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 #load model
 NetG = Generator().to(torch.bfloat16).to(device)
-NetD = Discriminator().to(torch.bfloat16).to(device)
+# NetD = Discriminator().to(torch.bfloat16).to(device)
 
-checkpoint_name = '20241101_15wan_1e-7d'
-checkpoint_G = torch.load('D:/MemeGAN/Model/' + checkpoint_name + '/' + checkpoint_name + '_NetG_17.pth')
-checkpoint_D = torch.load('D:/MemeGAN/Model/' + checkpoint_name + '/' + checkpoint_name + '_NetD_17.pth')
+checkpoint_name = '20241112_gemma_generate_base_20241110_gemma_generate_onlyd'
+checkpoint_G = torch.load('D:/MemeGAN/Model/' + checkpoint_name + '/' + checkpoint_name + '_NetG_11.pth')
+# checkpoint_D = torch.load('D:/MemeGAN/Model/' + checkpoint_name + '/' + checkpoint_name + '_NetD_4.pth')
 
 NetG.load_state_dict(checkpoint_G['model_state_dict'])
-NetD.load_state_dict(checkpoint_D['model_state_dict'])
+# NetD.load_state_dict(checkpoint_D['model_state_dict'])
 # optimizer_G.load_state_dict(checkpoint_G['optimizer_state_dict'])
 # optimizer_D.load_state_dict(checkpoint_D['optimizer_state_dict'])
 # train_losses_FC.append(checkpoint_G['FC_loss'])
@@ -346,13 +346,13 @@ NetD.load_state_dict(checkpoint_D['model_state_dict'])
 # present_epoch = checkpoint_G['epoch'] + 1
 # train with load model
 NetG.train()
-NetD.train()
+# NetD.train()
 # generate
 NetG.eval()
-NetD.eval()
+# NetD.eval()
 test_gt = ['you all loved it so i brought it back']
 image = imageExtraction("./test_img.jpg")
 text= textExtraction(tokenizer, gemmaConfig, test_gt)
-logits, funnyscore = NetG.generate(text.to(device),image.to(device).to(torch.bfloat16), 200)
+logits, funnyscore = NetG.generate(text.to(device),image.to(device).to(torch.bfloat16))
 # NetD(image.to(device).to(torch.bfloat16), logits, image.to(device).to(torch.bfloat16), "G")
 print(funnyscore)

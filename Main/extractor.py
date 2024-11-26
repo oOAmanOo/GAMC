@@ -11,8 +11,7 @@ def addImagePath(data, imgPath):
     data['image_id'] = data['image_id'].apply(lambda x: imgPath + str(x) + '.jpg')
     return data
 
-
-def textExtraction(tokenizer, gemmaConfig, text_data):
+def textExtraction_IFT(tokenizer, gemmaConfig, text_data):
     # tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
     # gemmaConfig = AutoConfig.from_pretrained('google/gemma-2-2b-it')
     vocab_size = gemmaConfig.vocab_size  # 詞彙表大小
@@ -33,44 +32,41 @@ def textExtraction(tokenizer, gemmaConfig, text_data):
             output = torch.cat((output, padding), dim=1)
         all_features.append(output.detach())
             # pbar.update(1)
-    return torch.cat(all_features)
+    return torch.cat(all_features).to(torch.bfloat16)
 
-def textExtraction_D(gemma, tokenizer, gemmaConfig, text_data):
+def textExtraction(tokenizer, gemmaConfig, text_data):
     # tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
     # gemmaConfig = AutoConfig.from_pretrained('google/gemma-2-2b-it')
-    vocab_size = gemmaConfig.vocab_size  # 詞彙表大小
-
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    embedding_dim = 2304  # 嵌入维度，與你的圖片嵌入维度相同
-    text_embedding = nn.Embedding(vocab_size, embedding_dim)
-    gemmaLm_head = nn.Sequential(*list(gemma.children())[-1:]).to(device)
-    avg_pool = nn.AdaptiveAvgPool1d(64)
-
-    all_features = []
-    # with tqdm.tqdm (total=len(text_data)) as pbar:
-    for text in (text_data):
-        tokens = tokenizer(text, padding='longest', return_tensors='pt', )
-        output = text_embedding(tokens['input_ids'])
-        if output.shape[1] > 64:
-            output = avg_pool(output.transpose(1, 2)).transpose(1, 2)
-        elif output.shape[1] < 64:
-            padding = torch.zeros(output.shape[0], 64 - output.shape[1], embedding_dim)
-            output = torch.cat((output, padding), dim=1)
-        torch.no_grad()
-        all_features.append(output.detach())
-            # pbar.update(1)
-    with torch.no_grad():
-        output = torch.cat(all_features).to(device).to(torch.bfloat16)
-        output = gemmaLm_head(output)
-    return output
-
-def textExtractReverse(gemma, tokenizer, gemmaConfig, data, Test = False):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     vocab_size = gemmaConfig.vocab_size  # 詞彙表大小
 
     embedding_dim = 768  # 嵌入维度，與你的圖片嵌入维度相同
     text_embedding = nn.Embedding(vocab_size, embedding_dim)
     avg_pool = nn.AdaptiveAvgPool1d(64)
+
+    token_ids = []
+    all_features = []
+    # with tqdm.tqdm (total=len(text_data)) as pbar:
+    for text in (text_data):
+        tokens = tokenizer(text, padding='longest', return_tensors='pt', )
+        # token_ids.append(tokens['input_ids'])
+        # all_features.append(tokens['attention_mask'])
+        output = text_embedding(tokens['input_ids'])
+        if output.shape[1] > 64:
+            output = avg_pool(output.transpose(1, 2)).transpose(1, 2)
+        elif output.shape[1] < 64:
+            padding = torch.zeros(output.shape[0], 64 - output.shape[1], 768)
+            output = torch.cat((output, padding), dim=1)
+        all_features.append(output.detach())
+            # pbar.update(1)
+    return torch.cat(all_features)
+
+def textExtractReverse(gemma, tokenizer, gemmaConfig, data, max_new_tokens=100):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    vocab_size = gemmaConfig.vocab_size  # 詞彙表大小
+
+    embedding_dim = 768  # 嵌入维度，與你的圖片嵌入维度相同
+    text_embedding = nn.Embedding(vocab_size, embedding_dim).to(device)
+    avg_pool = nn.AdaptiveAvgPool1d(64).to(device)
 
     # 有時後空格會失效，所以手動插入空格 <pad> = 0
     def insert_zeros(tensor):
@@ -83,22 +79,22 @@ def textExtractReverse(gemma, tokenizer, gemmaConfig, data, Test = False):
     # reverse the token
     reverse = tokenizer.batch_decode(reverse_data, skip_special_tokens=False)
     # tokenize with gemma-2b
-    prompt = "Write a humor memetic post for Instagram with the following elements: "
-    tokens = []
+    prompt = "Answer with only 100 words, only answer, no explain. Write a humor memetic post for Instagram with the following elements: "
     for i, text in enumerate(reverse):
         text = text.replace("<pad>", " ").replace("  ", " ")
         text = set(text.split())
         text = ', '.join(text)
         reverse[i] = prompt + text + "."
     input_ids = tokenizer(reverse, truncation=True, padding='max_length', max_length=64, return_tensors='pt').to(device)
-    outputs = gemma.generate(**input_ids, max_new_tokens=1000)
+    outputs = gemma.generate(**input_ids, max_new_tokens=max_new_tokens)
     #remove the same as input
+    # print(tokenizer.decode(outputs[0]))
     outputs = outputs[:, len(input_ids['input_ids'][0]):]
     outputs = text_embedding(outputs)  # embedding
     if outputs.shape[1] > 64:
         outputs = avg_pool(outputs.transpose(1, 2)).transpose(1, 2)
     elif outputs.shape[1] < 64:
-        padding = torch.zeros(outputs.shape[0], 64 - outputs.shape[1], 768)
+        padding = torch.zeros(outputs.shape[0], 64 - outputs.shape[1], embedding_dim)
         outputs = torch.cat((outputs, padding), dim=1)
     return outputs
 
