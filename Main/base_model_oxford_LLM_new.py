@@ -11,6 +11,7 @@ import torch.optim as optim
 from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss, BCELoss
 from torch.utils.data import DataLoader
 from transformers import AutoConfig, AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
+from torch.nn.functional import cosine_similarity
 # from local_gemma import LocalGemma2ForCausalLM
 
 from extractor import addImagePath, textExtraction, imageExtraction, textExtractReverse
@@ -34,14 +35,15 @@ class OxfordDataset(torch.utils.data.Dataset):
 
 
 def train():
-    epochs = 30
-    batch_size = 8
+    epochs = 200
+    batch_size = 128
     optimizer_Former_lr = 1e-5
-    save_name = 'test'
+    save_name = '20241128_llm_separted_G_F__base__20241128_blipLoss_wo_co_attention_temp'
     if not os.path.exists('./Model/' + save_name):
         os.makedirs('./Model/' + save_name)
         os.makedirs('D:/MemeGAN/Model/' + save_name)
-
+    checkpoint_folder = '20241127_infoNCE_wo_co_attention_direct_all_together'
+    checkpoint_name = 'D:/MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_43.pth'
 
     # if args.img - dir == 'Oxford_HIC':
     dirPath = '../Data/Oxford_HIC/CaptionID_oxford_hic_data.csv'
@@ -73,12 +75,14 @@ def train():
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, num_workers=1, pin_memory=True, drop_last=True)
 
     ### 官方的Gemma #########################################################################################
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     # 2b = 2304, 9b = 3584, 27b = 4608
     gemma_hiddenstate_size = 2304
     tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
     gemmaConfig = AutoConfig.from_pretrained('google/gemma-2-2b-it')
     ### gemma float32 / bfloat16
     gemma = AutoModelForCausalLM.from_pretrained("google/gemma-2-2b-it", device_map="auto", torch_dtype=torch.bfloat16)
+    # gemma.model.embed_tokens = nn.Identity().to(torch.bfloat16)
     ########################################################################################################
 
     class self_multi(nn.Module):
@@ -155,7 +159,7 @@ def train():
             output = self.feedForwardRelu(output)
             output = self.feedForwardLinear2(output)
 
-            return self_out, multi_out
+            return output, multi_out
 
 
     class Former(nn.Module):
@@ -174,8 +178,6 @@ def train():
             ######################### Transformer #########################
             for self_multi_layer in self.layers_self_multi:
                 image, text = self_multi_layer(image, text)
-            # for co_attention_layer in self.layers_co_attention:
-            #     image = co_attention_layer(image)
             ###############################################################
             return image, text
 
@@ -185,6 +187,7 @@ def train():
             # gemma
             self.gemmaLinearMaxTokens = nn.Linear(64, 32)
             self.gemmaLinearBefore = nn.Linear(768, gemmaConfig.vocab_size)
+            # self.gemmaLinearBefore = nn.Linear(768, gemma_hiddenstate_size)
             self.gemmaSoftmax = nn.Softmax(dim=2)
             # feed forward
             self.feedForwardLinear = nn.Linear(768, 768)
@@ -198,9 +201,28 @@ def train():
             self.unc_mlp1 = nn.Linear(768, 1)
             self.unc_mlp2 = nn.Linear(64, 1)
 
-        def forward(self, Former_G, Former_F, image, text, train):
+        def forward(self, Former_G, Former_F, image, text):
             ##############################################   generate ##############################################
             image_G, text_G = Former_G(text, image)
+            ####################### gemma  generate #######################
+            # image_G = image_G.transpose(0, 1)
+
+            # embedding_layer = gemma.get_input_embeddings()
+            # embedding_matrix = embedding_layer.weight  # (vocab_size, embedding_dim)
+
+            # # 計算相似度並取得最接近的 token ID
+            # image_G = self.gemmaLinearMaxTokens(image_G.transpose(1, 2)).transpose(1, 2)
+            # image_G = self.gemmaLinearBefore(image_G)
+            # similarity = cosine_similarity(image_G.unsqueeze(2), embedding_matrix.unsqueeze(1), dim=-1)
+            # token_ids = similarity.argmax(dim=-1)
+
+
+
+            # image_G = self.gemmaSoftmax(image_G + eps)
+            # get max value of each row, total 32*64
+            # top_k_values, top_k_indices = torch.topk(image_G, 1, dim=2, largest=True)
+            # output_text = textExtractReverse(gemma, tokenizer, gemmaConfig, top_k_values).to(device).to(torch.bfloat16)
+
             ####################### gemma  generate #######################
             image_G = image_G.transpose(0, 1)
             image_G = self.gemmaLinearMaxTokens(image_G.transpose(1, 2)).transpose(1, 2)
@@ -209,6 +231,7 @@ def train():
             # get max value of each row, total 32*64
             top_k_values, top_k_indices = torch.topk(image_G, 1, dim=2, largest=True)
             output_text = textExtractReverse(gemma, tokenizer, gemmaConfig, top_k_indices).to(device).to(torch.bfloat16)
+
             g_C_g = torch.cat((output_text, image), dim=-1)
             ########################  conditional  ########################
             g_C_g = self.con_mlp1(g_C_g)
@@ -233,7 +256,7 @@ def train():
             return g_C_g, g_UC_g, output_funny_score
 
 
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu" )
+
     NetFormer_G = Former().to(torch.bfloat16).to(device)
     NetFormer_F = Former().to(torch.bfloat16).to(device)
     Generator = Generator().to(torch.bfloat16).to(device)
@@ -249,7 +272,7 @@ def train():
     g_unc_loss_list = []
     g_fc_loss_list = []
 
-    checkpoint_Former = torch.load('.//Model/20241127_blipLoss_wo_co_attention_temp_NetFormer_41.pth')
+    checkpoint_Former = torch.load(checkpoint_name)
     NetFormer_G.load_state_dict(checkpoint_Former['model_state_dict'])
 
     class BypassMultiheadAttention(nn.Module):
@@ -263,6 +286,7 @@ def train():
         layers.multiheadAttentionRelu = nn.Identity()
         layers.multiheadAttentionLinear2 = nn.Identity()
         layers.multiheadAttentionLayerNorm = nn.Identity()
+
     NetFormer_F.load_state_dict(checkpoint_Former['model_state_dict'])
     del checkpoint_Former
     gc.collect()
@@ -278,7 +302,7 @@ def train():
         g_con_loss_list.append(con_loss.item())
         g_unc_loss_list.append(unc_loss.item())
         g_fc_loss_list.append(fc_loss.item())
-        loss = con_loss + unc_loss + fc_loss
+        loss = con_loss + unc_loss + fc_loss * 10
 
         return loss
 
@@ -291,11 +315,11 @@ def train():
         ###################################### Train ######################################
         with tqdm(train_loader, unit="batch", leave=True) as tepoch:
             for idx, (text, image, funny_score) in enumerate(tepoch):
-                text = textExtraction(tokenizer, gemmaConfig, text).to(torch.bfloat16)
+                text = textExtraction(tokenizer, gemmaConfig, text)
                 image = image.to(torch.bfloat16)
                 funny_score = funny_score.to(torch.bfloat16)
                 optimizer_Former.zero_grad()
-                con_logits, unc_logits, output_funny_score = Generator(NetFormer_G, NetFormer_F, text.to(device), image.to(device), funny_score.to(device))
+                con_logits, unc_logits, output_funny_score = Generator(NetFormer_G, NetFormer_F, image.to(device), text.to(device))
                 loss = loss_function(con_logits, unc_logits, output_funny_score, funny_score.to(device))
                 loss.backward()
                 optimizer_Former.step()
@@ -316,7 +340,7 @@ def train():
                 text = textExtraction(tokenizer, gemmaConfig, text).to(torch.bfloat16)
                 image = image.to(torch.bfloat16)
                 funny_score = funny_score.to(torch.bfloat16)
-                con_logits, unc_logits, output_funny_score = Generator(NetFormer_G, NetFormer_F, text.to(device), image.to(device), funny_score.to(device))
+                con_logits, unc_logits, output_funny_score = Generator(NetFormer_G, NetFormer_F, text.to(device), image.to(device))
                 loss = loss_function(con_logits, unc_logits, output_funny_score, funny_score.to(device))
                 test_loss_Former += loss.item()
                 tepoch.set_postfix(loss=test_loss_Former / (idx + 1))
@@ -331,7 +355,7 @@ def train():
                 'epoch': epoch + present_epoch,
                 'model_state_dict': Generator.state_dict(),
                 'optimizer_state_dict': optimizer_Former.state_dict(),
-                'loss': test_loss_Former,
+                'loss': loss,
             }, './Model/' + save_name + '/' + save_name + '_NetFormer_' + str(epoch + present_epoch) + '.pth')
             save.append("V")
         else:
