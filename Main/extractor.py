@@ -47,8 +47,8 @@ def textExtraction(tokenizer, gemmaConfig, text_data):
     all_features = []
     # with tqdm.tqdm (total=len(text_data)) as pbar:
     for text in (text_data):
-        tokens = tokenizer(text, padding='longest', return_tensors='pt', )
-        # token_ids.append(tokens['input_ids'])
+        tokens = tokenizer(text, truncation=True, padding='max_length', max_length=64, return_tensors='pt', )
+        token_ids.append(tokens['input_ids'])
         # all_features.append(tokens['attention_mask'])
         output = text_embedding(tokens['input_ids'])
         if output.shape[1] > 64:
@@ -58,9 +58,9 @@ def textExtraction(tokenizer, gemmaConfig, text_data):
             output = torch.cat((output, padding), dim=1)
         all_features.append(output.detach())
             # pbar.update(1)
-    return torch.cat(all_features)
+    return torch.cat(all_features), torch.cat(token_ids)
 
-def textExtractReverse(gemma, tokenizer, gemmaConfig, data, max_new_tokens=100):
+def textExtractReverse(gemma, tokenizer, gemmaConfig, data, labels_text_id):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     vocab_size = gemmaConfig.vocab_size  # 詞彙表大小
 
@@ -86,41 +86,27 @@ def textExtractReverse(gemma, tokenizer, gemmaConfig, data, max_new_tokens=100):
         text = ', '.join(text)
         reverse[i] = prompt + text + "."
     input_ids = tokenizer(reverse, truncation=True, padding='max_length', max_length=64, return_tensors='pt').to(device)
-    outputs = gemma.generate(**input_ids, max_new_tokens=max_new_tokens)
+    gemma_output = gemma(input_ids = input_ids.input_ids, max_length=200, labels=labels_text_id, return_dict = True)
+    loss = gemma_output.loss
+    logits = gemma_output.logits
     #remove the same as input
-    # print(tokenizer.decode(outputs[0]))
-    outputs = outputs[:, len(input_ids['input_ids'][0]):]
-    outputs = text_embedding(outputs)  # embedding
-    if outputs.shape[1] > 64:
-        outputs = avg_pool(outputs.transpose(1, 2)).transpose(1, 2)
-    elif outputs.shape[1] < 64:
-        padding = torch.zeros(outputs.shape[0], 64 - outputs.shape[1], embedding_dim)
-        outputs = torch.cat((outputs, padding), dim=1)
-    return outputs
+    if logits.shape[1] > 64:
+        logits = avg_pool(logits.transpose(1, 2)).transpose(1, 2)
 
-def textExtractReverseRecursive(gemma, tokenizer, data, Test = False):
+    return loss, logits
+
+def textExtractReverse_embedd(gemma, tokenizer, data, labels_text_id):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    # 有時後空格會失效，所以手動插入空格 <pad> = 0
-    def insert_zeros(tensor):
-        zeros = torch.zeros(tensor.shape[0], tensor.shape[1] * 2 - 1)
-        zeros[:, ::2] = tensor
-        zeros = zeros.to(int)
-        return zeros
 
-    reverse_data = insert_zeros(data.squeeze(-1))
-    # reverse the token
-    reverse = tokenizer.batch_decode(reverse_data, skip_special_tokens=False)
     # tokenize with gemma-2b
-    prompt = "Write a humor memetic post for Instagram with the following elements: "
-    tokens = []
-    for i, text in enumerate(reverse):
-        text = text.replace("<pad>", " ").replace("  ", " ")
-        text = set(text.split())
-        text = ', '.join(text)
-        reverse[i] = prompt + text + "."
-        temp = tokenizer(reverse, truncation=True, padding='max_length', max_length=64, return_tensors='pt').to(device)
-        tokens.append(temp['input_ids'])
-    return torch.cat(tokens)
+    prompt = "Answer with only 100 words, only answer, no explain. Write a humor memetic post for Instagram with the following elements: "
+    prompt_input_ids = tokenizer(prompt, return_tensors='pt')['input_ids'].to(device)
+    prompt_input_ids = prompt_input_ids.repeat(data.shape[0], 1)
+    input_ids = torch.cat((prompt_input_ids, data), dim=1)
+    gemma_output = gemma(inputs_embeds = input_ids, max_length=200, labels=labels_text_id, return_dict = True)
+    loss = gemma_output.loss
+    logits = gemma_output.logits
+    return loss, logits
 
 # 定義批量處理和提取特徵的函數
 def imageExtraction(image_data):
