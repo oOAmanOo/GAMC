@@ -38,12 +38,12 @@ def train():
     epochs = 200
     batch_size = 32
     optimizer_Former_lr = 1e-5
-    save_name = 'test'
+    save_name = '20241202_LLM_GemmaForCausalLM_not_generate_base_20241201_wo_coAttention_temp'
     if not os.path.exists('./Model/' + save_name):
         os.makedirs('./Model/' + save_name)
         os.makedirs('D:/MemeGAN/Model/' + save_name)
-    # checkpoint_folder = '20241127_infoNCE_wo_co_attention_direct_all_together'
-    # checkpoint_name = 'D:/MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_43.pth'
+    checkpoint_folder = '20241201_wo_coAttention_temp'
+    checkpoint_name = 'D:/MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_83.pth'
 
     # if args.img - dir == 'Oxford_HIC':
     dirPath = '../Data/Oxford_HIC/CaptionID_oxford_hic_data.csv'
@@ -195,10 +195,11 @@ def train():
             super(Generator, self).__init__()
             # gemma
             self.gemmaLinearMaxTokens = nn.Linear(64, 32)
-            self.gemmaLinearBefore = nn.Linear(768, gemmaConfig.vocab_size)
-            # self.gemmaLinearBefore = nn.Linear(768, gemma_hiddenstate_size)
+            # self.gemmaLinearBefore = nn.Linear(768, gemmaConfig.vocab_size)
             self.gemmaSoftmax = nn.Softmax(dim=2)
             self.gemmalinearAfter = nn.Linear(gemmaConfig.vocab_size, 768)
+            # embedding
+            self.gemmaLinearBefore = nn.Linear(768, gemma_hiddenstate_size)
             # feed forward
             self.feedForwardLinear = nn.Linear(768, 768)
             self.feedForwardLayerNorm = nn.LayerNorm(768, eps=eps)
@@ -206,20 +207,22 @@ def train():
             self.FunnyScorelinear1 = nn.Linear(768, 1)
             self.FunnyScorelinear2 = nn.Linear(64, 1)
 
-        def forward(self, Former, image, text_embedd, text_id):
+        def forward(self, Former, image, text_id):
             ##############################################   generate ##############################################
             #
             image = image.transpose(0, 1)
             image_G = Former.image(image)
 
             image_G = image_G.transpose(0, 1)
-            image_GG = self.gemmaLinearMaxTokens(image_G.transpose(1, 2)).transpose(1, 2)
-            image_GG = self.gemmaLinearBefore(image_GG)
-            image_GG = self.gemmaSoftmax(image_GG + eps)
+            # image_GG = self.gemmaLinearMaxTokens(image_G.transpose(1, 2)).transpose(1, 2)
+            # image_GG = self.gemmaLinearBefore(image_GG)
+            # image_GG = self.gemmaSoftmax(image_GG + eps)
             # get max value of each row, total 32*64
-            top_k_values, top_k_indices = torch.topk(image_GG, 1, dim=2, largest=True)
-            loss, logits = textExtractReverse(gemma, tokenizer, gemmaConfig, top_k_indices, text_id)
-            # loss, logits = textExtractReverse_embedd(gemma, tokenizer, gemmaConfig, top_k_indices)
+            image_GG = self.gemmaLinearBefore(image_G)
+            with torch.no_grad():
+                # top_k_values, top_k_indices = torch.topk(image_GG, 1, dim=2, largest=True)
+                # loss, logits = textExtractReverse(gemma, tokenizer, gemmaConfig, top_k_indices, text_id)
+                loss, logits = textExtractReverse_embedd(gemma, tokenizer, image_GG, text_id)
             ###########################################   funny score   ###########################################
             text = self.gemmalinearAfter(logits.to(torch.bfloat16))
             text_F = Former.text(text)
@@ -234,8 +237,6 @@ def train():
             #######################################################################################################
 
             return loss, output_funny_score
-
-
 
     NetFormer = Former().to(torch.bfloat16).to(device)
     Generator = Generator().to(torch.bfloat16).to(device)
@@ -252,8 +253,8 @@ def train():
     gemma_loss_list = []
     fc_loss_list = []
 
-    # checkpoint_Former = torch.load(checkpoint_name)
-    # NetFormer.load_state_dict(checkpoint_Former['model_state_dict'])
+    checkpoint_Former = torch.load(checkpoint_name)
+    NetFormer.load_state_dict(checkpoint_Former['model_state_dict'])
 
     # class BypassMultiheadAttention(nn.Module):
     #     def forward(self, query, key, value, attn_mask=None, *args, **kwargs):
@@ -268,8 +269,8 @@ def train():
     #     layers.multiheadAttentionLayerNorm = nn.Identity()
     #
     # NetFormer_F.load_state_dict(checkpoint_Former['model_state_dict'])
-    # del checkpoint_Former
-    # gc.collect()
+    del checkpoint_Former
+    gc.collect()
 
     def loss_function(gemmaLoss, funny_score, target_funny_score):
         fc_loss = nn.MSELoss()(funny_score, target_funny_score)
@@ -279,7 +280,7 @@ def train():
         # g_fc_loss_list.append(fc_loss.item())
         gemma_loss_list.append(gemmaLoss.item())
         fc_loss_list.append(fc_loss.item())
-        loss = gemmaLoss + fc_loss
+        loss = gemmaLoss + fc_loss*500
 
         return loss
 
@@ -292,11 +293,11 @@ def train():
         ###################################### Train ######################################
         with tqdm(train_loader, unit="batch", leave=True) as tepoch:
             for idx, (text, image, funny_score) in enumerate(tepoch):
-                text_embedd, text_id = textExtraction(tokenizer, gemmaConfig, text)
+                text_id = textExtraction(tokenizer, gemmaConfig, text)
                 image = image.to(torch.bfloat16)
                 funny_score = funny_score.to(torch.bfloat16)
                 optimizer_Former.zero_grad()
-                gemma_loss, output_funny_score = Generator(NetFormer, image.to(device), text_embedd.to(device), text_id.to(device))
+                gemma_loss, output_funny_score = Generator(NetFormer, image.to(device), text_id.to(device))
                 loss = loss_function(gemma_loss, output_funny_score, funny_score.to(device))
                 loss.backward()
                 optimizer_Former.step()
@@ -306,17 +307,18 @@ def train():
                 seperateLoss_data = pd.DataFrame()
                 seperateLoss_data['gemma_loss'] = gemma_loss_list
                 seperateLoss_data['fc_loss'] = fc_loss_list
-                seperateLoss_data.to_csv('./Model/' + save_name + '/' + save_name + '_seperateLoss.csv', index=False)
+                seperateLoss_data.to_csv('./Model/' + save_name + '/' + save_name + '_seperateLoss.csv',
+                                         index=False)
                 ##########################################################################
         train_loss_Former /= len(train_loader)
         train_losses_Former.append(train_loss_Former)
         ###################################### Test ######################################
         with tqdm(test_loader, unit="batch", leave=True) as tepoch:
             for idx, (text, image, funny_score) in enumerate(tepoch):
-                text = textExtraction(tokenizer, gemmaConfig, text).to(torch.bfloat16)
+                text_id = textExtraction(tokenizer, gemmaConfig, text)
                 image = image.to(torch.bfloat16)
                 funny_score = funny_score.to(torch.bfloat16)
-                gemma_loss, output_funny_score = Generator(NetFormer, image.to(device), text_embedd.to(device), text_id.to(device))
+                gemma_loss, output_funny_score = Generator(NetFormer, image.to(device), text_id.to(device))
                 loss = loss_function(gemma_loss, output_funny_score, funny_score.to(device))
                 test_loss_Former += loss.item()
                 tepoch.set_postfix(loss=test_loss_Former / (idx + 1))
@@ -332,11 +334,16 @@ def train():
                 'model_state_dict': Generator.state_dict(),
                 'optimizer_state_dict': optimizer_Former.state_dict(),
                 'loss': loss,
-            }, './Model/' + save_name + '/' + save_name + '_NetFormer_' + str(epoch + present_epoch) + '.pth')
+            }, './Model/' + save_name + '/' + save_name + '_NetFormer.pth')
+            torch.save({
+                'epoch': epoch + present_epoch,
+                'model_state_dict': Generator.state_dict(),
+                'optimizer_state_dict': optimizer_Former.state_dict(),
+                'loss': loss,
+            }, './Model/' + save_name + '/' + save_name + '_NetLLM_' + str(epoch + present_epoch) + '.pth')
             save.append("V")
         else:
             save.append(" ")
-
 
         loss_data = pd.DataFrame()
         loss_data['train_loss'] = train_losses_Former
