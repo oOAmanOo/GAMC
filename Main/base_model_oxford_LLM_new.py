@@ -36,14 +36,17 @@ class OxfordDataset(torch.utils.data.Dataset):
 
 def train():
     epochs = 200
-    batch_size = 32
+    batch_size = 30
     optimizer_Former_lr = 1e-5
-    save_name = '20241202_LLM_GemmaForCausalLM_not_generate_base_20241201_wo_coAttention_temp'
+    save_name = 'test'
     if not os.path.exists('./Model/' + save_name):
         os.makedirs('./Model/' + save_name)
         os.makedirs('D:/MemeGAN/Model/' + save_name)
-    checkpoint_folder = '20241201_wo_coAttention_temp'
-    checkpoint_name = 'D:/MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_83.pth'
+    checkpoint_folder = '20241203_LLM_GemmaForCausalLM_base_20241201_wo_coAttention_temp'
+    # checkpoint_Former = 'D:/MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer.pth'
+    # checkpoint_Generator = 'D:/MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetLLM_14.pth'
+    checkpoint_Former = './Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_4.pth'
+    checkpoint_Generator = './Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetLLM_4.pth'
 
     # if args.img - dir == 'Oxford_HIC':
     dirPath = '../Data/Oxford_HIC/CaptionID_oxford_hic_data.csv'
@@ -84,6 +87,15 @@ def train():
     gemma = Gemma2ForCausalLM.from_pretrained("google/gemma-2-2b-it", device_map="auto", torch_dtype=torch.bfloat16)
     # gemma = AutoModelForCausalLM.from_pretrained("google/gemma-2-2b-it", device_map="auto", torch_dtype=torch.bfloat16)
     # gemma.model.embed_tokens = nn.Identity().to(torch.bfloat16)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    vocab_size =   gemmaConfig.vocab_size  # 詞彙表大小
+
+    text_embedding = nn.Embedding(vocab_size, gemma_hiddenstate_size).to(device)
+
+    # tokenize with gemma-2b
+    prompt = "Answer with only 100 words, only answer, no explain. Write a humor memetic post for Instagram with the following elements: "
+    prompt_input_ids = tokenizer(prompt, return_tensors='pt')['input_ids'].to(device)
+    prompt_embedd = text_embedding(prompt_input_ids)
     ########################################################################################################
     class self_image(nn.Module):
         def __init__(self):
@@ -198,6 +210,7 @@ def train():
             # self.gemmaLinearBefore = nn.Linear(768, gemmaConfig.vocab_size)
             self.gemmaSoftmax = nn.Softmax(dim=2)
             self.gemmalinearAfter = nn.Linear(gemmaConfig.vocab_size, 768)
+            self.gemmalinearAfter2 = nn.Linear(94, 64)
             # embedding
             self.gemmaLinearBefore = nn.Linear(768, gemma_hiddenstate_size)
             # feed forward
@@ -222,10 +235,13 @@ def train():
             with torch.no_grad():
                 # top_k_values, top_k_indices = torch.topk(image_GG, 1, dim=2, largest=True)
                 # loss, logits = textExtractReverse(gemma, tokenizer, gemmaConfig, top_k_indices, text_id)
-                loss, logits = textExtractReverse_embedd(gemma, tokenizer, image_GG, text_id)
+                loss, logits = textExtractReverse_embedd(gemma, image_GG, text_id, prompt_embedd)
             ###########################################   funny score   ###########################################
             text = self.gemmalinearAfter(logits.to(torch.bfloat16))
-            text_F = Former.text(text)
+            # text = text.transpose(1, 2)
+            # text = self.gemmalinearAfter2(text).transpose(1, 2)
+            text = text.transpose(0, 1)
+            text_F = Former.text(text).transpose(0, 1)
             ######################### funny score #########################
             feature_fusion = image_G + text_F  # visual_attending_textual + textual_attending_visual
             feature_fusionFF = self.feedForwardLinear(feature_fusion)
@@ -253,8 +269,10 @@ def train():
     gemma_loss_list = []
     fc_loss_list = []
 
-    checkpoint_Former = torch.load(checkpoint_name)
+    checkpoint_Former = torch.load(checkpoint_Former)
+    checkpoint_Generator = torch.load(checkpoint_Generator)
     NetFormer.load_state_dict(checkpoint_Former['model_state_dict'])
+    Generator.load_state_dict(checkpoint_Generator['model_state_dict'])
 
     # class BypassMultiheadAttention(nn.Module):
     #     def forward(self, query, key, value, attn_mask=None, *args, **kwargs):
@@ -270,6 +288,7 @@ def train():
     #
     # NetFormer_F.load_state_dict(checkpoint_Former['model_state_dict'])
     del checkpoint_Former
+    del checkpoint_Generator
     gc.collect()
 
     def loss_function(gemmaLoss, funny_score, target_funny_score):
@@ -290,29 +309,29 @@ def train():
             epoch + present_epoch) + " ---------------------------------------")
         train_loss_Former = 0
         test_loss_Former = 0
-        ###################################### Train ######################################
-        with tqdm(train_loader, unit="batch", leave=True) as tepoch:
-            for idx, (text, image, funny_score) in enumerate(tepoch):
-                text_id = textExtraction(tokenizer, gemmaConfig, text)
-                image = image.to(torch.bfloat16)
-                funny_score = funny_score.to(torch.bfloat16)
-                optimizer_Former.zero_grad()
-                gemma_loss, output_funny_score = Generator(NetFormer, image.to(device), text_id.to(device))
-                loss = loss_function(gemma_loss, output_funny_score, funny_score.to(device))
-                loss.backward()
-                optimizer_Former.step()
-                train_loss_Former += loss.item()
-                tepoch.set_postfix(loss=train_loss_Former / (idx + 1))
-                ##########################################################################
-                seperateLoss_data = pd.DataFrame()
-                seperateLoss_data['gemma_loss'] = gemma_loss_list
-                seperateLoss_data['fc_loss'] = fc_loss_list
-                seperateLoss_data.to_csv('./Model/' + save_name + '/' + save_name + '_seperateLoss.csv',
-                                         index=False)
-                ##########################################################################
-        train_loss_Former /= len(train_loader)
-        train_losses_Former.append(train_loss_Former)
-        ###################################### Test ######################################
+        # ###################################### Train ######################################
+        # with tqdm(train_loader, unit="batch", leave=True) as tepoch:
+        #     for idx, (text, image, funny_score) in enumerate(tepoch):
+        #         text_id = textExtraction(tokenizer, gemmaConfig, text)
+        #         image = image.to(torch.bfloat16)
+        #         funny_score = funny_score.to(torch.bfloat16)
+        #         optimizer_Former.zero_grad()
+        #         gemma_loss, output_funny_score = Generator(NetFormer, image.to(device), text_id.to(device))
+        #         loss = loss_function(gemma_loss, output_funny_score, funny_score.to(device))
+        #         loss.backward()
+        #         optimizer_Former.step()
+        #         train_loss_Former += loss.item()
+        #         tepoch.set_postfix(loss=train_loss_Former / (idx + 1))
+        #         ##########################################################################
+        #         seperateLoss_data = pd.DataFrame()
+        #         seperateLoss_data['gemma_loss'] = gemma_loss_list
+        #         seperateLoss_data['fc_loss'] = fc_loss_list
+        #         seperateLoss_data.to_csv('./Model/' + save_name + '/' + save_name + '_seperateLoss.csv',
+        #                                  index=False)
+        #         ##########################################################################
+        # train_loss_Former /= len(train_loader)
+        # train_losses_Former.append(train_loss_Former)
+        # ###################################### Test ######################################
         with tqdm(test_loader, unit="batch", leave=True) as tepoch:
             for idx, (text, image, funny_score) in enumerate(tepoch):
                 text_id = textExtraction(tokenizer, gemmaConfig, text)
@@ -331,10 +350,10 @@ def train():
             best_train_loss_Former = train_loss_Former
             torch.save({
                 'epoch': epoch + present_epoch,
-                'model_state_dict': Generator.state_dict(),
+                'model_state_dict': NetFormer.state_dict(),
                 'optimizer_state_dict': optimizer_Former.state_dict(),
                 'loss': loss,
-            }, './Model/' + save_name + '/' + save_name + '_NetFormer.pth')
+            }, './Model/' + save_name + '/' + save_name + '_NetFormer_' + str(epoch + present_epoch) + '.pth')
             torch.save({
                 'epoch': epoch + present_epoch,
                 'model_state_dict': Generator.state_dict(),

@@ -7,6 +7,8 @@ import torch
 from transformers import AutoConfig
 import tqdm
 
+
+
 def addImagePath(data, imgPath):
     data['image_id'] = data['image_id'].apply(lambda x: imgPath + str(x) + '.jpg')
     return data
@@ -31,7 +33,7 @@ def textExtraction_IFT(tokenizer, gemmaConfig, text_data):
             padding = torch.zeros(output.shape[0], 64 - output.shape[1], 768)
             output = torch.cat((output, padding), dim=1)
         all_features.append(output.detach())
-            # pbar.update(1)
+        # pbar.update(1)
     return torch.cat(all_features).to(torch.bfloat16)
 
 def textExtraction(tokenizer, gemmaConfig, text_data):
@@ -48,6 +50,8 @@ def textExtraction(tokenizer, gemmaConfig, text_data):
     # with tqdm.tqdm (total=len(text_data)) as pbar:
     for text in (text_data):
         tokens = tokenizer(text, truncation=True, padding='max_length', max_length=64, return_tensors='pt', )
+        # tokens = tokenizer(text, truncation=True, padding='max_length', max_length=94, return_tensors='pt', )
+
         token_ids.append(tokens['input_ids'])
         # # all_features.append(tokens['attention_mask'])
         # output = text_embedding(tokens['input_ids'])
@@ -87,6 +91,8 @@ def textExtractReverse(gemma, tokenizer, gemmaConfig, data, labels_text_id):
         text = ', '.join(text)
         reverse[i] = prompt + text + "."
     input_ids = tokenizer(reverse, truncation=True, padding='max_length', max_length=64, return_tensors='pt').to(device)
+    generate_ids = gemma.generate(input_ids = input_ids.input_ids, max_new_tokens=200)
+    print(tokenizer.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0])
     gemma_output = gemma(input_ids = input_ids.input_ids, max_length=200, labels=labels_text_id, return_dict = True)
     loss = gemma_output.loss
     logits = gemma_output.logits
@@ -96,16 +102,14 @@ def textExtractReverse(gemma, tokenizer, gemmaConfig, data, labels_text_id):
 
     return loss, logits
 
-def textExtractReverse_embedd(gemma, tokenizer, data, labels_text_id):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-    # tokenize with gemma-2b
-    # prompt = "Answer with only 100 words, only answer, no explain. Write a humor memetic post for Instagram with the following elements: "
-    # prompt_input_ids = tokenizer(prompt, return_tensors='pt')['input_ids'].to(device)
-    # prompt_input_ids = prompt_input_ids.repeat(data.shape[0], 1)
-    # print(prompt_input_ids.shape, data.shape)
-    # input_ids = torch.cat((prompt_input_ids, data), dim=1)
-    gemma_output = gemma(inputs_embeds = data.to(torch.bfloat16), max_length=200, labels=labels_text_id, return_dict = True)
+def textExtractReverse_embedd(gemma, data, labels_text_id, prompt_embedd):
+    tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
+    # prompt_embedd = prompt_embedd.expand(data.shape[0], -1, -1)
+    # input_embedd= torch.cat((prompt_embedd, data), dim=1)
+    input_embedd = data
+    generate_ids = gemma.generate(inputs_embeds=input_embedd.to(torch.bfloat16), max_new_tokens=200)
+    print(tokenizer.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0])
+    gemma_output = gemma(inputs_embeds = input_embedd.to(torch.bfloat16), max_length=200, labels=labels_text_id, return_dict = True)
     loss = gemma_output.loss
     logits = gemma_output.logits
     return loss, logits
@@ -127,7 +131,7 @@ def imageExtraction(image_data):
     # with tqdm.tqdm(total=len(image_data), position=0, leave=True) as pbar:
     #     for image_path in (image_data):
     #         with torch.no_grad():
-                # 加載並預處理圖像
+    # 加載並預處理圖像
     image = Image.open(image_data).convert('RGB')
     image = np.array(image)
     image = image[:, :, :3]
@@ -141,6 +145,6 @@ def imageExtraction(image_data):
     # 儲存特徵
     last_hidden_states = last_hidden_states.cpu()
     all_features.append(last_hidden_states.squeeze(0).detach())
-                # pbar.update(1)
+    # pbar.update(1)
     # return all_features
     return last_hidden_states.detach()
