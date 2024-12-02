@@ -1,6 +1,7 @@
 import os
 import gc
 import pandas as pd
+from torch.distributions.constraints import positive
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
@@ -9,8 +10,9 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss, BCELoss
+from info_nce import InfoNCE, info_nce
 from torch.utils.data import DataLoader
-from transformers import AutoConfig, AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
+from transformers import AutoConfig, AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig, Gemma2ForCausalLM
 # from local_gemma import LocalGemma2ForCausalLM
 
 from extractor import addImagePath, textExtraction, imageExtraction, textExtractReverse
@@ -34,10 +36,10 @@ class OxfordDataset(torch.utils.data.Dataset):
 
 
 def train():
-    epochs = 30
-    batch_size = 128
+    epochs = 100
+    batch_size = 256
     optimizer_Former_lr = 1e-5
-    save_name = '20241125_old_IFT_blipLoss_wo_co_attention_shareWeight'
+    save_name = '20241201_wo_coAttention_temp'
     if not os.path.exists('./Model/' + save_name):
         os.makedirs('./Model/' + save_name)
         os.makedirs('D:/MemeGAN/Model/' + save_name)
@@ -81,9 +83,9 @@ def train():
     # gemma = AutoModelForCausalLM.from_pretrained("google/gemma-2-2b-it", device_map="auto", torch_dtype=torch.bfloat16)
     ########################################################################################################
 
-    class self_multi(nn.Module):
+    class self_image(nn.Module):
         def __init__(self):
-            super(self_multi, self).__init__()
+            super(self_image, self).__init__()
             # self attention
             self.selfAttentionMultihead = nn.MultiheadAttention(768, 1)
             self.selfAttentionLayerNorm = nn.LayerNorm(768, eps=eps)
@@ -91,13 +93,6 @@ def train():
             self.selfAttentionRelu = nn.ReLU()
             self.selfAttentionLinear2 = nn.Linear(768, 768)
             self.selfAttentionLayerNorm2 = nn.LayerNorm(768, eps=eps)
-
-            # multihead attention
-            self.multiheadAttentionMultihead = nn.MultiheadAttention(768, 8)
-            self.multiheadAttentionLinear1 = nn.Linear(768, 768)
-            self.multiheadAttentionRelu = nn.ReLU()
-            self.multiheadAttentionLinear2 = nn.Linear(768, 768)
-            self.multiheadAttentionLayerNorm = nn.LayerNorm(768, eps=eps)
 
             self.prefix_const = nn.Parameter(torch.randn(64, 768), requires_grad=True)
             # co-attention text
@@ -119,21 +114,14 @@ def train():
             self.feedForwardRelu = nn.ReLU()
             self.feedForwardLinear2 = nn.Linear(768, 768)
 
-        def forward(self, image, text):
+        def forward(self, image):
             # self attention module
             self_temp = self.selfAttentionMultihead(image, image, image)[0]
             self_temp = self.selfAttentionLayerNorm(self_temp + image)
             self_out = self.selfAttentionLinear1(self_temp)
             self_out = self.selfAttentionRelu(self_out)
             self_out = self.selfAttentionLinear2(self_out)
-            self_out = self.selfAttentionLayerNorm(self_out + self_temp)
-
-            # multihead attention module
-            multi_out = self.multiheadAttentionMultihead(text, text, text)[0]
-            multi_out = self.selfAttentionLinear1(multi_out)
-            multi_out = self.selfAttentionRelu(multi_out)
-            multi_out = self.selfAttentionLinear2(multi_out)
-            multi_out = self.selfAttentionLayerNorm(multi_out + text)
+            self_out = self.selfAttentionLayerNorm2(self_out + self_temp)
 
             # prefix = self.prefix_const.unsqueeze(0).expand(image.shape[1], -1, -1).transpose(0, 1).to(device).to(
             #     torch.bfloat16)
@@ -155,72 +143,50 @@ def train():
             # output = self.feedForwardRelu(output)
             # output = self.feedForwardLinear2(output)
 
-            return self_out, multi_out
+            return self_out
 
-    # class co_attention(nn.Module):
-    #     def __init__(self):
-    #         super(co_attention, self).__init__()
-    #         self.prefix_const = nn.Parameter(torch.randn(64, 768), requires_grad=True)
-    #         # co-attention text
-    #         self.coAttentionTextMultihead = nn.MultiheadAttention(768, 8)
-    #         self.coAttentionTextLinear1 = nn.Linear(768, 768)
-    #         self.coAttentionTextRelu = nn.ReLU()
-    #         self.coAttentionTextLinear2 = nn.Linear(768, 768)
-    #         self.coAttentionTextLayerNorm = nn.LayerNorm(768, eps=eps)
-    #
-    #         # co-attention image
-    #         self.coAttentionImageMultihead = nn.MultiheadAttention(768, 8)
-    #         self.coAttentionImageLinear1 = nn.Linear(768, 768)
-    #         self.coAttentionImageRelu = nn.ReLU()
-    #         self.coAttentionImageLinear2 = nn.Linear(768, 768)
-    #         self.coAttentionImageLayerNorm = nn.LayerNorm(768, eps=eps)
-    #
-    #         # feed forward
-    #         self.feedForwardLinear1 = nn.Linear(768, 768)
-    #         self.feedForwardRelu = nn.ReLU()
-    #         self.feedForwardLinear2 = nn.Linear(768, 768)
-    #
-    #     def forward(self, image):
-    #         prefix = self.prefix_const.unsqueeze(0).expand(image.shape[1], -1, -1).transpose(0, 1).to(device).to(torch.bfloat16)
-    #         # co-attention image module
-    #         visual_attending_textual = self.coAttentionTextMultihead(image, prefix, prefix)[0]
-    #         visual_attending_textual = self.coAttentionTextLinear1(visual_attending_textual)
-    #         visual_attending_textual = self.coAttentionTextRelu(visual_attending_textual)
-    #         visual_attending_textual = self.coAttentionTextLinear2(visual_attending_textual)
-    #         visual_attending_textual = self.coAttentionTextLayerNorm(visual_attending_textual + image)
-    #
-    #         # co-attention text module
-    #         textual_attending_visual = self.coAttentionTextMultihead(prefix, image, image)[0]
-    #         textual_attending_visual = self.coAttentionTextLinear1(textual_attending_visual)
-    #         textual_attending_visual = self.coAttentionTextRelu(textual_attending_visual)
-    #         textual_attending_visual = self.coAttentionTextLinear2(textual_attending_visual)
-    #         textual_attending_visual = self.coAttentionTextLayerNorm(textual_attending_visual + prefix)
-    #
-    #         output = self.feedForwardLinear1(visual_attending_textual + textual_attending_visual)
-    #         output = self.feedForwardRelu(output)
-    #         output = self.feedForwardLinear2(output)
-    #
-    #         return output
+    class multi_text(nn.Module):
+        def __init__(self):
+            super(multi_text, self).__init__()
+            # multihead attention
+            self.multiheadAttentionMultihead = nn.MultiheadAttention(768, 8)
+            self.multiheadAttentionLinear1 = nn.Linear(768, 768)
+            self.multiheadAttentionRelu = nn.ReLU()
+            self.multiheadAttentionLinear2 = nn.Linear(768, 768)
+            self.multiheadAttentionLayerNorm = nn.LayerNorm(768, eps=eps)
+
+        def forward(self, text):
+            # multihead attention module
+            multi_out = self.multiheadAttentionMultihead(text, text, text)[0]
+            multi_out = self.multiheadAttentionLinear1(multi_out)
+            multi_out = self.multiheadAttentionRelu(multi_out)
+            multi_out = self.multiheadAttentionLinear2(multi_out)
+            multi_out = self.multiheadAttentionLayerNorm(multi_out + text)
+
+            return multi_out
 
     class Former(nn.Module):
         def __init__(self, depth=12):
             super(Former, self).__init__()
-            self.layers_self_multi = nn.ModuleList([self_multi() for _ in range(depth)])
+            self.layers_self = nn.ModuleList([self_image() for _ in range(depth)])
+            self.layers_multi = nn.ModuleList([multi_text() for _ in range(depth)])
             # self.layers_co_attention = nn.ModuleList([co_attention() for _ in range(depth)])
 
-        def forward(self, text, image):
-            # max_seq_len = max(text.shape[1], image.shape[1])
-            # text = nn.functional.pad(text, (0, 0, 0, max_seq_len - text.shape[1]))
-            # image = nn.functional.pad(image, (0, 0, 0, max_seq_len - image.shape[1]))
-            text = text.transpose(0, 1)
-            image = image.transpose(0, 1)
+        def image(self, image):
+            for self_layer in self.layers_self:
+                image = self_layer(image)
+            return image
 
-            ######################### Transformer #########################
-            for self_multi_layer in self.layers_self_multi:
-                image, text = self_multi_layer(image, text)
-            # for co_attention_layer in self.layers_co_attention:
-            #     image = co_attention_layer(image)
-            ###############################################################
+        def text(self, text):
+            for multi_layer in self.layers_multi:
+                text = multi_layer(text)
+            return text
+
+        def forward(self, text, image):
+            text = text.transpose(0, 1)
+            text = self.text(text)
+            image = image.transpose(0, 1)
+            image = self.image(image)
             return image, text
 
     class IFormer(nn.Module):
@@ -231,14 +197,17 @@ def train():
 
             text = nn.functional.normalize(text.transpose(0, 1), p=2, dim=-1)
             image = nn.functional.normalize(image.transpose(0, 1), p=2, dim=-1)
+            loss = 0
 
+            #################################### Loss positive non-auto calculation ####################################
             c_text = text.unsqueeze(2).expand(-1, -1, image.shape[1], -1).to(torch.bfloat16)
             c_image = image.unsqueeze(2).expand(-1, -1, text.shape[1], -1).to(torch.bfloat16)
             sim_q2t = torch.einsum('bijk,bjik->bij', c_image, c_text)
             sim_t2q = torch.einsum('bijk,bjik->bij', c_text, c_image)
+            img2txt, _ = torch.max(sim_q2t, dim=-1)
+            txt2img, _ = torch.max(sim_t2q, dim=-1)
+
             ################ BITA Loss ################
-            # img2txt, _ = torch.max(sim_q2t, dim=-1)
-            # txt2img, _ = torch.max(sim_t2q, dim=-1)
             # img2txt = img2txt / self.temp
             # txt2img = txt2img / self.temp
 
@@ -251,8 +220,13 @@ def train():
             #         label_smoothing=0.1)(txt2img[i], targets)) / 2
             #     loss += loss_itc
             # loss /= img2txt.shape[0]
+            ############################################
 
             ################ Blip Loss ################
+            c_text = text.unsqueeze(2).expand(-1, -1, image.shape[1], -1).to(torch.bfloat16)
+            c_image = image.unsqueeze(2).expand(-1, -1, text.shape[1], -1).to(torch.bfloat16)
+            sim_q2t = torch.einsum('bijk,bjik->bij', c_image, c_text)
+            sim_t2q = torch.einsum('bijk,bjik->bij', c_text, c_image)
             img2txt, img2txt_idx = torch.max(sim_q2t, dim=-1, keepdim=True)
             txt2img, txt2img_idx = torch.max(sim_t2q, dim=-1, keepdim=True)
 
@@ -261,9 +235,45 @@ def train():
             img2txt_target.scatter_(-1, img2txt_idx, 1)
             txt2img_target.scatter_(-1, txt2img_idx, 1)
 
+            sim_q2t = sim_q2t / self.temp
+            sim_t2q = sim_t2q / self.temp
             img2txt_loss = CrossEntropyLoss()(sim_q2t, img2txt_target)
             txt2img_loss = CrossEntropyLoss()(sim_t2q, txt2img_target)
             loss = (img2txt_loss + txt2img_loss) / 2
+            ############################################
+
+            ################ InfoNCE Loss ################
+            # c_text = text.unsqueeze(2).expand(-1, -1, image.shape[1], -1).to(torch.bfloat16)
+            # c_image = image.unsqueeze(2).expand(-1, -1, text.shape[1], -1).to(torch.bfloat16)
+            # sim_q2t = torch.einsum('bijk,bjik->bij', c_image, c_text)
+            # sim_t2q = torch.einsum('bijk,bjik->bij', c_text, c_image)
+            # img2txt, img2txt_idx = torch.max(sim_q2t, dim=-1)
+            # txt2img, txt2img_idx = torch.max(sim_t2q, dim=-1)
+
+            # for i in range(text.shape[0]):
+                # txt2img_pos = torch.index_select(image[i], 0, img2txt_idx[i])
+                # mask = ~torch.eye(img2txt_idx[i].shape[0], dtype=bool)
+                # txt2img_neg = image[i].unsqueeze(0).expand(image.shape[1], -1, -1)
+                # txt2img_neg = txt2img_neg[mask]
+                # loss += info_nce(query=text[i], positive_key=image[i], negative_keys=image[i], temperature=0.07)
+                # img2txt_pos = torch.index_select(text[i], 0, txt2img_idx[i])
+                # mask = ~torch.eye(txt2img_idx[i].shape[0], dtype=bool)
+                # img2txt_neg = text[i].unsqueeze(0).expand(text.shape[1], -1, -1)
+                # img2txt_neg = img2txt_neg[mask]
+                # loss += info_nce(query=image[i], positive_key=text[i], negative_keys=text[i], temperature=0.07)
+            # loss = loss / text.shape[0]
+            ############################################
+
+            ###################################### Loss positive auto calculation ######################################
+            ################ InfoNCE Loss  ALL  ################
+            # batchSize, _, seqLen = text.shape
+            # text = text.contiguous().view(-1, seqLen)
+            # image = image.contiguous().view(-1, seqLen)
+            # loss += info_nce(query=text, positive_key=image, negative_keys=image, temperature=0.07)
+            # loss += info_nce(query=image, positive_key=text, negative_keys=text, temperature=0.07)
+            # loss /= batchSize
+            ####################################################
+            ############################################################################################################
             return loss
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu" )
@@ -296,10 +306,10 @@ def train():
         ###################################### Train ######################################
         with tqdm(train_loader, unit="batch", leave=True) as tepoch:
             for idx, (text, image, funny_score) in enumerate(tepoch):
-                text = textExtraction(tokenizer, gemmaConfig, text).to(torch.bfloat16)
+                text,_ = textExtraction(tokenizer, gemmaConfig, text)
                 image = image.to(torch.bfloat16)
                 optimizer_Former.zero_grad()
-                image, text = NetFormer(text.to(device), image.to(device))
+                image, text = NetFormer(text.to(device).to(torch.bfloat16), image.to(device))
                 loss = NetIFormer(text.to(device), image.to(device))
                 loss.backward()
                 optimizer_Former.step()
@@ -310,9 +320,9 @@ def train():
         ###################################### Test ######################################
         with tqdm(test_loader, unit="batch", leave=True) as tepoch:
             for idx, (text, image, funny_score) in enumerate(tepoch):
-                text = textExtraction(tokenizer, gemmaConfig, text).to(torch.bfloat16)
+                text,_ = textExtraction(tokenizer, gemmaConfig, text)
                 image = image.to(torch.bfloat16)
-                image, text = NetFormer(text.to(device), image.to(device))
+                image, text = NetFormer(text.to(torch.bfloat16).to(device), image.to(device))
                 loss = NetIFormer(text.to(device), image.to(device))
                 test_loss_Former += loss.item()
                 tepoch.set_postfix(loss=test_loss_Former / (idx + 1))

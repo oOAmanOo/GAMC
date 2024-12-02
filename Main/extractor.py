@@ -44,21 +44,22 @@ def textExtraction(tokenizer, gemmaConfig, text_data):
     avg_pool = nn.AdaptiveAvgPool1d(64)
 
     token_ids = []
-    all_features = []
+    # all_features = []
     # with tqdm.tqdm (total=len(text_data)) as pbar:
     for text in (text_data):
         tokens = tokenizer(text, truncation=True, padding='max_length', max_length=64, return_tensors='pt', )
         token_ids.append(tokens['input_ids'])
-        # all_features.append(tokens['attention_mask'])
-        output = text_embedding(tokens['input_ids'])
-        if output.shape[1] > 64:
-            output = avg_pool(output.transpose(1, 2)).transpose(1, 2)
-        elif output.shape[1] < 64:
-            padding = torch.zeros(output.shape[0], 64 - output.shape[1], 768)
-            output = torch.cat((output, padding), dim=1)
-        all_features.append(output.detach())
-            # pbar.update(1)
-    return torch.cat(all_features), torch.cat(token_ids)
+        # # all_features.append(tokens['attention_mask'])
+        # output = text_embedding(tokens['input_ids'])
+        # if output.shape[1] > 64:
+        #     output = avg_pool(output.transpose(1, 2)).transpose(1, 2)
+        # elif output.shape[1] < 64:
+        #     padding = torch.zeros(output.shape[0], 64 - output.shape[1], 768)
+        #     output = torch.cat((output, padding), dim=1)
+        # all_features.append(output.detach())
+        #     # pbar.update(1)
+    # return torch.cat(all_features), torch.cat(token_ids)
+    return torch.cat(token_ids)
 
 def textExtractReverse(gemma, tokenizer, gemmaConfig, data, labels_text_id):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -99,11 +100,12 @@ def textExtractReverse_embedd(gemma, tokenizer, data, labels_text_id):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # tokenize with gemma-2b
-    prompt = "Answer with only 100 words, only answer, no explain. Write a humor memetic post for Instagram with the following elements: "
-    prompt_input_ids = tokenizer(prompt, return_tensors='pt')['input_ids'].to(device)
-    prompt_input_ids = prompt_input_ids.repeat(data.shape[0], 1)
-    input_ids = torch.cat((prompt_input_ids, data), dim=1)
-    gemma_output = gemma(inputs_embeds = input_ids, max_length=200, labels=labels_text_id, return_dict = True)
+    # prompt = "Answer with only 100 words, only answer, no explain. Write a humor memetic post for Instagram with the following elements: "
+    # prompt_input_ids = tokenizer(prompt, return_tensors='pt')['input_ids'].to(device)
+    # prompt_input_ids = prompt_input_ids.repeat(data.shape[0], 1)
+    # print(prompt_input_ids.shape, data.shape)
+    # input_ids = torch.cat((prompt_input_ids, data), dim=1)
+    gemma_output = gemma(inputs_embeds = data.to(torch.bfloat16), max_length=200, labels=labels_text_id, return_dict = True)
     loss = gemma_output.loss
     logits = gemma_output.logits
     return loss, logits
