@@ -8,11 +8,10 @@ from sklearn.model_selection import train_test_split
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss, BCELoss
 from torch.utils.data import DataLoader
-from transformers import AutoConfig, AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig, Gemma2ForCausalLM
-from torch.nn.functional import cosine_similarity
-# from local_gemma import LocalGemma2ForCausalLM
+from transformers import AutoConfig, AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig, Gemma2ForCausalLM, \
+    TrainingArguments
+from peft import LoraConfig, TaskType, get_peft_model
 
 from extractor import addImagePath, textExtraction, imageExtraction, textExtractReverse, textExtractReverse_embedd
 eps = torch.finfo(torch.bfloat16).eps
@@ -42,11 +41,12 @@ def train():
     if not os.path.exists('./Model/' + save_name):
         os.makedirs('./Model/' + save_name)
         os.makedirs('D:/MemeGAN/Model/' + save_name)
-    checkpoint_folder = '20241203_LLM_GemmaForCausalLM_base_20241201_wo_coAttention_temp'
-    # checkpoint_Former = 'D:/MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer.pth'
+    checkpoint_folder = '20241201_wo_coAttention_temp'
+    checkpoint_Former = 'D:/MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_83.pth'
     # checkpoint_Generator = 'D:/MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetLLM_14.pth'
-    checkpoint_Former = './Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_4.pth'
-    checkpoint_Generator = './Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetLLM_4.pth'
+    # checkpoint_Former = './Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_83.pth'
+    # checkpoint_Former = './Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_6.pth'
+    # checkpoint_Generator = './Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetLLM_6.pth'
 
     # if args.img - dir == 'Oxford_HIC':
     dirPath = '../Data/Oxford_HIC/CaptionID_oxford_hic_data.csv'
@@ -72,8 +72,6 @@ def train():
 
     train_dataset = OxfordDataset(train_text, train_image, train_funny_score)
     test_dataset = OxfordDataset(test_text, test_image, test_funny_score)
-    # train_loader = DataLoader(train_dataset, batch_size=128, shuffle=True, num_workers=20)
-    # test_loader = DataLoader(test_dataset, batch_size=128, shuffle=True, num_workers=20)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=1, pin_memory=True, drop_last=True)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, num_workers=1, pin_memory=True, drop_last=True)
 
@@ -86,16 +84,16 @@ def train():
     ### gemma float32 / bfloat16
     gemma = Gemma2ForCausalLM.from_pretrained("google/gemma-2-2b-it", device_map="auto", torch_dtype=torch.bfloat16)
     # gemma = AutoModelForCausalLM.from_pretrained("google/gemma-2-2b-it", device_map="auto", torch_dtype=torch.bfloat16)
-    # gemma.model.embed_tokens = nn.Identity().to(torch.bfloat16)
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    vocab_size =   gemmaConfig.vocab_size  # 詞彙表大小
 
-    text_embedding = nn.Embedding(vocab_size, gemma_hiddenstate_size).to(device)
-
-    # tokenize with gemma-2b
-    prompt = "Answer with only 100 words, only answer, no explain. Write a humor memetic post for Instagram with the following elements: "
-    prompt_input_ids = tokenizer(prompt, return_tensors='pt')['input_ids'].to(device)
-    prompt_embedd = text_embedding(prompt_input_ids)
+    # LORAconfig = LoraConfig(
+    #     task_type=TaskType.CAUSAL_LM,
+    #     target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+    #     inference_mode=False,  # 训练模式
+    #     r=8,  # Lora 秩
+    #     lora_alpha=32,  # Lora alaph，具体作用参见 Lora 原理
+    #     lora_dropout=0.1  # Dropout 比例
+    # )
+    # gemma = get_peft_model(gemma, LORAconfig)
     ########################################################################################################
     class self_image(nn.Module):
         def __init__(self):
@@ -222,20 +220,19 @@ def train():
 
         def forward(self, Former, image, text_id):
             ##############################################   generate ##############################################
-            #
             image = image.transpose(0, 1)
             image_G = Former.image(image)
 
             image_G = image_G.transpose(0, 1)
-            # image_GG = self.gemmaLinearMaxTokens(image_G.transpose(1, 2)).transpose(1, 2)
-            # image_GG = self.gemmaLinearBefore(image_GG)
-            # image_GG = self.gemmaSoftmax(image_GG + eps)
+            image_GG = self.gemmaLinearMaxTokens(image_G.transpose(1, 2)).transpose(1, 2)
+            image_GG = self.gemmaLinearBefore(image_GG)
+            image_GG = self.gemmaSoftmax(image_GG + eps)
             # get max value of each row, total 32*64
-            image_GG = self.gemmaLinearBefore(image_G)
+            # image_GG = self.gemmaLinearBefore(image_G)
             with torch.no_grad():
-                # top_k_values, top_k_indices = torch.topk(image_GG, 1, dim=2, largest=True)
-                # loss, logits = textExtractReverse(gemma, tokenizer, gemmaConfig, top_k_indices, text_id)
-                loss, logits = textExtractReverse_embedd(gemma, image_GG, text_id, prompt_embedd)
+                top_k_values, top_k_indices = torch.topk(image_GG, 1, dim=2, largest=True)
+                loss, logits = textExtractReverse(gemma, tokenizer, top_k_indices, text_id)
+            # logits = textExtractReverse_embedd(gemma, image_GG, text_id, text_id)
             ###########################################   funny score   ###########################################
             text = self.gemmalinearAfter(logits.to(torch.bfloat16))
             # text = text.transpose(1, 2)
@@ -264,42 +261,30 @@ def train():
     present_epoch = 1
     best_train_loss_Former = 9999999999
     best_test_loss_Former = 9999999999
-    # g_con_loss_list = []
-    # g_unc_loss_list = []
     gemma_loss_list = []
     fc_loss_list = []
 
     checkpoint_Former = torch.load(checkpoint_Former)
-    checkpoint_Generator = torch.load(checkpoint_Generator)
+    # checkpoint_Generator = torch.load(checkpoint_Generator)
     NetFormer.load_state_dict(checkpoint_Former['model_state_dict'])
-    Generator.load_state_dict(checkpoint_Generator['model_state_dict'])
+    # Generator.load_state_dict(checkpoint_Generator['model_state_dict'])
 
-    # class BypassMultiheadAttention(nn.Module):
-    #     def forward(self, query, key, value, attn_mask=None, *args, **kwargs):
-    #         # 直接返回輸入 query，模擬無操作的情況
-    #         return query, None
-    #
-    # for layers in NetFormer_G.layers_self_multi:
-    #     layers.multiheadAttentionMultihead = BypassMultiheadAttention()
-    #     layers.multiheadAttentionLinear1 = nn.Identity()
-    #     layers.multiheadAttentionRelu = nn.Identity()
-    #     layers.multiheadAttentionLinear2 = nn.Identity()
-    #     layers.multiheadAttentionLayerNorm = nn.Identity()
-    #
-    # NetFormer_F.load_state_dict(checkpoint_Former['model_state_dict'])
     del checkpoint_Former
-    del checkpoint_Generator
+    # del checkpoint_Generator
     gc.collect()
 
     def loss_function(gemmaLoss, funny_score, target_funny_score):
-        fc_loss = nn.MSELoss()(funny_score, target_funny_score)
+        # if gemma_logits.shape[1] > text_id.shape[1]:
+        #     gemma_logits = gemma_logits[:, :text_id.shape[1], :]
+        # elif gemma_logits.shape[1] < text_id.shape[1]:
+        #     padding = torch.zeros(gemma_logits.shape[0], text_id.shape[1] - gemma_logits.shape[1], gemma_logits.shape[2])
+        #     gemma_logits = torch.cat((gemma_logits, padding), dim=1)
+        # gemmaLoss = nn.CrossEntropyLoss()(gemma_logits.view(-1, gemmaConfig.vocab_size), text_id.view(-1))
 
-        # g_con_loss_list.append(con_loss.item())
-        # g_unc_loss_list.append(unc_loss.item())
-        # g_fc_loss_list.append(fc_loss.item())
+        fc_loss = nn.MSELoss()(funny_score, target_funny_score)
         gemma_loss_list.append(gemmaLoss.item())
         fc_loss_list.append(fc_loss.item())
-        loss = gemmaLoss + fc_loss*500
+        loss = gemmaLoss + fc_loss * 500
 
         return loss
 
@@ -309,36 +294,36 @@ def train():
             epoch + present_epoch) + " ---------------------------------------")
         train_loss_Former = 0
         test_loss_Former = 0
-        # ###################################### Train ######################################
-        # with tqdm(train_loader, unit="batch", leave=True) as tepoch:
-        #     for idx, (text, image, funny_score) in enumerate(tepoch):
-        #         text_id = textExtraction(tokenizer, gemmaConfig, text)
-        #         image = image.to(torch.bfloat16)
-        #         funny_score = funny_score.to(torch.bfloat16)
-        #         optimizer_Former.zero_grad()
-        #         gemma_loss, output_funny_score = Generator(NetFormer, image.to(device), text_id.to(device))
-        #         loss = loss_function(gemma_loss, output_funny_score, funny_score.to(device))
-        #         loss.backward()
-        #         optimizer_Former.step()
-        #         train_loss_Former += loss.item()
-        #         tepoch.set_postfix(loss=train_loss_Former / (idx + 1))
-        #         ##########################################################################
-        #         seperateLoss_data = pd.DataFrame()
-        #         seperateLoss_data['gemma_loss'] = gemma_loss_list
-        #         seperateLoss_data['fc_loss'] = fc_loss_list
-        #         seperateLoss_data.to_csv('./Model/' + save_name + '/' + save_name + '_seperateLoss.csv',
-        #                                  index=False)
-        #         ##########################################################################
-        # train_loss_Former /= len(train_loader)
-        # train_losses_Former.append(train_loss_Former)
-        # ###################################### Test ######################################
+        ###################################### Train ######################################
+        with tqdm(train_loader, unit="batch", leave=True) as tepoch:
+            for idx, (text, image, funny_score) in enumerate(tepoch):
+                text_id = textExtraction(tokenizer, gemmaConfig, text)
+                image = image.to(torch.bfloat16)
+                funny_score = funny_score.to(torch.bfloat16)
+                optimizer_Former.zero_grad()
+                gemma_loss, output_funny_score = Generator(NetFormer, image.to(device), text_id.to(device))
+                loss = loss_function(gemma_loss, text_id.to(device), output_funny_score, funny_score.to(device))
+                loss.backward()
+                optimizer_Former.step()
+                train_loss_Former += loss.item()
+                tepoch.set_postfix(loss=train_loss_Former / (idx + 1))
+                ##########################################################################
+                seperateLoss_data = pd.DataFrame()
+                seperateLoss_data['gemma_loss'] = gemma_loss_list
+                seperateLoss_data['fc_loss'] = fc_loss_list
+                seperateLoss_data.to_csv('./Model/' + save_name + '/' + save_name + '_seperateLoss.csv',
+                                         index=False)
+                ##########################################################################
+        train_loss_Former /= len(train_loader)
+        train_losses_Former.append(train_loss_Former)
+        ##################################### Test ######################################
         with tqdm(test_loader, unit="batch", leave=True) as tepoch:
             for idx, (text, image, funny_score) in enumerate(tepoch):
                 text_id = textExtraction(tokenizer, gemmaConfig, text)
                 image = image.to(torch.bfloat16)
                 funny_score = funny_score.to(torch.bfloat16)
                 gemma_loss, output_funny_score = Generator(NetFormer, image.to(device), text_id.to(device))
-                loss = loss_function(gemma_loss, output_funny_score, funny_score.to(device))
+                loss = loss_function(gemma_loss, text_id.to(device), output_funny_score, funny_score.to(device))
                 test_loss_Former += loss.item()
                 tepoch.set_postfix(loss=test_loss_Former / (idx + 1))
         test_loss_Former /= len(test_loader)
