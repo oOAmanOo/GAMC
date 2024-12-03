@@ -65,12 +65,8 @@ def textExtraction(tokenizer, gemmaConfig, text_data):
     # return torch.cat(all_features), torch.cat(token_ids)
     return torch.cat(token_ids)
 
-def textExtractReverse(gemma, tokenizer, gemmaConfig, data, labels_text_id):
+def textExtractReverse(gemma, tokenizer, data, labels_text_id):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    vocab_size = gemmaConfig.vocab_size  # 詞彙表大小
-
-    embedding_dim = 768  # 嵌入维度，與你的圖片嵌入维度相同
-    text_embedding = nn.Embedding(vocab_size, embedding_dim).to(device)
     avg_pool = nn.AdaptiveAvgPool1d(64).to(device)
 
     # 有時後空格會失效，所以手動插入空格 <pad> = 0
@@ -81,22 +77,20 @@ def textExtractReverse(gemma, tokenizer, gemmaConfig, data, labels_text_id):
         return zeros
 
     reverse_data = insert_zeros(data.squeeze(-1))
-    # reverse the token
     reverse = tokenizer.batch_decode(reverse_data, skip_special_tokens=False)
-    # tokenize with gemma-2b
-    prompt = "Answer with only 100 words, only answer, no explain. Write a humor memetic post for Instagram with the following elements: "
+    prompt = ""
+    # prompt = "Answer with only 100 words, only answer, no explain. Write a humor memetic post for Instagram with the following elements: "
     for i, text in enumerate(reverse):
         text = text.replace("<pad>", " ").replace("  ", " ")
         text = set(text.split())
         text = ', '.join(text)
         reverse[i] = prompt + text + "."
     input_ids = tokenizer(reverse, truncation=True, padding='max_length', max_length=64, return_tensors='pt').to(device)
-    generate_ids = gemma.generate(input_ids = input_ids.input_ids, max_new_tokens=200)
-    print(tokenizer.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0])
+    # generate_ids = gemma.generate(input_ids = input_ids.input_ids, max_new_tokens=200)
+    # print(tokenizer.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0])
     gemma_output = gemma(input_ids = input_ids.input_ids, max_length=200, labels=labels_text_id, return_dict = True)
     loss = gemma_output.loss
     logits = gemma_output.logits
-    #remove the same as input
     if logits.shape[1] > 64:
         logits = avg_pool(logits.transpose(1, 2)).transpose(1, 2)
 
@@ -107,12 +101,12 @@ def textExtractReverse_embedd(gemma, data, labels_text_id, prompt_embedd):
     # prompt_embedd = prompt_embedd.expand(data.shape[0], -1, -1)
     # input_embedd= torch.cat((prompt_embedd, data), dim=1)
     input_embedd = data
-    generate_ids = gemma.generate(inputs_embeds=input_embedd.to(torch.bfloat16), max_new_tokens=200)
-    print(tokenizer.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0])
-    gemma_output = gemma(inputs_embeds = input_embedd.to(torch.bfloat16), max_length=200, labels=labels_text_id, return_dict = True)
-    loss = gemma_output.loss
+    # generate_ids = gemma.generate(inputs_embeds=input_embedd.to(torch.bfloat16), max_new_tokens=200)
+    # print(tokenizer.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0])
+    gemma_output = gemma(inputs_embeds = input_embedd.to(torch.bfloat16), max_length=200,return_dict = True) #, labels=labels_text_id, return_dict = True)
+    # loss = gemma_output.loss
     logits = gemma_output.logits
-    return loss, logits
+    return logits
 
 # 定義批量處理和提取特徵的函數
 def imageExtraction(image_data):
