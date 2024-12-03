@@ -273,6 +273,22 @@ def train():
     # del checkpoint_Generator
     gc.collect()
 
+    # def loss_function(output, labels, funny_score, target_funny_score):
+    #     # match loss
+    #     if output.shape[1] > labels.shape[1]:
+    #         padding = torch.zeros(output.shape[0], output.shape[1] - labels.shape[1]).to(device)
+    #         labels = torch.cat((labels, padding), dim=1)
+    #     elif output.shape[1] < labels.shape[1]:
+    #         padding = torch.zeros(output.shape[0], labels.shape[1] - output.shape[1]).to(device)
+    #         output = torch.cat((output, padding), dim=1)
+    #     gemmaLoss = (output != labels).float().mean()
+    #     fc_loss = nn.MSELoss()(funny_score, target_funny_score)
+    #     gemma_loss_list.append(gemmaLoss.item())
+    #     fc_loss_list.append(fc_loss.item())
+    #     loss = gemmaLoss + fc_loss
+    #
+    #     return loss
+
     def loss_function(gemmaLoss, funny_score, target_funny_score):
         # if gemma_logits.shape[1] > text_id.shape[1]:
         #     gemma_logits = gemma_logits[:, :text_id.shape[1], :]
