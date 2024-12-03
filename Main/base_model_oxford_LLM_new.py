@@ -1,6 +1,7 @@
 import os
 import gc
 import pandas as pd
+import numpy as np
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
@@ -35,18 +36,18 @@ class OxfordDataset(torch.utils.data.Dataset):
 
 def train():
     epochs = 200
-    batch_size = 30
+    batch_size = 20
     optimizer_Former_lr = 1e-5
-    save_name = 'test'
+    save_name = '20241204_Lora_base_20241201_wo_coAttention_temp'
     if not os.path.exists('./Model/' + save_name):
         os.makedirs('./Model/' + save_name)
         os.makedirs('D:/MemeGAN/Model/' + save_name)
     ################ right ################
-    # checkpoint_folder = '20241201_wo_coAttention_temp'
-    # checkpoint_Former = 'D:/MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_83.pth'
+    checkpoint_folder = '20241201_wo_coAttention_temp'
+    checkpoint_Former = 'D:/MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_83.pth'
     ################ left  ################
-    checkpoint_folder = '20241201_coAttention_temp'  # left
-    checkpoint_Former = 'D:/MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_140.pth'
+    # checkpoint_folder = '20241201_coAttention_temp'
+    # checkpoint_Former = 'D:/MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_140.pth'
     #######################################
     # checkpoint_folder = '20241201_coAttention_temp'
     # checkpoint_Former = './Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_6.pth'
@@ -89,15 +90,25 @@ def train():
     gemma = Gemma2ForCausalLM.from_pretrained("google/gemma-2-2b-it", device_map="auto", torch_dtype=torch.bfloat16)
     # gemma = AutoModelForCausalLM.from_pretrained("google/gemma-2-2b-it", device_map="auto", torch_dtype=torch.bfloat16)
 
-    # LORAconfig = LoraConfig(
-    #     task_type=TaskType.CAUSAL_LM,
-    #     target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
-    #     inference_mode=False,  # 训练模式
-    #     r=8,  # Lora 秩
-    #     lora_alpha=32,  # Lora alaph，具体作用参见 Lora 原理
-    #     lora_dropout=0.1  # Dropout 比例
-    # )
-    # gemma = get_peft_model(gemma, LORAconfig)
+    LORAconfig = LoraConfig(
+        task_type=TaskType.CAUSAL_LM,
+        target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+        inference_mode=False,  # 训练模式
+        r=8,  # Lora 秩
+        lora_alpha=32,  # Lora alaph，具体作用参见 Lora 原理
+        lora_dropout=0.1  # Dropout 比例
+    )
+
+    def count_trainable_parameters(model):
+        model_parameters = filter(lambda p: p.requires_grad, model.parameters())
+        params = sum([np.prod(p.size()) for p in model_parameters])
+        return params
+    a = count_trainable_parameters(gemma)
+    gemma = get_peft_model(gemma, LORAconfig)
+    b = count_trainable_parameters(gemma)
+    #留下小數點後兩位就好
+    percent = round((b / a) * 100, 3)
+    print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
     ########################################################################################################
     class self_image(nn.Module):
         def __init__(self):
@@ -233,9 +244,9 @@ def train():
             image_GG = self.gemmaSoftmax(image_GG + eps)
             # get max value of each row, total 32*64
             # image_GG = self.gemmaLinearBefore(image_G)
-            with torch.no_grad():
-                top_k_values, top_k_indices = torch.topk(image_GG, 1, dim=2, largest=True)
-                loss, logits = textExtractReverse(gemma, tokenizer, top_k_indices, text_id)
+            # with torch.no_grad():
+            top_k_values, top_k_indices = torch.topk(image_GG, 1, dim=2, largest=True)
+            loss, logits = textExtractReverse(gemma, tokenizer, top_k_indices, text_id)
             # logits = textExtractReverse_embedd(gemma, image_GG, text_id, text_id)
             ###########################################   funny score   ###########################################
             text = self.gemmalinearAfter(logits.to(torch.bfloat16))
