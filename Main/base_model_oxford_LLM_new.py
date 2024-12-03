@@ -41,13 +41,17 @@ def train():
     if not os.path.exists('./Model/' + save_name):
         os.makedirs('./Model/' + save_name)
         os.makedirs('D:/MemeGAN/Model/' + save_name)
-    checkpoint_folder = '20241201_wo_coAttention_temp'
-    checkpoint_Former = 'D:/MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_83.pth'
-    # checkpoint_Generator = 'D:/MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetLLM_14.pth'
-    # checkpoint_Former = './Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_83.pth'
+    ################ right ################
+    # checkpoint_folder = '20241201_wo_coAttention_temp'
+    # checkpoint_Former = 'D:/MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_83.pth'
+    ################ left  ################
+    checkpoint_folder = '20241201_coAttention_temp'  # left
+    checkpoint_Former = 'D:/MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_140.pth'
+    #######################################
+    # checkpoint_folder = '20241201_coAttention_temp'
     # checkpoint_Former = './Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_6.pth'
     # checkpoint_Generator = './Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetLLM_6.pth'
-
+    #######################################
     # if args.img - dir == 'Oxford_HIC':
     dirPath = '../Data/Oxford_HIC/CaptionID_oxford_hic_data.csv'
     # else:
