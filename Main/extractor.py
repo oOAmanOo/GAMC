@@ -49,7 +49,7 @@ def textExtraction(tokenizer, gemmaConfig, text_data):
     # all_features = []
     # with tqdm.tqdm (total=len(text_data)) as pbar:
     for text in (text_data):
-        tokens = tokenizer(text, truncation=True, padding='max_length', max_length=64, return_tensors='pt', )
+        tokens = tokenizer(text, truncation=True, padding='max_length', max_length=100, return_tensors='pt', )
         # tokens = tokenizer(text, truncation=True, padding='max_length', max_length=94, return_tensors='pt', )
 
         token_ids.append(tokens['input_ids'])
@@ -79,14 +79,14 @@ def textExtractReverse(gemma, tokenizer, data, labels_text_id):
     reverse_data = insert_zeros(data.squeeze(-1))
     reverse = tokenizer.batch_decode(reverse_data, skip_special_tokens=False)
     prompt = ""
-    # prompt = "Answer with only 100 words, only answer, no explain. Write a humor memetic post for Instagram with the following elements: "
+    prompt = "Answer with only 100 words, only answer, no explain. Write a humor memetic post for Instagram with the following elements: "
     for i, text in enumerate(reverse):
         text = text.replace("<pad>", " ").replace("  ", " ")
         text = set(text.split())
         text = ', '.join(text)
         reverse[i] = prompt + text + "."
-    input_ids = tokenizer(reverse, truncation=True, padding='max_length', max_length=64, return_tensors='pt').to(device)
-    # generate_ids = gemma.generate(input_ids = input_ids.input_ids, max_new_tokens=200)
+    input_ids = tokenizer(reverse, truncation=True, padding='max_length', max_length=100, return_tensors='pt').to(device)
+    # generate_ids = gemma.generate(input_ids = input_ids.input_ids, max_new_tokens=100)
     # print(tokenizer.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0])
     gemma_output = gemma(input_ids = input_ids.input_ids, max_length=200, labels=labels_text_id, return_dict = True)
     loss = gemma_output.loss
