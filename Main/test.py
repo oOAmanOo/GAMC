@@ -27,14 +27,14 @@ gemmaConfig = AutoConfig.from_pretrained('google/gemma-2-2b-it')
 gemma = Gemma2ForCausalLM.from_pretrained("google/gemma-2-2b-it", device_map="auto", torch_dtype=torch.bfloat16)
 # gemma = AutoModelForCausalLM.from_pretrained("google/gemma-2-2b-it", device_map="auto", torch_dtype=torch.bfloat16)
 
-LORAconfig = LoraConfig(
-    task_type=TaskType.CAUSAL_LM,
-    target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
-    inference_mode=False,  # 训练模式
-    r=8,  # Lora 秩
-    lora_alpha=32,  # Lora alaph，具体作用参见 Lora 原理
-    lora_dropout=0.1  # Dropout 比例
-)
+# LORAconfig = LoraConfig(
+#     task_type=TaskType.CAUSAL_LM,
+#     target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+#     inference_mode=False,  # 训练模式
+#     r=8,  # Lora 秩
+#     lora_alpha=32,  # Lora alaph，具体作用参见 Lora 原理
+#     lora_dropout=0.1  # Dropout 比例
+# )
 
 # def count_trainable_parameters(model):
 #     model_parameters = filter(lambda p: p.requires_grad, model.parameters())
@@ -166,7 +166,7 @@ class Generator(nn.Module):
         # self.gemmaLinearBefore = nn.Linear(768, gemmaConfig.vocab_size)
         self.gemmaSoftmax = nn.Softmax(dim=2)
         self.gemmalinearAfter = nn.Linear(gemmaConfig.vocab_size, 768)
-        self.gemmalinearAfter2 = nn.Linear(94, 64)
+        # self.gemmalinearAfter2 = nn.Linear(94, 64)
         # embedding
         self.gemmaLinearBefore = nn.Linear(768, gemma_hiddenstate_size)
         # feed forward
@@ -215,23 +215,28 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 NetFormer = Former().to(torch.bfloat16).to(device)
 Generator = Generator().to(torch.bfloat16).to(device)
 #######################################
-checkpoint_folder = '20241201_coAttention_temp'
+checkpoint_folder = '20241204_Lora_base_20241201_wo_coAttention_temp'
 checkpoint_Former = './Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_6.pth'
 checkpoint_Generator = './Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetLLM_6.pth'
+# checkpoint_Gemma = './Model/' + checkpoint_folder + '/' + checkpoint_folder + '_Gemma_6.pth'
 #######################################
 checkpoint_Former = torch.load(checkpoint_Former)
 checkpoint_Generator = torch.load(checkpoint_Generator)
 NetFormer.load_state_dict(checkpoint_Former['model_state_dict'])
 Generator.load_state_dict(checkpoint_Generator['model_state_dict'])
+# gemma.load_state_dict(torch.load(checkpoint_Gemma)['model_state_dict'])
 #######################################
 
 # generate
 NetFormer.eval()
 Generator.eval()
+# gemma.eval()
 
+image = imageExtraction("./test_img.jpg").to(torch.bfloat16)
 test_gt = ['you all loved it so i brought it back']
-image = imageExtraction("./test_img.jpg")
+# image = imageExtraction("./test_img2.jpg").to(torch.bfloat16)
+# test_gt = ['Can’t believe this is real (still) life. The Saucy Nugg legacy is forever cemented in oil on canvas (2024). Thank you']
+
 text_id = textExtraction(tokenizer, gemmaConfig, test_gt)
 gemma_loss, output_funny_score = Generator(NetFormer, image.to(device), text_id.to(device))
-# logits, funnyscore = NetG.generate(text.to(device),image.to(device).to(torch.bfloat16))
-print(output_funny_score)
+print(gemma_loss,output_funny_score)
