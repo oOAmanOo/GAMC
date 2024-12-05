@@ -36,19 +36,22 @@ class OxfordDataset(torch.utils.data.Dataset):
 
 def train():
     epochs = 200
-    batch_size = 20
+    batch_size = 15
     optimizer_Former_lr = 1e-5
-    save_name = '20241204_Lora_base_20241201_wo_coAttention_temp'
+    save_name = '20241205_Lora_embedd_noPrompt_base_20241201_wo_coAttention_temp'
     if not os.path.exists('./Model/' + save_name):
         os.makedirs('./Model/' + save_name)
         os.makedirs('D:/MemeGAN/Model/' + save_name)
     ################ right ################
+    twoModel = False
     checkpoint_folder = '20241201_wo_coAttention_temp'
     checkpoint_Former = 'D:/MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_83.pth'
     ################ left  ################
+    # twoModel = False
     # checkpoint_folder = '20241201_coAttention_temp'
     # checkpoint_Former = 'D:/MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_140.pth'
     #######################################
+    # twoModel = True
     # checkpoint_folder = '20241201_coAttention_temp'
     # checkpoint_Former = './Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_6.pth'
     # checkpoint_Generator = './Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetLLM_6.pth'
@@ -109,6 +112,8 @@ def train():
     #留下小數點後兩位就好
     percent = round((b / a) * 100, 3)
     print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
+    del a, b, percent
+    gc.collect()
     ########################################################################################################
     class self_image(nn.Module):
         def __init__(self):
@@ -223,7 +228,6 @@ def train():
             # self.gemmaLinearBefore = nn.Linear(768, gemmaConfig.vocab_size)
             self.gemmaSoftmax = nn.Softmax(dim=2)
             self.gemmalinearAfter = nn.Linear(gemmaConfig.vocab_size, 768)
-            self.gemmalinearAfter2 = nn.Linear(94, 64)
             # embedding
             self.gemmaLinearBefore = nn.Linear(768, gemma_hiddenstate_size)
             # feed forward
@@ -239,19 +243,17 @@ def train():
             image_G = Former.image(image)
 
             image_G = image_G.transpose(0, 1)
-            image_GG = self.gemmaLinearMaxTokens(image_G.transpose(1, 2)).transpose(1, 2)
-            image_GG = self.gemmaLinearBefore(image_GG)
-            image_GG = self.gemmaSoftmax(image_GG + eps)
+            # image_GG = self.gemmaLinearMaxTokens(image_G.transpose(1, 2)).transpose(1, 2)
+            # image_GG = self.gemmaLinearBefore(image_GG)
+            # image_GG = self.gemmaSoftmax(image_GG + eps)
             # get max value of each row, total 32*64
-            # image_GG = self.gemmaLinearBefore(image_G)
+            image_GG = self.gemmaLinearBefore(image_G)
             # with torch.no_grad():
-            top_k_values, top_k_indices = torch.topk(image_GG, 1, dim=2, largest=True)
-            loss, logits = textExtractReverse(gemma, tokenizer, top_k_indices, text_id)
-            # logits = textExtractReverse_embedd(gemma, image_GG, text_id, text_id)
+            # top_k_values, top_k_indices = torch.topk(image_GG, 1, dim=2, largest=True)
+            # loss, logits = textExtractReverse(gemma, tokenizer, top_k_indices, text_id)
+            loss, logits = textExtractReverse_embedd(gemma, image_GG, text_id)
             ###########################################   funny score   ###########################################
             text = self.gemmalinearAfter(logits.to(torch.bfloat16))
-            # text = text.transpose(1, 2)
-            # text = self.gemmalinearAfter2(text).transpose(1, 2)
             text = text.transpose(0, 1)
             text_F = Former.text(text).transpose(0, 1)
             ######################### funny score #########################
@@ -263,8 +265,7 @@ def train():
             output_funny_score = self.FunnyScorelinear1(feature_fusion_final).squeeze(-1)
             output_funny_score = self.FunnyScorelinear2(output_funny_score).squeeze(-1)
             #######################################################################################################
-
-            return loss, output_funny_score
+            return loss , output_funny_score
 
     NetFormer = Former().to(torch.bfloat16).to(device)
     Generator = Generator().to(torch.bfloat16).to(device)
@@ -280,12 +281,15 @@ def train():
     fc_loss_list = []
 
     checkpoint_Former = torch.load(checkpoint_Former)
-    # checkpoint_Generator = torch.load(checkpoint_Generator)
     NetFormer.load_state_dict(checkpoint_Former['model_state_dict'])
-    # Generator.load_state_dict(checkpoint_Generator['model_state_dict'])
+
+    if twoModel:
+        checkpoint_Generator = torch.load(checkpoint_Generator)
+        Generator.load_state_dict(checkpoint_Generator['model_state_dict'])
+        present_epoch = checkpoint_Former['epoch'] + 1
+        del checkpoint_Generator
 
     del checkpoint_Former
-    # del checkpoint_Generator
     gc.collect()
 
     # def loss_function(output, labels, funny_score, target_funny_score):
@@ -311,12 +315,11 @@ def train():
         #     padding = torch.zeros(gemma_logits.shape[0], text_id.shape[1] - gemma_logits.shape[1], gemma_logits.shape[2])
         #     gemma_logits = torch.cat((gemma_logits, padding), dim=1)
         # gemmaLoss = nn.CrossEntropyLoss()(gemma_logits.view(-1, gemmaConfig.vocab_size), text_id.view(-1))
-
         fc_loss = nn.MSELoss()(funny_score, target_funny_score)
         gemma_loss_list.append(gemmaLoss.item())
         fc_loss_list.append(fc_loss.item())
         loss = gemmaLoss + fc_loss * 500
-
+        # loss = gemmaLoss
         return loss
 
     torch.autograd.set_detect_anomaly(True)
@@ -376,6 +379,12 @@ def train():
                 'optimizer_state_dict': optimizer_Former.state_dict(),
                 'loss': loss,
             }, './Model/' + save_name + '/' + save_name + '_NetLLM_' + str(epoch + present_epoch) + '.pth')
+            torch.save({
+                'epoch': epoch + present_epoch,
+                'model_state_dict': gemma.state_dict(),
+                'optimizer_state_dict': optimizer_Former.state_dict(),
+                'loss': loss,
+            }, './Model/' + save_name + '/' + save_name + '_Gemma_' + str(epoch + present_epoch) + '.pth')
             save.append("V")
         else:
             save.append(" ")
