@@ -49,7 +49,7 @@ def textExtraction(tokenizer, gemmaConfig, text_data):
     # all_features = []
     # with tqdm.tqdm (total=len(text_data)) as pbar:
     for text in (text_data):
-        tokens = tokenizer(text, truncation=True, padding='max_length', max_length=100, return_tensors='pt', )
+        tokens = tokenizer(text, truncation=True, padding='max_length', max_length=64, return_tensors='pt', )
         # tokens = tokenizer(text, truncation=True, padding='max_length', max_length=94, return_tensors='pt', )
 
         token_ids.append(tokens['input_ids'])
@@ -86,8 +86,8 @@ def textExtractReverse(gemma, tokenizer, data, labels_text_id):
         text = ', '.join(text)
         reverse[i] = prompt + text + "."
     input_ids = tokenizer(reverse, truncation=True, padding='max_length', max_length=100, return_tensors='pt').to(device)
-    # generate_ids = gemma.generate(input_ids = input_ids.input_ids, max_new_tokens=100)
-    # print(tokenizer.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0])
+    generate_ids = gemma.generate(input_ids = input_ids.input_ids, max_new_tokens=100)
+    print(tokenizer.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0])
     gemma_output = gemma(input_ids = input_ids.input_ids, max_length=200, labels=labels_text_id, return_dict = True)
     loss = gemma_output.loss
     logits = gemma_output.logits
@@ -96,17 +96,17 @@ def textExtractReverse(gemma, tokenizer, data, labels_text_id):
 
     return loss, logits
 
-def textExtractReverse_embedd(gemma, data, labels_text_id, prompt_embedd):
+def textExtractReverse_embedd(gemma, data, labels_text_id):
     tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
     # prompt_embedd = prompt_embedd.expand(data.shape[0], -1, -1)
     # input_embedd= torch.cat((prompt_embedd, data), dim=1)
     input_embedd = data
     # generate_ids = gemma.generate(inputs_embeds=input_embedd.to(torch.bfloat16), max_new_tokens=200)
     # print(tokenizer.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0])
-    gemma_output = gemma(inputs_embeds = input_embedd.to(torch.bfloat16), max_length=200,return_dict = True) #, labels=labels_text_id, return_dict = True)
-    # loss = gemma_output.loss
+    gemma_output = gemma(inputs_embeds = input_embedd.to(torch.bfloat16), max_length=200, labels=labels_text_id, return_dict = True)
+    loss = gemma_output.loss
     logits = gemma_output.logits
-    return logits
+    return loss, logits
 
 # 定義批量處理和提取特徵的函數
 def imageExtraction(image_data):
