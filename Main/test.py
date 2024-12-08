@@ -27,27 +27,28 @@ gemmaConfig = AutoConfig.from_pretrained('google/gemma-2-2b-it')
 gemma = Gemma2ForCausalLM.from_pretrained("google/gemma-2-2b-it", device_map="auto", torch_dtype=torch.bfloat16)
 # gemma = AutoModelForCausalLM.from_pretrained("google/gemma-2-2b-it", device_map="auto", torch_dtype=torch.bfloat16)
 
-# LORAconfig = LoraConfig(
-#     task_type=TaskType.CAUSAL_LM,
-#     target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
-#     inference_mode=False,  # 训练模式
-#     r=8,  # Lora 秩
-#     lora_alpha=32,  # Lora alaph，具体作用参见 Lora 原理
-#     lora_dropout=0.1  # Dropout 比例
-# )
+LORAconfig = LoraConfig(
+    task_type=TaskType.CAUSAL_LM,
+    target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+    inference_mode=False,  # 训练模式
+    r=8,  # Lora 秩
+    lora_alpha=32,  # Lora alaph，具体作用参见 Lora 原理
+    lora_dropout=0.1  # Dropout 比例
+)
 
-# def count_trainable_parameters(model):
-#     model_parameters = filter(lambda p: p.requires_grad, model.parameters())
-#     params = sum([np.prod(p.size()) for p in model_parameters])
-#     return params
-# a = count_trainable_parameters(gemma)
-# gemma = get_peft_model(gemma, LORAconfig)
-# b = count_trainable_parameters(gemma)
-# #留下小數點後兩位就好
-# percent = round((b / a) * 100, 3)
-# print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
+def count_trainable_parameters(model):
+    model_parameters = filter(lambda p: p.requires_grad, model.parameters())
+    params = sum([np.prod(p.size()) for p in model_parameters])
+    return params
+a = count_trainable_parameters(gemma)
+gemma = get_peft_model(gemma, LORAconfig)
+b = count_trainable_parameters(gemma)
+#留下小數點後兩位就好
+percent = round((b / a) * 100, 3)
+print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
+del a, b, percent
+gc.collect()
 ########################################################################################################
-
 class self_image(nn.Module):
     def __init__(self):
         super(self_image, self).__init__()
@@ -88,8 +89,7 @@ class self_image(nn.Module):
         self_out = self.selfAttentionLinear2(self_out)
         self_out = self.selfAttentionLayerNorm2(self_out + self_temp)
 
-        prefix = self.prefix_const.unsqueeze(0).expand(image.shape[1], -1, -1).transpose(0, 1).to(device).to(
-            torch.bfloat16)
+        prefix = self.prefix_const.unsqueeze(0).expand(image.shape[1], -1, -1).transpose(0, 1).to(device).to(torch.bfloat16)
         # co-attention image module
         visual_attending_textual = self.coAttentionTextMultihead(self_out, prefix, prefix)[0]
         visual_attending_textual = self.coAttentionTextLinear1(visual_attending_textual)
@@ -110,7 +110,6 @@ class self_image(nn.Module):
 
         return output
 
-
 class multi_text(nn.Module):
     def __init__(self):
         super(multi_text, self).__init__()
@@ -122,6 +121,7 @@ class multi_text(nn.Module):
         self.multiheadAttentionLayerNorm = nn.LayerNorm(768, eps=eps)
 
     def forward(self, text):
+
         # multihead attention module
         multi_out = self.multiheadAttentionMultihead(text, text, text)[0]
         multi_out = self.multiheadAttentionLinear1(multi_out)
@@ -138,17 +138,14 @@ class Former(nn.Module):
         self.layers_self = nn.ModuleList([self_image() for _ in range(depth)])
         self.layers_multi = nn.ModuleList([multi_text() for _ in range(depth)])
         # self.layers_co_attention = nn.ModuleList([co_attention() for _ in range(depth)])
-
-    def image(self, image):
+    def image (self, image):
         for self_layer in self.layers_self:
             image = self_layer(image)
         return image
-
-    def text(self, text):
+    def text (self, text):
         for multi_layer in self.layers_multi:
             text = multi_layer(text)
         return text
-
     def forward(self, text, image):
 
         text = text.transpose(0, 1)
@@ -156,7 +153,6 @@ class Former(nn.Module):
         image = image.transpose(0, 1)
         image = self.image(image)
         return image, text
-
 
 class Generator(nn.Module):
     def __init__(self, depth=12):
@@ -166,7 +162,6 @@ class Generator(nn.Module):
         # self.gemmaLinearBefore = nn.Linear(768, gemmaConfig.vocab_size)
         self.gemmaSoftmax = nn.Softmax(dim=2)
         self.gemmalinearAfter = nn.Linear(gemmaConfig.vocab_size, 768)
-        # self.gemmalinearAfter2 = nn.Linear(94, 64)
         # embedding
         self.gemmaLinearBefore = nn.Linear(768, gemma_hiddenstate_size)
         # feed forward
@@ -182,31 +177,29 @@ class Generator(nn.Module):
         image_G = Former.image(image)
 
         image_G = image_G.transpose(0, 1)
-        image_GG = self.gemmaLinearMaxTokens(image_G.transpose(1, 2)).transpose(1, 2)
-        image_GG = self.gemmaLinearBefore(image_GG)
-        image_GG = self.gemmaSoftmax(image_GG + eps)
+        # image_GG = self.gemmaLinearMaxTokens(image_G.transpose(1, 2)).transpose(1, 2)
+        # image_GG = self.gemmaLinearBefore(image_GG)
+        # image_GG = self.gemmaSoftmax(image_GG + eps)
         # get max value of each row, total 32*64
-        # image_GG = self.gemmaLinearBefore(image_G)
+        image_GG = self.gemmaLinearBefore(image_G)
         # with torch.no_grad():
-        top_k_values, top_k_indices = torch.topk(image_GG, 1, dim=2, largest=True)
-        loss, logits = textExtractReverse(gemma, tokenizer, top_k_indices, text_id)
-        # logits = textExtractReverse_embedd(gemma, image_GG, text_id, text_id)
-        ###########################################   funny score   ###########################################
-        text = self.gemmalinearAfter(logits.to(torch.bfloat16))
-        # text = text.transpose(1, 2)
-        # text = self.gemmalinearAfter2(text).transpose(1, 2)
-        text = text.transpose(0, 1)
-        text_F = Former.text(text).transpose(0, 1)
-        ######################### funny score #########################
-        feature_fusion = image_G + text_F  # visual_attending_textual + textual_attending_visual
-        feature_fusionFF = self.feedForwardLinear(feature_fusion)
-        feature_fusion_final = self.feedForwardLayerNorm(feature_fusion + feature_fusionFF)
-        feature_fusion_final = feature_fusion_final.squeeze(-1)
-        feature_fusion_final = feature_fusion_final
-        output_funny_score = self.FunnyScorelinear1(feature_fusion_final).squeeze(-1)
-        output_funny_score = self.FunnyScorelinear2(output_funny_score).squeeze(-1)
-        #######################################################################################################
-
+        # top_k_values, top_k_indices = torch.topk(image_GG, 1, dim=2, largest=True)
+        # loss, logits = textExtractReverse(gemma, tokenizer, top_k_indices, text_id)
+        loss, logits = textExtractReverse_embedd(gemma, image_GG, text_id)
+        # ###########################################   funny score   ###########################################
+        # text = self.gemmalinearAfter(logits.to(torch.bfloat16))
+        # text = text.transpose(0, 1)
+        # text_F = Former.text(text).transpose(0, 1)
+        # ######################### funny score #########################
+        # feature_fusion = image_G + text_F  # visual_attending_textual + textual_attending_visual
+        # feature_fusionFF = self.feedForwardLinear(feature_fusion)
+        # feature_fusion_final = self.feedForwardLayerNorm(feature_fusion + feature_fusionFF)
+        # feature_fusion_final = feature_fusion_final.squeeze(-1)
+        # feature_fusion_final = feature_fusion_final
+        # output_funny_score = self.FunnyScorelinear1(feature_fusion_final).squeeze(-1)
+        # output_funny_score = self.FunnyScorelinear2(output_funny_score).squeeze(-1)
+        # #######################################################################################################
+        output_funny_score = 0
         return loss, output_funny_score
 
 
@@ -215,27 +208,29 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 NetFormer = Former().to(torch.bfloat16).to(device)
 Generator = Generator().to(torch.bfloat16).to(device)
 #######################################
-checkpoint_folder = '20241204_Lora_base_20241201_wo_coAttention_temp'
-checkpoint_Former = './Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_6.pth'
-checkpoint_Generator = './Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetLLM_6.pth'
-# checkpoint_Gemma = './Model/' + checkpoint_folder + '/' + checkpoint_folder + '_Gemma_6.pth'
+checkpoint_folder = '20241205_LoRa_embedd_noPrompt_onlyGemmaLoss_base_20241201_coAttention_temp'
+checkpoint_Former = 'D:MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_5.pth'
+checkpoint_Generator = 'D:MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetLLM_5.pth'
+checkpoint_Gemma = 'D:MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_Gemma_5.pth'
 #######################################
 checkpoint_Former = torch.load(checkpoint_Former)
 checkpoint_Generator = torch.load(checkpoint_Generator)
 NetFormer.load_state_dict(checkpoint_Former['model_state_dict'])
 Generator.load_state_dict(checkpoint_Generator['model_state_dict'])
-# gemma.load_state_dict(torch.load(checkpoint_Gemma)['model_state_dict'])
+gemma.load_state_dict(torch.load(checkpoint_Gemma)['model_state_dict'])
 #######################################
 
 # generate
 NetFormer.eval()
 Generator.eval()
-# gemma.eval()
+gemma.eval()
 
-image = imageExtraction("./test_img.jpg").to(torch.bfloat16)
-test_gt = ['you all loved it so i brought it back']
+# image = imageExtraction("./test_img.jpg").to(torch.bfloat16)
+# test_gt = ['you all loved it so i brought it back']
 # image = imageExtraction("./test_img2.jpg").to(torch.bfloat16)
 # test_gt = ['Can’t believe this is real (still) life. The Saucy Nugg legacy is forever cemented in oil on canvas (2024). Thank you']
+image = torch.load('../../Oxford_HIC/ImageData/bokete_9678.pt', weights_only=False).unsqueeze(0).to(torch.bfloat16)
+test_gt = ['I\'m like, \"What is this big?\"']
 
 text_id = textExtraction(tokenizer, gemmaConfig, test_gt)
 gemma_loss, output_funny_score = Generator(NetFormer, image.to(device), text_id.to(device))
