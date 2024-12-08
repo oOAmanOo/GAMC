@@ -30,6 +30,7 @@ class OxfordDataset(torch.utils.data.Dataset):
         imageData = torch.load('../../Oxford_HIC/ImageData/'+ self.image[idx] +'.pt', weights_only=False)
         # all dtype to torch.float16
         imageData = imageData
+
         return self.text[idx], imageData, self.funny_score[idx]
 
 
@@ -118,6 +119,8 @@ def train():
     prompt_gemma = text_embedding(prompt_gemma['input_ids']).to(device)
     prompt_gemma = prompt_gemma.squeeze(1).expand(batch_size, -1, -1).to(torch.bfloat16)
     # print(prompt_gemma.shape)
+    del a, b, percent
+    gc.collect()
     ########################################################################################################
     class self_image(nn.Module):
         def __init__(self):
@@ -232,9 +235,9 @@ def train():
             # self.gemmaLinearBefore = nn.Linear(768, gemmaConfig.vocab_size)
             self.gemmaSoftmax = nn.Softmax(dim=2)
             self.gemmalinearAfter = nn.Linear(gemmaConfig.vocab_size, 768)
+            self.gemmalinearAfter2 = nn.Linear(94, 64)
             # embedding
-            # self.gemmaLinearBefore = nn.Linear(768, gemma_hiddenstate_size)
-            self.gemmaLinearBefore = nn.Linear(1536, gemma_hiddenstate_size)
+            self.gemmaLinearBefore = nn.Linear(768, gemma_hiddenstate_size)
             # feed forward
             self.feedForwardLinear = nn.Linear(768, 768)
             self.feedForwardLayerNorm = nn.LayerNorm(768, eps=eps)
@@ -346,7 +349,6 @@ def train():
                 optimizer_Former.zero_grad()
                 gemma_loss, output_funny_score = Generator(NetFormer, image.to(device), text_id.to(device), prompt_gemma.detach())
                 loss = loss_function(gemma_loss, output_funny_score, funny_score.to(device))
-                # loss.requires_grad = True
                 loss.backward()
                 optimizer_Former.step()
                 train_loss_Former += loss.item()
@@ -400,13 +402,10 @@ def train():
             save.append(" ")
 
         loss_data = pd.DataFrame()
-
-        # loss_data['epoch'] = list(range(1, epoch + present_epoch + 1))
         loss_data['train_loss'] = train_losses_Former
         loss_data['test_loss'] = test_losses_Former
         loss_data['save'] = save
         loss_data.to_csv('./Model/' + save_name + '/' + save_name + '_loss.csv', index=False)
-
 
         plt.plot(train_losses_Former, label='train')
         plt.plot(test_losses_Former, label='test')

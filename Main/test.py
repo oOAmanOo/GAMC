@@ -121,7 +121,6 @@ class multi_text(nn.Module):
         self.multiheadAttentionLayerNorm = nn.LayerNorm(768, eps=eps)
 
     def forward(self, text):
-
         # multihead attention module
         multi_out = self.multiheadAttentionMultihead(text, text, text)[0]
         multi_out = self.multiheadAttentionLinear1(multi_out)
@@ -147,7 +146,6 @@ class Former(nn.Module):
             text = multi_layer(text)
         return text
     def forward(self, text, image):
-
         text = text.transpose(0, 1)
         text = self.text(text)
         image = image.transpose(0, 1)
