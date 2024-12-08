@@ -238,6 +238,7 @@ def train():
             self.gemmalinearAfter2 = nn.Linear(94, 64)
             # embedding
             self.gemmaLinearBefore = nn.Linear(768, gemma_hiddenstate_size)
+            self.gemmaLinearBefore = nn.Linear(1536 , gemma_hiddenstate_size)
             # feed forward
             self.feedForwardLinear = nn.Linear(768, 768)
             self.feedForwardLayerNorm = nn.LayerNorm(768, eps=eps)
