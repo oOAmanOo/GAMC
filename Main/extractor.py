@@ -1,6 +1,7 @@
 import numpy as np
 import torch.nn as nn
 from transformers import AutoTokenizer
+from transformers import BeitModel, BeitFeatureExtractor
 from transformers import AutoImageProcessor, Swinv2Model
 from PIL import Image
 import torch
@@ -49,7 +50,7 @@ def textExtraction(tokenizer, gemmaConfig, text_data):
     # all_features = []
     # with tqdm.tqdm (total=len(text_data)) as pbar:
     for text in (text_data):
-        tokens = tokenizer(text, padding_side="right", truncation=True, padding='max_length', max_length=64, return_tensors='pt', )
+        tokens = tokenizer(text, padding_side="right", truncation=True, padding='max_length', max_length=197, return_tensors='pt', )
         # tokens = tokenizer(text, truncation=True, padding='max_length', max_length=94, return_tensors='pt', )
 
         token_ids.append(tokens['input_ids'])
@@ -78,14 +79,14 @@ def textExtractReverse(gemma, tokenizer, data, labels_text_id):
 
     reverse_data = insert_zeros(data.squeeze(-1))
     reverse = tokenizer.batch_decode(reverse_data, skip_special_tokens=False)
-    prompt = ""
-    # prompt = "Answer with only 100 words, only answer, no explain. Write a humor memetic post for Instagram with the following elements: "
+    # prompt = ""
+    prompt = "Answer with only 100 words, only answer, no explain. Write a humor memetic post for Instagram with the following elements: "
     for i, text in enumerate(reverse):
         text = text.replace("<pad>", " ").replace("  ", " ")
         text = set(text.split())
         text = ', '.join(text)
         reverse[i] = prompt + text + "."
-    input_ids = tokenizer(reverse, truncation=True, padding='max_length', max_length=64, return_tensors='pt').to(device)
+    input_ids = tokenizer(reverse, padding_side="right", truncation=True, padding='max_length', max_length=100, return_tensors='pt').to(device)
     # generate_ids = gemma.generate(input_ids = input_ids.input_ids, max_new_tokens=100)
     # print(tokenizer.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0])
     gemma_output = gemma(input_ids = input_ids.input_ids, max_length=200, labels=labels_text_id, return_dict = True)
@@ -98,12 +99,12 @@ def textExtractReverse(gemma, tokenizer, data, labels_text_id):
     return loss, logits
 
 def textExtractReverse_embedd(gemma, data, labels_text_id):
-    # tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
+    tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
     # prompt_embedd = prompt_embedd.expand(data.shape[0], -1, -1)
     # input_embedd= torch.cat((prompt_embedd, data), dim=1)
     input_embedd = data
-    # generate_ids = gemma.generate(inputs_embeds=input_embedd.to(torch.bfloat16), max_new_tokens=200)
-    # print(tokenizer.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0])
+    generate_ids = gemma.generate(inputs_embeds=input_embedd.to(torch.bfloat16), max_new_tokens=200)
+    print(tokenizer.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0])
     gemma_output = gemma(inputs_embeds = input_embedd.to(torch.bfloat16), max_length=200, labels=labels_text_id, return_dict = True)
     loss = gemma_output.loss
     # logits = gemma_output.logits
@@ -112,35 +113,57 @@ def textExtractReverse_embedd(gemma, data, labels_text_id):
 
 # 定義批量處理和提取特徵的函數
 def imageExtraction(image_data):
-    # 加載 Swinv2 模型和處理器
-    image_processor = AutoImageProcessor.from_pretrained("microsoft/swinv2-tiny-patch4-window8-256")
-    swin = Swinv2Model.from_pretrained("microsoft/swinv2-tiny-patch4-window8-256")
+    # # 加載 Swinv2 模型和處理器
+    # image_processor = AutoImageProcessor.from_pretrained("microsoft/swinv2-tiny-patch4-window8-256")
+    # swin = Swinv2Model.from_pretrained("microsoft/swinv2-tiny-patch4-window8-256")
+    #
+    # # 將模型設置為評估模式
+    # swin.eval()
+    #
+    # # 如果有 GPU，可以將模型移動到 GPU 上
+    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # swin.to(device)
+    #
+    # all_features = []
+    # # with tqdm.tqdm(total=len(image_data), position=0, leave=True) as pbar:
+    # #     for image_path in (image_data):
+    # #         with torch.no_grad():
+    # # 加載並預處理圖像
+    # image = Image.open(image_data).convert('RGB')
+    # image = np.array(image)
+    # image = image[:, :, :3]
+    # # 使用 image_processor 將 batch 圖片處理成適合模型的格式
+    # inputs = image_processor(image, return_tensors="pt")
+    # # 將 inputs 放到 GPU 上（如果可用）
+    # inputs.to(device)
+    # # 獲取 Swinv2 模型的輸出
+    # outputs = swin(**inputs)
+    # last_hidden_states = outputs.last_hidden_state
+    # # 儲存特徵
+    # last_hidden_states = last_hidden_states.cpu()
+    # all_features.append(last_hidden_states.squeeze(0).detach())
+    # # pbar.update(1)
+    # # return all_features
 
-    # 將模型設置為評估模式
-    swin.eval()
-
-    # 如果有 GPU，可以將模型移動到 GPU 上
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    swin.to(device)
-
+    # 加载预训练模型和特征提取器
+    feature_extractor = BeitFeatureExtractor.from_pretrained("microsoft/beit-base-patch16-224-pt22k-ft22k")
+    beit = BeitModel.from_pretrained("microsoft/beit-base-patch16-224-pt22k-ft22k")
+    beit.eval()
     all_features = []
-    # with tqdm.tqdm(total=len(image_data), position=0, leave=True) as pbar:
-    #     for image_path in (image_data):
-    #         with torch.no_grad():
-    # 加載並預處理圖像
-    image = Image.open(image_data).convert('RGB')
-    image = np.array(image)
-    image = image[:, :, :3]
-    # 使用 image_processor 將 batch 圖片處理成適合模型的格式
-    inputs = image_processor(image, return_tensors="pt")
-    # 將 inputs 放到 GPU 上（如果可用）
-    inputs.to(device)
-    # 獲取 Swinv2 模型的輸出
-    outputs = swin(**inputs)
-    last_hidden_states = outputs.last_hidden_state
-    # 儲存特徵
-    last_hidden_states = last_hidden_states.cpu()
-    all_features.append(last_hidden_states.squeeze(0).detach())
-    # pbar.update(1)
-    # return all_features
-    return last_hidden_states.detach()
+    with tqdm.tqdm(total=len(image_data), position=0, leave=True) as pbar:
+        for image_path in (image_data):
+            with torch.no_grad():
+                # 预处理图像
+                image = Image.open(image_path).convert("RGB")
+                image = np.array(image)
+                image = image[:, :, :3]
+                inputs = feature_extractor(images=image, return_tensors="pt")
+
+                # 提取特征
+                outputs = beit(**inputs)  # (batch_size, num_patches+1, hidden_dim)
+                patch_embeddings = outputs.last_hidden_state  # batch_size, 197, 768
+                # 儲存特徵
+                patch_embeddings = patch_embeddings.cpu()
+                all_features.append(patch_embeddings.squeeze(0).detach())
+                pbar.update(1)
+    return all_features

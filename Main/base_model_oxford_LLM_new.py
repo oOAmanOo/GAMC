@@ -38,18 +38,14 @@ def train():
     epochs = 200
     batch_size = 15
     optimizer_Former_lr = 1e-5
-    save_name = '20241208_LoRa_embedd_smallPrompt_concat_onlyGemmaLoss_base_20241201_coAttention_temp'
+    save_name = '20241201_wo_coAttention_temp'
     if not os.path.exists('./Model/' + save_name):
         os.makedirs('./Model/' + save_name)
         os.makedirs('D:/MemeGAN/Model/' + save_name)
     ################ right ################
-    # twoModel = False
-    # checkpoint_folder = '20241201_wo_coAttention_temp'
-    # checkpoint_Former = 'D:/MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_83.pth'
-    ################ left  ################
     twoModel = False
-    checkpoint_folder = '20241201_coAttention_temp'
-    checkpoint_Former = 'D:/MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_140.pth'
+    checkpoint_folder = '20241201_wo_coAttention_temp'
+    checkpoint_Former = 'D:/MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_83.pth'
     #######################################
     # twoModel = True
     # checkpoint_folder = '20241204_noprompt_base_20241201_coAttention_temp'
@@ -113,14 +109,14 @@ def train():
     percent = round((b / a) * 100, 3)
     print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
 
-    prompt_gemma = "Create memetic post on Instagram."
-    prompt_gemma = tokenizer(prompt_gemma, padding_side="right", truncation=True, padding='max_length', max_length=64, return_tensors='pt').to(device)
-    text_embedding = nn.Embedding(gemmaConfig.vocab_size, 768).to(device)
-    prompt_gemma = text_embedding(prompt_gemma['input_ids']).to(device)
-    prompt_gemma = prompt_gemma.squeeze(1).expand(batch_size, -1, -1).to(torch.bfloat16)
-    # print(prompt_gemma.shape)
-    del a, b, percent
-    gc.collect()
+    # prompt_gemma = "Create memetic post on Instagram."
+    # prompt_gemma = tokenizer(prompt_gemma, padding_side="right", truncation=True, padding='max_length', max_length=64, return_tensors='pt').to(device)
+    # text_embedding = nn.Embedding(gemmaConfig.vocab_size, 768).to(device)
+    # prompt_gemma = text_embedding(prompt_gemma['input_ids']).to(device)
+    # prompt_gemma = prompt_gemma.squeeze(1).expand(batch_size, -1, -1).to(torch.bfloat16)
+    # # print(prompt_gemma.shape)
+    # del a, b, percent
+    # gc.collect()
     ########################################################################################################
     class self_image(nn.Module):
         def __init__(self):
@@ -252,17 +248,17 @@ def train():
             image_G = Former.image(image)
 
             image_G = image_G.transpose(0, 1)
-            # image_GG = self.gemmaLinearMaxTokens(image_G.transpose(1, 2)).transpose(1, 2)
-            # image_GG = self.gemmaLinearBefore(image_GG)
-            # image_GG = self.gemmaSoftmax(image_GG + eps)
+            image_GG = self.gemmaLinearMaxTokens(image_G.transpose(1, 2)).transpose(1, 2)
+            image_GG = self.gemmaLinearBefore(image_GG)
+            image_GG = self.gemmaSoftmax(image_GG + eps)
             # get max value of each row, total 32*64
 
             # with torch.no_grad():
-            # top_k_values, top_k_indices = torch.topk(image_GG, 1, dim=2, largest=True)
-            # loss, logits = textExtractReverse(gemma, tokenizer, top_k_indices, text_id)
-            image_GG = torch.cat((prompt_gemma2, image_G), dim=-1) # 8 + 64 = 72
-            image_GG = self.gemmaLinearBefore(image_GG)
-            loss, logits = textExtractReverse_embedd(gemma, image_GG, text_id)
+            top_k_values, top_k_indices = torch.topk(image_GG, 1, dim=2, largest=True)
+            loss, logits = textExtractReverse(gemma, tokenizer, top_k_indices, text_id)
+            # image_GG = torch.cat((prompt_gemma2, image_G), dim=-1) # 8 + 64 = 72
+            # image_GG = self.gemmaLinearBefore(image_GG)
+            # loss, logits = textExtractReverse_embedd(gemma, image_GG, text_id)
             # ###########################################   funny score   ###########################################
             # text = self.gemmalinearAfter(logits.to(torch.bfloat16))
             # text = text.transpose(0, 1)

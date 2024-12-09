@@ -46,6 +46,13 @@ b = count_trainable_parameters(gemma)
 #留下小數點後兩位就好
 percent = round((b / a) * 100, 3)
 print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
+
+prompt_gemma = "Create memetic post on Instagram."
+prompt_gemma = tokenizer(prompt_gemma, padding_side="right", truncation=True, padding='max_length', max_length=64, return_tensors='pt').to(device)
+text_embedding = nn.Embedding(gemmaConfig.vocab_size, 768).to(device)
+prompt_gemma = text_embedding(prompt_gemma['input_ids']).to(device)
+prompt_gemma = prompt_gemma.squeeze(1).to(torch.bfloat16)
+# print(prompt_gemma.shape)
 del a, b, percent
 gc.collect()
 ########################################################################################################
@@ -121,6 +128,7 @@ class multi_text(nn.Module):
         self.multiheadAttentionLayerNorm = nn.LayerNorm(768, eps=eps)
 
     def forward(self, text):
+
         # multihead attention module
         multi_out = self.multiheadAttentionMultihead(text, text, text)[0]
         multi_out = self.multiheadAttentionLinear1(multi_out)
@@ -146,6 +154,7 @@ class Former(nn.Module):
             text = multi_layer(text)
         return text
     def forward(self, text, image):
+
         text = text.transpose(0, 1)
         text = self.text(text)
         image = image.transpose(0, 1)
@@ -160,8 +169,10 @@ class Generator(nn.Module):
         # self.gemmaLinearBefore = nn.Linear(768, gemmaConfig.vocab_size)
         self.gemmaSoftmax = nn.Softmax(dim=2)
         self.gemmalinearAfter = nn.Linear(gemmaConfig.vocab_size, 768)
+        self.gemmalinearAfter2 = nn.Linear(94, 64)
         # embedding
         self.gemmaLinearBefore = nn.Linear(768, gemma_hiddenstate_size)
+        self.gemmaLinearBefore = nn.Linear(1536 , gemma_hiddenstate_size)
         # feed forward
         self.feedForwardLinear = nn.Linear(768, 768)
         self.feedForwardLayerNorm = nn.LayerNorm(768, eps=eps)
@@ -169,7 +180,7 @@ class Generator(nn.Module):
         self.FunnyScorelinear1 = nn.Linear(768, 1)
         self.FunnyScorelinear2 = nn.Linear(64, 1)
 
-    def forward(self, Former, image, text_id):
+    def forward(self, Former, image, text_id, prompt_gemma2):
         ##############################################   generate ##############################################
         image = image.transpose(0, 1)
         image_G = Former.image(image)
@@ -179,10 +190,12 @@ class Generator(nn.Module):
         # image_GG = self.gemmaLinearBefore(image_GG)
         # image_GG = self.gemmaSoftmax(image_GG + eps)
         # get max value of each row, total 32*64
-        image_GG = self.gemmaLinearBefore(image_G)
+
         # with torch.no_grad():
         # top_k_values, top_k_indices = torch.topk(image_GG, 1, dim=2, largest=True)
         # loss, logits = textExtractReverse(gemma, tokenizer, top_k_indices, text_id)
+        image_GG = torch.cat((prompt_gemma2, image_G), dim=-1) # 8 + 64 = 72
+        image_GG = self.gemmaLinearBefore(image_GG)
         loss, logits = textExtractReverse_embedd(gemma, image_GG, text_id)
         # ###########################################   funny score   ###########################################
         # text = self.gemmalinearAfter(logits.to(torch.bfloat16))
@@ -206,10 +219,10 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 NetFormer = Former().to(torch.bfloat16).to(device)
 Generator = Generator().to(torch.bfloat16).to(device)
 #######################################
-checkpoint_folder = '20241205_LoRa_embedd_noPrompt_onlyGemmaLoss_base_20241201_coAttention_temp'
-checkpoint_Former = 'D:MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_5.pth'
-checkpoint_Generator = 'D:MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetLLM_5.pth'
-checkpoint_Gemma = 'D:MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_Gemma_5.pth'
+checkpoint_folder = '20241208_LoRa_embedd_smallPrompt_concat_onlyGemmaLoss_base_20241201_coAttention_temp'
+checkpoint_Former = './Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_40.pth'
+checkpoint_Generator = './Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetLLM_40.pth'
+checkpoint_Gemma = './Model/' + checkpoint_folder + '/' + checkpoint_folder + '_Gemma_40.pth'
 #######################################
 checkpoint_Former = torch.load(checkpoint_Former)
 checkpoint_Generator = torch.load(checkpoint_Generator)
@@ -231,5 +244,5 @@ image = torch.load('../../Oxford_HIC/ImageData/bokete_9678.pt', weights_only=Fal
 test_gt = ['I\'m like, \"What is this big?\"']
 
 text_id = textExtraction(tokenizer, gemmaConfig, test_gt)
-gemma_loss, output_funny_score = Generator(NetFormer, image.to(device), text_id.to(device))
+gemma_loss, output_funny_score = Generator(NetFormer, image.to(device), text_id.to(device), prompt_gemma)
 print(gemma_loss,output_funny_score)
