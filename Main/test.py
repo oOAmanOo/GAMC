@@ -121,7 +121,6 @@ class multi_text(nn.Module):
         self.multiheadAttentionLayerNorm = nn.LayerNorm(768, eps=eps)
 
     def forward(self, text):
-
         # multihead attention module
         multi_out = self.multiheadAttentionMultihead(text, text, text)[0]
         multi_out = self.multiheadAttentionLinear1(multi_out)
@@ -147,7 +146,6 @@ class Former(nn.Module):
             text = multi_layer(text)
         return text
     def forward(self, text, image):
-
         text = text.transpose(0, 1)
         text = self.text(text)
         image = image.transpose(0, 1)
@@ -186,20 +184,21 @@ class Generator(nn.Module):
         # top_k_values, top_k_indices = torch.topk(image_GG, 1, dim=2, largest=True)
         # loss, logits = textExtractReverse(gemma, tokenizer, top_k_indices, text_id)
         loss, logits = textExtractReverse_embedd(gemma, image_GG, text_id)
-        ###########################################   funny score   ###########################################
-        text = self.gemmalinearAfter(logits.to(torch.bfloat16))
-        text = text.transpose(0, 1)
-        text_F = Former.text(text).transpose(0, 1)
-        ######################### funny score #########################
-        feature_fusion = image_G + text_F  # visual_attending_textual + textual_attending_visual
-        feature_fusionFF = self.feedForwardLinear(feature_fusion)
-        feature_fusion_final = self.feedForwardLayerNorm(feature_fusion + feature_fusionFF)
-        feature_fusion_final = feature_fusion_final.squeeze(-1)
-        feature_fusion_final = feature_fusion_final
-        output_funny_score = self.FunnyScorelinear1(feature_fusion_final).squeeze(-1)
-        output_funny_score = self.FunnyScorelinear2(output_funny_score).squeeze(-1)
-        #######################################################################################################
-        return loss , output_funny_score
+        # ###########################################   funny score   ###########################################
+        # text = self.gemmalinearAfter(logits.to(torch.bfloat16))
+        # text = text.transpose(0, 1)
+        # text_F = Former.text(text).transpose(0, 1)
+        # ######################### funny score #########################
+        # feature_fusion = image_G + text_F  # visual_attending_textual + textual_attending_visual
+        # feature_fusionFF = self.feedForwardLinear(feature_fusion)
+        # feature_fusion_final = self.feedForwardLayerNorm(feature_fusion + feature_fusionFF)
+        # feature_fusion_final = feature_fusion_final.squeeze(-1)
+        # feature_fusion_final = feature_fusion_final
+        # output_funny_score = self.FunnyScorelinear1(feature_fusion_final).squeeze(-1)
+        # output_funny_score = self.FunnyScorelinear2(output_funny_score).squeeze(-1)
+        # #######################################################################################################
+        output_funny_score = 0
+        return loss, output_funny_score
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -207,10 +206,10 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 NetFormer = Former().to(torch.bfloat16).to(device)
 Generator = Generator().to(torch.bfloat16).to(device)
 #######################################
-checkpoint_folder = '20241204_Lora_base_20241201_wo_coAttention_temp'
-checkpoint_Former = './Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_51.pth'
-checkpoint_Generator = './Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetLLM_51.pth'
-checkpoint_Gemma = './Model/' + checkpoint_folder + '/' + checkpoint_folder + '_Gemma_51.pth'
+checkpoint_folder = '20241205_LoRa_embedd_noPrompt_onlyGemmaLoss_base_20241201_coAttention_temp'
+checkpoint_Former = 'D:MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_5.pth'
+checkpoint_Generator = 'D:MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetLLM_5.pth'
+checkpoint_Gemma = 'D:MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_Gemma_5.pth'
 #######################################
 checkpoint_Former = torch.load(checkpoint_Former)
 checkpoint_Generator = torch.load(checkpoint_Generator)
@@ -226,8 +225,10 @@ gemma.eval()
 
 # image = imageExtraction("./test_img.jpg").to(torch.bfloat16)
 # test_gt = ['you all loved it so i brought it back']
-image = imageExtraction("./test_img2.jpg").to(torch.bfloat16)
-test_gt = ['Can’t believe this is real (still) life. The Saucy Nugg legacy is forever cemented in oil on canvas (2024). Thank you']
+# image = imageExtraction("./test_img2.jpg").to(torch.bfloat16)
+# test_gt = ['Can’t believe this is real (still) life. The Saucy Nugg legacy is forever cemented in oil on canvas (2024). Thank you']
+image = torch.load('../../Oxford_HIC/ImageData/bokete_9678.pt', weights_only=False).unsqueeze(0).to(torch.bfloat16)
+test_gt = ['I\'m like, \"What is this big?\"']
 
 text_id = textExtraction(tokenizer, gemmaConfig, test_gt)
 gemma_loss, output_funny_score = Generator(NetFormer, image.to(device), text_id.to(device))
