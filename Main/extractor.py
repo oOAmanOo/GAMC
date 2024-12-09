@@ -50,7 +50,7 @@ def textExtraction(tokenizer, gemmaConfig, text_data):
     # all_features = []
     # with tqdm.tqdm (total=len(text_data)) as pbar:
     for text in (text_data):
-        tokens = tokenizer(text, padding_side="right", truncation=True, padding='max_length', max_length=197, return_tensors='pt', )
+        tokens = tokenizer(text, padding_side="right", truncation=True, padding='max_length', max_length=100, return_tensors='pt', )
         # tokens = tokenizer(text, truncation=True, padding='max_length', max_length=94, return_tensors='pt', )
 
         token_ids.append(tokens['input_ids'])
