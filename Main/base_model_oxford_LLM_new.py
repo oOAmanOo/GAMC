@@ -38,7 +38,7 @@ def train():
     epochs = 200
     batch_size = 15
     optimizer_Former_lr = 1e-5
-    save_name = '20241201_wo_coAttention_temp'
+    save_name = '20241209_id_gemmaPrompt_20241201_wo_coAttention_temp'
     if not os.path.exists('./Model/' + save_name):
         os.makedirs('./Model/' + save_name)
         os.makedirs('D:/MemeGAN/Model/' + save_name)
@@ -109,14 +109,14 @@ def train():
     percent = round((b / a) * 100, 3)
     print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
 
-    # prompt_gemma = "Create memetic post on Instagram."
-    # prompt_gemma = tokenizer(prompt_gemma, padding_side="right", truncation=True, padding='max_length', max_length=64, return_tensors='pt').to(device)
-    # text_embedding = nn.Embedding(gemmaConfig.vocab_size, 768).to(device)
-    # prompt_gemma = text_embedding(prompt_gemma['input_ids']).to(device)
-    # prompt_gemma = prompt_gemma.squeeze(1).expand(batch_size, -1, -1).to(torch.bfloat16)
-    # # print(prompt_gemma.shape)
-    # del a, b, percent
-    # gc.collect()
+    prompt_gemma = "Create memetic post on Instagram."
+    prompt_gemma = tokenizer(prompt_gemma, padding_side="right", truncation=True, padding='max_length', max_length=64, return_tensors='pt').to(device)
+    text_embedding = nn.Embedding(gemmaConfig.vocab_size, 768).to(device)
+    prompt_gemma = text_embedding(prompt_gemma['input_ids']).to(device)
+    prompt_gemma = prompt_gemma.squeeze(1).expand(batch_size, -1, -1).to(torch.bfloat16)
+    # print(prompt_gemma.shape)
+    del a, b, percent
+    gc.collect()
     ########################################################################################################
     class self_image(nn.Module):
         def __init__(self):
@@ -228,13 +228,10 @@ def train():
             super(Generator, self).__init__()
             # gemma
             self.gemmaLinearMaxTokens = nn.Linear(64, 32)
-            # self.gemmaLinearBefore = nn.Linear(768, gemmaConfig.vocab_size)
+            self.gemmaLinearBefore = nn.Linear(768, gemmaConfig.vocab_size)
             self.gemmaSoftmax = nn.Softmax(dim=2)
-            self.gemmalinearAfter = nn.Linear(gemmaConfig.vocab_size, 768)
-            self.gemmalinearAfter2 = nn.Linear(94, 64)
             # embedding
-            self.gemmaLinearBefore = nn.Linear(768, gemma_hiddenstate_size)
-            self.gemmaLinearBefore = nn.Linear(1536 , gemma_hiddenstate_size)
+            # self.gemmaLinearBefore = nn.Linear(768, gemma_hiddenstate_size)
             # feed forward
             self.feedForwardLinear = nn.Linear(768, 768)
             self.feedForwardLayerNorm = nn.LayerNorm(768, eps=eps)
