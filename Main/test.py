@@ -17,6 +17,14 @@ from peft import LoraConfig, TaskType, get_peft_model
 from extractor import addImagePath, textExtraction, imageExtraction, textExtractReverse, textExtractReverse_embedd
 eps = torch.finfo(torch.bfloat16).eps
 
+dirPath = '../Data/Oxford_HIC/CaptionID_oxford_hic_data.csv'
+data = pd.read_csv(dirPath)
+print("shape of data: ", data.shape)
+data = data.sample(n=2000, random_state=42, replace=True).reset_index(drop=True)
+print("sample of data: ", data.shape)
+
+train, test = train_test_split(data, test_size=0.2, random_state=42)
+print(train.head())
 ### 官方的Gemma #########################################################################################
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # 2b = 2304, 9b = 3584, 27b = 4608
@@ -48,11 +56,13 @@ percent = round((b / a) * 100, 3)
 print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
 
 prompt_gemma = "Create memetic post on Instagram."
+# prompt_gemma = "Answer with only 100 words, only answer, no explain. Write a humor memetic post for Instagram with the following elements: "
+
 prompt_gemma = tokenizer(prompt_gemma, padding_side="right", truncation=True, padding='max_length', max_length=64, return_tensors='pt').to(device)
 text_embedding = nn.Embedding(gemmaConfig.vocab_size, 768).to(device)
 prompt_gemma = text_embedding(prompt_gemma['input_ids']).to(device)
 prompt_gemma = prompt_gemma.squeeze(1).to(torch.bfloat16)
-# print(prompt_gemma.shape)
+print(prompt_gemma.shape)
 del a, b, percent
 gc.collect()
 ########################################################################################################
@@ -96,26 +106,26 @@ class self_image(nn.Module):
         self_out = self.selfAttentionLinear2(self_out)
         self_out = self.selfAttentionLayerNorm2(self_out + self_temp)
 
-        prefix = self.prefix_const.unsqueeze(0).expand(image.shape[1], -1, -1).transpose(0, 1).to(device).to(torch.bfloat16)
-        # co-attention image module
-        visual_attending_textual = self.coAttentionTextMultihead(self_out, prefix, prefix)[0]
-        visual_attending_textual = self.coAttentionTextLinear1(visual_attending_textual)
-        visual_attending_textual = self.coAttentionTextRelu(visual_attending_textual)
-        visual_attending_textual = self.coAttentionTextLinear2(visual_attending_textual)
-        visual_attending_textual = self.coAttentionTextLayerNorm(visual_attending_textual + self_out)
+        # prefix = self.prefix_const.unsqueeze(0).expand(image.shape[1], -1, -1).transpose(0, 1).to(device).to(torch.bfloat16)
+        # # co-attention image module
+        # visual_attending_textual = self.coAttentionTextMultihead(self_out, prefix, prefix)[0]
+        # visual_attending_textual = self.coAttentionTextLinear1(visual_attending_textual)
+        # visual_attending_textual = self.coAttentionTextRelu(visual_attending_textual)
+        # visual_attending_textual = self.coAttentionTextLinear2(visual_attending_textual)
+        # visual_attending_textual = self.coAttentionTextLayerNorm(visual_attending_textual + self_out)
+        #
+        # # co-attention text module
+        # textual_attending_visual = self.coAttentionTextMultihead(prefix, self_out, self_out)[0]
+        # textual_attending_visual = self.coAttentionTextLinear1(textual_attending_visual)
+        # textual_attending_visual = self.coAttentionTextRelu(textual_attending_visual)
+        # textual_attending_visual = self.coAttentionTextLinear2(textual_attending_visual)
+        # textual_attending_visual = self.coAttentionTextLayerNorm(textual_attending_visual + prefix)
+        #
+        # output = self.feedForwardLinear1(visual_attending_textual + textual_attending_visual)
+        # output = self.feedForwardRelu(output)
+        # output = self.feedForwardLinear2(output)
 
-        # co-attention text module
-        textual_attending_visual = self.coAttentionTextMultihead(prefix, self_out, self_out)[0]
-        textual_attending_visual = self.coAttentionTextLinear1(textual_attending_visual)
-        textual_attending_visual = self.coAttentionTextRelu(textual_attending_visual)
-        textual_attending_visual = self.coAttentionTextLinear2(textual_attending_visual)
-        textual_attending_visual = self.coAttentionTextLayerNorm(textual_attending_visual + prefix)
-
-        output = self.feedForwardLinear1(visual_attending_textual + textual_attending_visual)
-        output = self.feedForwardRelu(output)
-        output = self.feedForwardLinear2(output)
-
-        return output
+        return self_out
 
 class multi_text(nn.Module):
     def __init__(self):
@@ -168,11 +178,9 @@ class Generator(nn.Module):
         self.gemmaLinearMaxTokens = nn.Linear(64, 32)
         # self.gemmaLinearBefore = nn.Linear(768, gemmaConfig.vocab_size)
         self.gemmaSoftmax = nn.Softmax(dim=2)
-        self.gemmalinearAfter = nn.Linear(gemmaConfig.vocab_size, 768)
-        self.gemmalinearAfter2 = nn.Linear(94, 64)
         # embedding
-        self.gemmaLinearBefore = nn.Linear(768, gemma_hiddenstate_size)
-        self.gemmaLinearBefore = nn.Linear(1536 , gemma_hiddenstate_size)
+        # self.gemmaLinearBefore = nn.Linear(768, gemma_hiddenstate_size)
+        self.gemmaLinearBefore = nn.Linear(1536, gemma_hiddenstate_size)
         # feed forward
         self.feedForwardLinear = nn.Linear(768, 768)
         self.feedForwardLayerNorm = nn.LayerNorm(768, eps=eps)
@@ -186,16 +194,17 @@ class Generator(nn.Module):
         image_G = Former.image(image)
 
         image_G = image_G.transpose(0, 1)
+
         # image_GG = self.gemmaLinearMaxTokens(image_G.transpose(1, 2)).transpose(1, 2)
         # image_GG = self.gemmaLinearBefore(image_GG)
         # image_GG = self.gemmaSoftmax(image_GG + eps)
-        # get max value of each row, total 32*64
-
+        # # get max value of each row, total 32*64
         # with torch.no_grad():
-        # top_k_values, top_k_indices = torch.topk(image_GG, 1, dim=2, largest=True)
-        # loss, logits = textExtractReverse(gemma, tokenizer, top_k_indices, text_id)
+        #     top_k_values, top_k_indices = torch.topk(image_GG, 1, dim=2, largest=True)
+        #     loss, logits = textExtractReverse(gemma, tokenizer, top_k_indices, text_id)
         image_GG = torch.cat((prompt_gemma2, image_G), dim=-1) # 8 + 64 = 72
         image_GG = self.gemmaLinearBefore(image_GG)
+        # with torch.no_grad():
         loss, logits = textExtractReverse_embedd(gemma, image_GG, text_id)
         # ###########################################   funny score   ###########################################
         # text = self.gemmalinearAfter(logits.to(torch.bfloat16))
@@ -219,10 +228,10 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 NetFormer = Former().to(torch.bfloat16).to(device)
 Generator = Generator().to(torch.bfloat16).to(device)
 #######################################
-checkpoint_folder = '20241208_LoRa_embedd_smallPrompt_concat_onlyGemmaLoss_base_20241201_coAttention_temp'
-checkpoint_Former = './Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_40.pth'
-checkpoint_Generator = './Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetLLM_40.pth'
-checkpoint_Gemma = './Model/' + checkpoint_folder + '/' + checkpoint_folder + '_Gemma_40.pth'
+checkpoint_folder = '20241210_LoRa_embedd_smallPrompt_onlyGemmaLoss_base_20241201_coAttention_temp'
+checkpoint_Former = 'D:MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_43.pth'
+checkpoint_Generator = 'D:MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetLLM_43.pth'
+checkpoint_Gemma = 'D:MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_Gemma_43.pth'
 #######################################
 checkpoint_Former = torch.load(checkpoint_Former)
 checkpoint_Generator = torch.load(checkpoint_Generator)
@@ -232,17 +241,90 @@ gemma.load_state_dict(torch.load(checkpoint_Gemma)['model_state_dict'])
 #######################################
 
 # generate
-NetFormer.eval()
-Generator.eval()
-gemma.eval()
+# NetFormer.eval()
+# Generator.eval()
+# gemma.eval()
 
 # image = imageExtraction("./test_img.jpg").to(torch.bfloat16)
 # test_gt = ['you all loved it so i brought it back']
+# text_id = textExtraction(tokenizer, gemmaConfig, test_gt)
+# gemma_loss, output_funny_score = Generator(NetFormer, image.to(device), text_id.to(device), prompt_gemma)
+# print(gemma_loss)
+#
 # image = imageExtraction("./test_img2.jpg").to(torch.bfloat16)
 # test_gt = ['Can’t believe this is real (still) life. The Saucy Nugg legacy is forever cemented in oil on canvas (2024). Thank you']
-image = torch.load('../../Oxford_HIC/ImageData/bokete_9678.pt', weights_only=False).unsqueeze(0).to(torch.bfloat16)
-test_gt = ['I\'m like, \"What is this big?\"']
+# text_id = textExtraction(tokenizer, gemmaConfig, test_gt)
+# gemma_loss, output_funny_score = Generator(NetFormer, image.to(device), text_id.to(device), prompt_gemma)
+# print(gemma_loss)
 
+print('=======================  sample1 =========================')
+print(train[train['image_id'] == 'bokete_51227'].shape[0] > 0)
+image = torch.load('../../Oxford_HIC/ImageData/bokete_51227.pt', weights_only=False).unsqueeze(0).to(torch.bfloat16)
+test_gt = ['Matsui found a porn actress in the audience.']
 text_id = textExtraction(tokenizer, gemmaConfig, test_gt)
 gemma_loss, output_funny_score = Generator(NetFormer, image.to(device), text_id.to(device), prompt_gemma)
-print(gemma_loss,output_funny_score)
+print(gemma_loss)
+print('=======================  sample2 =========================')
+print(train[train['image_id'] == 'bokete_3820'].shape[0] > 0)
+image = torch.load('../../Oxford_HIC/ImageData/bokete_3820.pt', weights_only=False).unsqueeze(0).to(torch.bfloat16)
+test_gt = ['I\'m in my 50s!']
+text_id = textExtraction(tokenizer, gemmaConfig, test_gt)
+gemma_loss, output_funny_score = Generator(NetFormer, image.to(device), text_id.to(device), prompt_gemma)
+print(gemma_loss)
+print('=======================  sample3 =========================')
+print(train[train['image_id'] == 'imgflip_0'].shape[0] > 0)
+image = torch.load('../../Oxford_HIC/ImageData/imgflip_0.pt', weights_only=False).unsqueeze(0).to(torch.bfloat16)
+test_gt = ['Getting hurt from cutting open your leg; Getting hurt from taking off a bandaid']
+text_id = textExtraction(tokenizer, gemmaConfig, test_gt)
+gemma_loss, output_funny_score = Generator(NetFormer, image.to(device), text_id.to(device), prompt_gemma)
+print(gemma_loss)
+print('=======================  sample4 =========================')
+print(train[train['image_id'] == 'imgflip_8'].shape[0] > 0)
+image = torch.load('../../Oxford_HIC/ImageData/imgflip_8.pt', weights_only=False).unsqueeze(0).to(torch.bfloat16)
+test_gt = ['image tagged in memes,one does not simply']
+text_id = textExtraction(tokenizer, gemmaConfig, test_gt)
+gemma_loss, output_funny_score = Generator(NetFormer, image.to(device), text_id.to(device), prompt_gemma)
+print(gemma_loss)
+print('=======================  sample5 =========================')
+print(train[train['image_id'] == 'imgflip_15'].shape[0] > 0)
+image = torch.load('../../Oxford_HIC/ImageData/imgflip_15.pt', weights_only=False).unsqueeze(0).to(torch.bfloat16)
+test_gt = ['KIDS WHEN THEIR PARENTS GIVE THEM; "THE TALK"']
+text_id = textExtraction(tokenizer, gemmaConfig, test_gt)
+gemma_loss, output_funny_score = Generator(NetFormer, image.to(device), text_id.to(device), prompt_gemma)
+print(gemma_loss)
+print('=======================  sample6 =========================')
+print(train[train['image_id'] == 'imgflip_19'].shape[0] > 0)
+image = torch.load('../../Oxford_HIC/ImageData/imgflip_19.pt', weights_only=False).unsqueeze(0).to(torch.bfloat16)
+test_gt = ['NOT SURE IF PEOPLE ARE UPVOTING MEMES; OR USER NAMES']
+text_id = textExtraction(tokenizer, gemmaConfig, test_gt)
+gemma_loss, output_funny_score = Generator(NetFormer, image.to(device), text_id.to(device), prompt_gemma)
+print(gemma_loss)
+print('=======================  sample7 =========================')
+print(train[train['image_id'] == 'bokete_104530'].shape[0] > 0)
+image = torch.load('../../Oxford_HIC/ImageData/bokete_104530.pt', weights_only=False).unsqueeze(0).to(torch.bfloat16)
+test_gt = ['It\'s a family night runaway.']
+text_id = textExtraction(tokenizer, gemmaConfig, test_gt)
+gemma_loss, output_funny_score = Generator(NetFormer, image.to(device), text_id.to(device), prompt_gemma)
+print(gemma_loss)
+print('=======================  sample8 =========================')
+print(train[train['image_id'] == 'imgflip_730'].shape[0] > 0)
+image = torch.load('../../Oxford_HIC/ImageData/imgflip_730.pt', weights_only=False).unsqueeze(0).to(torch.bfloat16)
+test_gt = ['CHUCK IS THE GOOD TYPE OF SCUMBAG; CUZ HE ONLY ROASTS YOU FROM YOUR INSIDES']
+text_id = textExtraction(tokenizer, gemmaConfig, test_gt)
+gemma_loss, output_funny_score = Generator(NetFormer, image.to(device), text_id.to(device), prompt_gemma)
+print(gemma_loss)
+print('=======================  sample9 =========================')
+print(train[train['image_id'] == 'imgflip_130'].shape[0] > 0)
+image = torch.load('../../Oxford_HIC/ImageData/imgflip_130.pt', weights_only=False).unsqueeze(0).to(torch.bfloat16)
+test_gt = ['SO YOUR TELLIN\' ME THAT SCHOOLS GOOD FOR YOU']
+text_id = textExtraction(tokenizer, gemmaConfig, test_gt)
+gemma_loss, output_funny_score = Generator(NetFormer, image.to(device), text_id.to(device), prompt_gemma)
+print(gemma_loss)
+print('=======================  sample10 =========================')
+print(train[train['image_id'] == 'imgflip_677'].shape[0] > 0)
+image = torch.load('../../Oxford_HIC/ImageData/imgflip_677.pt', weights_only=False).unsqueeze(0).to(torch.bfloat16)
+test_gt = ['Y\'ALL GOT ANY MORE OF THEM; JOBS?']
+text_id = textExtraction(tokenizer, gemmaConfig, test_gt)
+gemma_loss, output_funny_score = Generator(NetFormer, image.to(device), text_id.to(device), prompt_gemma)
+print(gemma_loss)
+
