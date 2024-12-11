@@ -38,7 +38,7 @@ def train():
     epochs = 200
     batch_size = 15
     optimizer_Former_lr = 1e-5
-    save_name = '20241209_id_gemmaPrompt_20241201_wo_coAttention_temp'
+    save_name = '20241210_LoRa_embedd_shortPrompt_onlyGemmaLoss_base_20241201_wo_coAttention_temp'
     if not os.path.exists('./Model/' + save_name):
         os.makedirs('./Model/' + save_name)
         os.makedirs('D:/MemeGAN/Model/' + save_name)
@@ -110,6 +110,7 @@ def train():
     print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
 
     prompt_gemma = "Create memetic post on Instagram."
+    # prompt_gemma = "Answer with only 100 words, only answer, no explain. Write a humor memetic post for Instagram with the following elements: "
     prompt_gemma = tokenizer(prompt_gemma, padding_side="right", truncation=True, padding='max_length', max_length=64, return_tensors='pt').to(device)
     text_embedding = nn.Embedding(gemmaConfig.vocab_size, 768).to(device)
     prompt_gemma = text_embedding(prompt_gemma['input_ids']).to(device)
@@ -158,26 +159,26 @@ def train():
             self_out = self.selfAttentionLinear2(self_out)
             self_out = self.selfAttentionLayerNorm2(self_out + self_temp)
 
-            prefix = self.prefix_const.unsqueeze(0).expand(image.shape[1], -1, -1).transpose(0, 1).to(device).to(torch.bfloat16)
-            # co-attention image module
-            visual_attending_textual = self.coAttentionTextMultihead(self_out, prefix, prefix)[0]
-            visual_attending_textual = self.coAttentionTextLinear1(visual_attending_textual)
-            visual_attending_textual = self.coAttentionTextRelu(visual_attending_textual)
-            visual_attending_textual = self.coAttentionTextLinear2(visual_attending_textual)
-            visual_attending_textual = self.coAttentionTextLayerNorm(visual_attending_textual + self_out)
+            # prefix = self.prefix_const.unsqueeze(0).expand(image.shape[1], -1, -1).transpose(0, 1).to(device).to(torch.bfloat16)
+            # # co-attention image module
+            # visual_attending_textual = self.coAttentionTextMultihead(self_out, prefix, prefix)[0]
+            # visual_attending_textual = self.coAttentionTextLinear1(visual_attending_textual)
+            # visual_attending_textual = self.coAttentionTextRelu(visual_attending_textual)
+            # visual_attending_textual = self.coAttentionTextLinear2(visual_attending_textual)
+            # visual_attending_textual = self.coAttentionTextLayerNorm(visual_attending_textual + self_out)
+            #
+            # # co-attention text module
+            # textual_attending_visual = self.coAttentionTextMultihead(prefix, self_out, self_out)[0]
+            # textual_attending_visual = self.coAttentionTextLinear1(textual_attending_visual)
+            # textual_attending_visual = self.coAttentionTextRelu(textual_attending_visual)
+            # textual_attending_visual = self.coAttentionTextLinear2(textual_attending_visual)
+            # textual_attending_visual = self.coAttentionTextLayerNorm(textual_attending_visual + prefix)
+            #
+            # output = self.feedForwardLinear1(visual_attending_textual + textual_attending_visual)
+            # output = self.feedForwardRelu(output)
+            # output = self.feedForwardLinear2(output)
 
-            # co-attention text module
-            textual_attending_visual = self.coAttentionTextMultihead(prefix, self_out, self_out)[0]
-            textual_attending_visual = self.coAttentionTextLinear1(textual_attending_visual)
-            textual_attending_visual = self.coAttentionTextRelu(textual_attending_visual)
-            textual_attending_visual = self.coAttentionTextLinear2(textual_attending_visual)
-            textual_attending_visual = self.coAttentionTextLayerNorm(textual_attending_visual + prefix)
-
-            output = self.feedForwardLinear1(visual_attending_textual + textual_attending_visual)
-            output = self.feedForwardRelu(output)
-            output = self.feedForwardLinear2(output)
-
-            return output
+            return self_out
 
     class multi_text(nn.Module):
         def __init__(self):
@@ -224,14 +225,17 @@ def train():
             return image, text
 
     class Generator(nn.Module):
-        def __init__(self, depth=12):
+        def __init__(self, Former, gemma, depth=12):
             super(Generator, self).__init__()
+            self.Former = Former
+            self.gemma = gemma
             # gemma
             self.gemmaLinearMaxTokens = nn.Linear(64, 32)
-            self.gemmaLinearBefore = nn.Linear(768, gemmaConfig.vocab_size)
+            # self.gemmaLinearBefore = nn.Linear(768, gemmaConfig.vocab_size)
             self.gemmaSoftmax = nn.Softmax(dim=2)
             # embedding
             # self.gemmaLinearBefore = nn.Linear(768, gemma_hiddenstate_size)
+            self.gemmaLinearBefore = nn.Linear(1536, gemma_hiddenstate_size)
             # feed forward
             self.feedForwardLinear = nn.Linear(768, 768)
             self.feedForwardLayerNorm = nn.LayerNorm(768, eps=eps)
@@ -239,23 +243,23 @@ def train():
             self.FunnyScorelinear1 = nn.Linear(768, 1)
             self.FunnyScorelinear2 = nn.Linear(64, 1)
 
-        def forward(self, Former, image, text_id, prompt_gemma2):
+        def forward(self, image, text_id, prompt_gemma2):
             ##############################################   generate ##############################################
             image = image.transpose(0, 1)
-            image_G = Former.image(image)
+            image_G = self.Former.image(image)
 
             image_G = image_G.transpose(0, 1)
-            image_GG = self.gemmaLinearMaxTokens(image_G.transpose(1, 2)).transpose(1, 2)
-            image_GG = self.gemmaLinearBefore(image_GG)
-            image_GG = self.gemmaSoftmax(image_GG + eps)
-            # get max value of each row, total 32*64
-
-            # with torch.no_grad():
-            top_k_values, top_k_indices = torch.topk(image_GG, 1, dim=2, largest=True)
-            loss, logits = textExtractReverse(gemma, tokenizer, top_k_indices, text_id)
-            # image_GG = torch.cat((prompt_gemma2, image_G), dim=-1) # 8 + 64 = 72
+            # image_GG = self.gemmaLinearMaxTokens(image_G.transpose(1, 2)).transpose(1, 2)
             # image_GG = self.gemmaLinearBefore(image_GG)
-            # loss, logits = textExtractReverse_embedd(gemma, image_GG, text_id)
+            # image_GG = self.gemmaSoftmax(image_GG + eps)
+            # # get max value of each row, total 32*64
+            #
+            # # with torch.no_grad():
+            # top_k_values, top_k_indices = torch.topk(image_GG, 1, dim=2, largest=True)
+            # loss, logits = textExtractReverse(gemma, tokenizer, top_k_indices, text_id)
+            image_GG = torch.cat((prompt_gemma2, image_G), dim=-1) # 8 + 64 = 72
+            image_GG = self.gemmaLinearBefore(image_GG)
+            loss, logits = textExtractReverse_embedd(gemma, image_GG, text_id)
             # ###########################################   funny score   ###########################################
             # text = self.gemmalinearAfter(logits.to(torch.bfloat16))
             # text = text.transpose(0, 1)
@@ -269,13 +273,11 @@ def train():
             # output_funny_score = self.FunnyScorelinear1(feature_fusion_final).squeeze(-1)
             # output_funny_score = self.FunnyScorelinear2(output_funny_score).squeeze(-1)
             # #######################################################################################################
-            output_funny_score = 0
-            return loss, output_funny_score
+            return loss, logits
 
     NetFormer = Former().to(torch.bfloat16).to(device)
-    Generator = Generator().to(torch.bfloat16).to(device)
+    Generator = Generator(Former= NetFormer, gemma=gemma).to(torch.bfloat16).to(device)
     optimizer_Former = optim.Adam(Generator.parameters(), lr=optimizer_Former_lr)
-
     train_losses_Former = []
     test_losses_Former = []
     save = []
@@ -286,7 +288,7 @@ def train():
     fc_loss_list = []
 
     checkpoint_Former = torch.load(checkpoint_Former)
-    NetFormer.load_state_dict(checkpoint_Former['model_state_dict'])
+    Generator.Former.load_state_dict(checkpoint_Former['model_state_dict'])
 
     if twoModel:
         checkpoint_Generator = torch.load(0)
@@ -297,36 +299,27 @@ def train():
     del checkpoint_Former
     gc.collect()
 
-    # def loss_function(output, labels, funny_score, target_funny_score):
-    #     # match loss
-    #     if output.shape[1] > labels.shape[1]:
-    #         padding = torch.zeros(output.shape[0], output.shape[1] - labels.shape[1]).to(device)
-    #         labels = torch.cat((labels, padding), dim=1)
-    #     elif output.shape[1] < labels.shape[1]:
-    #         padding = torch.zeros(output.shape[0], labels.shape[1] - output.shape[1]).to(device)
-    #         output = torch.cat((output, padding), dim=1)
-    #     gemmaLoss = (output != labels).float().mean()
-    #     fc_loss = nn.MSELoss()(funny_score, target_funny_score)
-    #     gemma_loss_list.append(gemmaLoss.item())
-    #     fc_loss_list.append(fc_loss.item())
-    #     loss = gemmaLoss + fc_loss
-    #
-    #     return loss
-
-    def loss_function(gemmaLoss, funny_score, target_funny_score):
-        # if gemma_logits.shape[1] > text_id.shape[1]:
-        #     gemma_logits = gemma_logits[:, :text_id.shape[1], :]
-        # elif gemma_logits.shape[1] < text_id.shape[1]:
-        #     padding = torch.zeros(gemma_logits.shape[0], text_id.shape[1] - gemma_logits.shape[1], gemma_logits.shape[2])
-        #     gemma_logits = torch.cat((gemma_logits, padding), dim=1)
-        # gemmaLoss = nn.CrossEntropyLoss()(gemma_logits.view(-1, gemmaConfig.vocab_size), text_id.view(-1))
-
-        # fc_loss = nn.MSELoss()(funny_score, target_funny_score)
-        # gemma_loss_list.append(gemmaLoss.item())
-        # fc_loss_list.append(fc_loss.item())
-        # loss = gemmaLoss + fc_loss * 500
-        loss = gemmaLoss
+    def loss_function(logits, text_id):
+        # loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens.flatten(), ignore_index=0)
+        # logits = logits[:, :-1, :].contiguous()
+        # text_id = text_id[:, 1:].contiguous()
+        loss = nn.CrossEntropyLoss()(logits.view(-1, gemmaConfig.vocab_size), text_id.view(-1))
         return loss
+
+    # def loss_function(gemmaLoss, funny_score, target_funny_score):
+    #     # if gemma_logits.shape[1] > text_id.shape[1]:
+    #     #     gemma_logits = gemma_logits[:, :text_id.shape[1], :]
+    #     # elif gemma_logits.shape[1] < text_id.shape[1]:
+    #     #     padding = torch.zeros(gemma_logits.shape[0], text_id.shape[1] - gemma_logits.shape[1], gemma_logits.shape[2])
+    #     #     gemma_logits = torch.cat((gemma_logits, padding), dim=1)
+    #     # gemmaLoss = nn.CrossEntropyLoss()(gemma_logits.view(-1, gemmaConfig.vocab_size), text_id.view(-1))
+    #
+    #     # fc_loss = nn.MSELoss()(funny_score, target_funny_score)
+    #     # gemma_loss_list.append(gemmaLoss.item())
+    #     # fc_loss_list.append(fc_loss.item())
+    #     # loss = gemmaLoss + fc_loss * 500
+    #     loss = gemmaLoss
+    #     return loss
 
     torch.autograd.set_detect_anomaly(True)
     for epoch in range(epochs):
@@ -341,18 +334,14 @@ def train():
                 image = image.to(torch.bfloat16)
                 funny_score = funny_score.to(torch.bfloat16)
                 optimizer_Former.zero_grad()
-                gemma_loss, output_funny_score = Generator(NetFormer, image.to(device), text_id.to(device), prompt_gemma.detach())
-                loss = loss_function(gemma_loss, output_funny_score, funny_score.to(device))
+                gemma_loss, logits = Generator(image.to(device), text_id.to(device), prompt_gemma.detach())
+                # loss = loss_function(logits, text_id.to(device))
+                loss = gemma_loss
+                # loss.requires_grad = True
                 loss.backward()
                 optimizer_Former.step()
                 train_loss_Former += loss.item()
                 tepoch.set_postfix(loss=train_loss_Former / (idx + 1))
-                ##########################################################################
-                # seperateLoss_data = pd.DataFrame()
-                # seperateLoss_data['gemma_loss'] = gemma_loss_list
-                # seperateLoss_data['fc_loss'] = fc_loss_list
-                # seperateLoss_data.to_csv('./Model/' + save_name + '/' + save_name + '_seperateLoss.csv',
-                #                          index=False)
                 ##########################################################################
         train_loss_Former /= len(train_loader)
         train_losses_Former.append(train_loss_Former)
@@ -362,8 +351,9 @@ def train():
                 text_id = textExtraction(tokenizer, gemmaConfig, text)
                 image = image.to(torch.bfloat16)
                 funny_score = funny_score.to(torch.bfloat16)
-                gemma_loss, output_funny_score = Generator(NetFormer, image.to(device), text_id.to(device), prompt_gemma)
-                loss = loss_function(gemma_loss, output_funny_score, funny_score.to(device))
+                gemma_loss, logits = Generator(image.to(device), text_id.to(device), prompt_gemma)
+                loss = gemma_loss
+                # loss = loss_function(logits, text_id.to(device))
                 test_loss_Former += loss.item()
                 tepoch.set_postfix(loss=test_loss_Former / (idx + 1))
         test_loss_Former /= len(test_loader)
@@ -375,23 +365,12 @@ def train():
             best_train_loss_Former = train_loss_Former
             torch.save({
                 'epoch': epoch + present_epoch,
-                'model_state_dict': NetFormer.state_dict(),
-                'optimizer_state_dict': optimizer_Former.state_dict(),
-                'loss': loss,
-            }, './Model/' + save_name + '/' + save_name + '_NetFormer_' + str(epoch + present_epoch) + '.pth')
-            torch.save({
-                'epoch': epoch + present_epoch,
                 'model_state_dict': Generator.state_dict(),
                 'optimizer_state_dict': optimizer_Former.state_dict(),
                 'loss': loss,
             }, './Model/' + save_name + '/' + save_name + '_NetLLM_' + str(epoch + present_epoch) + '.pth')
-            torch.save({
-                'epoch': epoch + present_epoch,
-                'model_state_dict': gemma.state_dict(),
-                'optimizer_state_dict': optimizer_Former.state_dict(),
-                'loss': loss,
-            }, './Model/' + save_name + '/' + save_name + '_Gemma_' + str(epoch + present_epoch) + '.pth')
             save.append("V")
+
         else:
             save.append(" ")
 
