@@ -38,7 +38,7 @@ def train():
     epochs = 200
     batch_size = 15
     optimizer_Former_lr = 1e-5
-    save_name = '20241211_LoRa_id_shortPrompt_CE_base_20241201_wo_coAttention_temp'
+    save_name = '20241212_LoRa_id_shortPrompt_gemmaLoss_avgPooling_addText_base_20241201_wo_coAttention_temp'
     if not os.path.exists('./Model/' + save_name):
         os.makedirs('./Model/' + save_name)
         os.makedirs('D:/MemeGAN/Model/' + save_name)
@@ -230,7 +230,8 @@ def train():
             self.Former = Former
             self.gemma = gemma
             # gemma
-            self.gemmaLinearMaxTokens = nn.Linear(64, 32)
+            # self.gemmaLinearMaxTokens = nn.Linear(64, 32)
+            self.avg_pool = nn.AdaptiveAvgPool1d(16)
             self.gemmaLinearBefore = nn.Linear(768, gemmaConfig.vocab_size)
             self.gemmaSoftmax = nn.Softmax(dim=2)
             # embedding
@@ -243,20 +244,39 @@ def train():
             self.FunnyScorelinear1 = nn.Linear(768, 1)
             self.FunnyScorelinear2 = nn.Linear(64, 1)
 
-        def forward(self, image, text_id, prompt_gemma2):
+        def forward(self, image, text_embedd, text_id, prompt_gemma):
             ##############################################   generate ##############################################
             image = image.transpose(0, 1)
             image_G = self.Former.image(image)
-
+            ########################################### feature fusion ###########################################
+            text_embedd = text_embedd.transpose(0, 1)
+            text_G = self.Former.text(text_embedd)
             image_G = image_G.transpose(0, 1)
-            image_GG = self.gemmaLinearMaxTokens(image_G.transpose(1, 2)).transpose(1, 2)
-            image_GG = self.gemmaLinearBefore(image_GG)
-            image_GG = self.gemmaSoftmax(image_GG + eps)
+            text_G = text_G.transpose(0, 1)
+            feature_fusion = image_G + text_G  # visual_attending_textual + textual_attending_visual
+            feature_fusionFF = self.feedForwardLinear(feature_fusion)
+            feature_fusion_final = self.feedForwardLayerNorm(feature_fusion + feature_fusionFF)
+            feature_fusion_final = self.avg_pool(feature_fusion_final.transpose(1, 2)).transpose(1, 2)
+            # image_GG = self.gemmaLinearMaxTokens(image_G.transpose(1, 2)).transpose(1, 2)
+            feature_fusion_final = self.gemmaLinearBefore(feature_fusion_final)
+            feature_fusion_final = self.gemmaSoftmax(feature_fusion_final + eps)
             # get max value of each row, total 32*64
 
             # with torch.no_grad():
-            top_k_values, top_k_indices = torch.topk(image_GG, 1, dim=2, largest=True)
+            top_k_values, top_k_indices = torch.topk(feature_fusion_final, 1, dim=2, largest=True)
             loss, logits = textExtractReverse(gemma, tokenizer, top_k_indices, text_id)
+            ########################################### input_id ###########################################
+            # image_G = image_G.transpose(0, 1)
+            # image_GG = self.avg_pool(image_G.transpose(1, 2)).transpose(1, 2)
+            # # image_GG = self.gemmaLinearMaxTokens(image_G.transpose(1, 2)).transpose(1, 2)
+            # image_GG = self.gemmaLinearBefore(image_GG)
+            # image_GG = self.gemmaSoftmax(image_GG + eps)
+            # # get max value of each row, total 32*64
+            #
+            # # with torch.no_grad():
+            # top_k_values, top_k_indices = torch.topk(image_GG, 1, dim=2, largest=True)
+            # loss, logits = textExtractReverse(gemma, tokenizer, top_k_indices, text_id)
+            ########################################### input embedd ###########################################
             # image_GG = torch.cat((prompt_gemma2, image_G), dim=-1) # 8 + 64 = 72
             # image_GG = self.gemmaLinearBefore(image_GG)
             # loss, logits = textExtractReverse_embedd(gemma, image_GG, text_id)
@@ -301,9 +321,9 @@ def train():
 
     def loss_function(logits, text_id):
         # loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens.flatten(), ignore_index=0)
-        # logits = logits[:, :-1, :].contiguous()
-        # text_id = text_id[:, 1:].contiguous()
         logits = logits[:, 100:, :].contiguous()
+        logits = logits[:, :-1, :].contiguous()
+        text_id = text_id[:, 1:].contiguous()
         loss = nn.CrossEntropyLoss()(logits.view(-1, gemmaConfig.vocab_size), text_id.view(-1))
         return loss
 
@@ -332,13 +352,13 @@ def train():
         with tqdm(train_loader, unit="batch", leave=True) as tepoch:
             Generator.train()
             for idx, (text, image, funny_score) in enumerate(tepoch):
-                text_id = textExtraction(tokenizer, gemmaConfig, text)
+                text_embedd, text_id = textExtraction(tokenizer, gemmaConfig, text, 'train')
                 image = image.to(torch.bfloat16)
                 funny_score = funny_score.to(torch.bfloat16)
                 optimizer_Former.zero_grad()
-                gemma_loss, logits = Generator(image.to(device), text_id.to(device), prompt_gemma.detach())
-                loss = loss_function(logits, text_id.to(device))
-                # loss = gemma_loss
+                gemma_loss, logits = Generator(image.to(device), text_embedd.to(device), text_id.to(device), prompt_gemma.detach())
+                # loss = loss_function(logits, text_id.to(device))
+                loss = gemma_loss
                 # loss.requires_grad = True
                 loss.backward()
                 optimizer_Former.step()
@@ -352,12 +372,12 @@ def train():
             Generator.eval()
             with torch.no_grad():
                 for idx, (text, image, funny_score) in enumerate(tepoch):
-                    text_id = textExtraction(tokenizer, gemmaConfig, text)
+                    text_embedd, text_id = textExtraction(tokenizer, gemmaConfig, text, 'test')
                     image = image.to(torch.bfloat16)
                     funny_score = funny_score.to(torch.bfloat16)
-                    gemma_loss, logits = Generator(image.to(device), text_id.to(device), prompt_gemma)
-                    loss = loss_function(logits, text_id.to(device))
-                    # loss = gemma_loss
+                    gemma_loss, logits = Generator(image.to(device), text_embedd.to(device), text_id.to(device), prompt_gemma.detach())
+                    # loss = loss_function(logits, text_id.to(device))
+                    loss = gemma_loss
                     test_loss_Former += loss.item()
                     tepoch.set_postfix(loss=test_loss_Former / (idx + 1))
         test_loss_Former /= len(test_loader)
