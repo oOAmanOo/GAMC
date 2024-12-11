@@ -37,7 +37,7 @@ def textExtraction_IFT(tokenizer, gemmaConfig, text_data):
         # pbar.update(1)
     return torch.cat(all_features).to(torch.bfloat16)
 
-def textExtraction(tokenizer, gemmaConfig, text_data):
+def textExtraction(tokenizer, gemmaConfig, text_data, trainTest):
     # tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
     # gemmaConfig = AutoConfig.from_pretrained('google/gemma-2-2b-it')
     vocab_size = gemmaConfig.vocab_size  # 詞彙表大小
@@ -46,25 +46,38 @@ def textExtraction(tokenizer, gemmaConfig, text_data):
     text_embedding = nn.Embedding(vocab_size, embedding_dim)
     avg_pool = nn.AdaptiveAvgPool1d(64)
 
-    token_ids = []
+
     # all_features = []
     # with tqdm.tqdm (total=len(text_data)) as pbar:
-    for text in (text_data):
-        tokens = tokenizer(text, truncation=True, padding='max_length', max_length=100, return_tensors='pt', )
-        # tokens = tokenizer(text, truncation=True, padding='max_length', max_length=94, return_tensors='pt', )
-
-        token_ids.append(tokens['input_ids'])
-        # # all_features.append(tokens['attention_mask'])
-        # output = text_embedding(tokens['input_ids'])
-        # if output.shape[1] > 64:
-        #     output = avg_pool(output.transpose(1, 2)).transpose(1, 2)
-        # elif output.shape[1] < 64:
-        #     padding = torch.zeros(output.shape[0], 64 - output.shape[1], 768)
-        #     output = torch.cat((output, padding), dim=1)
-        # all_features.append(output.detach())
-        #     # pbar.update(1)
-    # return torch.cat(all_features), torch.cat(token_ids)
-    return torch.cat(token_ids)
+    tokens = tokenizer(text_data, truncation=True, padding='max_length', max_length=100, return_tensors='pt', )
+    token_ids = tokens['input_ids']
+    if trainTest == 'train':
+        token_embedd = text_embedding(token_ids).to(torch.bfloat16)
+        if token_embedd.shape[1] > 64:
+            token_embedd = avg_pool(token_embedd.transpose(1, 2)).transpose(1, 2)
+        elif token_embedd.shape[1] < 64:
+            padding = torch.zeros(token_embedd.shape[0], 64 - token_embedd.shape[1], 768)
+            token_embedd = torch.cat((token_embedd, padding), dim=1)
+        return token_embedd.detach(), token_ids
+    else:
+        token_embedd = torch.zeros(token_ids.shape[0], 64, 768).to(torch.bfloat16)
+        return token_embedd, token_ids
+    # for text in (text_data):
+    #     tokens = tokenizer(text, truncation=True, padding='max_length', max_length=100, return_tensors='pt', )
+    #     # tokens = tokenizer(text, truncation=True, padding='max_length', max_length=94, return_tensors='pt', )
+    #
+    #     token_ids.append(tokens['input_ids'])
+    #     # # all_features.append(tokens['attention_mask'])
+    #     # output = text_embedding(tokens['input_ids'])
+    #     # if output.shape[1] > 64:
+    #     #     output = avg_pool(output.transpose(1, 2)).transpose(1, 2)
+    #     # elif output.shape[1] < 64:
+    #     #     padding = torch.zeros(output.shape[0], 64 - output.shape[1], 768)
+    #     #     output = torch.cat((output, padding), dim=1)
+    #     # all_features.append(output.detach())
+    #     #     # pbar.update(1)
+    # # return torch.cat(all_features), torch.cat(token_ids)
+    # return torch.cat(token_ids)
 
 def textExtractReverse(gemma, tokenizer, data, labels_text_id):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -79,7 +92,8 @@ def textExtractReverse(gemma, tokenizer, data, labels_text_id):
 
     reverse_data = insert_zeros(data.squeeze(-1))
     reverse = tokenizer.batch_decode(reverse_data, skip_special_tokens=False)
-    prompt = "Create meme post for Instagram with "
+    prompt = "Create meme caption for Instagram with "
+    # prompt = "ignore some elements and create meme caption for Instagram "
     # prompt = "Answer with only 100 words, only answer, no explain. Write a humor memetic post for Instagram with the following elements: "
     for i, text in enumerate(reverse):
         text = text.replace("<pad>", " ").replace("  ", " ")
@@ -90,10 +104,9 @@ def textExtractReverse(gemma, tokenizer, data, labels_text_id):
     padding = torch.zeros(input_ids.input_ids.shape[0], 100, dtype=torch.int64).to(device)
     input = torch.cat((padding, input_ids.input_ids), dim=-1)
     labels = torch.cat((input_ids.input_ids, labels_text_id), dim=-1)
-    # input_ids = tokenizer(reverse, truncation=True, padding='max_length', max_length=100, return_tensors='pt').to(device)
     # generate_ids = gemma.generate(input_ids = input_ids.input_ids, max_new_tokens=100)
     # print(tokenizer.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0])
-    gemma_output = gemma(input_ids = input, labels=labels, return_dict = True)
+    gemma_output = gemma(input_ids=input, labels=labels, return_dict = True)
     loss = gemma_output.loss
     # logits =0
     logits = gemma_output.logits
