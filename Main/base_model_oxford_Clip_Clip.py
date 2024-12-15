@@ -13,8 +13,6 @@ from torch.utils.data import DataLoader
 
 from transformers import GPT2Tokenizer, GPT2LMHeadModel
 
-from Citations.CLIP_prefix_caption.train import TransformerMapper
-
 eps = torch.finfo(torch.bfloat16).eps
 
 class OxfordDataset(torch.utils.data.Dataset):
@@ -36,12 +34,12 @@ class OxfordDataset(torch.utils.data.Dataset):
 
 def train():
     epochs = 200
-    batch_size = 128
+    batch_size = 64
     optimizer_Former_lr = 1e-5
-    save_name = '20241215_Clip_mineStruc_woGPT'
-    # if not os.path.exists('./Model/' + save_name):
-    #     os.makedirs('./Model/' + save_name)
-    #     os.makedirs('D:/MemeGAN/Model/' + save_name)
+    save_name = '20241216_Clip_Clip_woGPT'
+    if not os.path.exists('./Model/' + save_name):
+        os.makedirs('./Model/' + save_name)
+        os.makedirs('D:/MemeGAN/Model/' + save_name)
     ################ right ################
     # twoModel = False
     # checkpoint_folder = '20241201_wo_coAttention_temp'
@@ -87,89 +85,6 @@ def train():
     gpt_embedding_size = gpt.transformer.wte.weight.shape[1]
     # prefix = image embedding, token = text embedding
     ########################################################################################################
-
-    class self_image(nn.Module):
-        def __init__(self):
-            super(self_image, self).__init__()
-            # self attention
-            self.selfAttentionMultihead = nn.MultiheadAttention(768, 1)
-            self.selfAttentionLayerNorm = nn.LayerNorm(768, eps=eps)
-            self.selfAttentionLinear1 = nn.Linear(768, 768)
-            self.selfAttentionRelu = nn.ReLU()
-            self.selfAttentionLinear2 = nn.Linear(768, 768)
-            self.selfAttentionLayerNorm2 = nn.LayerNorm(768, eps=eps)
-
-            self.prefix_const = nn.Parameter(torch.randn(64, 768), requires_grad=True)
-            # co-attention text
-            self.coAttentionTextMultihead = nn.MultiheadAttention(768, 8)
-            self.coAttentionTextLinear1 = nn.Linear(768, 768)
-            self.coAttentionTextRelu = nn.ReLU()
-            self.coAttentionTextLinear2 = nn.Linear(768, 768)
-            self.coAttentionTextLayerNorm = nn.LayerNorm(768, eps=eps)
-
-            # co-attention image
-            self.coAttentionImageMultihead = nn.MultiheadAttention(768, 8)
-            self.coAttentionImageLinear1 = nn.Linear(768, 768)
-            self.coAttentionImageRelu = nn.ReLU()
-            self.coAttentionImageLinear2 = nn.Linear(768, 768)
-            self.coAttentionImageLayerNorm = nn.LayerNorm(768, eps=eps)
-
-            # feed forward
-            self.feedForwardLinear1 = nn.Linear(768, 768)
-            self.feedForwardRelu = nn.ReLU()
-            self.feedForwardLinear2 = nn.Linear(768, 768)
-
-        def forward(self, image):
-            # self attention module
-            self_temp = self.selfAttentionMultihead(image, image, image)[0]
-            self_temp = self.selfAttentionLayerNorm(self_temp + image)
-            self_out = self.selfAttentionLinear1(self_temp)
-            self_out = self.selfAttentionRelu(self_out)
-            self_out = self.selfAttentionLinear2(self_out)
-            self_out = self.selfAttentionLayerNorm2(self_out + self_temp)
-
-            prefix = self.prefix_const.unsqueeze(0).expand(image.shape[1], -1, -1).transpose(0, 1).to(device).to(torch.bfloat16)
-            # co-attention image module
-            visual_attending_textual = self.coAttentionTextMultihead(self_out, prefix, prefix)[0]
-            visual_attending_textual = self.coAttentionTextLinear1(visual_attending_textual)
-            visual_attending_textual = self.coAttentionTextRelu(visual_attending_textual)
-            visual_attending_textual = self.coAttentionTextLinear2(visual_attending_textual)
-            visual_attending_textual = self.coAttentionTextLayerNorm(visual_attending_textual + self_out)
-
-            # co-attention text module
-            textual_attending_visual = self.coAttentionTextMultihead(prefix, self_out, self_out)[0]
-            textual_attending_visual = self.coAttentionTextLinear1(textual_attending_visual)
-            textual_attending_visual = self.coAttentionTextRelu(textual_attending_visual)
-            textual_attending_visual = self.coAttentionTextLinear2(textual_attending_visual)
-            textual_attending_visual = self.coAttentionTextLayerNorm(textual_attending_visual + prefix)
-
-            output = self.feedForwardLinear1(visual_attending_textual + textual_attending_visual)
-            output = self.feedForwardRelu(output)
-            output = self.feedForwardLinear2(output)
-
-            return output
-
-    class multi_text(nn.Module):
-        def __init__(self):
-            super(multi_text, self).__init__()
-            # multihead attention
-            self.multiheadAttentionMultihead = nn.MultiheadAttention(768, 8)
-            self.multiheadAttentionLinear1 = nn.Linear(768, 768)
-            self.multiheadAttentionRelu = nn.ReLU()
-            self.multiheadAttentionLinear2 = nn.Linear(768, 768)
-            self.multiheadAttentionLayerNorm = nn.LayerNorm(768, eps=eps)
-
-        def forward(self, text):
-
-            # multihead attention module
-            multi_out = self.multiheadAttentionMultihead(text, text, text)[0]
-            multi_out = self.multiheadAttentionLinear1(multi_out)
-            multi_out = self.multiheadAttentionRelu(multi_out)
-            multi_out = self.multiheadAttentionLinear2(multi_out)
-            multi_out = self.multiheadAttentionLayerNorm(multi_out + text)
-
-            return multi_out
-
     class MLP(nn.Module):
         def __init__(self, sizes: tuple[int, ...], bias=True, act=nn.Tanh):
             super(MLP, self).__init__()
@@ -240,27 +155,29 @@ def train():
             return x, attentions
 
         def forward(self, x, y=None, mask=None):
+            if mask is None:
+                mask = torch.ones(x.shape[0], x.shape[1], x.shape[2]).to(device).to(torch.bfloat16)
             for i, layer in enumerate(self.layers):
-                if i % 2 == 0 and self.enc_dec:  # cross
-                    x = layer(x, y)
-                elif self.enc_dec:  # self
-                    x = layer(x, x, mask)
-                else:  # self or cross
-                    x = layer(x, y, mask)
+                x = layer(x, x, mask)
+                # if i % 2 == 0 and self.enc_dec:  # cross
+                #     x = layer(x, y)
+                # elif self.enc_dec:  # self
+                #     x = layer(x, x, mask)
+                # else:  # self or cross
+                #     x = layer(x, y, mask)
             return x
 
     class TransformerMapper(nn.Module):
         def __init__(self):
             super(TransformerMapper, self).__init__()
-            self.transformer = Transformer(768, 8, 12)
+            self.transformer = Transformer(8, enc_dec=True)
             self.linear = nn.Linear(768, 768)
             self.prefix_const = nn.Parameter(torch.randn(64, 768), requires_grad=True)
         def forward(self, x):
             x = self.linear(x)
-            prefix = self.prefix_const.unsqueeze(0).expand(image.shape[1], -1, -1).transpose(0, 1).to(device).to(torch.bfloat16)
+            prefix = self.prefix_const.unsqueeze(0).expand(x.shape[0], -1, -1).to(device).to(torch.bfloat16)
             prefix = torch.cat((x, prefix), dim=1)
             out = self.transformer(prefix)
-            print(out.shape)
             return out
 
     class Generator(nn.Module):
@@ -279,18 +196,18 @@ def train():
 
         def forward(self, image, text_id=None):
             if text_id is None:
-                text_id = torch.zeros((image.shape[0], 64), dtype=torch.long).to(device)
+                text_id = torch.full((image.shape[0], 64), 50256, dtype=torch.long).to(device)
             text_embedd = gpt.transformer.wte(text_id)
             ##############################################   generate ##############################################
-            image = image.transpose(0, 1)
             image_G = self.Former(image)
             ########################################### feature fusion ###########################################
-            image_G = image_G.transpose(0, 1)
             embedding_cat = torch.cat((image_G, text_embedd), dim=1)
+            dummy_token = torch.full_like(image_G[:,:,0], 50256, dtype=text_id.dtype).to(device)
+            labels = torch.cat((dummy_token, text_id), dim=1)
             image_GG = self.gptLinearBefore(embedding_cat)
-            gotOutput = self.gpt(inputs_embeds=image_GG, labels=text_id)
-            logits = gotOutput.logits
-            return logits
+            gptOutput = self.gpt(inputs_embeds=image_GG, labels=labels)
+            logits = gptOutput.logits
+            return logits, labels
 
     # NetFormer = Former().to(torch.bfloat16).to(device)
     Generator = Generator(Former= "Trans", gpt=gpt).to(torch.bfloat16).to(device)
@@ -316,11 +233,11 @@ def train():
     # del checkpoint_Former
     # gc.collect()
 
-    def loss_function(logits, text_id):
-        logit = logits.view(-1, logits.size(-1))
-        labels = text_id.view(-1)
+    def loss_function(logits, labels):
+        logits = logits.view(-1, logits.size(-1))
+        labels = labels.view(-1)
         labels = torch.where(labels == 50256, torch.tensor(-100, device=labels.device), labels)
-        loss = nn.CrossEntropyLoss()(logit, labels)
+        loss = nn.CrossEntropyLoss()(logits, labels)
         return loss
 
     torch.autograd.set_detect_anomaly(True)
@@ -338,8 +255,8 @@ def train():
                 image = image.to(device, dtype=torch.bfloat16)
                 funny_score = funny_score.to(device, dtype=torch.bfloat16)
                 optimizer_Former.zero_grad()
-                logits = Generator(image, text_id)
-                loss = loss_function(logits, text_id)
+                logits, labels = Generator(image, text_id)
+                loss = loss_function(logits, labels)
                 # loss.requires_grad = True
                 loss.backward()
                 optimizer_Former.step()
@@ -357,8 +274,8 @@ def train():
                     text_id = text_id['input_ids'].to(device)
                     image = image.to(device, dtype=torch.bfloat16)
                     funny_score = funny_score.to(device, dtype=torch.bfloat16)
-                    logits = Generator(image, text_id)
-                    loss = loss_function(logits, text_id)
+                    logits, labels = Generator(image, text_id)
+                    loss = loss_function(logits, labels)
                     test_loss_Former += loss.item()
                     tepoch.set_postfix(loss=test_loss_Former / (idx + 1))
         test_loss_Former /= len(test_loader)
