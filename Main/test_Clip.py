@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 import torch
@@ -162,8 +163,10 @@ class Generator(nn.Module):
         image_G = self.Former.image(image)
         image_G = image_G.transpose(0, 1)
         image_GG = self.gptLinearBefore(image_G)
-        print("generate_beam", generate_beam(Generator, tokenizer, embed=image_GG)[0])
-        print("generate2", generate2(Generator, tokenizer, embed=image_GG))
+        print("generate_beam: ")
+        print(generate_beam(Generator, tokenizer, embed=image_GG)[0])
+        print("generate2: ")
+        print(generate2(Generator, tokenizer, embed=image_GG))
 
     def generate_withText(self, image, text_id=None):
         if text_id is None:
@@ -181,16 +184,18 @@ class Generator(nn.Module):
         feature_fusionFF = self.feedForwardLinear(feature_fusion)
         feature_fusion_final = self.feedForwardLayerNorm(feature_fusion + feature_fusionFF)
         image_GG = self.gptLinearBefore(feature_fusion_final)
-        print("generate_beam", generate_beam(Generator, tokenizer, embed=image_GG)[0])
-        print("generate2", generate2(Generator, tokenizer, embed=image_GG))
+        print("generate_beam: ")
+        print( generate_beam(Generator, tokenizer, embed=image_GG)[0])
+        print("generate2: ")
+        print(generate2(Generator, tokenizer, embed=image_GG))
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 ############# load  model #############
 NetFormer = Former().to(torch.bfloat16).to(device)
 Generator = Generator(Former=NetFormer, gpt=gpt).to(torch.bfloat16).to(device)
 #######################################
-checkpoint_folder = '20241211_LoRa_id_shortPrompt_CE_base_20241201_wo_coAttention_temp'
-checkpoint_Generator = './Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetLLM_1.pth'
+checkpoint_folder = '20241215_Clip_mineStruc_woGPT'
+checkpoint_Generator = './Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetLLM_191.pth'
 #######################################
 checkpoint_Generator = torch.load(checkpoint_Generator)
 Generator.load_state_dict(checkpoint_Generator['model_state_dict'])
@@ -320,7 +325,8 @@ def generate2(
                 logits = logits[:, -1, :] / (temperature if temperature > 0 else 1.0)
                 sorted_logits, sorted_indices = torch.sort(logits, descending=True)
                 cumulative_probs = torch.cumsum(
-                    nn.softmax(sorted_logits, dim=-1), dim=-1
+                    nn.functional.softmax(sorted_logits, dim=-1), dim=-1
+                    # nn.softmax(sorted_logits, dim=-1), dim=-1
                 )
                 sorted_indices_to_remove = cumulative_probs > top_p
                 sorted_indices_to_remove[..., 1:] = sorted_indices_to_remove[
@@ -339,17 +345,33 @@ def generate2(
                 generated = torch.cat((generated, next_token_embed), dim=1)
                 if stop_token_index == next_token.item():
                     break
-
-            output_list = list(tokens.squeeze().cpu().numpy())
-            output_text = tokenizer.decode(output_list)
-            generated_list.append(output_text)
+                    
+            if tokens is not None:
+                output_list = tokens.squeeze().cpu().numpy()
+                output_text = tokenizer.decode(output_list)
+                generated_list.append(output_text)
+            else:
+                generated_list.append("")
 
     return generated_list[0]
 
 
 print('=======================  test  1 =========================')
-image = imageExtraction("./test_img.jpg").to(torch.bfloat16)
+image = imageExtraction("./test_img.jpg").to(device, dtype=torch.bfloat16)
 test_gt = ['you all loved it so i brought it back']
+print("ground_truth: ", test_gt)
+text_id = tokenizer(test_gt, return_tensors='pt', padding='max_length', truncation=True, max_length=64)
+text_id = text_id['input_ids'].to(device)
+print("=== Only image ===")
+Generator.generate_woText(image)
+print("=== Empty Text ===")
+Generator.generate_withText(image)
+print("=== Full  Text ===")
+Generator.generate_withText(image, text_id)
+
+print('=======================  test  2 =========================')
+image = imageExtraction("./test_img2.jpg").to(device, dtype=torch.bfloat16)
+test_gt = ['Can’t believe this is real (still) life. The Saucy Nugg legacy is forever cemented in oil on canvas (2024). Thank you']
 print("ground_truth: ", test_gt)
 text_id = tokenizer(test_gt, return_tensors='pt', padding='max_length', truncation=True, max_length=64)
 text_id = text_id['input_ids'].to(device)
@@ -362,108 +384,145 @@ Generator.generate_withText(image, text_id)
 
 
 
-# loss = loss_function(logits, text_id.to(device))
-# loss_next = loss_function_next(logits, text_id.to(device))
-# print("gemma_loss", gemma_loss.item(), "loss", loss.item(), "loss_next", loss_next.item())
-# #
-# image = imageExtraction("./test_img2.jpg").expand(batch_size, -1, -1).to(torch.bfloat16)
-# test_gt = ['Can’t believe this is real (still) life. The Saucy Nugg legacy is forever cemented in oil on canvas (2024). Thank you']
-# text_id = textExtraction(tokenizer, gemmaConfig, test_gt).expand(batch_size, -1)
-# gemma_loss, logits = Generator(image.to(device), text_id.to(device), prompt_gemma.detach())
-# loss = loss_function(logits, text_id.to(device))
-# loss_next = loss_function_next(logits, text_id.to(device))
-# print("gemma_loss", gemma_loss.item(), "loss", loss.item(), "loss_next", loss_next.item())
 
+print('=======================  sample1 =========================')
+print(train[train['image_id'] == 'bokete_51227'].shape[0] > 0)
+image = torch.load('../../Oxford_HIC/ImageData/bokete_51227.pt', weights_only=False).unsqueeze(0).to(device, dtype=torch.bfloat16)
+test_gt = ['Matsui found a porn actress in the audience.']
+print("ground_truth: ", test_gt)
+text_id = tokenizer(test_gt, return_tensors='pt', padding='max_length', truncation=True, max_length=64)
+text_id = text_id['input_ids'].to(device)
+print("=== Only image ===")
+Generator.generate_woText(image)
+print("=== Empty Text ===")
+Generator.generate_withText(image)
+print("=== Full  Text ===")
+Generator.generate_withText(image, text_id)
 
+print('=======================  sample2 =========================')
+print(train[train['image_id'] == 'bokete_3820'].shape[0] > 0)
+image = torch.load('../../Oxford_HIC/ImageData/bokete_3820.pt', weights_only=False).unsqueeze(0).to(device, dtype=torch.bfloat16)
+test_gt = ['I\'m in my 50s!']
+print("ground_truth: ", test_gt)
+text_id = tokenizer(test_gt, return_tensors='pt', padding='max_length', truncation=True, max_length=64)
+text_id = text_id['input_ids'].to(device)
+print("=== Only image ===")
+Generator.generate_woText(image)
+print("=== Empty Text ===")
+Generator.generate_withText(image)
+print("=== Full  Text ===")
+Generator.generate_withText(image, text_id)
 
-# print('=======================  sample1 =========================')
-# print(train[train['image_id'] == 'bokete_51227'].shape[0] > 0)
-# image = torch.load('../../Oxford_HIC/ImageData/bokete_51227.pt', weights_only=False).unsqueeze(0).expand(batch_size, -1, -1).to(torch.bfloat16)
-# test_gt = ['Matsui found a porn actress in the audience.']
-# text_id = textExtraction(tokenizer, gemmaConfig, test_gt).expand(batch_size, -1)
-# gemma_loss, logits = Generator(image.to(device), text_id.to(device), prompt_gemma.detach())
-# loss = loss_function(logits, text_id.to(device))
-# loss_next = loss_function_next(logits, text_id.to(device))
-# print("gemma_loss", gemma_loss.item(), "loss", loss.item(), "loss_next", loss_next.item())
-# print('=======================  sample2 =========================')
-# print(train[train['image_id'] == 'bokete_3820'].shape[0] > 0)
-# image = torch.load('../../Oxford_HIC/ImageData/bokete_3820.pt', weights_only=False).unsqueeze(0).expand(batch_size, -1, -1).to(torch.bfloat16)
-# test_gt = ['I\'m in my 50s!']
-# text_id = textExtraction(tokenizer, gemmaConfig, test_gt).expand(batch_size, -1)
-# gemma_loss, logits = Generator(image.to(device), text_id.to(device), prompt_gemma.detach())
-# loss = loss_function(logits, text_id.to(device))
-# loss_next = loss_function_next(logits, text_id.to(device))
-# print("gemma_loss", gemma_loss.item(), "loss", loss.item(), "loss_next", loss_next.item())
-# print('=======================  sample3 =========================')
-# print(train[train['image_id'] == 'imgflip_0'].shape[0] > 0)
-# image = torch.load('../../Oxford_HIC/ImageData/imgflip_0.pt', weights_only=False).unsqueeze(0).expand(batch_size, -1, -1).to(torch.bfloat16)
-# test_gt = ['Getting hurt from cutting open your leg; Getting hurt from taking off a bandaid']
-# text_id = textExtraction(tokenizer, gemmaConfig, test_gt).expand(batch_size, -1)
-# gemma_loss, logits = Generator(image.to(device), text_id.to(device), prompt_gemma.detach())
-# loss = loss_function(logits, text_id.to(device))
-# loss_next = loss_function_next(logits, text_id.to(device))
-# print("gemma_loss", gemma_loss.item(), "loss", loss.item(), "loss_next", loss_next.item())
-# print('=======================  sample4 =========================')
-# print(train[train['image_id'] == 'imgflip_8'].shape[0] > 0)
-# image = torch.load('../../Oxford_HIC/ImageData/imgflip_8.pt', weights_only=False).unsqueeze(0).expand(batch_size, -1, -1).to(torch.bfloat16)
-# test_gt = ['image tagged in memes,one does not simply']
-# text_id = textExtraction(tokenizer, gemmaConfig, test_gt).expand(batch_size, -1)
-# gemma_loss, logits = Generator(image.to(device), text_id.to(device), prompt_gemma.detach())
-# loss = loss_function(logits, text_id.to(device))
-# loss_next = loss_function_next(logits, text_id.to(device))
-# print("gemma_loss", gemma_loss.item(), "loss", loss.item(), "loss_next", loss_next.item())
-# print('=======================  sample5 =========================')
-# print(train[train['image_id'] == 'imgflip_15'].shape[0] > 0)
-# image = torch.load('../../Oxford_HIC/ImageData/imgflip_15.pt', weights_only=False).unsqueeze(0).expand(batch_size, -1, -1).to(torch.bfloat16)
-# test_gt = ['KIDS WHEN THEIR PARENTS GIVE THEM; "THE TALK"']
-# text_id = textExtraction(tokenizer, gemmaConfig, test_gt).expand(batch_size, -1)
-# gemma_loss, logits = Generator(image.to(device), text_id.to(device), prompt_gemma.detach())
-# loss = loss_function(logits, text_id.to(device))
-# loss_next = loss_function_next(logits, text_id.to(device))
-# print("gemma_loss", gemma_loss.item(), "loss", loss.item(), "loss_next", loss_next.item())
-# print('=======================  sample6 =========================')
-# print(train[train['image_id'] == 'imgflip_19'].shape[0] > 0)
-# image = torch.load('../../Oxford_HIC/ImageData/imgflip_19.pt', weights_only=False).unsqueeze(0).expand(batch_size, -1, -1).to(torch.bfloat16)
-# test_gt = ['NOT SURE IF PEOPLE ARE UPVOTING MEMES; OR USER NAMES']
-# text_id = textExtraction(tokenizer, gemmaConfig, test_gt).expand(batch_size, -1)
-# gemma_loss, logits = Generator(image.to(device), text_id.to(device), prompt_gemma.detach())
-# loss = loss_function(logits, text_id.to(device))
-# loss_next = loss_function_next(logits, text_id.to(device))
-# print("gemma_loss", gemma_loss.item(), "loss", loss.item(), "loss_next", loss_next.item())
-# print('=======================  sample7 =========================')
-# print(train[train['image_id'] == 'bokete_104530'].shape[0] > 0)
-# image = torch.load('../../Oxford_HIC/ImageData/bokete_104530.pt', weights_only=False).unsqueeze(0).expand(batch_size, -1, -1).to(torch.bfloat16)
-# test_gt = ['It\'s a family night runaway.']
-# text_id = textExtraction(tokenizer, gemmaConfig, test_gt).expand(batch_size, -1)
-# gemma_loss, logits = Generator(image.to(device), text_id.to(device), prompt_gemma.detach())
-# loss = loss_function(logits, text_id.to(device))
-# loss_next = loss_function_next(logits, text_id.to(device))
-# print("gemma_loss", gemma_loss.item(), "loss", loss.item(), "loss_next", loss_next.item())
-# print('=======================  sample8 =========================')
-# print(train[train['image_id'] == 'imgflip_730'].shape[0] > 0)
-# image = torch.load('../../Oxford_HIC/ImageData/imgflip_730.pt', weights_only=False).unsqueeze(0).expand(batch_size, -1, -1).to(torch.bfloat16)
-# test_gt = ['CHUCK IS THE GOOD TYPE OF SCUMBAG; CUZ HE ONLY ROASTS YOU FROM YOUR INSIDES']
-# text_id = textExtraction(tokenizer, gemmaConfig, test_gt).expand(batch_size, -1)
-# gemma_loss, logits = Generator(image.to(device), text_id.to(device), prompt_gemma.detach())
-# loss = loss_function(logits, text_id.to(device))
-# loss_next = loss_function_next(logits, text_id.to(device))
-# print("gemma_loss", gemma_loss.item(), "loss", loss.item(), "loss_next", loss_next.item())
-# print('=======================  sample9 =========================')
-# print(train[train['image_id'] == 'imgflip_130'].shape[0] > 0)
-# image = torch.load('../../Oxford_HIC/ImageData/imgflip_130.pt', weights_only=False).unsqueeze(0).expand(batch_size, -1, -1).to(torch.bfloat16)
-# test_gt = ['SO YOUR TELLIN\' ME THAT SCHOOLS GOOD FOR YOU']
-# text_id = textExtraction(tokenizer, gemmaConfig, test_gt).expand(batch_size, -1)
-# gemma_loss, logits = Generator(image.to(device), text_id.to(device), prompt_gemma.detach())
-# loss = loss_function(logits, text_id.to(device))
-# loss_next = loss_function_next(logits, text_id.to(device))
-# print("gemma_loss", gemma_loss.item(), "loss", loss.item(), "loss_next", loss_next.item())
-# print('=======================  sample10 =========================')
-# print(train[train['image_id'] == 'imgflip_677'].shape[0] > 0)
-# image = torch.load('../../Oxford_HIC/ImageData/imgflip_677.pt', weights_only=False).unsqueeze(0).expand(batch_size, -1, -1).to(torch.bfloat16)
-# test_gt = ['Y\'ALL GOT ANY MORE OF THEM; JOBS?']
-# text_id = textExtraction(tokenizer, gemmaConfig, test_gt).expand(batch_size, -1)
-# gemma_loss, logits = Generator(image.to(device), text_id.to(device), prompt_gemma.detach())
-# loss = loss_function(logits, text_id.to(device))
-# loss_next = loss_function_next(logits, text_id.to(device))
-# print("gemma_loss", gemma_loss.item(), "loss", loss.item(), "loss_next", loss_next.item())
+print('=======================  sample3 =========================')
+print(train[train['image_id'] == 'imgflip_0'].shape[0] > 0)
+image = torch.load('../../Oxford_HIC/ImageData/imgflip_0.pt', weights_only=False).unsqueeze(0).to(device, dtype=torch.bfloat16)
+test_gt = ['Getting hurt from cutting open your leg; Getting hurt from taking off a bandaid']
+print("ground_truth: ", test_gt)
+text_id = tokenizer(test_gt, return_tensors='pt', padding='max_length', truncation=True, max_length=64)
+text_id = text_id['input_ids'].to(device)
+print("=== Only image ===")
+Generator.generate_woText(image)
+print("=== Empty Text ===")
+Generator.generate_withText(image)
+print("=== Full  Text ===")
+Generator.generate_withText(image, text_id)
+
+print('=======================  sample4 =========================')
+print(train[train['image_id'] == 'imgflip_8'].shape[0] > 0)
+image = torch.load('../../Oxford_HIC/ImageData/imgflip_8.pt', weights_only=False).unsqueeze(0).to(device, dtype=torch.bfloat16)
+test_gt = ['image tagged in memes,one does not simply']
+print("ground_truth: ", test_gt)
+text_id = tokenizer(test_gt, return_tensors='pt', padding='max_length', truncation=True, max_length=64)
+text_id = text_id['input_ids'].to(device)
+print("=== Only image ===")
+Generator.generate_woText(image)
+print("=== Empty Text ===")
+Generator.generate_withText(image)
+print("=== Full  Text ===")
+Generator.generate_withText(image, text_id)
+
+print('=======================  sample5 =========================')
+print(train[train['image_id'] == 'imgflip_15'].shape[0] > 0)
+image = torch.load('../../Oxford_HIC/ImageData/imgflip_15.pt', weights_only=False).unsqueeze(0).to(device, dtype=torch.bfloat16)
+test_gt = ['KIDS WHEN THEIR PARENTS GIVE THEM; "THE TALK"']
+print("ground_truth: ", test_gt)
+text_id = tokenizer(test_gt, return_tensors='pt', padding='max_length', truncation=True, max_length=64)
+text_id = text_id['input_ids'].to(device)
+print("=== Only image ===")
+Generator.generate_woText(image)
+print("=== Empty Text ===")
+Generator.generate_withText(image)
+print("=== Full  Text ===")
+Generator.generate_withText(image, text_id)
+
+print('=======================  sample6 =========================')
+print(train[train['image_id'] == 'imgflip_19'].shape[0] > 0)
+image = torch.load('../../Oxford_HIC/ImageData/imgflip_19.pt', weights_only=False).unsqueeze(0).to(device, dtype=torch.bfloat16)
+test_gt = ['NOT SURE IF PEOPLE ARE UPVOTING MEMES; OR USER NAMES']
+print("ground_truth: ", test_gt)
+text_id = tokenizer(test_gt, return_tensors='pt', padding='max_length', truncation=True, max_length=64)
+text_id = text_id['input_ids'].to(device)
+print("=== Only image ===")
+Generator.generate_woText(image)
+print("=== Empty Text ===")
+Generator.generate_withText(image)
+print("=== Full  Text ===")
+Generator.generate_withText(image, text_id)
+
+print('=======================  sample7 =========================')
+print(train[train['image_id'] == 'bokete_104530'].shape[0] > 0)
+image = torch.load('../../Oxford_HIC/ImageData/bokete_104530.pt', weights_only=False).unsqueeze(0).to(device, dtype=torch.bfloat16)
+test_gt = ['It\'s a family night runaway.']
+print("ground_truth: ", test_gt)
+text_id = tokenizer(test_gt, return_tensors='pt', padding='max_length', truncation=True, max_length=64)
+text_id = text_id['input_ids'].to(device)
+print("=== Only image ===")
+Generator.generate_woText(image)
+print("=== Empty Text ===")
+Generator.generate_withText(image)
+print("=== Full  Text ===")
+Generator.generate_withText(image, text_id)
+
+print('=======================  sample8 =========================')
+print(train[train['image_id'] == 'imgflip_730'].shape[0] > 0)
+image = torch.load('../../Oxford_HIC/ImageData/imgflip_730.pt', weights_only=False).unsqueeze(0).to(device, dtype=torch.bfloat16)
+test_gt = ['CHUCK IS THE GOOD TYPE OF SCUMBAG; CUZ HE ONLY ROASTS YOU FROM YOUR INSIDES']
+print("ground_truth: ", test_gt)
+text_id = tokenizer(test_gt, return_tensors='pt', padding='max_length', truncation=True, max_length=64)
+text_id = text_id['input_ids'].to(device)
+print("=== Only image ===")
+Generator.generate_woText(image)
+print("=== Empty Text ===")
+Generator.generate_withText(image)
+print("=== Full  Text ===")
+Generator.generate_withText(image, text_id)
+
+print('=======================  sample9 =========================')
+print(train[train['image_id'] == 'imgflip_130'].shape[0] > 0)
+image = torch.load('../../Oxford_HIC/ImageData/imgflip_130.pt', weights_only=False).unsqueeze(0).to(device, dtype=torch.bfloat16)
+test_gt = ['SO YOUR TELLIN\' ME THAT SCHOOLS GOOD FOR YOU']
+print("ground_truth: ", test_gt)
+text_id = tokenizer(test_gt, return_tensors='pt', padding='max_length', truncation=True, max_length=64)
+text_id = text_id['input_ids'].to(device)
+print("=== Only image ===")
+Generator.generate_woText(image)
+print("=== Empty Text ===")
+Generator.generate_withText(image)
+print("=== Full  Text ===")
+Generator.generate_withText(image, text_id)
+
+print('=======================  sample10 =========================')
+print(train[train['image_id'] == 'imgflip_677'].shape[0] > 0)
+image = torch.load('../../Oxford_HIC/ImageData/imgflip_677.pt', weights_only=False).unsqueeze(0).to(device, dtype=torch.bfloat16)
+test_gt = ['Y\'ALL GOT ANY MORE OF THEM; JOBS?']
+print("ground_truth: ", test_gt)
+text_id = tokenizer(test_gt, return_tensors='pt', padding='max_length', truncation=True, max_length=64)
+text_id = text_id['input_ids'].to(device)
+print("=== Only image ===")
+Generator.generate_woText(image)
+print("=== Empty Text ===")
+Generator.generate_withText(image)
+print("=== Full  Text ===")
+Generator.generate_withText(image, text_id)
+
 
