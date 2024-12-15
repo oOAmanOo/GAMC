@@ -34,12 +34,12 @@ class OxfordDataset(torch.utils.data.Dataset):
 
 def train():
     epochs = 200
-    batch_size = 15
+    batch_size = 128
     optimizer_Former_lr = 1e-5
-    save_name = '20241215_Clip_mineStruc'
-    # if not os.path.exists('./Model/' + save_name):
-    #     os.makedirs('./Model/' + save_name)
-    #     os.makedirs('D:/MemeGAN/Model/' + save_name)
+    save_name = '20241215_Clip_mineStruc_woGPT'
+    if not os.path.exists('./Model/' + save_name):
+        os.makedirs('./Model/' + save_name)
+        os.makedirs('D:/MemeGAN/Model/' + save_name)
     ################ right ################
     # twoModel = False
     # checkpoint_folder = '20241201_wo_coAttention_temp'
@@ -58,7 +58,7 @@ def train():
     # load data
     data = pd.read_csv(dirPath)
     print("shape of data: ", data.shape)
-    data = data.sample(n=2000, random_state=42, replace=True).reset_index(drop=True)
+    data = data.sample(n=10000, random_state=42, replace=True).reset_index(drop=True)
     # frac = 0.05 ==> 5% of the data = 169904
     # n = 169920 ==> 72 * 2360 = 169920 (F2G)
     # n = 169988 ==> 91 * 1868 = 169988 (G2F)
@@ -74,8 +74,8 @@ def train():
 
     train_dataset = OxfordDataset(train_text, train_image, train_funny_score)
     test_dataset = OxfordDataset(test_text, test_image, test_funny_score)
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=1, pin_memory=True, drop_last=True)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, num_workers=1, pin_memory=True, drop_last=True)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=20, pin_memory=True, drop_last=True)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, num_workers=20, pin_memory=True, drop_last=True)
 
     ### GPT2 #########################################################################################
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -195,14 +195,16 @@ def train():
             super(Generator, self).__init__()
             self.Former = Former
             self.gpt = gpt
+            self.gpt.eval()
             self.gptLinearBefore = nn.Linear(768, gpt_embedding_size)
             # feed forward
             self.feedForwardLinear = nn.Linear(768, 768)
             self.feedForwardLayerNorm = nn.LayerNorm(768, eps=eps)
 
-        def forward(self, image, text_id):
+        def forward(self, image, text_id=None):
+            if text_id is None:
+                text_id = torch.zeros((image.shape[0], 64), dtype=torch.long).to(device)
             text_embedd = gpt.transformer.wte(text_id)
-            print(text_embedd.shape)
             ##############################################   generate ##############################################
             image = image.transpose(0, 1)
             image_G = self.Former.image(image)
@@ -246,9 +248,9 @@ def train():
 
     def loss_function(logits, text_id):
         logit = logits.view(-1, logits.size(-1))
-        text_id = text_id.view(-1)
-        text_id[text_id == 50256] = -100
-        loss = nn.CrossEntropyLoss()(logit, text_id)
+        labels = text_id.view(-1)
+        labels = torch.where(labels == 50256, torch.tensor(-100, device=labels.device), labels)
+        loss = nn.CrossEntropyLoss()(logit, labels)
         return loss
 
     torch.autograd.set_detect_anomaly(True)
@@ -263,11 +265,11 @@ def train():
             for idx, (text, image, funny_score) in enumerate(tepoch):
                 text_id = tokenizer(text, return_tensors='pt', padding='max_length', truncation=True, max_length=64)
                 text_id = text_id['input_ids'].to(device)
-                image = image.to(torch.bfloat16)
-                funny_score = funny_score.to(torch.bfloat16)
+                image = image.to(device, dtype=torch.bfloat16)
+                funny_score = funny_score.to(device, dtype=torch.bfloat16)
                 optimizer_Former.zero_grad()
-                logits = Generator(image.to(device), text_id.to(device))
-                loss = loss_function(logits, text_id.to(device))
+                logits = Generator(image, text_id)
+                loss = loss_function(logits, text_id)
                 # loss.requires_grad = True
                 loss.backward()
                 optimizer_Former.step()
@@ -283,10 +285,10 @@ def train():
                 for idx, (text, image, funny_score) in enumerate(tepoch):
                     text_id = tokenizer(text, return_tensors='pt', padding='max_length', truncation=True, max_length=64)
                     text_id = text_id['input_ids'].to(device)
-                    image = image.to(torch.bfloat16)
-                    funny_score = funny_score.to(torch.bfloat16)
-                    logits = Generator(image.to(device), text_id.to(device))
-                    loss = loss_function(logits, text_id.to(device))
+                    image = image.to(device, dtype=torch.bfloat16)
+                    funny_score = funny_score.to(device, dtype=torch.bfloat16)
+                    logits = Generator(image, text_id)
+                    loss = loss_function(logits, text_id)
                     test_loss_Former += loss.item()
                     tepoch.set_postfix(loss=test_loss_Former / (idx + 1))
         test_loss_Former /= len(test_loader)
