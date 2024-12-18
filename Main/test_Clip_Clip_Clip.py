@@ -22,6 +22,12 @@ gpt_embedding_size = gpt.transformer.wte.weight.shape[1]
 # prefix = image embedding, token = text embedding
 ########################################################################################################
 
+Only_image = None
+Empty_Text = None
+Full_Text = None
+Only_image_text = []
+Empty_Text_text = []
+Full_Text_text = []
 class MLP(nn.Module):
     def __init__(self, sizes: tuple[int, ...], bias=True, act=nn.Tanh):
         super(MLP, self).__init__()
@@ -113,231 +119,142 @@ class Generator(nn.Module):
             self.Former = TransformerMapper()
         self.gpt = gpt
         self.gpt.train()
+        self.Only_image = None
+        self.Only_image_text = []
+        self.Only_image_loss = []
+        self.Empty_Text = None
+        self.Empty_Text_text = []
+        self.Empty_Text_loss = []
+        self.Full_Text = None
+        self.Full_Text_text = []
+        self.Full_Text_loss = []
 
-def forward(self, image, text_id, mode):
-    if mode == 'test':
-        dummy = torch.full((image.shape[0], 64), 50256, dtype=torch.long).to(device)
-        text_embedd = gpt.transformer.wte(dummy)
-    else:
-        text_embedd = gpt.transformer.wte(text_id)
-    ##############################################   generate ##############################################
-    image_G = self.Former(image)
-    embedding_cat = torch.cat((image_G, text_embedd), dim=1)
-    ########################################### feature fusion ###########################################
-    if mode == 'train':
-        dummy_token = torch.full((text_id.shape[0], 64), 50256, dtype=text_id.dtype).to(device)
-        print(dummy_token.shape, text_id.shape)
-        labels = torch.cat((dummy_token, text_id, text_id), dim=1)
-    else:
-        labels = torch.full_like(embedding_cat[:, :, 0], 50256, dtype=text_id.dtype).to(device)
-    print(embedding_cat.shape, labels.shape)
-    gptOutput = self.gpt(inputs_embeds=embedding_cat, labels=labels)
-    logits = gptOutput.logits
-    if mode == 'test':
-        dummy_token = torch.full((text_id.shape[0], 64), 50256, dtype=text_id.dtype).to(device)
-        labels = torch.cat((dummy_token, text_id, text_id), dim=1)
-    return logits, labels
-
-def generate_woText(self, image):
-    image_GG = self.Former(image)
-    print("----generate_beam----")
-    # print(generate_beam(Generator, tokenizer, embed=image_GG)[0])
-    a = generate_beam(Generator, tokenizer, embed=image_GG)[0]
-    print(a)
-    print(tokenizer(a, return_tensors='pt'))
-    print("------generate2------")
-    # print(generate2(Generator, tokenizer, embed=image_GG))
-    a = generate2(Generator, tokenizer, embed=image_GG)
-    print(a)
-    print(tokenizer(a, return_tensors='pt'))
-    print("----Not  Generate----")
-    gptOutput = self.gpt(inputs_embeds=image_GG)
-    logits = gptOutput.logits
-    print(tokenizer.decode(logits.argmax(-1)[0], skip_special_tokens=True, clean_up_tokenization_spaces=False))
-    print(logits.argmax(-1)[0])
-
-
-def generate_withText(self, image, text_id=None):
-    if text_id is None:
-        text_id = torch.full((image.shape[0], 64), 50256, dtype=torch.long).to(device)
-    text_embedd = gpt.transformer.wte(text_id)
-    ##############################################   generate ##############################################
-    image_G = self.Former(image)
-    ########################################### feature fusion ###########################################
-    image_GG = torch.cat((image_G, text_embedd), dim=1)
-    print("----generate_beam----")
-    # print(generate_beam(Generator, tokenizer, embed=image_GG)[0])
-    a = generate_beam(Generator, tokenizer, embed=image_GG)[0]
-    print(tokenizer(a, return_tensors='pt'))
-    print("------generate2------")
-    # print(generate2(Generator, tokenizer, embed=image_GG))
-    a = generate2(Generator, tokenizer, embed=image_GG)
-    print(tokenizer(a, return_tensors='pt'))
-    print("----Not  Generate----")
-    gptOutput = self.gpt(inputs_embeds=image_GG)
-    logits = gptOutput.logits
-    print(tokenizer.decode(logits.argmax(-1)[0], skip_special_tokens=True, clean_up_tokenization_spaces=False))
-    print(logits.argmax(-1)[0])
-
-def generate_beam(
-        model,
-        tokenizer,
-        beam_size: int = 5,
-        prompt=None,
-        embed=None,
-        entry_length=67,
-        temperature=1.0,
-        stop_token: str = ".",
-):
-
-    model.eval()
-    stop_token_index = tokenizer.encode(stop_token)[0]
-    tokens = None
-    scores = None
-    device = next(model.parameters()).device
-    seq_lengths = torch.ones(beam_size, device=device)
-    is_stopped = torch.zeros(beam_size, device=device, dtype=torch.bool)
-    with torch.no_grad():
-        if embed is not None:
-            generated = embed
+    def forward(self, image, text_id, mode):
+        if mode == 'test':
+            dummy = torch.full((image.shape[0], 64), 50256, dtype=torch.long).to(device)
+            text_embedd = gpt.transformer.wte(dummy)
         else:
-            if tokens is None:
-                tokens = torch.tensor(tokenizer.encode(prompt))
-                tokens = tokens.unsqueeze(0).to(device)
-                generated = model.gpt.transformer.wte(tokens)
-        for i in range(entry_length):
-            outputs = model.gpt(inputs_embeds=generated)
-            logits = outputs.logits
-            logits = logits[:, -1, :] / (temperature if temperature > 0 else 1.0)
-            logits = logits.softmax(-1).log()
-            if scores is None:
-                scores, next_tokens = logits.topk(beam_size, -1)
-                generated = generated.expand(beam_size, *generated.shape[1:])
-                next_tokens, scores = next_tokens.permute(1, 0), scores.squeeze(0)
-                if tokens is None:
-                    tokens = next_tokens
-                else:
-                    tokens = tokens.expand(beam_size, *tokens.shape[1:])
-                    tokens = torch.cat((tokens, next_tokens), dim=1)
+            text_embedd = gpt.transformer.wte(text_id)
+        ##############################################   generate ##############################################
+        image_G = self.Former(image)
+        embedding_cat = torch.cat((image_G, text_embedd), dim=1)
+        ########################################### feature fusion ###########################################
+        if mode == 'train':
+            dummy_token = torch.full((text_id.shape[0], 64), 50256, dtype=text_id.dtype).to(device)
+            dummy_token2 = torch.full_like(text_id, 50256, dtype=text_id.dtype).to(device)
+            labels = torch.cat((dummy_token, text_id, dummy_token2), dim=1)
+        else:
+            labels = torch.full_like(embedding_cat[:, :, 0], 50256, dtype=text_id.dtype).to(device)
+        gptOutput = self.gpt(inputs_embeds=embedding_cat, labels=labels)
+        logits = gptOutput.logits
+        if mode == 'test':
+            dummy_token = torch.full((text_id.shape[0], 64), 50256, dtype=text_id.dtype).to(device)
+            dummy_token2 = torch.full_like(text_id, 50256, dtype=text_id.dtype).to(device)
+            labels = torch.cat((dummy_token, text_id, dummy_token2), dim=1)
+        return logits, labels
+
+    def generate_woText(self, image, text_id):
+        image_GG = self.Former(image)
+        gptOutput = self.gpt(inputs_embeds=image_GG)
+        logits = gptOutput.logits
+        caption_tokens = logits.argmax(-1)[0]
+        caption = tokenizer.decode(caption_tokens, skip_special_tokens=True, clean_up_tokenization_spaces=False)
+        print(caption)
+        print(caption_tokens)
+        dummy_token = torch.full((text_id.shape[0], 64), 50256, dtype=text_id.dtype).to(device)
+        labels = torch.cat((dummy_token, text_id), dim=1)
+        loss = loss_function(logits, labels)
+        print("loss: ", loss.item())
+        if self.Only_image != None:
+            self.Only_image = torch.cat((self.Only_image, caption_tokens.unsqueeze(0)), dim=0)
+        else:
+            self.Only_image = caption_tokens.unsqueeze(0)
+        self.Only_image_text.append(caption)
+        self.Only_image_loss.append(loss.item())
+        
+    def generate_withText(self, image, text_id, trainTest):
+        if trainTest == 'test':
+            dummy = torch.full_like(text_id, 50256, dtype=text_id.dtype).to(device)
+            text_embedd = self.gpt.transformer.wte(dummy)
+        else:
+            text_embedd = self.gpt.transformer.wte(text_id)
+        ##############################################   generate ##############################################
+        image_G = self.Former(image)
+        ########################################### feature fusion ###########################################
+        image_GG = torch.cat((image_G, text_embedd), dim=1)
+        gptOutput = self.gpt(inputs_embeds=image_GG)
+        logits = gptOutput.logits
+        caption_tokens = logits.argmax(-1)[0]
+        caption = tokenizer.decode(caption_tokens, skip_special_tokens=True, clean_up_tokenization_spaces=False)
+        print(caption)
+        print(caption_tokens)
+        dummy_token = torch.full((text_id.shape[0], 64), 50256, dtype=text_id.dtype).to(device)
+        dummy_token2 = torch.full_like(text_id, 50256, dtype=text_id.dtype).to(device)
+        labels = torch.cat((dummy_token, text_id, dummy_token2), dim=1)
+        print(logits.shape, labels.shape)
+        loss = loss_function(logits, labels)
+        print("loss: ", loss.item())
+        if trainTest == 'test':
+            if self.Empty_Text != None:
+                self.Empty_Text = torch.cat((self.Empty_Text, caption_tokens.unsqueeze(0)), dim=0)
             else:
-                logits[is_stopped] = -float(np.inf)
-                logits[is_stopped, 0] = 0
-                scores_sum = scores[:, None] + logits
-                seq_lengths[~is_stopped] += 1
-                scores_sum_average = scores_sum / seq_lengths[:, None]
-                scores_sum_average, next_tokens = scores_sum_average.view(-1).topk(
-                    beam_size, -1
-                )
-                next_tokens_source = next_tokens // scores_sum.shape[1]
-                seq_lengths = seq_lengths[next_tokens_source]
-                next_tokens = next_tokens % scores_sum.shape[1]
-                next_tokens = next_tokens.unsqueeze(1)
-                tokens = tokens[next_tokens_source]
-                tokens = torch.cat((tokens, next_tokens), dim=1)
-                generated = generated[next_tokens_source]
-                scores = scores_sum_average * seq_lengths
-                is_stopped = is_stopped[next_tokens_source]
-            next_token_embed = model.gpt.transformer.wte(next_tokens.squeeze()).view(
-                generated.shape[0], 1, -1
-            )
-            generated = torch.cat((generated, next_token_embed), dim=1)
-            is_stopped = is_stopped + next_tokens.eq(stop_token_index).squeeze()
-            if is_stopped.all():
-                break
-    scores = scores / seq_lengths
-    output_list = tokens.cpu().numpy()
-    output_texts = [
-        tokenizer.decode(output[: int(length)])
-        for output, length in zip(output_list, seq_lengths)
-    ]
-    order = scores.argsort(descending=True)
-    output_texts = [output_texts[i] for i in order]
-    return output_texts
-
-
-def generate2(
-        model,
-        tokenizer,
-        tokens=None,
-        prompt=None,
-        embed=None,
-        entry_count=1,
-        entry_length=67,  # maximum number of words
-        top_p=0.8,
-        temperature=1.0,
-        stop_token: str = ".",
-):
-    model.eval()
-    generated_num = 0
-    generated_list = []
-    stop_token_index = tokenizer.encode(stop_token)[0]
-    filter_value = -float("Inf")
-    device = next(model.parameters()).device
-
-    with torch.no_grad():
-
-        for entry_idx in range(entry_count):
-            if embed is not None:
-                generated = embed
+                self.Empty_Text = caption_tokens.unsqueeze(0)
+            self.Empty_Text_text.append(caption)
+            self.Empty_Text_loss.append(loss.item())
+        else:
+            if self.Full_Text != None:
+                self.Full_Text = torch.cat((self.Full_Text, caption_tokens.unsqueeze(0)), dim=0)
             else:
-                if tokens is None:
-                    tokens = torch.tensor(tokenizer.encode(prompt))
-                    tokens = tokens.unsqueeze(0).to(device)
+                self.Full_Text = caption_tokens.unsqueeze(0)
+            self.Full_Text_text.append(caption)
+            self.Full_Text_loss.append(loss.item())
 
-                generated = model.gpt.transformer.wte(tokens)
-
-            for i in range(entry_length):
-
-                outputs = model.gpt(inputs_embeds=generated)
-                logits = outputs.logits
-                logits = logits[:, -1, :] / (temperature if temperature > 0 else 1.0)
-                sorted_logits, sorted_indices = torch.sort(logits, descending=True)
-                cumulative_probs = torch.cumsum(
-                    nn.functional.softmax(sorted_logits, dim=-1), dim=-1
-                    # nn.softmax(sorted_logits, dim=-1), dim=-1
-                )
-                sorted_indices_to_remove = cumulative_probs > top_p
-                sorted_indices_to_remove[..., 1:] = sorted_indices_to_remove[
-                                                    ..., :-1
-                                                    ].clone()
-                sorted_indices_to_remove[..., 0] = 0
-
-                indices_to_remove = sorted_indices[sorted_indices_to_remove]
-                logits[:, indices_to_remove] = filter_value
-                next_token = torch.argmax(logits, -1).unsqueeze(0)
-                next_token_embed = model.gpt.transformer.wte(next_token)
-                if tokens is None:
-                    tokens = next_token
-                else:
-                    tokens = torch.cat((tokens, next_token), dim=1)
-                generated = torch.cat((generated, next_token_embed), dim=1)
-                if stop_token_index == next_token.item():
-                    break
-
-            if tokens is not None:
-                output_list = tokens.squeeze().cpu().numpy()
-                output_text = tokenizer.decode(output_list)
-                generated_list.append(output_text)
+    def print(self):
+        def dataframe_Name(name,count=0, rows=0):
+            if count == 0:
+                name_df = pd.DataFrame([[name]], columns=["Name"])
+                return name_df
             else:
-                generated_list.append("")
+                name_df = pd.DataFrame([[name] * count for _ in range(rows)], columns=[f"{i}" for i in range(0, count)])
+                return name_df
 
-    return generated_list[0]
+        test = pd.DataFrame()
+        test['Name'] = ['train1', 'train2', 'train3', 'train4', 'train5', 'train6', 'train7', 'train8', 'train9',
+                        'train10']
+        Only_image_df = pd.DataFrame(self.Only_image.cpu().detach(), columns=[f"{i}" for i in range(64, 192)])
+        Only_image_df = pd.concat([test, Only_image_df, dataframe_Name("-", 64, 10)], axis=1)
+        Only_image_df['loss'] = self.Only_image_loss
+        Only_image_df['text'] = self.Only_image_text
+        Empty_Text_df = pd.DataFrame(self.Empty_Text.cpu().detach(), columns=[f"{i}" for i in range(0, 192)])
+        Empty_Text_df = pd.concat([test, Empty_Text_df], axis=1)
+        Empty_Text_df['loss'] = self.Empty_Text_loss
+        Empty_Text_df['text'] = self.Empty_Text_text
+        Full_Text_df = pd.DataFrame(self.Full_Text.cpu().detach(), columns=[f"{i}" for i in range(0, 192)])
+        Full_Text_df = pd.concat([test, Full_Text_df], axis=1)
+        Full_Text_df['loss'] = self.Full_Text_loss
+        Full_Text_df['text'] = self.Full_Text_text
+        final = pd.concat([dataframe_Name("Only_image"), Only_image_df, dataframe_Name("Empty_Text"), Empty_Text_df,
+                           dataframe_Name("Full_Text"), Full_Text_df], axis=0)
+        print(dataframe_Name("Only_image").shape, Only_image_df.shape, dataframe_Name("Empty_Text").shape, Empty_Text_df.shape, dataframe_Name("Full_Text").shape, Full_Text_df.shape)
+        print(final.shape)
+        print(final.columns)
+        final.to_csv('./Model/' + checkpoint_folder + '/' + checkpoint_folder + '_test.csv', index=False)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 ############# load  model #############
 # NetFormer = Former().to(torch.bfloat16).to(device)
 Generator = Generator(Former= "Trans", gpt=gpt).to(torch.bfloat16).to(device)
 #######################################
-checkpoint_folder = '20241218_Clip_Clip_Clip_noGPT_testNoText_img2txt'
-checkpoint_Generator = './Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetLLM_15.pth'
+checkpoint_folder = '20241218_Clip_Clip_Clip_noGPT_testNoText_img2txtonly'
+checkpoint_Generator = './Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetLLM_72.pth'
 #######################################
 checkpoint_Generator = torch.load(checkpoint_Generator)
 Generator.load_state_dict(checkpoint_Generator['model_state_dict'])
 #######################################
 
 def loss_function(logits, labels):
-    logits = logits.view(-1, logits.size(-1))
-    labels = labels.view(-1)
+    logits = logits.contiguous().view(-1, logits.size(-1))
+    labels = labels.contiguous().view(-1)
     loss = nn.CrossEntropyLoss(ignore_index=50256)(logits, labels)
     return loss
 
@@ -372,7 +289,6 @@ Generator.eval()
 
 
 
-
 print('=======================  sample1 =========================')
 print(train[train['image_id'] == 'bokete_51227'].shape[0] > 0)
 image = torch.load('../../Oxford_HIC/ImageClip/imgflip_34.pt', weights_only=False).unsqueeze(0).to(device, dtype=torch.bfloat16)
@@ -381,11 +297,11 @@ print("ground_truth: ", test_gt)
 text_id = tokenizer(test_gt, return_tensors='pt', padding='max_length', truncation=True, max_length=64)
 text_id = text_id['input_ids'].to(device)
 print("========= Only image =========")
-Generator.generate_woText(image)
+Generator.generate_woText(image, text_id)
 print("========= Empty Text =========")
-Generator.generate_withText(image)
+Generator.generate_withText(image, text_id, 'test')
 print("========= Full  Text =========")
-Generator.generate_withText(image, text_id)
+Generator.generate_withText(image, text_id,'train')
 
 print('=======================  sample2 =========================')
 print(train[train['image_id'] == 'bokete_3820'].shape[0] > 0)
@@ -395,11 +311,11 @@ print("ground_truth: ", test_gt)
 text_id = tokenizer(test_gt, return_tensors='pt', padding='max_length', truncation=True, max_length=64)
 text_id = text_id['input_ids'].to(device)
 print("========= Only image =========")
-Generator.generate_woText(image)
+Generator.generate_woText(image, text_id)
 print("========= Empty Text =========")
-Generator.generate_withText(image)
+Generator.generate_withText(image, text_id, 'test')
 print("========= Full  Text =========")
-Generator.generate_withText(image, text_id)
+Generator.generate_withText(image, text_id,'train')
 
 print('=======================  sample3 =========================')
 print(train[train['image_id'] == 'imgflip_0'].shape[0] > 0)
@@ -409,11 +325,11 @@ print("ground_truth: ", test_gt)
 text_id = tokenizer(test_gt, return_tensors='pt', padding='max_length', truncation=True, max_length=64)
 text_id = text_id['input_ids'].to(device)
 print("========= Only image =========")
-Generator.generate_woText(image)
+Generator.generate_woText(image, text_id)
 print("========= Empty Text =========")
-Generator.generate_withText(image)
+Generator.generate_withText(image, text_id, 'test')
 print("========= Full  Text =========")
-Generator.generate_withText(image, text_id)
+Generator.generate_withText(image, text_id,'train')
 
 print('=======================  sample4 =========================')
 print(train[train['image_id'] == 'imgflip_8'].shape[0] > 0)
@@ -423,11 +339,11 @@ print("ground_truth: ", test_gt)
 text_id = tokenizer(test_gt, return_tensors='pt', padding='max_length', truncation=True, max_length=64)
 text_id = text_id['input_ids'].to(device)
 print("========= Only image =========")
-Generator.generate_woText(image)
+Generator.generate_woText(image, text_id)
 print("========= Empty Text =========")
-Generator.generate_withText(image)
+Generator.generate_withText(image, text_id, 'test')
 print("========= Full  Text =========")
-Generator.generate_withText(image, text_id)
+Generator.generate_withText(image, text_id,'train')
 
 print('=======================  sample5 =========================')
 print(train[train['image_id'] == 'imgflip_15'].shape[0] > 0)
@@ -437,11 +353,11 @@ print("ground_truth: ", test_gt)
 text_id = tokenizer(test_gt, return_tensors='pt', padding='max_length', truncation=True, max_length=64)
 text_id = text_id['input_ids'].to(device)
 print("========= Only image =========")
-Generator.generate_woText(image)
+Generator.generate_woText(image, text_id)
 print("========= Empty Text =========")
-Generator.generate_withText(image)
+Generator.generate_withText(image, text_id, 'test')
 print("========= Full  Text =========")
-Generator.generate_withText(image, text_id)
+Generator.generate_withText(image, text_id,'train')
 
 print('=======================  sample6 =========================')
 print(train[train['image_id'] == 'imgflip_19'].shape[0] > 0)
@@ -451,11 +367,11 @@ print("ground_truth: ", test_gt)
 text_id = tokenizer(test_gt, return_tensors='pt', padding='max_length', truncation=True, max_length=64)
 text_id = text_id['input_ids'].to(device)
 print("========= Only image =========")
-Generator.generate_woText(image)
+Generator.generate_woText(image, text_id)
 print("========= Empty Text =========")
-Generator.generate_withText(image)
+Generator.generate_withText(image, text_id, 'test')
 print("========= Full  Text =========")
-Generator.generate_withText(image, text_id)
+Generator.generate_withText(image, text_id,'train')
 
 print('=======================  sample7 =========================')
 print(train[train['image_id'] == 'bokete_104530'].shape[0] > 0)
@@ -465,11 +381,11 @@ print("ground_truth: ", test_gt)
 text_id = tokenizer(test_gt, return_tensors='pt', padding='max_length', truncation=True, max_length=64)
 text_id = text_id['input_ids'].to(device)
 print("========= Only image =========")
-Generator.generate_woText(image)
+Generator.generate_woText(image, text_id)
 print("========= Empty Text =========")
-Generator.generate_withText(image)
+Generator.generate_withText(image, text_id, 'test')
 print("========= Full  Text =========")
-Generator.generate_withText(image, text_id)
+Generator.generate_withText(image, text_id,'train')
 
 print('=======================  sample8 =========================')
 print(train[train['image_id'] == 'imgflip_730'].shape[0] > 0)
@@ -479,11 +395,11 @@ print("ground_truth: ", test_gt)
 text_id = tokenizer(test_gt, return_tensors='pt', padding='max_length', truncation=True, max_length=64)
 text_id = text_id['input_ids'].to(device)
 print("========= Only image =========")
-Generator.generate_woText(image)
+Generator.generate_woText(image, text_id)
 print("========= Empty Text =========")
-Generator.generate_withText(image)
+Generator.generate_withText(image, text_id, 'test')
 print("========= Full  Text =========")
-Generator.generate_withText(image, text_id)
+Generator.generate_withText(image, text_id,'train')
 
 print('=======================  sample9 =========================')
 print(train[train['image_id'] == 'imgflip_130'].shape[0] > 0)
@@ -493,11 +409,11 @@ print("ground_truth: ", test_gt)
 text_id = tokenizer(test_gt, return_tensors='pt', padding='max_length', truncation=True, max_length=64)
 text_id = text_id['input_ids'].to(device)
 print("========= Only image =========")
-Generator.generate_woText(image)
+Generator.generate_woText(image, text_id)
 print("========= Empty Text =========")
-Generator.generate_withText(image)
+Generator.generate_withText(image, text_id, 'test')
 print("========= Full  Text =========")
-Generator.generate_withText(image, text_id)
+Generator.generate_withText(image, text_id,'train')
 
 print('=======================  sample10 =========================')
 print(train[train['image_id'] == 'imgflip_677'].shape[0] > 0)
@@ -507,10 +423,12 @@ print("ground_truth: ", test_gt)
 text_id = tokenizer(test_gt, return_tensors='pt', padding='max_length', truncation=True, max_length=64)
 text_id = text_id['input_ids'].to(device)
 print("========= Only image =========")
-Generator.generate_woText(image)
+Generator.generate_woText(image, text_id)
 print("========= Empty Text =========")
-Generator.generate_withText(image)
+Generator.generate_withText(image, text_id, 'test')
 print("========= Full  Text =========")
-Generator.generate_withText(image, text_id)
+Generator.generate_withText(image, text_id,'train')
+
+Generator.print()
 
 
