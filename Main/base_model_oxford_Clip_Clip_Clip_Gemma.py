@@ -1,4 +1,6 @@
 import os
+import gc
+import numpy as np
 import pandas as pd
 from tqdm import tqdm
 import matplotlib.pyplot as plt
@@ -7,7 +9,9 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
-from transformers import GPT2Tokenizer, GPT2LMHeadModel
+# from transformers import GPT2Tokenizer, GPT2LMHeadModel
+from transformers import AutoConfig, AutoTokenizer, Gemma2ForCausalLM
+from peft import LoraConfig, TaskType, get_peft_model
 eps = torch.finfo(torch.bfloat16).eps
 
 class OxfordDataset(torch.utils.data.Dataset):
@@ -29,9 +33,9 @@ class OxfordDataset(torch.utils.data.Dataset):
 
 def train():
     epochs = 200
-    batch_size = 64
+    batch_size = 5
     optimizer_Former_lr = 1e-5
-    save_name = '20241218_Clip_Clip_Clip_noGPT_testNoText_img2txtonly'
+    save_name = '20241218_Clip_Clip_Clip_noGemma_testNoText_img2txtOnly'
     if not os.path.exists('./Model/' + save_name):
         os.makedirs('./Model/' + save_name)
         os.makedirs('D:/MemeGAN/Model/' + save_name)
@@ -73,14 +77,43 @@ def train():
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True, num_workers=20, pin_memory=True, drop_last=True)
 
     ### GPT2 #########################################################################################
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
-    tokenizer.pad_token = tokenizer.eos_token
-    gpt = GPT2LMHeadModel.from_pretrained('gpt2').to(device)
-    gpt_embedding_size = gpt.transformer.wte.weight.shape[1]
-    print('gpt_embedding_size: ', gpt_embedding_size)
+    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+    # tokenizer.pad_token = tokenizer.eos_token
+    # gpt = GPT2LMHeadModel.from_pretrained('gpt2').to(device)
+    # embedding_size = gpt.transformer.wte.weight.shape[1]
+    # print('embedding_size: ', embedding_size)
     # prefix = image embedding, token = text embedding
     ########################################################################################################
+    ### 官方的Gemma #########################################################################################
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    # 2b = 2304, 9b = 3584, 27b = 4608
+    embedding_size = 2304
+    tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
+    # gemmaConfig = AutoConfig.from_pretrained('google/gemma-2-2b-it')
+    gemma = Gemma2ForCausalLM.from_pretrained("google/gemma-2-2b-it", device_map="auto", torch_dtype=torch.bfloat16)
+
+    # LORAconfig = LoraConfig(
+    #     task_type=TaskType.CAUSAL_LM,
+    #     target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+    #     inference_mode=False,  # 训练模式
+    #     r=8,  # Lora 秩
+    #     lora_alpha=32,  # Lora alaph，具体作用参见 Lora 原理
+    #     lora_dropout=0.1  # Dropout 比例
+    # )
+    #
+    # def count_trainable_parameters(model):
+    #     model_parameters = filter(lambda p: p.requires_grad, model.parameters())
+    #     params = sum([np.prod(p.size()) for p in model_parameters])
+    #     return params
+    # a = count_trainable_parameters(gemma)
+    # gemma = get_peft_model(gemma, LORAconfig)
+    # b = count_trainable_parameters(gemma)
+    # #留下小數點後兩位就好
+    # percent = round((b / a) * 100, 3)
+    # print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
+    ########################################################################################################
+
     class MLP(nn.Module):
         def __init__(self, sizes: tuple[int, ...], bias=True, act=nn.Tanh):
             super(MLP, self).__init__()
@@ -98,9 +131,9 @@ def train():
     class MlpTransformer(nn.Module):
         def __init__(self, h_dim):
             super().__init__()
-            self.fc1 = nn.Linear(gpt_embedding_size, h_dim)
+            self.fc1 = nn.Linear(embedding_size, h_dim)
             self.relu = nn.ReLU()
-            self.fc2 = nn.Linear(h_dim, gpt_embedding_size)
+            self.fc2 = nn.Linear(h_dim, embedding_size)
             self.dropout = nn.Dropout()
 
         def forward(self, x):
@@ -114,10 +147,10 @@ def train():
     class TransformerLayer(nn.Module):
         def __init__(self,  mlp_ratio=4., bias=False, dropout=0.):
             super().__init__()
-            self.norm1 = nn.LayerNorm(gpt_embedding_size, eps=eps)
-            self.attn = nn.MultiheadAttention(gpt_embedding_size, 8, bias=bias, dropout=dropout)
-            self.norm2 = nn.LayerNorm(gpt_embedding_size, eps=eps)
-            self.mlp = MlpTransformer(int(gpt_embedding_size * mlp_ratio))
+            self.norm1 = nn.LayerNorm(embedding_size, eps=eps)
+            self.attn = nn.MultiheadAttention(embedding_size, 8, bias=bias, dropout=dropout)
+            self.norm2 = nn.LayerNorm(embedding_size, eps=eps)
+            self.mlp = MlpTransformer(int(embedding_size * mlp_ratio))
 
         def forward_with_attention(self, x, y=None, mask=None):
             x_, attention = self.attn(self.norm1(x), y, mask)
@@ -167,51 +200,51 @@ def train():
         def __init__(self):
             super(TransformerMapper, self).__init__()
             self.transformer = Transformer(8, enc_dec=True)
-            self.linear = nn.Linear(512, 64*gpt_embedding_size)
-            self.prefix_const = nn.Parameter(torch.randn(64, gpt_embedding_size), requires_grad=True)
+            self.linear = nn.Linear(512, 64*embedding_size)
+            self.prefix_const = nn.Parameter(torch.randn(64, embedding_size), requires_grad=True)
         def forward(self, x):
-            x = self.linear(x).view(x.shape[0], 64, gpt_embedding_size)
+            x = self.linear(x).view(x.shape[0], 64, embedding_size)
             prefix = self.prefix_const.unsqueeze(0).expand(x.shape[0], -1, -1).to(device).to(torch.bfloat16)
             prefix = torch.cat((x, prefix), dim=1)
             out = self.transformer(prefix)
             return out
 
     class Generator(nn.Module):
-        def __init__(self, Former, gpt, depth=12):
+        def __init__(self, Former, gemma, depth=12):
             super(Generator, self).__init__()
             if Former == "MLP":
                 self.Former = MLP()
             else:
                 self.Former = TransformerMapper()
-            self.gpt = gpt
-            self.gpt.train()
+            self.gemma = gemma
+            self.gemma.eval()
+            for param in self.gemma.parameters():
+                param.requires_grad = False
 
         def forward(self, image, text_id, mode):
             if mode == 'test':
                 dummy = torch.full((image.shape[0], 64), 50256, dtype=torch.long).to(device)
-                text_embedd = gpt.transformer.wte(dummy)
+                text_embedd = self.gemma.model.embed_tokens(dummy)
             else:
-                text_embedd = gpt.transformer.wte(text_id)
+                text_embedd = self.gemma.model.embed_tokens(text_id)
             ##############################################   generate ##############################################
             image_G = self.Former(image)
             embedding_cat = torch.cat((image_G, text_embedd), dim=1)
             ########################################### feature fusion ###########################################
             if mode == 'train':
                 dummy_token = torch.full((text_id.shape[0], 64), 50256, dtype=text_id.dtype).to(device)
-                dummy_token2 = torch.full_like(text_id, 50256, dtype=text_id.dtype).to(device)
-                labels = torch.cat((dummy_token, text_id, dummy_token2), dim=1)
+                labels = torch.cat((dummy_token, text_id, text_id), dim=1)
             else:
                 labels = torch.full_like(embedding_cat[:, :, 0], 50256, dtype=text_id.dtype).to(device)
-            gptOutput = self.gpt(inputs_embeds=embedding_cat, labels=labels)
+            gptOutput = self.gemma(inputs_embeds=embedding_cat, labels=labels, return_dict = True)
             logits = gptOutput.logits
             if mode == 'test':
                 dummy_token = torch.full((text_id.shape[0], 64), 50256, dtype=text_id.dtype).to(device)
-                dummy_token2 = torch.full_like(text_id, 50256, dtype=text_id.dtype).to(device)
-                labels = torch.cat((dummy_token, text_id, dummy_token2), dim=1)
+                labels = torch.cat((dummy_token, text_id, text_id), dim=1)
             return logits, labels
 
     # NetFormer = Former().to(torch.bfloat16).to(device)
-    Generator = Generator(Former= "Trans", gpt=gpt).to(torch.bfloat16).to(device)
+    Generator = Generator(Former= "Trans", gemma=gemma).to(torch.bfloat16).to(device)
     optimizer_Former = optim.Adam(Generator.parameters(), lr=optimizer_Former_lr)
     train_losses_Former = []
     test_losses_Former = []
@@ -235,8 +268,8 @@ def train():
     # gc.collect()
 
     def loss_function(logits, labels):
-        logits = logits.contiguous().view(-1, logits.size(-1))
-        labels = labels.contiguous().view(-1)
+        logits = logits.view(-1, logits.size(-1))
+        labels = labels.view(-1)
         loss = nn.CrossEntropyLoss(ignore_index=50256)(logits, labels)
         return loss
 
