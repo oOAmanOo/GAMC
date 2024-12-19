@@ -35,7 +35,7 @@ def train():
     epochs = 200
     batch_size = 5
     optimizer_Former_lr = 1e-5
-    save_name = '20241218_Clip_Clip_Clip_noGemma_testNoText_img2txtOnly'
+    save_name = '20241219_Clip_Clip_Clip_noGemma_testNoText_img2txt_prefix10'
     if not os.path.exists('./Model/' + save_name):
         os.makedirs('./Model/' + save_name)
         os.makedirs('D:/MemeGAN/Model/' + save_name)
@@ -201,7 +201,7 @@ def train():
             super(TransformerMapper, self).__init__()
             self.transformer = Transformer(8, enc_dec=True)
             self.linear = nn.Linear(512, 64*embedding_size)
-            self.prefix_const = nn.Parameter(torch.randn(64, embedding_size), requires_grad=True)
+            self.prefix_const = nn.Parameter(torch.randn(10, embedding_size), requires_grad=True)
         def forward(self, x):
             x = self.linear(x).view(x.shape[0], 64, embedding_size)
             prefix = self.prefix_const.unsqueeze(0).expand(x.shape[0], -1, -1).to(device).to(torch.bfloat16)
@@ -223,7 +223,7 @@ def train():
 
         def forward(self, image, text_id, mode):
             if mode == 'test':
-                dummy = torch.full((image.shape[0], 64), 50256, dtype=torch.long).to(device)
+                dummy = torch.full((image.shape[0], 64), 0, dtype=torch.long).to(device)
                 text_embedd = self.gemma.model.embed_tokens(dummy)
             else:
                 text_embedd = self.gemma.model.embed_tokens(text_id)
@@ -232,14 +232,16 @@ def train():
             embedding_cat = torch.cat((image_G, text_embedd), dim=1)
             ########################################### feature fusion ###########################################
             if mode == 'train':
-                dummy_token = torch.full((text_id.shape[0], 64), 50256, dtype=text_id.dtype).to(device)
+                dummy_token = torch.full((text_id.shape[0], 10), 0, dtype=text_id.dtype).to(device)
+                dummy_token2 = torch.full_like(text_id, 0, dtype=text_id.dtype).to(device)
                 labels = torch.cat((dummy_token, text_id, text_id), dim=1)
             else:
-                labels = torch.full_like(embedding_cat[:, :, 0], 50256, dtype=text_id.dtype).to(device)
+                labels = torch.full_like(embedding_cat[:, :, 0], 0, dtype=text_id.dtype).to(device)
             gptOutput = self.gemma(inputs_embeds=embedding_cat, labels=labels, return_dict = True)
             logits = gptOutput.logits
             if mode == 'test':
-                dummy_token = torch.full((text_id.shape[0], 64), 50256, dtype=text_id.dtype).to(device)
+                dummy_token = torch.full((text_id.shape[0], 10), 0, dtype=text_id.dtype).to(device)
+                dummy_token2 = torch.full_like(text_id, 0, dtype=text_id.dtype).to(device)
                 labels = torch.cat((dummy_token, text_id, text_id), dim=1)
             return logits, labels
 
@@ -268,9 +270,9 @@ def train():
     # gc.collect()
 
     def loss_function(logits, labels):
-        logits = logits.view(-1, logits.size(-1))
-        labels = labels.view(-1)
-        loss = nn.CrossEntropyLoss(ignore_index=50256)(logits, labels)
+        logits = logits.contiguous().view(-1, logits.size(-1))
+        labels = labels.contiguous().view(-1)
+        loss = nn.CrossEntropyLoss(ignore_index=0)(logits, labels)
         return loss
 
     torch.autograd.set_detect_anomaly(True)
