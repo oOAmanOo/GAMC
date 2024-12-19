@@ -34,16 +34,16 @@ class OxfordDataset(torch.utils.data.Dataset):
 
 def train():
     epochs = 200
-    batch_size = 128
+    batch_size = 64
     optimizer_Former_lr = 1e-5
-    save_name = '20241215_Clip_mineStruc_woGPT'
+    save_name = '20241219_Clip_GPT_catFF_64_loadFormer'
     if not os.path.exists('./Model/' + save_name):
         os.makedirs('./Model/' + save_name)
         os.makedirs('D:/MemeGAN/Model/' + save_name)
     ################ right ################
-    # twoModel = False
-    # checkpoint_folder = '20241201_wo_coAttention_temp'
-    # checkpoint_Former = 'D:/MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_83.pth'
+    twoModel = False
+    checkpoint_folder = '20241201_wo_coAttention_temp'
+    checkpoint_Former = 'D:/MemeGAN/Model/' + checkpoint_folder + '/' + checkpoint_folder + '_NetFormer_83.pth'
     #######################################
     # twoModel = True
     # checkpoint_folder = '20241204_noprompt_base_20241201_coAttention_temp'
@@ -195,16 +195,18 @@ def train():
             super(Generator, self).__init__()
             self.Former = Former
             self.gpt = gpt
-            self.gpt.eval()
-            self.gptLinearBefore = nn.Linear(768, gpt_embedding_size)
-            # feed forward
-            self.feedForwardLinear = nn.Linear(768, 768)
-            self.feedForwardLayerNorm = nn.LayerNorm(768, eps=eps)
+            # # self.gpt.eval()
+            # self.gptLinearBefore = nn.Linear(768, gpt_embedding_size)
+            # # feed forward
+            # self.feedForwardLinear = nn.Linear(768, 768)
+            # self.feedForwardLayerNorm = nn.LayerNorm(768, eps=eps)
 
-        def forward(self, image, text_id=None):
-            if text_id is None:
-                text_id = torch.zeros((image.shape[0], 64), dtype=torch.long).to(device)
-            text_embedd = gpt.transformer.wte(text_id)
+        def forward(self, image, text_id, mode):
+            if mode == 'test':
+                dummy = torch.full_like(text_id, 50256, dtype=torch.long).to(device)
+                text_embedd = gpt.transformer.wte(dummy)
+            else:
+                text_embedd = gpt.transformer.wte(text_id)
             ##############################################   generate ##############################################
             image = image.transpose(0, 1)
             image_G = self.Former.image(image)
@@ -214,13 +216,24 @@ def train():
             text_G = self.Former.text(text_embedd)
             image_G = image_G.transpose(0, 1)
             text_G = text_G.transpose(0, 1)
-            feature_fusion = image_G + text_G  # visual_attending_textual + textual_attending_visual
-            feature_fusionFF = self.feedForwardLinear(feature_fusion)
-            feature_fusion_final = self.feedForwardLayerNorm(feature_fusion + feature_fusionFF)
-            image_GG = self.gptLinearBefore(feature_fusion_final)
-            gotOutput = self.gpt(inputs_embeds=image_GG, labels=text_id)
+            # feature_fusion = image_G + text_G  # visual_attending_textual + textual_attending_visual
+            # feature_fusionFF = self.feedForwardLinear(feature_fusion)
+            # feature_fusion_final = self.feedForwardLayerNorm(feature_fusion + feature_fusionFF)
+            embedding_cat = torch.cat((image_G, text_G), dim=1)
+            if mode == 'train':
+                # dummy_token = torch.full((text_id.shape[0], 10), 50256, dtype=text_id.dtype).to(device)
+                dummy_token2 = torch.full_like(text_id, 50256, dtype=text_id.dtype).to(device)
+                labels = torch.cat((dummy_token2, text_id), dim=1)
+            else:
+                labels = torch.full_like(embedding_cat[:, :, 0], 50256, dtype=text_id.dtype).to(device)
+            # image_GG = self.gptLinearBefore(feature_fusion_final)
+            gotOutput = self.gpt(inputs_embeds=embedding_cat, labels=labels)
             logits = gotOutput.logits
-            return logits
+            if mode == 'test':
+                # dummy_token = torch.full((text_id.shape[0], 10), 50256, dtype=text_id.dtype).to(device)
+                dummy_token2 = torch.full_like(text_id, 50256, dtype=text_id.dtype).to(device)
+                labels = torch.cat((dummy_token2, text_id), dim=1)
+            return logits, labels
 
     NetFormer = Former().to(torch.bfloat16).to(device)
     Generator = Generator(Former= NetFormer, gpt=gpt).to(torch.bfloat16).to(device)
@@ -234,23 +247,22 @@ def train():
     gemma_loss_list = []
     fc_loss_list = []
 
-    # checkpoint_Former = torch.load(checkpoint_Former)
-    # Generator.Former.load_state_dict(checkpoint_Former['model_state_dict'])
-    #
-    # if twoModel:
-    #     checkpoint_Generator = torch.load(0)
-    #     Generator.load_state_dict(checkpoint_Generator['model_state_dict'])
-    #     present_epoch = checkpoint_Former['epoch'] + 1
-    #     del checkpoint_Generator
-    #
-    # del checkpoint_Former
-    # gc.collect()
+    checkpoint_Former = torch.load(checkpoint_Former)
+    Generator.Former.load_state_dict(checkpoint_Former['model_state_dict'])
 
-    def loss_function(logits, text_id):
-        logit = logits.view(-1, logits.size(-1))
-        labels = text_id.view(-1)
-        labels = torch.where(labels == 50256, torch.tensor(-100, device=labels.device), labels)
-        loss = nn.CrossEntropyLoss()(logit, labels)
+    if twoModel:
+        checkpoint_Generator = torch.load(0)
+        Generator.load_state_dict(checkpoint_Generator['model_state_dict'])
+        present_epoch = checkpoint_Former['epoch'] + 1
+        del checkpoint_Generator
+
+    del checkpoint_Former
+    gc.collect()
+
+    def loss_function(logits, labels):
+        logits = logits.contiguous().view(-1, logits.size(-1))
+        labels = labels.contiguous().view(-1)
+        loss = nn.CrossEntropyLoss(ignore_index=50256)(logits, labels)
         return loss
 
     torch.autograd.set_detect_anomaly(True)
@@ -268,9 +280,8 @@ def train():
                 image = image.to(device, dtype=torch.bfloat16)
                 funny_score = funny_score.to(device, dtype=torch.bfloat16)
                 optimizer_Former.zero_grad()
-                logits = Generator(image, text_id)
-                loss = loss_function(logits, text_id)
-                # loss.requires_grad = True
+                logits, labels = Generator(image, text_id, 'train')
+                loss = loss_function(logits, labels)
                 loss.backward()
                 optimizer_Former.step()
                 train_loss_Former += loss.item()
@@ -287,8 +298,8 @@ def train():
                     text_id = text_id['input_ids'].to(device)
                     image = image.to(device, dtype=torch.bfloat16)
                     funny_score = funny_score.to(device, dtype=torch.bfloat16)
-                    logits = Generator(image, text_id)
-                    loss = loss_function(logits, text_id)
+                    logits, labels = Generator(image, text_id, 'test')
+                    loss = loss_function(logits, labels)
                     test_loss_Former += loss.item()
                     tepoch.set_postfix(loss=test_loss_Former / (idx + 1))
         test_loss_Former /= len(test_loader)
