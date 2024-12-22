@@ -9,11 +9,20 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
-# from transformers import GPT2Tokenizer, GPT2LMHeadModel
 from transformers import AutoConfig, AutoTokenizer, Gemma2ForCausalLM
-from peft import LoraConfig, TaskType, get_peft_model
 eps = torch.finfo(torch.bfloat16).eps
-
+from typing import Tuple, Optional, Union
+import numpy as np
+import random
+from transformers import GPT2Tokenizer, GPT2LMHeadModel
+from transformers import get_linear_schedule_with_warmup
+# eps = torch.finfo(torch.bfloat16).eps
+eps = 1e-5
+seed = 42
+random.seed(seed)
+np.random.seed(seed)
+torch.manual_seed(seed)
+torch.cuda.manual_seed_all(seed)
 class OxfordDataset(torch.utils.data.Dataset):
     def __init__(self, text, image, funny_score):
         self.text = text
@@ -35,7 +44,7 @@ def train():
     epochs = 200
     batch_size = 5
     optimizer_Former_lr = 1e-5
-    save_name = '20241219_Clip_Clip_Clip_noGemma_testNoText_img2txt_prefix10'
+    save_name = '20241221_Clip_Clip_Clip_noGemma_prefix10_mask'
     if not os.path.exists('./Model/' + save_name):
         os.makedirs('./Model/' + save_name)
         os.makedirs('D:/MemeGAN/Model/' + save_name)
@@ -115,7 +124,11 @@ def train():
     ########################################################################################################
 
     class MLP(nn.Module):
-        def __init__(self, sizes: tuple[int, ...], bias=True, act=nn.Tanh):
+
+        def forward(self, x: torch.Tensor) -> torch.Tensor:
+            return self.model(x)
+
+        def __init__(self, sizes: Tuple[int, ...], bias=True, act=nn.Tanh):
             super(MLP, self).__init__()
             layers = []
             for i in range(len(sizes) - 1):
@@ -123,18 +136,14 @@ def train():
                 if i < len(sizes) - 2:
                     layers.append(act())
             self.model = nn.Sequential(*layers)
-        def forward(self, x: torch.Tensor) -> torch.Tensor:
-            return self.model(x)
-
-
 
     class MlpTransformer(nn.Module):
         def __init__(self, h_dim):
-            super().__init__()
-            self.fc1 = nn.Linear(embedding_size, h_dim)
-            self.relu = nn.ReLU()
-            self.fc2 = nn.Linear(h_dim, embedding_size)
-            self.dropout = nn.Dropout()
+            super(MlpTransformer, self).__init__()
+            self.fc1 = nn.Linear(gpt_embedding_size, h_dim)
+            self.relu = nn.functional.relu
+            self.fc2 = nn.Linear(h_dim, gpt_embedding_size)
+            self.dropout = nn.Dropout(0.0)
 
         def forward(self, x):
             x = self.fc1(x)
@@ -144,13 +153,44 @@ def train():
             x = self.dropout(x)
             return x
 
+    class MultiHeadAttention(nn.Module):
+
+        def __init__(self, num_heads, bias=True, dropout=0.):
+            super(MultiHeadAttention, self).__init__()
+            self.num_heads = num_heads
+            head_dim = gpt_embedding_size // num_heads
+            self.scale = head_dim ** -0.5
+            self.to_queries = nn.Linear(gpt_embedding_size, gpt_embedding_size, bias=bias)
+            self.to_keys_values = nn.Linear(gpt_embedding_size, gpt_embedding_size * 2, bias=bias)
+            self.project = nn.Linear(gpt_embedding_size, gpt_embedding_size)
+            self.dropout = nn.Dropout(dropout)
+
+        def forward(self, x, y=None, mask=None):
+            y = y if y is not None else x
+            b, n, c = x.shape
+            _, m, d = y.shape
+            # b n h dh
+            queries = self.to_queries(x).reshape(b, n, self.num_heads, c // self.num_heads)
+            # b m 2 h dh
+            keys_values = self.to_keys_values(y).reshape(b, m, 2, self.num_heads, c // self.num_heads)
+            keys, values = keys_values[:, :, 0], keys_values[:, :, 1]
+            attention = torch.einsum('bnhd,bmhd->bnmh', queries, keys) * self.scale
+            if mask is not None:
+                if mask.dim() == 2:
+                    mask = mask.unsqueeze(1)
+                attention = attention.masked_fill(mask.unsqueeze(3), float("-inf"))
+            attention = attention.softmax(dim=2)
+            out = torch.einsum('bnmh,bmhd->bnhd', attention, values).reshape(b, n, c)
+            out = self.project(out)
+            return out, attention
+
     class TransformerLayer(nn.Module):
         def __init__(self,  mlp_ratio=4., bias=False, dropout=0.):
-            super().__init__()
-            self.norm1 = nn.LayerNorm(embedding_size, eps=eps)
-            self.attn = nn.MultiheadAttention(embedding_size, 8, bias=bias, dropout=dropout)
-            self.norm2 = nn.LayerNorm(embedding_size, eps=eps)
-            self.mlp = MlpTransformer(int(embedding_size * mlp_ratio))
+            super(TransformerLayer, self).__init__()
+            self.norm1 = nn.LayerNorm(gpt_embedding_size, eps=eps)
+            self.attn = MultiHeadAttention(8, bias=bias, dropout=dropout)
+            self.norm2 = nn.LayerNorm(gpt_embedding_size, eps=eps)
+            self.mlp = MlpTransformer(int(gpt_embedding_size * mlp_ratio))
 
         def forward_with_attention(self, x, y=None, mask=None):
             x_, attention = self.attn(self.norm1(x), y, mask)
@@ -163,8 +203,6 @@ def train():
             x = x + self.mlp(self.norm2(x))
             return x
 
-
-
     class Transformer(nn.Module):
         def __init__(self, num_layers: int, mlp_ratio: float = 2., enc_dec: bool = False):
             super(Transformer, self).__init__()
@@ -173,7 +211,12 @@ def train():
                 num_layers = num_layers * 2
             layers = []
             for i in range(num_layers):
-                layers.append(TransformerLayer(mlp_ratio))
+                if i % 2 == 0 and enc_dec:  # cross
+                    layers.append(TransformerLayer(mlp_ratio))
+                elif enc_dec:  # self
+                    layers.append(TransformerLayer(mlp_ratio))
+                else:  # self or cross
+                    layers.append(TransformerLayer(mlp_ratio))
             self.layers = nn.ModuleList(layers)
 
         def forward_with_attention(self, x, y=None, mask=None):
@@ -184,29 +227,22 @@ def train():
             return x, attentions
 
         def forward(self, x, y=None, mask=None):
-            if mask is None:
-                mask = torch.ones(x.shape[0], x.shape[1], x.shape[2]).to(device).to(torch.bfloat16)
             for i, layer in enumerate(self.layers):
-                x = layer(x, x, mask)
-                # if i % 2 == 0 and self.enc_dec:  # cross
-                #     x = layer(x, y)
-                # elif self.enc_dec:  # self
-                #     x = layer(x, x, mask)
-                # else:  # self or cross
-                #     x = layer(x, y, mask)
+                x = layer(x, y, mask)
             return x
 
     class TransformerMapper(nn.Module):
         def __init__(self):
             super(TransformerMapper, self).__init__()
-            self.transformer = Transformer(8, enc_dec=True)
-            self.linear = nn.Linear(512, 64*embedding_size)
-            self.prefix_const = nn.Parameter(torch.randn(10, embedding_size), requires_grad=True)
+            self.transformer = Transformer(num_layers=8, enc_dec=False)
+            self.linear = nn.Linear(512, 10*gpt_embedding_size)
+            self.prefix_const = nn.Parameter(torch.randn(10, gpt_embedding_size), requires_grad=True)
+
         def forward(self, x):
-            x = self.linear(x).view(x.shape[0], 64, embedding_size)
+            x = self.linear(x).view(x.shape[0], 10, gpt_embedding_size)
             prefix = self.prefix_const.unsqueeze(0).expand(x.shape[0], -1, -1).to(device).to(torch.bfloat16)
             prefix = torch.cat((x, prefix), dim=1)
-            out = self.transformer(prefix)
+            out = self.transformer(prefix)[:, 10:]
             return out
 
     class Generator(nn.Module):
@@ -221,7 +257,7 @@ def train():
             for param in self.gemma.parameters():
                 param.requires_grad = False
 
-        def forward(self, image, text_id, mode):
+        def forward(self, image, text_id, mask, mode):
             if mode == 'test':
                 dummy = torch.full((image.shape[0], 64), 0, dtype=torch.long).to(device)
                 text_embedd = self.gemma.model.embed_tokens(dummy)
@@ -231,23 +267,22 @@ def train():
             image_G = self.Former(image)
             embedding_cat = torch.cat((image_G, text_embedd), dim=1)
             ########################################### feature fusion ###########################################
-            if mode == 'train':
-                dummy_token = torch.full((text_id.shape[0], 10), 0, dtype=text_id.dtype).to(device)
-                dummy_token2 = torch.full_like(text_id, 0, dtype=text_id.dtype).to(device)
-                labels = torch.cat((dummy_token, text_id, text_id), dim=1)
-            else:
-                labels = torch.full_like(embedding_cat[:, :, 0], 0, dtype=text_id.dtype).to(device)
-            gptOutput = self.gemma(inputs_embeds=embedding_cat, labels=labels, return_dict = True)
-            logits = gptOutput.logits
-            if mode == 'test':
-                dummy_token = torch.full((text_id.shape[0], 10), 0, dtype=text_id.dtype).to(device)
-                dummy_token2 = torch.full_like(text_id, 0, dtype=text_id.dtype).to(device)
-                labels = torch.cat((dummy_token, text_id, text_id), dim=1)
-            return logits, labels
+            gemmaOutput = self.gemma(inputs_embeds=embedding_cat, labels=labels, return_dict = True)
+            logits = gemmaOutput.logits
+
+            return logits
 
     # NetFormer = Former().to(torch.bfloat16).to(device)
-    Generator = Generator(Former= "Trans", gemma=gemma).to(torch.bfloat16).to(device)
-    optimizer_Former = optim.Adam(Generator.parameters(), lr=optimizer_Former_lr)
+    Generator = Generator(Former= "Trans").to(torch.bfloat16).to(device)
+    optimizer_Former = optim.Adam(Generator.parameters(), lr= optimizer_Former_lr)
+    counter = 0
+    for param in Generator.parameters():
+        if param.requires_grad:
+            counter += param.numel()
+    print("number of parameters: ", counter)
+    scheduler = get_linear_schedule_with_warmup(
+        optimizer_Former, num_warmup_steps=5000, num_training_steps=epochs * len(train_loader)
+    )
     train_losses_Former = []
     test_losses_Former = []
     save = []
@@ -270,6 +305,7 @@ def train():
     # gc.collect()
 
     def loss_function(logits, labels):
+        logits = logits[:, 9:-1]
         logits = logits.contiguous().view(-1, logits.size(-1))
         labels = labels.contiguous().view(-1)
         loss = nn.CrossEntropyLoss(ignore_index=0)(logits, labels)
@@ -285,16 +321,18 @@ def train():
         with tqdm(train_loader, unit="batch", leave=True) as tepoch:
             Generator.train()
             for idx, (text, image, funny_score) in enumerate(tepoch):
-                text_id = tokenizer(text, return_tensors='pt', padding='max_length', truncation=True, max_length=64)
-                text_id = text_id['input_ids'].to(device)
+                Generator.zero_grad()
+                text_data = tokenizer(text, return_tensors='pt', padding='max_length', truncation=True, max_length=64)
+                text_id = text_data['input_ids'].to(device)
+                mask = torch.cat ((torch.ones(text_id.shape[0], 10), text_data['attention_mask']), dim=1).to(device)
                 image = image.to(device, dtype=torch.bfloat16)
-                funny_score = funny_score.to(device, dtype=torch.bfloat16)
-                optimizer_Former.zero_grad()
-                logits, labels = Generator(image, text_id, mode='train')
-                loss = loss_function(logits, labels)
-                # loss.requires_grad = True
+                # funny_score = funny_score.to(device, dtype=torch.bfloat16)
+                logits = Generator(image, text_id, mask, mode='train')
+                loss = loss_function(logits, text_id)
                 loss.backward()
                 optimizer_Former.step()
+                scheduler.step()
+                optimizer_Former.zero_grad()
                 train_loss_Former += loss.item()
                 tepoch.set_postfix(loss=train_loss_Former / (idx + 1))
                 ##########################################################################
@@ -305,12 +343,13 @@ def train():
             Generator.eval()
             with torch.no_grad():
                 for idx, (text, image, funny_score) in enumerate(tepoch):
-                    text_id = tokenizer(text, return_tensors='pt', padding='max_length', truncation=True, max_length=64)
-                    text_id = text_id['input_ids'].to(device)
+                    text_data = tokenizer(text, return_tensors='pt', padding='max_length', truncation=True, max_length=64)
+                    text_id = text_data['input_ids'].to(device)
+                    mask = torch.cat((torch.ones(text_id.shape[0], 10), text_data['attention_mask']), dim=1).to(device)
                     image = image.to(device, dtype=torch.bfloat16)
-                    funny_score = funny_score.to(device, dtype=torch.bfloat16)
-                    logits, labels = Generator(image, text_id, mode='test')
-                    loss = loss_function(logits, labels)
+                    # funny_score = funny_score.to(device, dtype=torch.bfloat16)
+                    logits = Generator(image, text_id , mask, mode='test')
+                    loss = loss_function(logits, text_id)
                     test_loss_Former += loss.item()
                     tepoch.set_postfix(loss=test_loss_Former / (idx + 1))
         test_loss_Former /= len(test_loader)
