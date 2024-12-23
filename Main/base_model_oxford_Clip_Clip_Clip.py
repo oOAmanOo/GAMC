@@ -39,7 +39,7 @@ def train():
     epochs = 200
     batch_size = 64
     optimizer_Former_lr = 2e-5
-    save_name = '20241221_Clip_Clip_Clip_noGPT_prefix10_mask'
+    save_name = '20241221_Clip_Clip_Clip_noGPT_prefix10_mask_Adam'
     if not os.path.exists('./Model/' + save_name):
         os.makedirs('./Model/' + save_name)
         os.makedirs('D:/MemeGAN/Model/' + save_name)
@@ -91,10 +91,6 @@ def train():
     ########################################################################################################
 
     class MLP(nn.Module):
-
-        def forward(self, x: torch.Tensor) -> torch.Tensor:
-            return self.model(x)
-
         def __init__(self, sizes: Tuple[int, ...], bias=True, act=nn.Tanh):
             super(MLP, self).__init__()
             layers = []
@@ -103,6 +99,11 @@ def train():
                 if i < len(sizes) - 2:
                     layers.append(act())
             self.model = nn.Sequential(*layers)
+
+        def forward(self, x: torch.Tensor) -> torch.Tensor:
+            return self.model(x)
+
+
 
     class MlpTransformer(nn.Module):
         def __init__(self, h_dim):
@@ -228,7 +229,6 @@ def train():
                 text_embedd = self.gpt.transformer.wte(dummy)
             else:
                 text_embedd = self.gpt.transformer.wte(text_id)
-
             ##############################################   generate ##############################################
             image_G = self.Former(image)
             embedding_cat = torch.cat((image_G, text_embedd), dim=1)
@@ -243,8 +243,8 @@ def train():
 
     # NetFormer = Former().to(torch.bfloat16).to(device)
     Generator = Generator(Former= "Trans").to(torch.bfloat16).to(device)
-    # optimizer_Former = optim.Adam(Generator.parameters(), lr= optimizer_Former_lr)
-    optimizer_Former = optim.AdamW(Generator.parameters(), lr=optimizer_Former_lr)
+    optimizer_Former = optim.Adam(Generator.parameters(), lr= optimizer_Former_lr)
+    # optimizer_Former = optim.AdamW(Generator.parameters(), lr=optimizer_Former_lr)
     counter = 0
     for param in Generator.parameters():
         if param.requires_grad:
