@@ -1,5 +1,7 @@
 import os
 import gc
+from sys import prefix
+
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
@@ -43,8 +45,10 @@ class OxfordDataset(torch.utils.data.Dataset):
 def train():
     epochs = 200
     batch_size = 5
+    prefix_length = 64
     optimizer_Former_lr = 1e-5
-    save_name = '20241221_Clip_Clip_Clip_noGemma_prefix10_mask'
+    # save_name = '20241221_Clip_Clip_Clip_noGemma_prefix64_mask'
+    save_name = '20241221_Clip_Clip_Clip_noGemma_prefix64_mask_AdamW' #right
     if not os.path.exists('./Model/' + save_name):
         os.makedirs('./Model/' + save_name)
         os.makedirs('D:/MemeGAN/Model/' + save_name)
@@ -140,9 +144,9 @@ def train():
     class MlpTransformer(nn.Module):
         def __init__(self, h_dim):
             super(MlpTransformer, self).__init__()
-            self.fc1 = nn.Linear(gpt_embedding_size, h_dim)
+            self.fc1 = nn.Linear(embedding_size, h_dim)
             self.relu = nn.functional.relu
-            self.fc2 = nn.Linear(h_dim, gpt_embedding_size)
+            self.fc2 = nn.Linear(h_dim, embedding_size)
             self.dropout = nn.Dropout(0.0)
 
         def forward(self, x):
@@ -158,11 +162,11 @@ def train():
         def __init__(self, num_heads, bias=True, dropout=0.):
             super(MultiHeadAttention, self).__init__()
             self.num_heads = num_heads
-            head_dim = gpt_embedding_size // num_heads
+            head_dim = embedding_size // num_heads
             self.scale = head_dim ** -0.5
-            self.to_queries = nn.Linear(gpt_embedding_size, gpt_embedding_size, bias=bias)
-            self.to_keys_values = nn.Linear(gpt_embedding_size, gpt_embedding_size * 2, bias=bias)
-            self.project = nn.Linear(gpt_embedding_size, gpt_embedding_size)
+            self.to_queries = nn.Linear(embedding_size, embedding_size, bias=bias)
+            self.to_keys_values = nn.Linear(embedding_size, embedding_size * 2, bias=bias)
+            self.project = nn.Linear(embedding_size, embedding_size)
             self.dropout = nn.Dropout(dropout)
 
         def forward(self, x, y=None, mask=None):
@@ -187,10 +191,10 @@ def train():
     class TransformerLayer(nn.Module):
         def __init__(self,  mlp_ratio=4., bias=False, dropout=0.):
             super(TransformerLayer, self).__init__()
-            self.norm1 = nn.LayerNorm(gpt_embedding_size, eps=eps)
+            self.norm1 = nn.LayerNorm(embedding_size, eps=eps)
             self.attn = MultiHeadAttention(8, bias=bias, dropout=dropout)
-            self.norm2 = nn.LayerNorm(gpt_embedding_size, eps=eps)
-            self.mlp = MlpTransformer(int(gpt_embedding_size * mlp_ratio))
+            self.norm2 = nn.LayerNorm(embedding_size, eps=eps)
+            self.mlp = MlpTransformer(int(embedding_size * mlp_ratio))
 
         def forward_with_attention(self, x, y=None, mask=None):
             x_, attention = self.attn(self.norm1(x), y, mask)
@@ -235,14 +239,14 @@ def train():
         def __init__(self):
             super(TransformerMapper, self).__init__()
             self.transformer = Transformer(num_layers=8, enc_dec=False)
-            self.linear = nn.Linear(512, 10*gpt_embedding_size)
-            self.prefix_const = nn.Parameter(torch.randn(10, gpt_embedding_size), requires_grad=True)
+            self.linear = nn.Linear(512, prefix_length*embedding_size)
+            self.prefix_const = nn.Parameter(torch.randn(prefix_length, embedding_size), requires_grad=True)
 
         def forward(self, x):
-            x = self.linear(x).view(x.shape[0], 10, gpt_embedding_size)
+            x = self.linear(x).view(x.shape[0], prefix_length, embedding_size)
             prefix = self.prefix_const.unsqueeze(0).expand(x.shape[0], -1, -1).to(device).to(torch.bfloat16)
             prefix = torch.cat((x, prefix), dim=1)
-            out = self.transformer(prefix)[:, 10:]
+            out = self.transformer(prefix)[:, prefix_length:]
             return out
 
     class Generator(nn.Module):
@@ -267,14 +271,15 @@ def train():
             image_G = self.Former(image)
             embedding_cat = torch.cat((image_G, text_embedd), dim=1)
             ########################################### feature fusion ###########################################
-            gemmaOutput = self.gemma(inputs_embeds=embedding_cat, labels=labels, return_dict = True)
+            gemmaOutput = self.gemma(inputs_embeds=embedding_cat, attention_mask=mask)
             logits = gemmaOutput.logits
 
             return logits
 
     # NetFormer = Former().to(torch.bfloat16).to(device)
-    Generator = Generator(Former= "Trans").to(torch.bfloat16).to(device)
-    optimizer_Former = optim.Adam(Generator.parameters(), lr= optimizer_Former_lr)
+    Generator = Generator(Former= "Trans", gemma= gemma).to(torch.bfloat16).to(device)
+    # optimizer_Former = optim.Adam(Generator.parameters(), lr= optimizer_Former_lr) #left
+    optimizer_Former = optim.AdamW(Generator.parameters(), lr=optimizer_Former_lr) #right
     counter = 0
     for param in Generator.parameters():
         if param.requires_grad:
@@ -305,7 +310,7 @@ def train():
     # gc.collect()
 
     def loss_function(logits, labels):
-        logits = logits[:, 9:-1]
+        logits = logits[:, prefix_length-1:-1]
         logits = logits.contiguous().view(-1, logits.size(-1))
         labels = labels.contiguous().view(-1)
         loss = nn.CrossEntropyLoss(ignore_index=0)(logits, labels)
@@ -324,7 +329,7 @@ def train():
                 Generator.zero_grad()
                 text_data = tokenizer(text, return_tensors='pt', padding='max_length', truncation=True, max_length=64)
                 text_id = text_data['input_ids'].to(device)
-                mask = torch.cat ((torch.ones(text_id.shape[0], 10), text_data['attention_mask']), dim=1).to(device)
+                mask = torch.cat ((torch.ones(text_id.shape[0], prefix_length), text_data['attention_mask']), dim=1).to(device)
                 image = image.to(device, dtype=torch.bfloat16)
                 # funny_score = funny_score.to(device, dtype=torch.bfloat16)
                 logits = Generator(image, text_id, mask, mode='train')
