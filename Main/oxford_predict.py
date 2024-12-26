@@ -99,7 +99,7 @@ class Predictor(object):
             logits = out.logits[:, self.prefix_length-1: -1]
             loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens[i].flatten(), ignore_index=0)
             print(loss)
-            caption_token = out.logits.argmax(-1)[0].cpu()
+            caption_token = logits.argmax(-1)[0].cpu()
             caption = tokenizer.decode(caption_token, skip_special_tokens=True)
             print(caption)
             if self.train_output != None:
@@ -110,14 +110,14 @@ class Predictor(object):
             self.train_loss.append(loss.item())
 
         if len(text_list) != 2:
-            def dataframe_Name(name, count=237, rows=1):
+            def dataframe_Name(name, count=227, rows=1):
                 if rows == 1:
                     name_df = pd.DataFrame([[name]], columns=["Name"])
                     num_df = pd.DataFrame([[0] * count for _ in range(rows)], columns=[f"{i}" for i in range(0, count)])
                     name_df = pd.concat([name_df, num_df], axis=1)
                     return name_df
                 else:
-                    name_df = pd.DataFrame([[name] * count for _ in range(rows)],columns=[f"{i}" for i in range(237 - count, 237)])
+                    name_df = pd.DataFrame([[name] * count for _ in range(rows)],columns=[f"{i}" for i in range(227 - count, 227)])
                     return name_df
 
             test = pd.DataFrame()
@@ -130,7 +130,7 @@ class Predictor(object):
             generate2_df = pd.DataFrame(self.generate2_output.cpu().detach(), columns=[f"{i}" for i in range(0, 74)])
             generate2_df = pd.concat([test, generate2_df, dataframe_Name("-", 74, 12)], axis=1)
             generate2_df['text'] = self.generate2_text
-            train_df = pd.DataFrame(self.train_output.cpu().detach(), columns=[f"{i}" for i in range(0, 237)])
+            train_df = pd.DataFrame(self.train_output.cpu().detach(), columns=[f"{i}" for i in range(0, 227)])
             train_df = pd.concat([test, train_df], axis=1)
             train_df['loss'] = self.train_loss
             train_df['text'] = self.train_text
