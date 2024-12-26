@@ -458,9 +458,10 @@ def main():
     parser.add_argument('--normalize_prefix', dest='normalize_prefix', action='store_true')
     args = parser.parse_args()
     prefix_length = args.prefix_length
+    if not os.path.exists('./Model/' + args.out_dir):
+        os.makedirs('./Model/' + args.out_dir)
+        os.makedirs('D:/MemeGAN/Model/' + args.out_dir)
     args.out_dir = './Model/' + args.out_dir
-    if not os.path.exists(args.out_dir):
-        os.makedirs(args.out_dir)
     trainDataset = TrainClipCocoDataset(args.trainData, prefix_length, normalize_prefix=args.normalize_prefix)
     testDataset = TestClipCocoDataset(args.testData, prefix_length, normalize_prefix=args.normalize_prefix)
     prefix_dim = 640 if args.is_rn else 512

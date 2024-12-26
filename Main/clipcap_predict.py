@@ -119,8 +119,7 @@ class Predictor(object):
 
             test = pd.DataFrame()
             test['Name'] = ['test1', 'test2', 'train1', 'train2', 'train3', 'train4', 'train5', 'train6', 'train7',
-                            'train8', 'train9',
-                            'train10']
+                            'train8', 'train9','train10']
             generate_beam_df = pd.DataFrame(self.generate_beam_output.cpu().detach(),columns=[f"{i}" for i in range(0, 40)])
             generate_beam_df = pd.concat([test, generate_beam_df], axis=1)
             generate_beam_df['text'] = self.generate_beam_text
