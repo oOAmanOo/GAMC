@@ -430,6 +430,7 @@ def train(trainDataset: TrainClipCocoDataset, testDataset: TestClipCocoDataset, 
                 os.path.join(output_dir, f"{output_prefix}-{epoch:03d}.pt"),
             )
             save.append('V')
+            print(f"Model saved at {output_dir}/{output_prefix}-{epoch:03d}.pt")
         else:
             save.append(' ')
         loss_data = pd.DataFrame()
@@ -452,7 +453,7 @@ def main():
     parser.add_argument('--trainData', default='../Data/Oxford_HIC/parse/oxford_10k_ViT-B_32_train.pkl')
     parser.add_argument('--testData', default='../Data/Oxford_HIC/parse/oxford_10k_ViT-B_32_test.pkl')
     parser.add_argument('--out_dir', default='20241226_totalClip_COCO_transformer0')
-    parser.add_argument('--prefix', default='coco_prefix', help='prefix for saved filenames')
+    parser.add_argument('--prefix', default='checkpoint', help='prefix for saved filenames')
     parser.add_argument('--epochs', type=int, default=200)
     parser.add_argument('--save_every', type=int, default=1)
     parser.add_argument('--prefix_length', type=int, default=10)
