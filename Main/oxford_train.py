@@ -427,10 +427,9 @@ def train(trainDataset: TrainClipCocoDataset, testDataset: TestClipCocoDataset, 
             best_test_loss = testLoss
             torch.save(
                 model.state_dict(),
-                os.path.join(output_dir, f"{output_prefix}-{epoch:03d}.pt"),
+                os.path.join(output_dir, f"{output_prefix}-{epoch+1:03d}.pt"),
             )
             save.append('V')
-            print(f"Model saved at {output_dir}/{output_prefix}-{epoch:03d}.pt")
         else:
             save.append(' ')
         loss_data = pd.DataFrame()
