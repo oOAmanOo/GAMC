@@ -73,7 +73,7 @@ class Predictor(object):
             print('--------- generate_beam ---------')
             prefix_embed = model.clip_project(prefixs[i].unsqueeze(0)).view(-1, self.prefix_length, self.gpt_embedding_size).to(device, dtype=torch.float32)
             caption = generate_beam(model, tokenizer, embed=prefix_embed)[0]
-            caption_token = tokenizer(caption, return_tensors='pt', padding='max_length', truncation=True, max_length=74)
+            caption_token = tokenizer(caption, return_tensors='pt', padding='max_length', truncation=True, max_length=40)
             print(caption)
             if self.generate_beam_output != None:
                 self.generate_beam_output = torch.cat((self.generate_beam_output, caption_token['input_ids']), dim=0)
@@ -82,7 +82,7 @@ class Predictor(object):
             self.generate_beam_text.append(caption)
             print('---------generate2---------')
             caption = generate2(model, tokenizer, embed=prefix_embed)
-            caption_token = tokenizer(caption, return_tensors='pt', padding='max_length', truncation=True, max_length=74)
+            caption_token = tokenizer(caption, return_tensors='pt', padding='max_length', truncation=True, max_length=40)
             print(caption)
             if self.generate2_output != None:
                 self.generate2_output = torch.cat((self.generate2_output, caption_token['input_ids']), dim=0)
@@ -107,27 +107,27 @@ class Predictor(object):
             self.train_loss.append(loss.item())
 
         if len(text_list) != 2:
-            def dataframe_Name(name, count=227, rows=1):
+            def dataframe_Name(name, count=40, rows=1):
                 if rows == 1:
                     name_df = pd.DataFrame([[name]], columns=["Name"])
                     num_df = pd.DataFrame([[0] * count for _ in range(rows)], columns=[f"{i}" for i in range(0, count)])
                     name_df = pd.concat([name_df, num_df], axis=1)
                     return name_df
                 else:
-                    name_df = pd.DataFrame([[name] * count for _ in range(rows)],columns=[f"{i}" for i in range(227 - count, 227)])
+                    name_df = pd.DataFrame([[name] * count for _ in range(rows)],columns=[f"{i}" for i in range(40 - count, 40)])
                     return name_df
 
             test = pd.DataFrame()
             test['Name'] = ['test1', 'test2', 'train1', 'train2', 'train3', 'train4', 'train5', 'train6', 'train7',
                             'train8', 'train9',
                             'train10']
-            generate_beam_df = pd.DataFrame(self.generate_beam_output.cpu().detach(),columns=[f"{i}" for i in range(0, 74)])
-            generate_beam_df = pd.concat([test, generate_beam_df, dataframe_Name("-", 74, 12)], axis=1)
+            generate_beam_df = pd.DataFrame(self.generate_beam_output.cpu().detach(),columns=[f"{i}" for i in range(0, 40)])
+            generate_beam_df = pd.concat([test, generate_beam_df], axis=1)
             generate_beam_df['text'] = self.generate_beam_text
-            generate2_df = pd.DataFrame(self.generate2_output.cpu().detach(), columns=[f"{i}" for i in range(0, 74)])
-            generate2_df = pd.concat([test, generate2_df, dataframe_Name("-", 74, 12)], axis=1)
+            generate2_df = pd.DataFrame(self.generate2_output.cpu().detach(), columns=[f"{i}" for i in range(0, 40)])
+            generate2_df = pd.concat([test, generate2_df], axis=1)
             generate2_df['text'] = self.generate2_text
-            train_df = pd.DataFrame(self.train_output.cpu().detach(), columns=[f"{i}" for i in range(0, 227)])
+            train_df = pd.DataFrame(self.train_output.cpu().detach(), columns=[f"{i}" for i in range(0, 40)])
             train_df = pd.concat([test, train_df], axis=1)
             train_df['loss'] = self.train_loss
             train_df['text'] = self.train_text
@@ -139,9 +139,6 @@ class Predictor(object):
             print(final.columns)
 
             final.to_csv('./Model/'+save_file+'/'+save_file+'_test.csv', index=False)
-
-
-
 
 class MLP(nn.Module):
 
@@ -302,12 +299,9 @@ class ClipCaptionModel(nn.Module):
         self.gpt_embedding_size = self.gpt.transformer.wte.weight.shape[1]
         # print(mapping_type)
         # if mapping_type == MappingType.MLP:
-        self.clip_project = MLP((prefix_size, (self.gpt_embedding_size * prefix_length) // 2,
-                                     self.gpt_embedding_size * prefix_length))
+        # self.clip_project = MLP((prefix_size, (self.gpt_embedding_size * prefix_length) // 2, self.gpt_embedding_size * prefix_length))
         # else:
-        # self.clip_project = TransformerMapper(prefix_size, self.gpt_embedding_size, prefix_length,
-        #                                                              clip_length, num_layers)
-
+        self.clip_project = TransformerMapper(prefix_size, self.gpt_embedding_size, prefix_length, clip_length, num_layers)
 
 class ClipCaptionPrefix(ClipCaptionModel):
 
@@ -319,8 +313,7 @@ class ClipCaptionPrefix(ClipCaptionModel):
         self.gpt.eval()
         return self
 
-
-def generate_beam(model, tokenizer, beam_size: int = 5, prompt=None, embed=None, entry_length=74, temperature=1.0, stop_token: str = ".", ):
+def generate_beam(model, tokenizer, beam_size: int = 5, prompt=None, embed=None, entry_length=40, temperature=1.0, stop_token: str = ".", ):
 
     model.eval()
     stop_token_index = tokenizer.encode(stop_token)[0]
@@ -386,7 +379,7 @@ def generate_beam(model, tokenizer, beam_size: int = 5, prompt=None, embed=None,
     output_texts = [output_texts[i] for i in order]
     return output_texts
 
-def generate2(model, tokenizer, tokens=None, prompt=None, embed=None, entry_count=1, entry_length=74, top_p=0.8, temperature=1.0, stop_token: str = ".", ):
+def generate2(model, tokenizer, tokens=None, prompt=None, embed=None, entry_count=1, entry_length=40, top_p=0.8, temperature=1.0, stop_token: str = ".", ):
     model.eval()
     generated_num = 0
     generated_list = []
@@ -566,8 +559,8 @@ testDataset = TestClipCocoDataset(testData, prefix_length, normalize_prefix=norm
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = ClipCaptionModel( prefix_length, clip_length=10, prefix_size=512, num_layers=8)
-save_file = '20241226_totalClip_oxford_10K_transformer'
-model.load_state_dict(torch.load('./Model/'+save_file+'/coco_prefix-009.pt'))
+save_file = '20241226_totalClip_coco_transformer'
+model.load_state_dict(torch.load('./Model/'+save_file+'/coco_prefix-003.pt'))
 model = model.eval()
 model = model.to(device)
 
@@ -582,7 +575,7 @@ for i in range(50):
     caption = trainDataset.captions[i]
     image_id = trainDataset.image_ids[i]
     if image_id not in image_id_list:
-        print(f"Image ID: {image_id}, Caption: {caption}")
+        # print(f"Image ID: {image_id}, Caption: {caption}")
         tokens, mask, prefix = trainDataset[i]
         tokens_list.append(tokens)
         mask_list.append(mask)
@@ -603,11 +596,11 @@ prefix_list = []
 test_caption =[]
 image_id_list = []
 for i in range(20):
-    caption = trainDataset.captions[i+50]
-    image_id = trainDataset.image_ids[i+50]
+    caption = testDataset.captions[i]
+    image_id = testDataset.image_ids[i]
     if image_id not in image_id_list:
-        print(f"Image ID: {image_id}, Caption: {caption}")
-        tokens, mask, prefix = trainDataset[i+50]
+        # print(f"Image ID: {image_id}, Caption: {caption}")
+        tokens, mask, prefix = testDataset[i]
         tokens_list.append(tokens)
         mask_list.append(mask)
         prefix_list.append(prefix)
