@@ -442,9 +442,9 @@ def train(trainDataset: TrainClipCocoDataset, testDataset: TestClipCocoDataset, 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--trainData', default='../Data/Oxford_HIC/parse/oxford_10k_ViT-B_32_train.pkl')
-    parser.add_argument('--testData', default='../Data/Oxford_HIC/parse/oxford_10k_ViT-B_32_test.pkl')
-    parser.add_argument('--out_dir', default='20241226_totalClip_COCO_transformer0')
+    parser.add_argument('--trainData', default='../Citations/CLIP_prefix_caption/data/coco/oscar_split_ViT-B_32_train.pkl')
+    parser.add_argument('--testData', default='../Citations/CLIP_prefix_caption/data/coco/oscar_split_ViT-B_32_valid.pkl')
+    parser.add_argument('--out_dir', default='20241226_totalClip_COCO_transformer')
     parser.add_argument('--prefix', default='checkpoint', help='prefix for saved filenames')
     parser.add_argument('--epochs', type=int, default=200)
     parser.add_argument('--save_every', type=int, default=1)
