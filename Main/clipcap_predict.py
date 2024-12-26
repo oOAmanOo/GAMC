@@ -302,11 +302,11 @@ class ClipCaptionModel(nn.Module):
         self.gpt_embedding_size = self.gpt.transformer.wte.weight.shape[1]
         # print(mapping_type)
         # if mapping_type == MappingType.MLP:
-        # self.clip_project = MLP((prefix_size, (self.gpt_embedding_size * prefix_length) // 2,
-        #                              self.gpt_embedding_size * prefix_length))
+        self.clip_project = MLP((prefix_size, (self.gpt_embedding_size * prefix_length) // 2,
+                                     self.gpt_embedding_size * prefix_length))
         # else:
-        self.clip_project = TransformerMapper(prefix_size, self.gpt_embedding_size, prefix_length,
-                                                                     clip_length, num_layers)
+        # self.clip_project = TransformerMapper(prefix_size, self.gpt_embedding_size, prefix_length,
+        #                                                              clip_length, num_layers)
 
 
 class ClipCaptionPrefix(ClipCaptionModel):
@@ -557,8 +557,8 @@ class TestClipCocoDataset(Dataset):
         all_len = torch.tensor([len(self.captions_tokens[i]) for i in range(len(self))]).float()
         self.max_seq_len = min(int(all_len.mean() + all_len.std() * 10), int(all_len.max()))
 
-trainData = '../Data/Oxford_HIC/parse/oxford_10k_ViT-B_32_train.pkl'
-testData = '../Data/Oxford_HIC/parse/oxford_10k_ViT-B_32_test.pkl'
+trainData = '../Citations/CLIP_prefix_caption/data/coco/oscar_split_ViT-B_32_train.pkl'
+testData = '../Citations/CLIP_prefix_caption/data/coco/oscar_split_ViT-B_32_valid.pkl'
 prefix_length = 10
 normalize_prefix = True
 trainDataset = TrainClipCocoDataset(trainData, prefix_length, normalize_prefix=normalize_prefix)
@@ -571,61 +571,50 @@ model.load_state_dict(torch.load('./Model/'+save_file+'/coco_prefix-009.pt'))
 model = model.eval()
 model = model.to(device)
 
-train_image = ['imgflip_34', 'bokete_3820', 'imgflip_0','imgflip_8', 'imgflip_15', 'imgflip_19', 'bokete_104530','imgflip_730', 'imgflip_130', 'imgflip_677']
-train_text = ['You finish doing something at your friends house and look at your phone; 7 missed calls from your mom; 7 missed calls from your mom'
-              ,'I\'m in my 50s!'
-              ,'School; Memes'
-              ,'image tagged in memes,one does not simply'
-              ,'THAT; IS WHAT A GOOD MEME LOOKS LIKE'
-              ,'NOT SURE IF PEOPLE ARE UPVOTING MEMES; OR USER NAMES'
-              ,'It\'s a family night runaway.'
-              ,'CHUCK IS THE GOOD TYPE OF SCUMBAG; CUZ HE ONLY ROASTS YOU FROM YOUR INSIDES'
-              ,'WHEN SHE IS SAYIN WORK WORK WORK; BUT SHE AINT GOT NO JOB JOB JOB'
-              ,'Y\'ALL GOT ANY MORE OF THEM; JOBS?']
+train_image = ['318556', '116100', '379340','134754', '538480', '476220', '299675','32275', '302443', '25470']
+
 tokens_list = []
 mask_list = []
 prefix_list = []
 train_caption =[]
 image_id_list = []
-for i in range(len(trainDataset)):
+for i in range(50):
     caption = trainDataset.captions[i]
     image_id = trainDataset.image_ids[i]
-    if image_id in train_image:
-        if caption in train_text and image_id not in image_id_list:
-            # print(f"Image ID: {image_id}, Caption: {caption}")
-            tokens, mask, prefix = trainDataset[i]
-            tokens_list.append(tokens)
-            mask_list.append(mask)
-            prefix_list.append(prefix)
-            train_caption.append(caption)
-            image_id_list.append(image_id)
+    if image_id not in image_id_list:
+        print(f"Image ID: {image_id}, Caption: {caption}")
+        tokens, mask, prefix = trainDataset[i]
+        tokens_list.append(tokens)
+        mask_list.append(mask)
+        prefix_list.append(prefix)
+        train_caption.append(caption)
+        image_id_list.append(image_id)
+        if len(image_id_list) == 10:
+            break
 train_tokens = torch.stack(tokens_list).to(device)
 train_mask = torch.stack(mask_list).to(device)
 train_prefix = torch.stack(prefix_list).to(device)
 print(train_tokens.shape, train_mask.shape, train_prefix.shape)
 
-# Image ID: bokete_111723, Caption: I'm going to take care of you. I'm going to take care of you. I'm going to take care of you.
-# Image ID: imgflip_57, Caption: WHAT'S DONE IN THE DARK WILL ALWAYS COME OUT IN THE LIGHT; BUT THATS NONE OF MY BUSINESS
-test_image = ['bokete_111723', 'imgflip_57']
-test_text = ['I\'m going to take care of you. I\'m going to take care of you. I\'m going to take care of you.'
-              ,'WHAT\'S DONE IN THE DARK WILL ALWAYS COME OUT IN THE LIGHT; BUT THATS NONE OF MY BUSINESS']
+test_image = ['266366', '72704']
 tokens_list = []
 mask_list = []
 prefix_list = []
 test_caption =[]
 image_id_list = []
 for i in range(20):
-    caption = trainDataset.captions[i]
-    image_id = trainDataset.image_ids[i]
-    if image_id in test_image:
-        if caption in test_text and image_id not in image_id_list:
-            # print(f"Image ID: {image_id}, Caption: {caption}")
-            tokens, mask, prefix = trainDataset[i]
-            tokens_list.append(tokens)
-            mask_list.append(mask)
-            prefix_list.append(prefix)
-            test_caption.append(caption)
-            image_id_list.append(image_id)
+    caption = trainDataset.captions[i+50]
+    image_id = trainDataset.image_ids[i+50]
+    if image_id not in image_id_list:
+        print(f"Image ID: {image_id}, Caption: {caption}")
+        tokens, mask, prefix = trainDataset[i+50]
+        tokens_list.append(tokens)
+        mask_list.append(mask)
+        prefix_list.append(prefix)
+        test_caption.append(caption)
+        image_id_list.append(image_id)
+        if len(image_id_list) == 2:
+            break
 test_tokens = torch.stack(tokens_list).to(device)
 test_mask = torch.stack(mask_list).to(device)
 test_prefix = torch.stack(prefix_list).to(device)
