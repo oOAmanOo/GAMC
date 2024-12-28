@@ -47,7 +47,7 @@ CPU = torch.device("cpu")
 
 
 class Predictor(object):
-    def __init__(self):
+    def __init__(self, prefix_length, cp_num):
         self.generate_beam_output = None
         self.generate2_output = None
         self.train_output = None
@@ -55,8 +55,9 @@ class Predictor(object):
         self.generate2_text = []
         self.train_text = []
         self.train_loss = []
-        self.prefix_length = 10
+        self.prefix_length = prefix_length
         self.gpt_embedding_size = 768
+        self.cp_num = cp_num
 
     def predict(self, tokens, masks, prefixs, text_list, model):
         """Run a single prediction on the model"""
@@ -75,6 +76,7 @@ class Predictor(object):
             print(text)
             print('--------- generate_beam ---------')
             prefix_embed = model.clip_project(prefixs[i].unsqueeze(0)).view(-1, self.prefix_length, self.gpt_embedding_size).to(device, dtype=torch.float32)
+            print(prefix_embed.shape)
             caption = generate_beam(model, tokenizer, embed=prefix_embed)[0]
             caption_token = tokenizer(caption, return_tensors='pt', padding='max_length', truncation=True, max_length=74)
             print(caption)
@@ -100,6 +102,7 @@ class Predictor(object):
             loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens[i].flatten(), ignore_index=0)
             print(loss)
             caption_token = logits.argmax(-1)[0].cpu()
+            caption_token = caption_token[:510]
             caption = tokenizer.decode(caption_token, skip_special_tokens=True)
             print(caption)
             if self.train_output != None:
@@ -110,14 +113,14 @@ class Predictor(object):
             self.train_loss.append(loss.item())
 
         if len(text_list) != 2:
-            def dataframe_Name(name, count=227, rows=1):
+            def dataframe_Name(name, count=510, rows=1):
                 if rows == 1:
                     name_df = pd.DataFrame([[name]], columns=["Name"])
                     num_df = pd.DataFrame([[0] * count for _ in range(rows)], columns=[f"{i}" for i in range(0, count)])
                     name_df = pd.concat([name_df, num_df], axis=1)
                     return name_df
                 else:
-                    name_df = pd.DataFrame([[name] * count for _ in range(rows)],columns=[f"{i}" for i in range(227 - count, 227)])
+                    name_df = pd.DataFrame([[name] * count for _ in range(rows)],columns=[f"{i}" for i in range(510 - count, 510)])
                     return name_df
 
             test = pd.DataFrame()
@@ -130,7 +133,7 @@ class Predictor(object):
             generate2_df = pd.DataFrame(self.generate2_output.cpu().detach(), columns=[f"{i}" for i in range(0, 74)])
             generate2_df = pd.concat([test, generate2_df, dataframe_Name("-", 74, 12)], axis=1)
             generate2_df['text'] = self.generate2_text
-            train_df = pd.DataFrame(self.train_output.cpu().detach(), columns=[f"{i}" for i in range(0, 227)])
+            train_df = pd.DataFrame(self.train_output.cpu().detach(), columns=[f"{i}" for i in range(0, 510)])
             train_df = pd.concat([test, train_df], axis=1)
             train_df['loss'] = self.train_loss
             train_df['text'] = self.train_text
@@ -141,7 +144,7 @@ class Predictor(object):
             print(final.shape)
             print(final.columns)
 
-            final.to_csv('C:/Users/TonyLab/PycharmProjects/MemeGAN/Main/Model/'+save_file+'/'+save_file+'_test.csv', index=False)
+            final.to_csv(f'./Model/{save_file}/{save_file}_test_{self.cp_num:03d}.csv', index=False)
 
 
 
@@ -311,7 +314,6 @@ class ClipCaptionModel(nn.Module):
         self.clip_project = TransformerMapper(prefix_size, self.gpt_embedding_size, prefix_length,
                                                                      clip_length, num_layers)
 
-
 class ClipCaptionPrefix(ClipCaptionModel):
 
     def parameters(self, recurse: bool = True):
@@ -321,7 +323,6 @@ class ClipCaptionPrefix(ClipCaptionModel):
         super(ClipCaptionPrefix, self).train(mode)
         self.gpt.eval()
         return self
-
 
 def generate_beam(model, tokenizer, beam_size: int = 5, prompt=None, embed=None, entry_length=74, temperature=1.0, stop_token: str = ".", ):
 
@@ -560,19 +561,13 @@ class TestClipCocoDataset(Dataset):
         all_len = torch.tensor([len(self.captions_tokens[i]) for i in range(len(self))]).float()
         self.max_seq_len = min(int(all_len.mean() + all_len.std() * 10), int(all_len.max()))
 
-trainData = 'C:/Users/TonyLab/PycharmProjects/MemeGAN/Data/Oxford_HIC/parse/oxford_10k_ViT-B_32_train.pkl'
-testData = 'C:/Users/TonyLab/PycharmProjects/MemeGAN/Data/Oxford_HIC/parse/oxford_10k_ViT-B_32_test.pkl'
-prefix_length = 10
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+trainData = 'C:/Users/TonyLab/PycharmProjects/MemeGAN/Data/Oxford_HIC/parse/oxford_300k_ViT-B_32_train.pkl'
+testData = 'C:/Users/TonyLab/PycharmProjects/MemeGAN/Data/Oxford_HIC/parse/oxford_300k_ViT-B_32_test.pkl'
+prefix_length = 40
 normalize_prefix = True
 trainDataset = TrainClipCocoDataset(trainData, prefix_length, normalize_prefix=normalize_prefix)
 testDataset = TestClipCocoDataset(testData, prefix_length, normalize_prefix=normalize_prefix)
-
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model = ClipCaptionModel( prefix_length, clip_length=10, prefix_size=512, num_layers=8)
-save_file = '20241226_totalClip_oxford_10K_transformer'
-model.load_state_dict(torch.load('./Model/'+save_file+'/coco_prefix-009.pt'))
-model = model.eval()
-model = model.to(device)
 
 train_image = ['imgflip_34', 'bokete_3820', 'imgflip_0','imgflip_8', 'imgflip_15', 'imgflip_19', 'bokete_104530','imgflip_730', 'imgflip_130', 'imgflip_677']
 train_text = ['You finish doing something at your friends house and look at your phone; 7 missed calls from your mom; 7 missed calls from your mom'
@@ -583,7 +578,7 @@ train_text = ['You finish doing something at your friends house and look at your
               ,'NOT SURE IF PEOPLE ARE UPVOTING MEMES; OR USER NAMES'
               ,'It\'s a family night runaway.'
               ,'CHUCK IS THE GOOD TYPE OF SCUMBAG; CUZ HE ONLY ROASTS YOU FROM YOUR INSIDES'
-              ,'WHEN SHE IS SAYIN WORK WORK WORK; BUT SHE AINT GOT NO JOB JOB JOB'
+              ,'SO YOUR TELLIN\' ME THAT SCHOOLS GOOD FOR YOU'
               ,'Y\'ALL GOT ANY MORE OF THEM; JOBS?']
 tokens_list = []
 mask_list = []
@@ -607,23 +602,23 @@ train_mask = torch.stack(mask_list).to(device)
 train_prefix = torch.stack(prefix_list).to(device)
 print(train_tokens.shape, train_mask.shape, train_prefix.shape)
 
-# Image ID: bokete_111723, Caption: I'm going to take care of you. I'm going to take care of you. I'm going to take care of you.
-# Image ID: imgflip_57, Caption: WHAT'S DONE IN THE DARK WILL ALWAYS COME OUT IN THE LIGHT; BUT THATS NONE OF MY BUSINESS
-test_image = ['bokete_111723', 'imgflip_57']
-test_text = ['I\'m going to take care of you. I\'m going to take care of you. I\'m going to take care of you.'
-              ,'WHAT\'S DONE IN THE DARK WILL ALWAYS COME OUT IN THE LIGHT; BUT THATS NONE OF MY BUSINESS']
+# Image ID: imgflip_7, Caption: CHEESE; ME AT 3 AM; CHEESE; MY MOM WHO WAS WAITING; ME
+# Image ID: imgflip_32, Caption: IS THIS A PIGEON?
+test_image = ['imgflip_7', 'imgflip_32']
+test_text = ['CHEESE; ME AT 3 AM; CHEESE; MY MOM WHO WAS WAITING; ME'
+              ,'IS THIS A PIGEON?']
 tokens_list = []
 mask_list = []
 prefix_list = []
 test_caption =[]
 image_id_list = []
-for i in range(20):
-    caption = trainDataset.captions[i]
-    image_id = trainDataset.image_ids[i]
+for i in range(160):
+    caption = testDataset.captions[i]
+    image_id = testDataset.image_ids[i]
     if image_id in test_image:
         if caption in test_text and image_id not in image_id_list:
             # print(f"Image ID: {image_id}, Caption: {caption}")
-            tokens, mask, prefix = trainDataset[i]
+            tokens, mask, prefix = testDataset[i]
             tokens_list.append(tokens)
             mask_list.append(mask)
             prefix_list.append(prefix)
@@ -634,6 +629,13 @@ test_mask = torch.stack(mask_list).to(device)
 test_prefix = torch.stack(prefix_list).to(device)
 print(test_tokens.shape, test_mask.shape, test_prefix.shape)
 
-pred = Predictor()
-pred.predict(test_tokens, test_mask, test_prefix, test_caption, model)
-pred.predict(train_tokens, train_mask, train_prefix, train_caption, model)
+
+model = ClipCaptionModel( prefix_length, clip_length=10, prefix_size=512, num_layers=8)
+save_file = '20241226_totalClip_oxford_300K_transformer_p40'
+for i in range(5):
+    model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i+1:03d}.pt'))
+    model = model.eval()
+    model = model.to(device)
+    pred = Predictor(prefix_length, cp_num = i+1)
+    pred.predict(test_tokens, test_mask, test_prefix, test_caption, model)
+    pred.predict(train_tokens, train_mask, train_prefix, train_caption, model)

@@ -449,15 +449,15 @@ def train(trainDataset: TrainClipCocoDataset, testDataset: TestClipCocoDataset, 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--trainData', default='../Data/Oxford_HIC/parse/oxford_10k_ViT-B_32_train.pkl')
-    parser.add_argument('--testData', default='../Data/Oxford_HIC/parse/oxford_10k_ViT-B_32_test.pkl')
-    parser.add_argument('--out_dir', default='20241226_totalClip_COCO_transformer0')
+    parser.add_argument('--trainData', default='../Data/Oxford_HIC/parse/oxford_300k_ViT-B_32_train.pkl')
+    parser.add_argument('--testData', default='../Data/Oxford_HIC/parse/oxford_300k_ViT-B_32_test.pkl')
+    parser.add_argument('--out_dir', default='20241226_totalClip_oxford_300K_transformer_p40')
     parser.add_argument('--prefix', default='checkpoint', help='prefix for saved filenames')
     parser.add_argument('--epochs', type=int, default=200)
     parser.add_argument('--save_every', type=int, default=1)
-    parser.add_argument('--prefix_length', type=int, default=10)
+    parser.add_argument('--prefix_length', type=int, default=40)
     parser.add_argument('--prefix_length_clip', type=int, default=10)
-    parser.add_argument('--bs', type=int, default=20)
+    parser.add_argument('--bs', type=int, default=10)
     parser.add_argument('--only_prefix', dest='only_prefix', action='store_true')
     parser.add_argument('--mapping_type', type=str, default='transformer', help='mlp/transformer')
     parser.add_argument('--num_layers', type=int, default=8)
@@ -465,9 +465,10 @@ def main():
     parser.add_argument('--normalize_prefix', dest='normalize_prefix', action='store_true')
     args = parser.parse_args()
     prefix_length = args.prefix_length
+    if not os.path.exists('./Model/' + args.out_dir):
+        os.makedirs('./Model/' + args.out_dir)
+        os.makedirs('D:/MemeGAN/Model/' + args.out_dir)
     args.out_dir = './Model/' + args.out_dir
-    if not os.path.exists(args.out_dir):
-        os.makedirs(args.out_dir)
     trainDataset = TrainClipCocoDataset(args.trainData, prefix_length, normalize_prefix=args.normalize_prefix)
     testDataset = TestClipCocoDataset(args.testData, prefix_length, normalize_prefix=args.normalize_prefix)
     prefix_dim = 640 if args.is_rn else 512
