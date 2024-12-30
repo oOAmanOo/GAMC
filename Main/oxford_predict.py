@@ -17,11 +17,9 @@ from transformers import (
     AdamW,
     get_linear_schedule_with_warmup,
 )
+from transformers import AutoConfig, AutoTokenizer, Gemma2ForCausalLM
+from peft import LoraConfig, TaskType, get_peft_model
 import PIL.Image
-
-from Main.BITA.common import save_file
-
-# import torch
 
 N = type(None)
 V = np.array
@@ -56,16 +54,19 @@ class Predictor(object):
         self.train_text = []
         self.train_loss = []
         self.prefix_length = prefix_length
-        self.gpt_embedding_size = 768
+        # self.embedding_size = 768
+        self.embedding_size = 2304
         self.cp_num = cp_num
 
     def predict(self, tokens, masks, prefixs, text_list, model):
         """Run a single prediction on the model"""
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        tokens, masks, prefixs = tokens.to(device), masks.to(device), prefixs.to(device, dtype=torch.float32)
-        tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
-        tokenizer.pad_token = tokenizer.eos_token
+        tokens, masks, prefixs = tokens.to(device), masks.to(device), prefixs.to(device, dtype=torch.bfloat16)
+        # tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+        # tokenizer.pad_token = tokenizer.eos_token
+        tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
         model.eval()
+        model.to(device, dtype=torch.bfloat16)
         if len(text_list) == 2:
             data_mode = "test"
         else:
@@ -75,8 +76,9 @@ class Predictor(object):
             print('--------- ground truth ---------')
             print(text)
             print('--------- generate_beam ---------')
-            prefix_embed = model.clip_project(prefixs[i].unsqueeze(0)).view(-1, self.prefix_length, self.gpt_embedding_size).to(device, dtype=torch.float32)
+            prefix_embed = model.clip_project(prefixs[i].unsqueeze(0)).view(-1, self.prefix_length, self.embedding_size).to(device, dtype=torch.bfloat16)
             print(prefix_embed.shape)
+            print(prefix_embed.dtype)
             caption = generate_beam(model, tokenizer, embed=prefix_embed)[0]
             caption_token = tokenizer(caption, return_tensors='pt', padding='max_length', truncation=True, max_length=74)
             print(caption)
@@ -95,9 +97,12 @@ class Predictor(object):
                 self.generate2_output = caption_token['input_ids']
             self.generate2_text.append(caption)
             print('---------train---------')
-            embedding_text = model.gpt.transformer.wte(tokens[i].unsqueeze(0))
+            # embedding_text = model.gemma.model.embed_tokens(tokens[i].unsqueeze(0))
+            embedding_text = self.gemma.base_model.model.model.embed_tokens(tokens)
+            # embedding_text = model.gpt.transformer.wte(tokens[i].unsqueeze(0))
             embedding_cat = torch.cat((prefix_embed, embedding_text), dim=1)
-            out = model.gpt(inputs_embeds=embedding_cat, attention_mask=masks[i].unsqueeze(0))
+            out = model.gemma(inputs_embeds=embedding_cat, attention_mask=masks[i].unsqueeze(0))
+            # out = model.gpt(inputs_embeds=embedding_cat, attention_mask=masks[i].unsqueeze(0))
             logits = out.logits[:, self.prefix_length-1: -1]
             loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens[i].flatten(), ignore_index=0)
             print(loss)
@@ -292,7 +297,7 @@ class ClipCaptionModel(nn.Module):
     def forward(self, tokens: torch.Tensor, prefix: torch.Tensor, mask: Optional[torch.Tensor] = None,
                 labels: Optional[torch.Tensor] = None):
         embedding_text = self.gpt.transformer.wte(tokens)
-        prefix_projections = self.clip_project(prefix).view(-1, self.prefix_length, self.gpt_embedding_size)
+        prefix_projections = self.clip_project(prefix).view(-1, self.prefix_length, self.embedding_size)
         embedding_cat = torch.cat((prefix_projections, embedding_text), dim=1)
         if labels is not None:
             dummy_token = self.get_dummy_token(tokens.shape[0], tokens.device)
@@ -304,14 +309,44 @@ class ClipCaptionModel(nn.Module):
                  num_layers: int = 8):
         super(ClipCaptionModel, self).__init__()
         self.prefix_length = prefix_length
-        self.gpt = GPT2LMHeadModel.from_pretrained('gpt2')
-        self.gpt_embedding_size = self.gpt.transformer.wte.weight.shape[1]
-        # print(mapping_type)
+        self.gemma = Gemma2ForCausalLM.from_pretrained("google/gemma-2-2b-it", device_map="auto",
+                                                       torch_dtype=torch.bfloat16)
+        self.embedding_size = 2304
+        LORAconfig = LoraConfig(
+            task_type=TaskType.CAUSAL_LM,
+            target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+            inference_mode=False,  # 训练模式
+            r=8,  # Lora 秩
+            lora_alpha=32,  # Lora alaph，具体作用参见 Lora 原理
+            lora_dropout=0.1  # Dropout 比例
+        )
+
+        def count_trainable_parameters(model):
+            model_parameters = filter(lambda p: p.requires_grad, model.parameters())
+            params = sum([np.prod(p.size()) for p in model_parameters])
+            return params
+
+        a = count_trainable_parameters(self.gemma)
+        self.gemma = get_peft_model(self.gemma, LORAconfig)
+        b = count_trainable_parameters(self.gemma)
+        # 留下小數點後兩位就好
+        percent = round((b / a) * 100, 3)
+        print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
+        # self.gemma.eval()
+        # for param in self.gemma.parameters():
+        #     param.requires_grad = False
+
+        # self.gpt = GPT2LMHeadModel.from_pretrained('gpt2')
+        # self.gpt.eval()
+        # for param in self.gpt.parameters():
+        #     param.requires_grad = False
+        # self.embedding_size = self.gpt.transformer.wte.weight.shape[1]
+
         # if mapping_type == MappingType.MLP:
-        # self.clip_project = MLP((prefix_size, (self.gpt_embedding_size * prefix_length) // 2,
-        #                              self.gpt_embedding_size * prefix_length))
+        # self.clip_project = MLP((prefix_size, (self.embedding_size * prefix_length) // 2,
+        #                              self.embedding_size * prefix_length))
         # else:
-        self.clip_project = TransformerMapper(prefix_size, self.gpt_embedding_size, prefix_length,
+        self.clip_project = TransformerMapper(prefix_size, self.embedding_size, prefix_length,
                                                                      clip_length, num_layers)
 
 class ClipCaptionPrefix(ClipCaptionModel):
@@ -340,9 +375,12 @@ def generate_beam(model, tokenizer, beam_size: int = 5, prompt=None, embed=None,
             if tokens is None:
                 tokens = torch.tensor(tokenizer.encode(prompt))
                 tokens = tokens.unsqueeze(0).to(device)
-                generated = model.gpt.transformer.wte(tokens)
+                # generated = model.gpt.transformer.wte(tokens)
+                # generated = model.gemma.model.embed_tokens(tokens)
+                generated = model.gemma.base_model.model.model.embed_tokens(tokens)
         for i in range(entry_length):
-            outputs = model.gpt(inputs_embeds=generated)
+            outputs = model.gemma(inputs_embeds=generated)
+            # outputs = model.gpt(inputs_embeds=generated)
             logits = outputs.logits
             logits = logits[:, -1, :] / (temperature if temperature > 0 else 1.0)
             logits = logits.softmax(-1).log()
@@ -373,9 +411,9 @@ def generate_beam(model, tokenizer, beam_size: int = 5, prompt=None, embed=None,
                 generated = generated[next_tokens_source]
                 scores = scores_sum_average * seq_lengths
                 is_stopped = is_stopped[next_tokens_source]
-            next_token_embed = model.gpt.transformer.wte(next_tokens.squeeze()).view(
-                generated.shape[0], 1, -1
-            )
+            # next_token_embed = model.gpt.transformer.wte(next_tokens.squeeze()).view(generated.shape[0], 1, -1)
+            # next_token_embed = model.gemma.model.embed_tokens(next_tokens.squeeze()).view(generated.shape[0], 1, -1)
+            next_token_embed = model.gemma.base_model.model.model.embed_tokens(next_tokens.squeeze()).view(generated.shape[0], 1, -1)
             generated = torch.cat((generated, next_token_embed), dim=1)
             is_stopped = is_stopped + next_tokens.eq(stop_token_index).squeeze()
             if is_stopped.all():
@@ -408,11 +446,12 @@ def generate2(model, tokenizer, tokens=None, prompt=None, embed=None, entry_coun
                     tokens = torch.tensor(tokenizer.encode(prompt))
                     tokens = tokens.unsqueeze(0).to(device)
 
-                generated = model.gpt.transformer.wte(tokens)
-
+                # generated = model.gpt.transformer.wte(tokens)
+                # generated = model.gemma.model.embed_tokens(tokens)
+                generated = model.gemma.base_model.model.model.embed_tokens(tokens)
             for i in range(entry_length):
-
-                outputs = model.gpt(inputs_embeds=generated)
+                outputs = model.gemma(inputs_embeds=generated)
+                # outputs = model.gpt(inputs_embeds=generated)
                 logits = outputs.logits
                 logits = logits[:, -1, :] / (temperature if temperature > 0 else 1.0)
                 sorted_logits, sorted_indices = torch.sort(logits, descending=True)
@@ -428,7 +467,9 @@ def generate2(model, tokenizer, tokens=None, prompt=None, embed=None, entry_coun
                 indices_to_remove = sorted_indices[sorted_indices_to_remove]
                 logits[:, indices_to_remove] = filter_value
                 next_token = torch.argmax(logits, -1).unsqueeze(0)
-                next_token_embed = model.gpt.transformer.wte(next_token)
+                # next_token_embed = model.gemma.model.embed_tokens(next_token)
+                next_token_embed = model.gemma.base_model.model.model.embed_tokens(next_token)
+                # next_token_embed = model.gpt.transformer.wte(next_token)
                 if tokens is None:
                     tokens = next_token
                 else:
@@ -475,7 +516,8 @@ class TrainClipCocoDataset(Dataset):
 
     def __init__(self, data_path: str,  prefix_length: int, gpt2_type: str = "gpt2",
                  normalize_prefix=False):
-        self.tokenizer = GPT2Tokenizer.from_pretrained(gpt2_type)
+        # self.tokenizer = GPT2Tokenizer.from_pretrained(gpt2_type)
+        self.tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
         self.prefix_length = prefix_length
         self.normalize_prefix = normalize_prefix
         with open(data_path, 'rb') as f:
@@ -533,7 +575,8 @@ class TestClipCocoDataset(Dataset):
 
     def __init__(self, data_path: str,  prefix_length: int, gpt2_type: str = "gpt2",
                  normalize_prefix=False):
-        self.tokenizer = GPT2Tokenizer.from_pretrained(gpt2_type)
+        # self.tokenizer = GPT2Tokenizer.from_pretrained(gpt2_type)
+        self.tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
         self.prefix_length = prefix_length
         self.normalize_prefix = normalize_prefix
         with open(data_path, 'rb') as f:
@@ -631,11 +674,11 @@ print(test_tokens.shape, test_mask.shape, test_prefix.shape)
 
 
 model = ClipCaptionModel( prefix_length, clip_length=10, prefix_size=512, num_layers=8)
-save_file = '20241226_totalClip_oxford_300K_transformer_p40'
-for i in range(5):
+save_file = '20241231_totalClip_oxford_300K_transformer_p40_nogpt'
+for i in range(6):
     model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i+1:03d}.pt'))
     model = model.eval()
-    model = model.to(device)
+    model = model.to(device, dtype=torch.bfloat16)
     pred = Predictor(prefix_length, cp_num = i+1)
     pred.predict(test_tokens, test_mask, test_prefix, test_caption, model)
     pred.predict(train_tokens, train_mask, train_prefix, train_caption, model)
