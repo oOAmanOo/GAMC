@@ -4,6 +4,7 @@ from torch.nn import functional as nnf
 from torch.utils.data import Dataset, DataLoader
 from enum import Enum
 from transformers import GPT2Tokenizer, GPT2LMHeadModel, AdamW, get_linear_schedule_with_warmup
+from transformers import AutoConfig, AutoTokenizer, Gemma2ForCausalLM
 from tqdm import tqdm
 import os
 import pickle
@@ -11,12 +12,11 @@ import sys
 import argparse
 import json
 from typing import Tuple, Optional, Union
-import pandas as pd
-from sklearn.model_selection import train_test_split
 import numpy as np
 import random
 import matplotlib.pyplot as plt
 import pandas as pd
+from peft import LoraConfig, TaskType, get_peft_model
 
 seed = 42
 random.seed(seed)
@@ -59,7 +59,8 @@ class TrainClipCocoDataset(Dataset):
 
     def __init__(self, data_path: str,  prefix_length: int, gpt2_type: str = "gpt2",
                  normalize_prefix=False):
-        self.tokenizer = GPT2Tokenizer.from_pretrained(gpt2_type)
+        # self.tokenizer = GPT2Tokenizer.from_pretrained(gpt2_type)
+        self.tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
         self.prefix_length = prefix_length
         self.normalize_prefix = normalize_prefix
         with open(data_path, 'rb') as f:
@@ -68,10 +69,6 @@ class TrainClipCocoDataset(Dataset):
         sys.stdout.flush()
         self.prefixes = all_data["clip_embedding"]
         captions_raw = all_data["captions"]
-        print(all_data.keys())
-        for caption in captions_raw:
-            print(caption)
-            break
         self.image_ids = [caption["image_id"] for caption in captions_raw]
         self.captions = [caption['caption'] for caption in captions_raw]
         if os.path.isfile(f"{data_path[:-4]}_tokens.pkl"):
@@ -121,7 +118,8 @@ class TestClipCocoDataset(Dataset):
 
     def __init__(self, data_path: str,  prefix_length: int, gpt2_type: str = "gpt2",
                  normalize_prefix=False):
-        self.tokenizer = GPT2Tokenizer.from_pretrained(gpt2_type)
+        # self.tokenizer = GPT2Tokenizer.from_pretrained(gpt2_type)
+        self.tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
         self.prefix_length = prefix_length
         self.normalize_prefix = normalize_prefix
         with open(data_path, 'rb') as f:
@@ -291,31 +289,60 @@ class ClipCaptionModel(nn.Module):
     def get_dummy_token(self, batch_size: int, device: torch.device) -> torch.Tensor:
         return torch.zeros(batch_size, self.prefix_length, dtype=torch.int64, device=device)
 
-    def forward(self, tokens: torch.Tensor, prefix: torch.Tensor, mask: Optional[torch.Tensor] = None,
-                labels: Optional[torch.Tensor] = None):
-        embedding_text = self.gpt.transformer.wte(tokens)
-        prefix_projections = self.clip_project(prefix).view(-1, self.prefix_length, self.gpt_embedding_size)
+    def forward(self, tokens: torch.Tensor, prefix: torch.Tensor, mask: Optional[torch.Tensor] = None, labels: Optional[torch.Tensor] = None):
+        # embedding_text = self.gemma.model.embed_tokens(tokens)
+        embedding_text = self.gemma.base_model.model.model.embed_tokens(tokens)
+        # embedding_text = self.gpt.transformer.wte(tokens)
+        prefix_projections = self.clip_project(prefix).view(-1, self.prefix_length, self.embedding_size)
         embedding_cat = torch.cat((prefix_projections, embedding_text), dim=1)
         if labels is not None:
             dummy_token = self.get_dummy_token(tokens.shape[0], tokens.device)
             labels = torch.cat((dummy_token, tokens), dim=1)
-        out = self.gpt(inputs_embeds=embedding_cat, labels=labels, attention_mask=mask)
+        # out = self.gpt(inputs_embeds=embedding_cat, labels=labels, attention_mask=mask)
+        out = self.gemma(inputs_embeds=embedding_cat, labels=labels, attention_mask=mask)
         return out
 
     def __init__(self, prefix_length: int, clip_length: Optional[int] = None, prefix_size: int = 512,
                  num_layers: int = 8, mapping_type: MappingType = MappingType.MLP):
         super(ClipCaptionModel, self).__init__()
         self.prefix_length = prefix_length
-        self.gpt = GPT2LMHeadModel.from_pretrained('gpt2')
-        self.gpt_embedding_size = self.gpt.transformer.wte.weight.shape[1]
+        self.gemma = Gemma2ForCausalLM.from_pretrained("google/gemma-2-2b-it", device_map="auto", torch_dtype=torch.bfloat16)
+        self.embedding_size = 2304
+        LORAconfig = LoraConfig(
+            task_type=TaskType.CAUSAL_LM,
+            target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+            inference_mode=False,  # 训练模式
+            r=8,  # Lora 秩
+            lora_alpha=32,  # Lora alaph，具体作用参见 Lora 原理
+            lora_dropout=0.1  # Dropout 比例
+        )
+
+        def count_trainable_parameters(model):
+            model_parameters = filter(lambda p: p.requires_grad, model.parameters())
+            params = sum([np.prod(p.size()) for p in model_parameters])
+            return params
+        a = count_trainable_parameters(self.gemma)
+        self.gemma = get_peft_model(self.gemma, LORAconfig)
+        b = count_trainable_parameters(self.gemma)
+        #留下小數點後兩位就好
+        percent = round((b / a) * 100, 3)
+        print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
+        # self.gemma.eval()
+        # for param in self.gemma.parameters():
+        #     param.requires_grad = False
+
+        # self.gpt = GPT2LMHeadModel.from_pretrained('gpt2')
+        # self.gpt.eval()
+        # for param in self.gpt.parameters():
+        #     param.requires_grad = False
+        # self.embedding_size = self.gpt.transformer.wte.weight.shape[1]
         print(mapping_type)
         if mapping_type == MappingType.MLP:
-            self.clip_project = MLP((prefix_size, (self.gpt_embedding_size * prefix_length) // 2,
-                                     self.gpt_embedding_size * prefix_length))
+            self.clip_project = MLP(
+                (prefix_size, (self.embedding_size * prefix_length) // 2, self.embedding_size * prefix_length))
         else:
-            self.clip_project = TransformerMapper(prefix_size, self.gpt_embedding_size, prefix_length,
-                                                                     clip_length, num_layers)
-
+            self.clip_project = TransformerMapper(prefix_size, self.embedding_size, prefix_length, clip_length,
+                                                  num_layers)
 
 class ClipCaptionPrefix(ClipCaptionModel):
 
@@ -366,7 +393,7 @@ def train(trainDataset: TrainClipCocoDataset, testDataset: TestClipCocoDataset, 
     epochs = args.epochs
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-    model = model.to(device)
+    model = model.to(device, dtype=torch.bfloat16)
     model.train()
     optimizer = AdamW(model.parameters(), lr=lr)
     train_dataloader = DataLoader(trainDataset, batch_size=batch_size, shuffle=True, drop_last=True)
@@ -381,7 +408,7 @@ def train(trainDataset: TrainClipCocoDataset, testDataset: TestClipCocoDataset, 
     best_test_loss = 9999999999
     save = []
     for epoch in range(epochs):
-        print(f">>> Training epoch {epoch}")
+        print(f">>> Training epoch {epoch+1}")
         sys.stdout.flush()
         trainLoss = 0
         testLoss = 0
@@ -389,7 +416,7 @@ def train(trainDataset: TrainClipCocoDataset, testDataset: TestClipCocoDataset, 
         progress = tqdm(total=len(train_dataloader), desc=output_prefix)
         for idx, (tokens, mask, prefix) in enumerate(train_dataloader):
             model.zero_grad()
-            tokens, mask, prefix = tokens.to(device), mask.to(device), prefix.to(device, dtype=torch.float32)
+            tokens, mask, prefix = tokens.to(device), mask.to(device), prefix.to(device, dtype=torch.bfloat16)
             outputs = model(tokens, prefix, mask)
             logits = outputs.logits[:, trainDataset.prefix_length - 1: -1]
             loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens.flatten(), ignore_index=0)
@@ -400,6 +427,8 @@ def train(trainDataset: TrainClipCocoDataset, testDataset: TestClipCocoDataset, 
             optimizer.zero_grad()
             progress.set_postfix({"loss": loss.item()})
             progress.update()
+            # if idx % 101 == 100:
+            #     break
         trainLoss /= len(train_dataloader)
         progress.set_postfix({"loss": trainLoss})
         train_losses.append(trainLoss)
@@ -410,7 +439,7 @@ def train(trainDataset: TrainClipCocoDataset, testDataset: TestClipCocoDataset, 
         progress = tqdm(total=len(test_dataloader), desc=output_prefix)
         for idx, (tokens, mask, prefix) in enumerate(test_dataloader):
             model.zero_grad()
-            tokens, mask, prefix = tokens.to(device), mask.to(device), prefix.to(device, dtype=torch.float32)
+            tokens, mask, prefix = tokens.to(device), mask.to(device), prefix.to(device, dtype=torch.bfloat16)
             outputs = model(tokens, prefix, mask)
             logits = outputs.logits[:, testDataset.prefix_length - 1: -1]
             loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens.flatten(), ignore_index=0)
@@ -451,13 +480,13 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--trainData', default='../Data/Oxford_HIC/parse/oxford_300k_ViT-B_32_train.pkl')
     parser.add_argument('--testData', default='../Data/Oxford_HIC/parse/oxford_300k_ViT-B_32_test.pkl')
-    parser.add_argument('--out_dir', default='20241226_totalClip_oxford_300K_transformer_p40')
+    parser.add_argument('--out_dir', default='20241231_totalClip_oxford_300K_transformer_p40_lora')
     parser.add_argument('--prefix', default='checkpoint', help='prefix for saved filenames')
     parser.add_argument('--epochs', type=int, default=200)
     parser.add_argument('--save_every', type=int, default=1)
     parser.add_argument('--prefix_length', type=int, default=40)
     parser.add_argument('--prefix_length_clip', type=int, default=10)
-    parser.add_argument('--bs', type=int, default=10)
+    parser.add_argument('--bs', type=int, default=2)
     parser.add_argument('--only_prefix', dest='only_prefix', action='store_true')
     parser.add_argument('--mapping_type', type=str, default='transformer', help='mlp/transformer')
     parser.add_argument('--num_layers', type=int, default=8)
