@@ -77,8 +77,6 @@ class Predictor(object):
             print(text)
             print('--------- generate_beam ---------')
             prefix_embed = model.clip_project(prefixs[i].unsqueeze(0)).view(-1, self.prefix_length, self.embedding_size).to(device, dtype=torch.bfloat16)
-            print(prefix_embed.shape)
-            print(prefix_embed.dtype)
             caption = generate_beam(model, tokenizer, embed=prefix_embed)[0]
             caption_token = tokenizer(caption, return_tensors='pt', padding='max_length', truncation=True, max_length=74)
             print(caption)
@@ -98,8 +96,9 @@ class Predictor(object):
             self.generate2_text.append(caption)
             print('---------train---------')
             # embedding_text = model.gemma.model.embed_tokens(tokens[i].unsqueeze(0))
-            embedding_text = self.gemma.base_model.model.model.embed_tokens(tokens)
+            embedding_text = model.gemma.base_model.model.model.embed_tokens(tokens[i].unsqueeze(0))
             # embedding_text = model.gpt.transformer.wte(tokens[i].unsqueeze(0))
+            print(prefix_embed.shape, embedding_text.shape)
             embedding_cat = torch.cat((prefix_embed, embedding_text), dim=1)
             out = model.gemma(inputs_embeds=embedding_cat, attention_mask=masks[i].unsqueeze(0))
             # out = model.gpt(inputs_embeds=embedding_cat, attention_mask=masks[i].unsqueeze(0))
@@ -107,25 +106,25 @@ class Predictor(object):
             loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens[i].flatten(), ignore_index=0)
             print(loss)
             caption_token = logits.argmax(-1)[0].cpu()
-            caption_token = caption_token[:510]
             caption = tokenizer.decode(caption_token, skip_special_tokens=True)
+            caption_token = tokenizer(caption, return_tensors='pt', padding='max_length', truncation=True, max_length=489)['input_ids']
             print(caption)
             if self.train_output != None:
-                self.train_output = torch.cat((self.train_output, caption_token.unsqueeze(0)), dim=0)
+                self.train_output = torch.cat((self.train_output, caption_token), dim=0)
             else:
-                self.train_output = caption_token.unsqueeze(0)
+                self.train_output = caption_token
             self.train_text.append(caption)
             self.train_loss.append(loss.item())
 
         if len(text_list) != 2:
-            def dataframe_Name(name, count=510, rows=1):
+            def dataframe_Name(name, count=489, rows=1):
                 if rows == 1:
                     name_df = pd.DataFrame([[name]], columns=["Name"])
                     num_df = pd.DataFrame([[0] * count for _ in range(rows)], columns=[f"{i}" for i in range(0, count)])
                     name_df = pd.concat([name_df, num_df], axis=1)
                     return name_df
                 else:
-                    name_df = pd.DataFrame([[name] * count for _ in range(rows)],columns=[f"{i}" for i in range(510 - count, 510)])
+                    name_df = pd.DataFrame([[name] * count for _ in range(rows)],columns=[f"{i}" for i in range(489 - count, 489)])
                     return name_df
 
             test = pd.DataFrame()
@@ -138,7 +137,7 @@ class Predictor(object):
             generate2_df = pd.DataFrame(self.generate2_output.cpu().detach(), columns=[f"{i}" for i in range(0, 74)])
             generate2_df = pd.concat([test, generate2_df, dataframe_Name("-", 74, 12)], axis=1)
             generate2_df['text'] = self.generate2_text
-            train_df = pd.DataFrame(self.train_output.cpu().detach(), columns=[f"{i}" for i in range(0, 510)])
+            train_df = pd.DataFrame(self.train_output.cpu().detach(), columns=[f"{i}" for i in range(0, 489)])
             train_df = pd.concat([test, train_df], axis=1)
             train_df['loss'] = self.train_loss
             train_df['text'] = self.train_text
@@ -605,13 +604,25 @@ class TestClipCocoDataset(Dataset):
         self.max_seq_len = min(int(all_len.mean() + all_len.std() * 10), int(all_len.max()))
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-trainData = 'C:/Users/TonyLab/PycharmProjects/MemeGAN/Data/Oxford_HIC/parse/oxford_300k_ViT-B_32_train.pkl'
-testData = 'C:/Users/TonyLab/PycharmProjects/MemeGAN/Data/Oxford_HIC/parse/oxford_300k_ViT-B_32_test.pkl'
-prefix_length = 40
+trainData = '../Data/Oxford_HIC/parse/oxford_100k_ViT-B_32_train.pkl'
+testData = '../Data/Oxford_HIC/parse/oxford_100k_ViT-B_32_test.pkl'
+prefix_length = 10
 normalize_prefix = True
 trainDataset = TrainClipCocoDataset(trainData, prefix_length, normalize_prefix=normalize_prefix)
 testDataset = TestClipCocoDataset(testData, prefix_length, normalize_prefix=normalize_prefix)
-
+# oxford_300k
+# train_image = ['imgflip_34', 'bokete_3820', 'imgflip_0','imgflip_8', 'imgflip_15', 'imgflip_19', 'bokete_104530','imgflip_730', 'imgflip_130', 'imgflip_677']
+# train_text = ['You finish doing something at your friends house and look at your phone; 7 missed calls from your mom; 7 missed calls from your mom'
+#               ,'I\'m in my 50s!'
+#               ,'School; Memes'
+#               ,'image tagged in memes,one does not simply'
+#               ,'THAT; IS WHAT A GOOD MEME LOOKS LIKE'
+#               ,'NOT SURE IF PEOPLE ARE UPVOTING MEMES; OR USER NAMES'
+#               ,'It\'s a family night runaway.'
+#               ,'CHUCK IS THE GOOD TYPE OF SCUMBAG; CUZ HE ONLY ROASTS YOU FROM YOUR INSIDES'
+#               ,'SO YOUR TELLIN\' ME THAT SCHOOLS GOOD FOR YOU'
+#               ,'Y\'ALL GOT ANY MORE OF THEM; JOBS?']
+# 100K
 train_image = ['imgflip_34', 'bokete_3820', 'imgflip_0','imgflip_8', 'imgflip_15', 'imgflip_19', 'bokete_104530','imgflip_730', 'imgflip_130', 'imgflip_677']
 train_text = ['You finish doing something at your friends house and look at your phone; 7 missed calls from your mom; 7 missed calls from your mom'
               ,'I\'m in my 50s!'
@@ -620,7 +631,7 @@ train_text = ['You finish doing something at your friends house and look at your
               ,'THAT; IS WHAT A GOOD MEME LOOKS LIKE'
               ,'NOT SURE IF PEOPLE ARE UPVOTING MEMES; OR USER NAMES'
               ,'It\'s a family night runaway.'
-              ,'CHUCK IS THE GOOD TYPE OF SCUMBAG; CUZ HE ONLY ROASTS YOU FROM YOUR INSIDES'
+              ,'Chuck Norris doesn\'t go washroom; He goes washBOOM!'
               ,'SO YOUR TELLIN\' ME THAT SCHOOLS GOOD FOR YOU'
               ,'Y\'ALL GOT ANY MORE OF THEM; JOBS?']
 tokens_list = []
@@ -633,7 +644,6 @@ for i in range(len(trainDataset)):
     image_id = trainDataset.image_ids[i]
     if image_id in train_image:
         if caption in train_text and image_id not in image_id_list:
-            # print(f"Image ID: {image_id}, Caption: {caption}")
             tokens, mask, prefix = trainDataset[i]
             tokens_list.append(tokens)
             mask_list.append(mask)
@@ -644,18 +654,27 @@ train_tokens = torch.stack(tokens_list).to(device)
 train_mask = torch.stack(mask_list).to(device)
 train_prefix = torch.stack(prefix_list).to(device)
 print(train_tokens.shape, train_mask.shape, train_prefix.shape)
-
-# Image ID: imgflip_7, Caption: CHEESE; ME AT 3 AM; CHEESE; MY MOM WHO WAS WAITING; ME
-# Image ID: imgflip_32, Caption: IS THIS A PIGEON?
+# # 300K
+# # Image ID: imgflip_7, Caption: CHEESE; ME AT 3 AM; CHEESE; MY MOM WHO WAS WAITING; ME
+# # Image ID: imgflip_32, Caption: IS THIS A PIGEON?
+# test_image = ['imgflip_7', 'imgflip_32']
+# test_text = ['CHEESE; ME AT 3 AM; CHEESE; MY MOM WHO WAS WAITING; ME'
+#               ,'IS THIS A PIGEON?']
+# # 100K
 test_image = ['imgflip_7', 'imgflip_32']
-test_text = ['CHEESE; ME AT 3 AM; CHEESE; MY MOM WHO WAS WAITING; ME'
-              ,'IS THIS A PIGEON?']
+test_text = ['THE DOG FOOD; MY DOG; DOG FOOD; ME LOOKING AT HIM; MY DOG'
+              ,'MATH; ME; IS THIS THE REASON I DROPPED OUT OF COLLEGE?']
+# Image ID: bokete_111723, Caption: I'm going to take care of you. I'm going to take care of you. I'm going to take care of you.
+# Image ID: imgflip_57, Caption: WHAT'S DONE IN THE DARK WILL ALWAYS COME OUT IN THE LIGHT; BUT THATS NONE OF MY BUSINESS
+# test_image = ['bokete_111723', 'imgflip_57']
+# test_text = ['I\'m going to take care of you. I\'m going to take care of you. I\'m going to take care of you.'
+#               ,'WHAT\'S DONE IN THE DARK WILL ALWAYS COME OUT IN THE LIGHT; BUT THATS NONE OF MY BUSINESS']
 tokens_list = []
 mask_list = []
 prefix_list = []
 test_caption =[]
 image_id_list = []
-for i in range(160):
+for i in range(len(testDataset)):
     caption = testDataset.captions[i]
     image_id = testDataset.image_ids[i]
     if image_id in test_image:
@@ -673,12 +692,22 @@ test_prefix = torch.stack(prefix_list).to(device)
 print(test_tokens.shape, test_mask.shape, test_prefix.shape)
 
 
-model = ClipCaptionModel( prefix_length, clip_length=10, prefix_size=512, num_layers=8)
-save_file = '20241231_totalClip_oxford_300K_transformer_p40_nogpt'
-for i in range(6):
-    model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i+1:03d}.pt'))
-    model = model.eval()
-    model = model.to(device, dtype=torch.bfloat16)
-    pred = Predictor(prefix_length, cp_num = i+1)
-    pred.predict(test_tokens, test_mask, test_prefix, test_caption, model)
-    pred.predict(train_tokens, train_mask, train_prefix, train_caption, model)
+model = ClipCaptionModel( prefix_length, clip_length=prefix_length, prefix_size=512, num_layers=8)
+save_file = '20241231_totalClip_oxford_100K_transformer_p10_lora'
+for i in range(16):
+    if os.path.exists(f'./Model/{save_file}/checkpoint-{i+1:03d}.pt'):
+        model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i+1:03d}.pt'))
+        model = model.eval()
+        model = model.to(device, dtype=torch.bfloat16)
+        pred = Predictor(prefix_length, cp_num = i+1)
+        pred.predict(test_tokens, test_mask, test_prefix, test_caption, model)
+        pred.predict(train_tokens, train_mask, train_prefix, train_caption, model)
+
+AllCaption =pd.DataFrame()
+for i in range(16):
+    if os.path.exists(f'./Model/{save_file}/checkpoint-{i+1:03d}.pt'):
+        df = pd.read_csv(f'./Model/{save_file}/{save_file}_test_{i+1:03d}.csv')
+        textAndLoss = df[['text', 'loss']]
+        AllCaption = pd.concat([AllCaption, textAndLoss], axis=1)
+AllCaption.to_csv(f'./Model/{save_file}/{save_file}_test_all.csv', index=False)
+
