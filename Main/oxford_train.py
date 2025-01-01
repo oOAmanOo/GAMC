@@ -480,13 +480,13 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--trainData', default='../Data/Oxford_HIC/parse/oxford_100k_ViT-B_32_train.pkl')
     parser.add_argument('--testData', default='../Data/Oxford_HIC/parse/oxford_100k_ViT-B_32_test.pkl')
-    parser.add_argument('--out_dir', default='20241231_totalClip_oxford_100K_transformer_p40_lora')
+    parser.add_argument('--out_dir', default='20241231_totalClip_oxford_100K_transformer_p10_lora')
     parser.add_argument('--prefix', default='checkpoint', help='prefix for saved filenames')
     parser.add_argument('--epochs', type=int, default=200)
     parser.add_argument('--save_every', type=int, default=1)
-    parser.add_argument('--prefix_length', type=int, default=40)
+    parser.add_argument('--prefix_length', type=int, default=10)
     parser.add_argument('--prefix_length_clip', type=int, default=10)
-    parser.add_argument('--bs', type=int, default=2)
+    parser.add_argument('--bs', type=int, default=3)
     parser.add_argument('--only_prefix', dest='only_prefix', action='store_true')
     parser.add_argument('--mapping_type', type=str, default='transformer', help='mlp/transformer')
     parser.add_argument('--num_layers', type=int, default=8)
@@ -504,12 +504,10 @@ def main():
     args.mapping_type = {'mlp': MappingType.MLP, 'transformer': MappingType.Transformer}[args.mapping_type]
     print(args.mapping_type)
     if args.only_prefix:
-        model = ClipCaptionPrefix(prefix_length, clip_length=args.prefix_length_clip, prefix_size=prefix_dim,
-                                  num_layers=args.num_layers, mapping_type=args.mapping_type)
+        model = ClipCaptionPrefix(prefix_length, clip_length=prefix_length, prefix_size=prefix_dim, num_layers=args.num_layers, mapping_type=args.mapping_type)
         print("Train only prefix")
     else:
-        model = ClipCaptionModel(prefix_length, clip_length=args.prefix_length_clip, prefix_size=prefix_dim,
-                                  num_layers=args.num_layers, mapping_type=args.mapping_type)
+        model = ClipCaptionModel(prefix_length, clip_length=prefix_length, prefix_size=prefix_dim, num_layers=args.num_layers, mapping_type=args.mapping_type)
         print("Train both prefix and GPT")
         sys.stdout.flush()
     train(trainDataset, testDataset, model, args, output_dir=args.out_dir, output_prefix=args.prefix)
