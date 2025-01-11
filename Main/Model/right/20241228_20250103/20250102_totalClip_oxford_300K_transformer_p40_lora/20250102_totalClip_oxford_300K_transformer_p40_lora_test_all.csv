@@ -1,0 +1,1045 @@
+text,loss,fitCount,gtNum,text,loss,fitCount,gtNum,text,loss,fitCount,gtNum,text,loss,fitCount,gtNum,text,loss,fitCount,gtNum,text,loss,fitCount,gtNum,text,loss,fitCount,gtNum,text,loss,fitCount,gtNum,text,loss,fitCount,gtNum,text,loss,fitCount,gtNum,text,loss,fitCount,gtNum,text,loss,fitCount,gtNum,text,loss,fitCount,gtNum,text,loss,fitCount,gtNum,text,loss,fitCount,gtNum
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+<bos>,,0.0,344.0,<bos>,,0.0,344.0,<bos>,,0.0,344.0,<bos>,,0.0,344.0,<bos>,,0.0,344.0,<bos>,,0.0,344.0,<bos>,,0.0,344.0,<bos>,,0.0,344.0,<bos>,,0.0,344.0,<bos>,,0.0,344.0,<bos>,,0.0,344.0,<bos>,,0.0,344.0,<bos>,,0.0,344.0,<bos>,,0.0,344.0,<bos>,,0.0,344.0
+<bos>,,0.0,159.0,<bos>,,0.0,159.0,<bos>,,0.0,159.0,<bos>,,0.0,159.0,<bos>,,0.0,159.0,<bos>,,0.0,159.0,<bos>,,0.0,159.0,<bos>,,0.0,159.0,<bos>,,0.0,159.0,<bos>,,0.0,159.0,<bos>,,0.0,159.0,<bos>,,0.0,159.0,<bos>,,0.0,159.0,<bos>,,0.0,159.0,<bos>,,0.0,159.0
+<bos>,,0.0,5015.0,<bos>,,0.0,5015.0,<bos>,,0.0,5015.0,<bos>,,0.0,5015.0,<bos>,,0.0,5015.0,<bos>,,0.0,5015.0,<bos>,,0.0,5015.0,<bos>,,0.0,5015.0,<bos>,,0.0,5015.0,<bos>,,0.0,5015.0,<bos>,,0.0,5015.0,<bos>,,0.0,5015.0,<bos>,,0.0,5015.0,<bos>,,0.0,5015.0,<bos>,,0.0,5015.0
+<bos>,,0.0,2200.0,<bos>,,0.0,2200.0,<bos>,,0.0,2200.0,<bos>,,0.0,2200.0,<bos>,,0.0,2200.0,<bos>,,0.0,2200.0,<bos>,,0.0,2200.0,<bos>,,0.0,2200.0,<bos>,,0.0,2200.0,<bos>,,0.0,2200.0,<bos>,,0.0,2200.0,<bos>,,0.0,2200.0,<bos>,,0.0,2200.0,<bos>,,0.0,2200.0,<bos>,,0.0,2200.0
+<bos>,,0.0,71.0,<bos>,,0.0,71.0,<bos>,,0.0,71.0,<bos>,,0.0,71.0,<bos>,,0.0,71.0,<bos>,,0.0,71.0,<bos>,,0.0,71.0,<bos>,,0.0,71.0,<bos>,,0.0,71.0,<bos>,,0.0,71.0,<bos>,,0.0,71.0,<bos>,,0.0,71.0,<bos>,,0.0,71.0,<bos>,,0.0,71.0,<bos>,,0.0,71.0
+<bos>,,0.0,2748.0,<bos>,,0.0,2748.0,<bos>,,0.0,2748.0,<bos>,,0.0,2748.0,<bos>,,0.0,2748.0,<bos>,,0.0,2748.0,<bos>,,0.0,2748.0,<bos>,,0.0,2748.0,<bos>,,0.0,2748.0,<bos>,,0.0,2748.0,<bos>,,0.0,2748.0,<bos>,,0.0,2748.0,<bos>,,0.0,2748.0,<bos>,,0.0,2748.0,<bos>,,0.0,2748.0
+<bos>,,0.0,234.0,<bos>,,0.0,234.0,<bos>,,0.0,234.0,<bos>,,0.0,234.0,<bos>,,0.0,234.0,<bos>,,0.0,234.0,<bos>,,0.0,234.0,<bos>,,0.0,234.0,<bos>,,0.0,234.0,<bos>,,0.0,234.0,<bos>,,0.0,234.0,<bos>,,0.0,234.0,<bos>,,0.0,234.0,<bos>,,0.0,234.0,<bos>,,0.0,234.0
+<bos>,,0.0,1293.0,<bos>,,0.0,1293.0,<bos>,,0.0,1293.0,<bos>,,0.0,1293.0,<bos>,,0.0,1293.0,<bos>,,0.0,1293.0,<bos>,,0.0,1293.0,<bos>,,0.0,1293.0,<bos>,,0.0,1293.0,<bos>,,0.0,1293.0,<bos>,,0.0,1293.0,<bos>,,0.0,1293.0,<bos>,,0.0,1293.0,<bos>,,0.0,1293.0,<bos>,,0.0,1293.0
+<bos>,,0.0,4.0,<bos>,,0.0,4.0,<bos>,,0.0,4.0,<bos>,,0.0,4.0,<bos>,,0.0,4.0,<bos>,,0.0,4.0,<bos>,,0.0,4.0,<bos>,,0.0,4.0,<bos>,,0.0,4.0,<bos>,,0.0,4.0,<bos>,,0.0,4.0,<bos>,,0.0,4.0,<bos>,,0.0,4.0,<bos>,,0.0,4.0,<bos>,,0.0,4.0
+<bos>,,0.0,2.0,<bos>,,0.0,2.0,<bos>,,0.0,2.0,<bos>,,0.0,2.0,<bos>,,0.0,2.0,<bos>,,0.0,2.0,<bos>,,0.0,2.0,<bos>,,0.0,2.0,<bos>,,0.0,2.0,<bos>,,0.0,2.0,<bos>,,0.0,2.0,<bos>,,0.0,2.0,<bos>,,0.0,2.0,<bos>,,0.0,2.0,<bos>,,0.0,2.0
+<bos>,,0.0,1367.0,<bos>,,0.0,1367.0,<bos>,,0.0,1367.0,<bos>,,0.0,1367.0,<bos>,,0.0,1367.0,<bos>,,0.0,1367.0,<bos>,,0.0,1367.0,<bos>,,0.0,1367.0,<bos>,,0.0,1367.0,<bos>,,0.0,1367.0,<bos>,,0.0,1367.0,<bos>,,0.0,1367.0,<bos>,,0.0,1367.0,<bos>,,0.0,1367.0,<bos>,,0.0,1367.0
+<bos>,,0.0,1419.0,<bos>,,0.0,1419.0,<bos>,,0.0,1419.0,<bos>,,0.0,1419.0,<bos>,,0.0,1419.0,<bos>,,0.0,1419.0,<bos>,,0.0,1419.0,<bos>,,0.0,1419.0,<bos>,,0.0,1419.0,<bos>,,0.0,1419.0,<bos>,,0.0,1419.0,<bos>,,0.0,1419.0,<bos>,,0.0,1419.0,<bos>,,0.0,1419.0,<bos>,,0.0,1419.0
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+<bos>,,0.0,344.0,<bos>,,0.0,344.0,<bos>,,0.0,344.0,<bos>,,0.0,344.0,<bos>,,0.0,344.0,<bos>,,0.0,344.0,<bos>,,0.0,344.0,<bos>,,0.0,344.0,<bos>,,0.0,344.0,<bos>,,0.0,344.0,<bos>,,0.0,344.0,<bos>,,0.0,344.0,<bos>,,0.0,344.0,<bos>,,0.0,344.0,<bos>,,0.0,344.0
+<bos>,,0.0,159.0,<bos>,,0.0,159.0,<bos>,,0.0,159.0,<bos>,,0.0,159.0,<bos>,,0.0,159.0,<bos>,,0.0,159.0,<bos>,,0.0,159.0,<bos>,,0.0,159.0,<bos>,,0.0,159.0,<bos>,,0.0,159.0,<bos>,,0.0,159.0,<bos>,,0.0,159.0,<bos>,,0.0,159.0,<bos>,,0.0,159.0,<bos>,,0.0,159.0
+<bos>,,0.0,5015.0,<bos>,,0.0,5015.0,<bos>,,0.0,5015.0,<bos>,,0.0,5015.0,<bos>,,0.0,5015.0,<bos>,,0.0,5015.0,<bos>,,0.0,5015.0,<bos>,,0.0,5015.0,<bos>,,0.0,5015.0,<bos>,,0.0,5015.0,<bos>,,0.0,5015.0,<bos>,,0.0,5015.0,<bos>,,0.0,5015.0,<bos>,,0.0,5015.0,<bos>,,0.0,5015.0
+<bos>,,0.0,2200.0,<bos>,,0.0,2200.0,<bos>,,0.0,2200.0,<bos>,,0.0,2200.0,<bos>,,0.0,2200.0,<bos>,,0.0,2200.0,<bos>,,0.0,2200.0,<bos>,,0.0,2200.0,<bos>,,0.0,2200.0,<bos>,,0.0,2200.0,<bos>,,0.0,2200.0,<bos>,,0.0,2200.0,<bos>,,0.0,2200.0,<bos>,,0.0,2200.0,<bos>,,0.0,2200.0
+<bos>,,0.0,71.0,<bos>,,0.0,71.0,<bos>,,0.0,71.0,<bos>,,0.0,71.0,<bos>,,0.0,71.0,<bos>,,0.0,71.0,<bos>,,0.0,71.0,<bos>,,0.0,71.0,<bos>,,0.0,71.0,<bos>,,0.0,71.0,<bos>,,0.0,71.0,<bos>,,0.0,71.0,<bos>,,0.0,71.0,<bos>,,0.0,71.0,<bos>,,0.0,71.0
+<bos>,,0.0,2748.0,<bos>,,0.0,2748.0,<bos>,,0.0,2748.0,<bos>,,0.0,2748.0,<bos>,,0.0,2748.0,<bos>,,0.0,2748.0,<bos>,,0.0,2748.0,<bos>,,0.0,2748.0,<bos>,,0.0,2748.0,<bos>,,0.0,2748.0,<bos>,,0.0,2748.0,<bos>,,0.0,2748.0,<bos>,,0.0,2748.0,<bos>,,0.0,2748.0,<bos>,,0.0,2748.0
+<bos>,,0.0,234.0,<bos>,,0.0,234.0,<bos>,,0.0,234.0,<bos>,,0.0,234.0,<bos>,,0.0,234.0,<bos>,,0.0,234.0,<bos>,,0.0,234.0,<bos>,,0.0,234.0,<bos>,,0.0,234.0,<bos>,,0.0,234.0,<bos>,,0.0,234.0,<bos>,,0.0,234.0,<bos>,,0.0,234.0,<bos>,,0.0,234.0,<bos>,,0.0,234.0
+<bos>,,0.0,1293.0,<bos>,,0.0,1293.0,<bos>,,0.0,1293.0,<bos>,,0.0,1293.0,<bos>,,0.0,1293.0,<bos>,,0.0,1293.0,<bos>,,0.0,1293.0,<bos>,,0.0,1293.0,<bos>,,0.0,1293.0,<bos>,,0.0,1293.0,<bos>,,0.0,1293.0,<bos>,,0.0,1293.0,<bos>,,0.0,1293.0,<bos>,,0.0,1293.0,<bos>,,0.0,1293.0
+<bos>,,0.0,4.0,<bos>,,0.0,4.0,<bos>,,0.0,4.0,<bos>,,0.0,4.0,<bos>,,0.0,4.0,<bos>,,0.0,4.0,<bos>,,0.0,4.0,<bos>,,0.0,4.0,<bos>,,0.0,4.0,<bos>,,0.0,4.0,<bos>,,0.0,4.0,<bos>,,0.0,4.0,<bos>,,0.0,4.0,<bos>,,0.0,4.0,<bos>,,0.0,4.0
+<bos>,,0.0,2.0,<bos>,,0.0,2.0,<bos>,,0.0,2.0,<bos>,,0.0,2.0,<bos>,,0.0,2.0,<bos>,,0.0,2.0,<bos>,,0.0,2.0,<bos>,,0.0,2.0,<bos>,,0.0,2.0,<bos>,,0.0,2.0,<bos>,,0.0,2.0,<bos>,,0.0,2.0,<bos>,,0.0,2.0,<bos>,,0.0,2.0,<bos>,,0.0,2.0
+<bos>,,0.0,1367.0,<bos>,,0.0,1367.0,<bos>,,0.0,1367.0,<bos>,,0.0,1367.0,<bos>,,0.0,1367.0,<bos>,,0.0,1367.0,<bos>,,0.0,1367.0,<bos>,,0.0,1367.0,<bos>,,0.0,1367.0,<bos>,,0.0,1367.0,<bos>,,0.0,1367.0,<bos>,,0.0,1367.0,<bos>,,0.0,1367.0,<bos>,,0.0,1367.0,<bos>,,0.0,1367.0
+<bos>,,0.0,1419.0,<bos>,,0.0,1419.0,<bos>,,0.0,1419.0,<bos>,,0.0,1419.0,<bos>,,0.0,1419.0,<bos>,,0.0,1419.0,<bos>,,0.0,1419.0,<bos>,,0.0,1419.0,<bos>,,0.0,1419.0,<bos>,,0.0,1419.0,<bos>,,0.0,1419.0,<bos>,,0.0,1419.0,<bos>,,0.0,1419.0,<bos>,,0.0,1419.0,<bos>,,0.0,1419.0
+,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+"IERS IS CHE; 3 AM; CHEESE; ME MOM AT IS JUSTITING FOR ME AT
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;;
+;
+
+;;;;;;;;; ME ME ME ME;;;; ME",2.34375,1288.0,344.0,"IERS; CHE; 3AM; CHEESE; ME MOM; IS JUSTITING FOR ME AT
+
+
+
+
+
+
+
+
+
+
+
+
+;;
+
+
+
+
+;
+
+
+; ME>;>;;;; ME ME ME;;;;;;",2.1875,854.0,344.0,"IERS IS CHE; 3AM; CHEESE; ME MOM; IS JUSTITING FOR ME AT
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;;;;;;;;;;;;;;;;",2.15625,460.0,344.0,"IERS; CHE; 3AM; CHEESE; MY MOM; IS JUSTITING FOR ME AT
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>>;;;;;>>>>>;",2.140625,339.0,344.0,"IERS; CHE; 3 AM; CHEESE; MY MOM; IS JUSTITING FOR ME AT
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>;;;;;;
+;;;;;;;",2.09375,345.0,344.0,"IERS; CHE; 3AM; CHEESE; MY MOM; IS JUSTITING FOR ME AT
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>>>>>>>>>>>;;;>>>>>>>;",2.15625,339.0,344.0,"IERS; CHE; 3AM; CHEESE; MY MOM; IS JUSTITING FOR ME AT
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>;;;;;;;;;;;;;",2.0625,339.0,344.0,"IERS; CHE; 3AM; CHEESE; MY MOM; IS JUSTITING FOR ME AT
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>>>>>>>>>;;;;;>>;;;;;",2.09375,339.0,344.0,"IERS; CHE; 3AM; CHEESE; MY MOM; IS JUSTITING FOR ME AT
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>>>;;;>>>;;;;;",2.125,339.0,344.0,"IERS; CHE; 3AM; CHEESE; MY MOM; IS JUSTITING FOR ME AT
+
+
+
+;;
+
+
+
+
+
+
+
+
+
+>>>>>>>>>>>>>>>;>>>>>>;;;;",2.140625,339.0,344.0,"IERS; CHE; 3AM; CHEESE; MY MOM; IS JUSTITING FOR ME AT
+
+
+
+
+;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>>;;;;;>;;;;;;",2.09375,339.0,344.0,"IERS; CHE; 3AM; CHEESE; MY MOM; IS JUSTITING FOR ME AT
+
+
+
+;;;
+
+
+
+
+
+
+
+>>>>>>>>>>>>>>>>;;;>>>;;;;;",2.140625,339.0,344.0,"IERS; CHE; 3AM; CHEESE; MY MOM; IS JUSTITING FOR ME AT
+
+
+
+; ME
+
+
+
+
+
+
+
+
+
+
+>>>>>>>>>>>>>>>>>>>>>>;>>",2.09375,542.0,344.0,"IERS; CHE; 3AM; CHEESE; MY MOM; IS JUSTITING FOR ME AT
+
+
+;; ME;
+
+
+
+
+
+
+
+
+>>>>>>>>>>>>>>>>;>>>>>;;;;",2.140625,531.0,344.0,"IERS; CHE; 3AM; CHEESE; MY MOM; IS JUSTITING FOR ME AT I
+
+;;;;;;
+
+
+
+
+
+
+>>>;;>>>>>>;>;;;;;;;;;;;;;",2.125,369.0,344.0
+"I THIS A MEMIZZAON? NO
+
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;; IS IS;;;;;;;;;;;;;;;;;;;;;;",2.3125,305.0,159.0,"I THIS A MEMIZZAON? NO
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;",2.359375,196.0,159.0,"I THIS A MEMIZZAON? NO
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;",2.34375,196.0,159.0,"I THIS A MEMIZZAON? NO
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;",2.34375,196.0,159.0,"I THIS A MEMIZZAON? NO
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;    ;;;;;      ;;;;;;",2.28125,196.0,159.0,"I THIS A MEMIZZAON? NO
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;",2.265625,196.0,159.0,I THIS A MEMIZZAON? NO;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,2.234375,194.0,159.0,"I THIS A MEMIZZAON? NO;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;",2.25,194.0,159.0,"I THIS A MEMIZZAON? NO
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;",2.34375,196.0,159.0,I THIS A MEMIZZAON? NO;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,2.296875,194.0,159.0,I THIS A MEMIZZAON? NO;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,2.265625,194.0,159.0,I THIS A MEMIZZAON? NO;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,2.265625,194.0,159.0,I THIS A MEMIZZAON? NO;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,2.3125,194.0,159.0,I THIS A MEMIZZAON? NO;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,2.296875,194.0,159.0,I THIS A MEMIZZAON? NO;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,2.328125,194.0,159.0
+"I'ALL GOT ANY MORE OF THEM; JOBS? I;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;",0.52734375,13063.0,5015.0,"I'ALL GOT ANY MORE OF THAT; BASIC? I
+;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;",0.6015625,13734.0,5015.0,"I'ALL GOT ANY MORE OF THEM; JOBS? I
+
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;",0.52734375,13761.0,5015.0,"I'ALL GOT ANY MORE OF THAT; JOBS? I>
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;>>>>>>>>>>;;;;;>;;",0.5859375,13404.0,5015.0,"I'ALL GOT ANY MORE OF THAT; JOBS? I>
+
+
+
+
+
+;;;;;; YOU YOU YOU YOU YOU YOU YOU YOU YOU YOU;;;;; YOU YOU YOU YOU YOU YOU YOU YOU>>;>;; YOU YOU YOU; YOU YOU YOU YOU YOU",0.55859375,13404.0,5015.0,"I'ALL GOT ANY MORE OF THAT; BASIC? I>>;;
+
+;;;;;;;;;;;;;;;;;;;;;>>>;;;;>>>>>>>>>>>;;;; YOU;;",0.65234375,13036.0,5015.0,"I'ALL GOT ANY MORE OF THAT; JOBS? I>
+
+;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;:;>>>>>>>>:>::;;;;;;",0.578125,13404.0,5015.0,I'ALL GOT ANY MORE OF THEM; JOBS? I>***;;;;;;;;;;;;;;;;;;;;;>>>>::::>>>>>::::::::;;;;;,0.5703125,13063.0,5015.0,"I'ALL GOT ANY MORE OF THAT; JOBS? I>
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;>>;;;;;;;;;;;;;;",0.671875,13404.0,5015.0,I'ALL GOT ANY MORE OF THEM; JOBS? I>**;;;;;;;;;; YOU YOU YOU YOU; YOU YOU YOU YOU;;;>>>>>;;;>>>>>::::::::;;;;;,0.57421875,13063.0,5015.0,"I'ALL GOT ANY MORE OF THAT; JOBS? I>*
+;;;;;;;;;;;;;;;;; YOU;;;;;;;;;:::; YOU YOU YOU YOU:::::;::;;;;;",0.64453125,13404.0,5015.0,I'ALL GOT ANY MORE OF THAT; JOBS? I>**;;;;;;;; YOU YOU YOU YOU YOU YOU YOU YOU YOU YOU YOU;;;;;>; YOU YOU;; YOU YOU YOU YOU;;;;;;;;;;;;;;,0.5625,13404.0,5015.0,I'ALL GOT ANY MORE OF THAT; JOBS? I>***;;;;;;;; YOU YOU YOU YOU;;; YOU YOU;;;;;>>;;;;;;>>>>;;>>>;;;;;;;;,0.56640625,13404.0,5015.0,I'ALL GOT ANY MORE OF THAT; JOBS? I>*;;;;;;;;;;;; YOU;;;; YOU YOU YOU;;;;>> YOU YOU::;;>>>>;;;>;;;;;;;;;,0.5703125,13404.0,5015.0,I'ALL GOT ANY MORE OF THAT; JOBS? I>*;;;;;;;;; YOU YOU YOU YOU YOU YOU;; YOU YOU YOU;;;;;;;;;;;;; YOU;;;;;;;;;;;;;;;,0.57421875,13404.0,5015.0
+"I tagged in memes,drake does not simply,
+ i
+
+
+
+
+
+
+
+;
+
+
+
+;
+;;;;;;;;;;;;
+
+
+
+
+
+
+
+
+
+
+;
+
+
+
+
+
+
+
+
+
+
+
+",1.0546875,281.0,2200.0,"I tagged in memes,drake does not simply,... i
+
+
+
+
+
+
+oneimgimgimgimg;;;;;;;;;;;; i i i i i i i;; i
+
+
+ i i i i i one
+
+
+
+
+
+
+
+",1.1171875,283.0,2200.0,"I tagged in memes,drake does not simply,++.""""
+
+
+
+
+
+ me one oneimgimgimgimg i i i;;;;; i i i i i i i i i i;;; i
+---- i i i one one one
+ one one
+
+
+
+",1.0703125,299.0,2200.0,"I tagged in memes,drake does not simply,...,++.++.&;;
+
+ i i meimgimgimgimg;;;;;;;;;;;;;;;>>>>>>>>>>>>>>>>>>>>>>>",1.109375,280.0,2200.0,"I tagged in memes,the does not simply,++.++. i&&**.__). me one one i one one one one i i i i i i i i i i i i i i i i i one;;; i------------
+
+
+
+
+
+
+
+
+
+",1.1484375,298.0,2200.0,"I tagged in memes,drake does not simply,++.... i i&;img me me me i me me me i i i;;;;;; i i i;;;;;;;;;;;>-------->>>---->>>>----",1.109375,280.0,2200.0,"I tagged in memes,drake does not simply,...... me me;; me me me me me me me me me i i i;;;; i i i;;;;;;;;;;;;>>------>>>one>>>>>>--",1.09375,280.0,2200.0,"I tagged in memes,the does not simply,......++.++.**,, me me one one one*;;;;;;;;;;;;;;;>>>>>;;>>>-->>>>>>>>>>>>--",1.1484375,286.0,2200.0,"I tagged in memes,drake does not simply,++.......,,,,,, one one,"""";;;;;;;;;;;;;;;;;;;>>;;;>>>-->>>>>one>>>>>----",1.1015625,283.0,2200.0,"I tagged in memes,drake does not simply,++....---;;;** one one one one--;;;;;;;;; i i;;;;;>>>>>;;>>>---->>>>one>>>>>----",1.09375,289.0,2200.0,"I tagged in memes,drake does not simply,......***,,, one one one one one one one one one one;; i i i i i;;;;;;;;;;;;--------------oneoneone> one--------",1.140625,307.0,2200.0,"I tagged in memes,the does not simply,......***,,,, one one one?*;;;;;; one one one one i;;;;;>>>;;;>>>>>>>>oneoneoneoneone>oneoneone",1.1171875,298.0,2200.0,"I tagged in memes,the does not simply,......****** me one me me me*;;;;;;; i i i i;;;>>>>>>;>>>>>>>>>>>>>>>>>>",1.171875,283.0,2200.0,"I tagged in memes,drake does not simply, alt...---*,,,,, one one one me*;;;;;;;; i i i;;;>>>>>>>>>>>>>>>>>>>>>>>>>",1.1484375,290.0,2200.0,"I tagged in memes,the does not simply, .........*,,,, me one one me me;;;;;;; i i i i i;;;;;>>>>;;>>>>>>>>>one>>>>>>>",1.0859375,287.0,2200.0
+"I NOR A BEST GUY OF GUYUMBAG; HEUZ HE' SCASTS THE WHEN THE BACKANE;;уда;;;;;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;;;; C;;;;;;;;;;;;;",3.59375,95.0,71.0,"I NOR A BEST GUY OF GUYUMBAG; HEUZ HE' SCASTS THE WHEN THE BACKIDES;;;;;;;;
+
+
+
+
+
+
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;",3.59375,95.0,71.0,"I NOR A BEST GUY OF GUYUMBAG; HEUZ HE' WASTS THE WHEN THE BACKIDES. I;;;;;--
+
+
+
+
+
+
+
+
+
+
+ C C C;;;; C;;;;;;;;;;;;;;",3.53125,95.0,71.0,"I NOR A BEST GUY OF GUYUMBAG; HEUZ HE' WASTS THE WHEN THE BACKIDES; -;;;;;----;;
+
+
+
+
+
+
+
+;;;;>>>>>>;;;;;;;;;>>;",3.5625,95.0,71.0,"I NOR A BEST GUY OF GUYUMBAG; HEUZ HE' SCASTS THE WHEN THE BACKIDES. I I;;;;; I
+
+
+
+
+
+
+
+
+
+ C C;;;;>>;;;;;;;;;;;;;;",3.546875,99.0,71.0,"I NOR A BEST GUY OF GUYUMBAG; HEUZ HE' WASTS THE WHEN THE BACKIDES. -;;;;;;;;;;;;
+
+
+
+; C;;;;>>>>>;;;;;;;;;>;;",3.53125,95.0,71.0,"I NOR A BEST GUY OF GUYUMBAG; HEUZ HE' WASTS THE WHEN THE BACKIDES. I;;;;;;;;; I;;;
+ I C C C C C C C C C C C C C C;;;;;;;;;;",3.5625,97.0,71.0,I NOR A BEST GUY OF GUYUMBAG; HEUZ HE' WASTS THE WHEN THE BACKANE.;;;;;;;;;;;;;;;; I C C C C;;;;;;;;;;;;;;;;;;;,3.546875,97.0,71.0,"I NOR A BEST GUY OF GUYUMBAG; HEUZ HE' WASTS THE WHEN THE BACKIDES.;;;;;;;;;;;;;;;
+ C C C C C C C C C>;;;;;;;;;;;;;;",3.515625,95.0,71.0,I NOR A BEST GUY OF GUYUMBAG; HEUZ HE' WASTS THE WHEN THE BACKIDES. -;;;;;;;;;;;;;;; C C C C C; C C C;;;;;;;;;;;;;;;,3.546875,95.0,71.0,I NOR A BEST GUY OF GUYUMBAG; HEUZ HE' WASTS THE WHEN THE BACKIDES.;;;;;;;;;; I I;; I I C C C C C C C C C C C;;;;;;;;;;;;;,3.515625,101.0,71.0,I NOR A BEST GUY OF GUYUMBAG; HEUZ HE' WASTS THE WHEN THE BACKIDES. -;;;; - -;;; - - -;; C C C C C C C C C C C C;;;;;;;;;;;;;,3.515625,95.0,71.0,I NOR A BEST GUY OF GUYUMBAG; HEUZ HE' WASTS THE WHEN THE BACKIDES.;;;;;;;;;;; I;;; C C C C C C C C C C C C;;;;;;;;;;;;;,3.578125,95.0,71.0,I NOR A BEST GUY OF GUYUMBAG; HEUZ HE' WASTS THE WHEN THE BACKIDES. -;;; - - - - -; - - -;; C C C C C;; C C;;;;;;;;;;;;;;;;,3.546875,95.0,71.0,I NOR A BEST GUY OF GUYUMBAG; HEUZ HE' WASTS THE WHEN THE BACKIDES. -;;; - - - - -; - - -;; C C C C C;;;;;;;;;;;;;;;;;;;;,3.53125,95.0,71.0
+"I; Me;
+
+
+
+
+
+
+
+
+
+
+
+
+;;;;;; Memes;; Memes;;;;;;;; Memes Memes;;;;; Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes",3.609375,178.0,2748.0,"I; Me;
+
+
+
+
+
+
+
+
+
+
+
+
+
+ Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes;;;; Memes Memes Memes Memes Memes Memes;;;; Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes",3.65625,282.0,2748.0,"I; School;
+
+
+
+
+
+
+
+
+
+
+
+
+
+ School Memes Memes Memes School Memes Memes Memes Memes Memes Memes;;;;; Memes Memes Memes Memes Memes;;;; Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes",3.671875,292.0,2748.0,"I; School;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ Memes Memes
+
+ School Memes Memes Memes Memes;;;;; Memes Memes Memes;;;;;; Memes Memes Memes Memes Memes Memes Memes; Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes",3.625,224.0,2748.0,"I; School;
+
+
+
+
+
+
+
+
+
+
+
+
+
+ School School Memes School School School School School School Memes Memes School;;; Memes Memes Memes Memes I; School;;; Memes Memes Memes Memes Memes Memes Memes; Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes",3.671875,315.0,2748.0,"I; School;
+
+
+
+
+
+
+
+
+
+
+
+
+
+ Memes Memes Memes Memes School School Memes Memes Memes;;;;;;;; Memes Memes;;;;;;; Memes Memes Memes Memes Memes;;;; Memes Memes Memes Memes Memes Memes Memes Memes;;",3.609375,180.0,2748.0,"I; School;
+
+
+
+
+
+
+
+
+
+
+
+
+ School School School Memes Memes School School School School School School;;;;;;; Memes Memes Memes;;;;;; Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes",3.671875,298.0,2748.0,"I; School;
+
+
+
+
+
+
+
+
+ School
+
+
+ School School School School Memes School School School School Memes Memes;;;;;; Memes Memes;;;;;;;; Memes Memes Memes Memes Memes;;;; Memes Memes Memes Memes Memes Memes Memes Memes;;",3.609375,239.0,2748.0,"I; School;
+
+
+
+
+
+
+
+
+
+
+
+
+
+ School Memes Memes Memes School School School Memes Memes;;;;;;;;;;;;;;;;; Memes Memes Memes Memes Memes;;;; Memes Memes Memes Memes Memes Memes Memes;;;",3.796875,174.0,2748.0,"I; School;
+
+
+
+
+
+
+
+
+
+
+
+
+
+ School Memes Memes Memes Memes School Memes Memes Memes Memes;;;;;;;;;;;;;;; Memes Memes Memes Memes Memes Memes Memes;; Memes Memes Memes Memes Memes Memes Memes Memes Memes;;",3.796875,204.0,2748.0,"I; Me;
+
+
+
+
+
+
+
+
+
+
+
+
+
+ School Memes Memes Memes Memes School School Memes Memes;;;;;;;;;;;;;;;;;; Memes Memes Memes Memes;;;; Memes Memes Memes Memes Memes Memes Memes Memes;;",3.859375,161.0,2748.0,"I; School;
+
+
+
+
+
+
+
+
+
+
+
+
+
+ School School School School School School School School Memes;;;;;;;;;;;;;;;;; Memes Memes Memes Memes Memes;;; Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes Memes",3.78125,234.0,2748.0,"I; School;
+
+
+
+
+
+
+
+
+
+
+
+
+
+ School School School School School School School School Memes Memes;;;;;;;;;;;;;;;;;;; Memes;;;;; Memes Memes Memes Memes Memes Memes Memes;;;",3.671875,170.0,2748.0,"I; School;
+
+
+
+
+
+
+
+
+
+
+
+
+
+;;;; Memes; School School;;;;;;;;;;;;;;;;;;;; Memes Memes;;;;; Memes Memes Memes Memes Memes Memes Memes;;;",3.953125,80.0,2748.0,"I; School;
+
+
+
+
+
+
+
+
+
+
+
+
+;;;;;;;; Memes;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;",3.671875,10.0,2748.0
+"I YOU SAYIN ME ME THAT YOU ARE FOR YOU? SO SO
+
+
+
+
+
+
+
+
+
+
+ SO SO SO SO SO SO SO SO SO SO SO SO SO SO SO SO I I SO SO SO THAT THAT THAT THAT THAT I; SO SO SO
+ SO SO SO SO SO;",3.09375,1425.0,234.0,"I YOU TEIN ME ME; YOU ARE FOR YOU? NO SO THAT THAT
+
+
+
+
+
+
+ THAT SO SO SO SO I I I I I I I I SO;;; I I I I I; I THAT THAT I I;; I I I I;;;;;;",2.96875,1371.0,234.0,"I YOU TEIN ME ME; YOU ARE FOR YOU? NO AND AND
+
+
+
+
+
+
+ THAT SO SO SO SO SO I I I SO SO SO SO SO SO SO SO YOU I YOU YOU YOU SO SO SO SO THAT THAT THAT; SO SO SO SO SO SO SO SO SO SO;",2.9375,1794.0,234.0,"I YOU TEIN ME ME; YOU ARE FOR YOU? AND AND AND AND
+
+
+
+ AND
+
+ I I I I I I I I I I I I I;;;; I I I I I YOU I I AND I I;; I I I I;;;;;;",3.0,1589.0,234.0,"I YOU TEIN ME ME THAT YOU ARE FOR YOU? NO THAT THAT
+
+
+
+
+
+ I I I I I I I I I I I I I I I;;; YOU YOU I YOU I YOU YOU YOU THAT THAT THAT I YOU I I I I I I I YOU I YOU I",2.9375,2550.0,234.0,"I YOU TEIN ME ME; YOU ARE FOR YOU? AND I AND AND
+
+
+
+ I I I I I I I I I I I I I I I;;;;; YOU YOU YOU YOU YOU YOU YOU YOU YOU YOU YOU YOU; I I I I;;; YOU;;",2.96875,2264.0,234.0,I YOU TEIN ME ME; YOU ARE FOR YOU? AND I I I I SO SO I SO I I I SO SO SO I I I I SO SO SO SO;;;;; SO I I I SO SO SO THAT THAT I I I I I I I I I I SO YOU;;,2.96875,1914.0,234.0,"I YOU TEIN ME ME; YOU ARE FOR YOU? AND I I I
+
+
+ I I I I I I I I I I I I I I I;;;;;;; YOU YOU YOU YOU YOU YOU YOU YOU YOU;;;; I I I;;;;;;",2.953125,1962.0,234.0,I YOU TEIN ME ME; YOU ARE FOR YOU? NO THAT THAT THAT THAT YOU YOU I I I I YOU YOU I I I I I YOU YOU I YOU YOU YOU;;;; YOU YOU YOU YOU YOU YOU YOU YOU YOU YOU;;;; I I;;;;;;;,2.953125,2582.0,234.0,"I YOU TEIN ME ME; YOU ARE FOR YOU? THAT I I I
+
+
+ I I I I;; I I I I I I I I I I;;;;; YOU YOU YOU YOU YOU YOU YOU YOU YOU YOU YOU;; I I I I;; YOU;;;",2.96875,2115.0,234.0,"I YOU TEIN ME ME; YOU ARE FOR YOU? NO I I I
+
+
+
+ I I;;;; I I I I;;;;;;;;;;; YOU YOU;;; YOU YOU YOU;;;;;;;;;;;;;;",2.953125,932.0,234.0,"I YOU TEIN ME ME; YOU ARE FOR YOU? THAT I I I I YOU YOU I I I I I; I I I I I I I I YOU I;;;;; YOU YOU YOU YOU YOU YOU YOU YOU YOU YOU;;; YOU I I
+;; YOU YOU;;",2.953125,2503.0,234.0,"I YOU TEIN ME ME; YOU ARE FOR YOU? NO I I I YOU
+ YOU I I I I;; I I I I I I I I I I I;;;; YOU YOU YOU YOU YOU YOU YOU YOU YOU YOU;;; YOU YOU
+
+;; YOU YOU;;",2.96875,2395.0,234.0,"I YOU TEIN ME ME; YOU ARE FOR YOU? THAT I I I I YOU I I I I I;; I I I I I I;; I;;;;;; YOU YOU YOU YOU; YOU YOU YOU YOU YOU;;;; YOU
+
+ YOU YOU YOU YOU YOU
+",2.96875,2286.0,234.0,"I YOU TEIN ME ME; YOU ARE FOR YOU? NO I I I I I I I I I I;; I I I I I I;; I;;;;;; YOU YOU YOU YOU YOU YOU YOU YOU YOU YOU;;; YOU YOU
+
+ YOU; YOU YOU YOU YOU",3.0,2407.0,234.0
+I'S NOT I GOOD MEME LOOKS LIKE; THAT THAT;;;; THAT THAT THAT THAT THAT;;;;;;;;;;;;;; THAT THAT THAT THAT THAT;;;; THAT THAT THAT THAT THAT THAT;;; THAT THAT THAT;;; THAT THAT THAT,2.34375,1779.0,1293.0,I MOMENTS NOT I; MEME LOOKS LIKE; THAT THAT;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; THAT THAT THAT;,2.4375,418.0,1293.0,I MOMENTS NOT I GOOD MEME LOOKS LIKE; THAT THAT;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,2.40625,362.0,1293.0,I MOMENTS A I; MEME LOOKS LIKE; THAT THAT;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,2.34375,358.0,1293.0,I MOMENTS A I GOOD MEME LOOKS LIKE; THAT THAT;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,2.359375,478.0,1293.0,I MOMENTS A I GOOD MEME LOOKS LIKE; THAT THAT;;;;;;; THAT;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; THAT;;,2.40625,478.0,1293.0,I MOMENTS A I GOOD MEME LOOKS LIKE; THAT THAT;;;;;;;;;;;;;;;;;;;;;;;;;;; THAT;;;;;;;;;;;; THAT THAT;;;; THAT;;;,2.328125,563.0,1293.0,I MOMENTS A I GOOD MEME LOOKS LIKE;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;::::;;:::;;;;;;,2.375,391.0,1293.0,I FACES A I GOOD MEME LOOKS LIKE;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,2.34375,395.0,1293.0,I MOMENTS WHAT I GOOD MEME LOOKS LIKE; THAT;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::;;;::::;;;;;,2.40625,292.0,1293.0,I MOMENTS; I GOOD MEME LOOKS LIKE;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:;;;;;:;;;;;;;,2.40625,246.0,1293.0,I MOMENTS; I GOOD MEME LOOKS LIKE;;;;;;;;;;;;;;;;;;;;; THAT;;;;;; THAT THAT THAT THAT;;;;;;;;;;;;;;;;;;;;;,2.328125,501.0,1293.0,I MOMENTS NOT I; MEME LOOKS LIKE; THAT THAT;;;;;;;;;;;;;;;;;;;;;;;;;; THAT THAT THAT;;;;;;;;;;;;;;;;;;;;;,2.25,412.0,1293.0,I MOMENTS WHAT I GOOD MEME LOOKS LIKE; THAT;;;;;;;;;;;;;;;;;;;;;;;;;;;; THAT;;;;;;;:::;;;;;:;;;;;;,2.28125,292.0,1293.0,I MOMENTS; I; MEME LOOKS LIKE;;;;;;;;;;;;;;;;;;;;;;;;;;;; THAT THAT THAT;;;;;;;;;;;;;;;;;;;;;;,2.28125,296.0,1293.0
+I'm going the 20s. I;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,1.640625,3.0,4.0,I'm going the 20s. I:;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,1.6015625,3.0,4.0,I'm going the 20s. I::;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,1.625,3.0,4.0,I'm going the 20s. I::;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,1.6640625,3.0,4.0,I'm going the 20s. I::;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,1.6640625,3.0,4.0,I'm going the 20s. I::>;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,1.671875,3.0,4.0,I'm going the 20s. I:;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,1.6015625,3.0,4.0,I'm going the 20s. I::;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,1.671875,3.0,4.0,I'm going the 20s. I::;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,1.6875,3.0,4.0,I'm going the 20s. I::;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,1.609375,3.0,4.0,I'm going the 20s. I::;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,1.625,3.0,4.0,I'm going the 20s. I:;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,1.6328125,3.0,4.0,I'm going the 20s. I:;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,1.640625,3.0,4.0,I'm going the 20s. I:;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,1.609375,3.0,4.0,I'm going the 20s. I:;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,1.59375,3.0,4.0
+"I's a good... It
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;;;;;;;;;;
+;;;;
+
+
+
+;;;;;;;;;;;;;;;;;;;;",3.828125,2.0,2.0,"I's a good photo.. It
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;;;;;;;;;;;;
+
+
+
+ I I I I I>>>> I I;;;; I I I;;;;;",3.75,2.0,2.0,"I's a little... It ---
+----
+
+
+
+
+
+
+
+
+
+
+
+ - - - - - - -
+
+
+
+
+
+ - - - - - - - - - - - - - - - - - - - - -;;;",3.734375,2.0,2.0,I's a little... It>------------------>>-->>>>>>>>> ->>>>>>>>>>>>>>>>>>>>;==>>>=>>>=,3.75,2.0,2.0,"I's a little photo.. It>--------------------------------
+>>> - ->>>>>>>>>>>>>>>>>> -=======
+=
+==",3.71875,2.0,2.0,I's a little... It>-------------------------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>=>>>>>==,3.6875,2.0,2.0,I's a little of.. It>------------------>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> - -;;=======;=,3.703125,2.0,2.0,I's a little photo.. It>---------------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;====>==>>;,3.75,2.0,2.0,I's a little photo.. It>------------------>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>==========>==,3.703125,2.0,2.0,I's a little... It>-------------------------->>>>>>>>>>>>>>>>>>>>>>>>>>>=;>>=>>>=>>>;,3.6875,2.0,2.0,I's a little photo.. It>-------------------------->---->>>>>>>>>>>>>>>>>>>>>>>==;=========;;,3.734375,2.0,2.0,I's a little... It>------------------>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>;;;====>>>=;,3.734375,2.0,2.0,"I's a little... It>--------
+
+
+------>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>",3.703125,2.0,2.0,I's a little of.. It>-------------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>,3.6875,2.0,2.0,I's a little of.. It>------------------>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>,3.75,2.0,2.0
+"I' your your;  desk house; you at the phone to You1: calls from your mom; 1 missed calls from your mom;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   
+
+
+   ",2.265625,2560.0,1367.0,"I' your your;  house house; you at the phone; You1: calls from your mom; 1 missed calls from your mom;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     
+     ",2.203125,2257.0,1367.0,"I' your your;  house house; you at the phone; You1: calls from your mom; 1 missed calls from your mom;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              ",2.234375,2257.0,1367.0,"I' your your;  house house; you at the phone; You1: calls from your mom; 1 missed calls from your mom;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+>>>>>>>>>>>>>>>",2.171875,2257.0,1367.0,"I' your your;  house house; you at the phone; You1: calls from your mom; 1 missed calls from your mom;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   > >     >  ",2.171875,2257.0,1367.0,"I' your your;  house house; you at the phone; You1: calls from your mom; 1 missed calls from your mom;
+
+
+
+
+
+
+
+
+    >>> >>>>>>  >>>>",2.140625,2257.0,1367.0,"I' your your;  house house; you at the phone; You1: calls from your mom; 1 missed calls from your mom;
+
+
+
+
+
+
+
+
+
+                       ",2.171875,2257.0,1367.0,"I' your your;  house house; you at the phone; You1: calls from your mom; 1 missed calls from your mom;
+
+
+
+
+
+
+
+
+
+                       ",2.171875,2257.0,1367.0,"I' your your;  house house; you at the phone; You1: calls from your mom; 1 missed calls from your mom;
+
+
+
+
+
+
+
+
+
+
+                      ",2.140625,2257.0,1367.0,"I' your your;  house house; you at the phone; You1: calls from your mom; 1 missed calls from your mom;
+
+
+
+
+
+
+
+
+
+                       ",2.15625,2257.0,1367.0,"I' your your;  house house; you at the phone; You1: calls from your mom; 1 missed calls from your mom;
+
+
+
+
+
+
+
+
+                        ",2.1875,2257.0,1367.0,"I' your your;  house house; you at the phone; You1: calls from your mom; 1 missed calls from your mom;
+
+
+
+
+
+
+
+
+                        ",2.125,2257.0,1367.0,"I' your your;  house house; you at the phone; You1: calls from your mom; 1 missed calls from your mom;
+
+
+
+
+
+
+
+
+
+                       ",2.140625,2257.0,1367.0,"I' your your;  house house; they at the phone; You1: calls from your mom; 1 missed calls from your mom;
+
+
+
+
+
+
+
+
+
+        >>             ",2.140625,1875.0,1367.0,"I' your your;  house house; they at the phone; You1: calls from your mom; 1 missed calls from your mom;
+
+
+
+
+
+
+
+
+
+                       ",2.15625,1875.0,1367.0
+"I SURE IF I ARE JUSTvotingOTING THISES BECAUSE OR IFNAME;
+
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;",2.96875,2362.0,1419.0,"I SURE IF I ARE JUSTvotingOTING THISES BECAUSE OR IFNAME;>
+ OR;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;",2.875,2362.0,1419.0,I SURE IF I ARE JUSTvotingOTING THISES BECAUSE OR IFNAME ARE OR OR OR;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,2.890625,3529.0,1419.0,I SURE IF I ARE JUSTvotingOTING THISES BECAUSE OR IFNAME THAT>>>>>>;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;..,2.8125,2362.0,1419.0,I SURE IF I ARE JUSTVOTING THISES BECAUSE OR IFNAME ARE>>>.....; OR OR OR;...;;;;;;;; OR;;;;;;;;;;,2.859375,3432.0,1419.0,I SURE IF I ARE JUSTvotingOTING THISES BECAUSE OR JUSTNAME THATquotquotquot OR OR>>;;; OR OR OR OR OR OR OR OR OR OR;;;;;;;; OR OR OR OR OR;;;;;;;;,2.859375,9852.0,1419.0,I SURE IF I ARE JUSTvotingOTING THISES BECAUSE OR IFNAME ARE;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;..,2.796875,2362.0,1419.0,"I SURE IF I ARE JUSTvotingOTING THISES BECAUSE OR IFNAME ARE
+quotquot
+ OR OR OR OR OR; OR OR OR OR OR OR OR OR OR OR OR;;;;;;; OR OR OR OR OR;;;;;;;;;",2.8125,12103.0,1419.0,I SURE IF I ARE JUSTVOTING THISES BECAUSE OR IFNAME ARE ORquot@@;;;;;;;;; OR OR OR OR OR OR OR OR;;;;;;;;; OR; OR;;;;;;;;;;,2.8125,6218.0,1419.0,I SURE IF I ARE JUSTVOTING THISES BECAUSE OR JUSTNAME AREquotquotquot>> OR OR;;;.. OR; OR OR OR OR OR;;;;;;;;; OR OR;;;;;;;;..-,2.8125,5586.0,1419.0,I SURE IF I ARE JUSTvotingOTING THISES BECAUSE OR IFNAME ARE OR OR;;; OR OR OR;;;;; OR OR OR OR; OR OR;;;;;;; OR OR OR OR OR;;;;;;;;;-,2.78125,8358.0,1419.0,I SURE IF I ARE JUSTVOTING THISES OR OR IFNAME THAT OR;;;;;;; OR;; OR OR OR OR OR OR OR OR OR;;;;;;;; OR;;;;;;;;;;;;;,2.765625,7302.0,1419.0,I SURE IF I ARE JUSTVOTING THISES BECAUSE OR IFNAME ARE.;;;;;>;;;;;;;; OR OR OR OR OR OR OR OR;;;;;; OR OR OR OR OR OR OR;;;;;;;;,2.765625,9317.0,1419.0,"I SURE IF I ARE JUSTvotingOTING THISES BECAUSE OR IFNAME THAT.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-",2.78125,2362.0,1419.0,I SURE IF I ARE JUSTVOTING THISES BECAUSE OR IFNAME ARE.;;;;; OR OR;;;;;;;;;;;;;;; OR OR OR;;;;;;; OR OR;;;;;;;;;;;;;,2.78125,4502.0,1419.0
