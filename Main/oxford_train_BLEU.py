@@ -93,7 +93,7 @@ class TrainClipCocoDataset(Dataset):
             for i, original_idx in enumerate(original_indices):
                 reference = self.captions_tokens[original_idx].tolist()
                 candidate = generated_tokens_batch[i].tolist()
-                bleu_score = sentence_bleu([reference], candidate)
+                bleu_score = sentence_bleu([reference], candidate, weights=(1, 0, 0, 0))
 
                 if bleu_score <= bleu_threshold:
                     filtered_indices.append(original_idx)
@@ -101,10 +101,12 @@ class TrainClipCocoDataset(Dataset):
 
         # Update dataset based on filtered indices
         print(f"Before Filtered: {len(self.captions_tokens)}")
+        self.captions = [self.captions[i] for i in filtered_indices]
+        self.image_ids = [self.image_ids[i] for i in filtered_indices]
         self.captions_tokens = [self.captions_tokens[i] for i in filtered_indices]
         self.caption2embedding = [self.caption2embedding[i] for i in filtered_indices]
-        with open(f"{self.data_path[:-4]}_bleu1.pkl", 'wb') as f:
-            pickle.dump([self.captions_tokens, self.caption2embedding, self.max_seq_len], f)
+        # with open(f"{self.data_path[:-4]}_bleu_0.4.pkl", 'wb') as f:
+        #     pickle.dump([self.captions_tokens, self.caption2embedding, self.max_seq_len], f)
         print(f"Filtered train dataset to {len(self.captions_tokens)} samples with BLEU <= {bleu_threshold}")
         del tokens_batch, masks_batch, prefixes_batch, original_indices, prefix_embeds, text_embeds, embedding_cat, outputs, logits, generated_tokens_batch, reference, candidate, bleu_score
         gc.collect()
@@ -127,12 +129,12 @@ class TrainClipCocoDataset(Dataset):
         print("Data size is %0d" % len(all_data["clip_embedding"]))
         sys.stdout.flush()
         self.prefixes = all_data["clip_embedding"]
-
-        if os.path.isfile(f"{data_path[:-4]}_bleu1.pkl"):
+        if 2 == 1:
+        # if os.path.isfile(f"{data_path[:-4]}_bleu_all.pkl"):
             del all_data
             gc.collect()
             torch.cuda.empty_cache()
-            with open(f"{data_path[:-4]}_bleu1.pkl", 'rb') as f:
+            with open(f"{data_path[:-4]}_bleu_all.pkl", 'rb') as f:
                 self.captions_tokens, self.caption2embedding, self.max_seq_len = pickle.load(f)
             all_len = torch.tensor([len(self.captions_tokens[i]) for i in range(len(self))]).float()
             self.max_seq_len = min(int(all_len.mean() + all_len.std() * 10), int(all_len.max()))
@@ -191,7 +193,6 @@ class TestClipCocoDataset(Dataset):
             batch_size: Number of samples per batch.
             bleu_threshold: Minimum BLEU score to keep a sample.
         """
-        dataloader = DataLoader(self, batch_size=batch_size, shuffle=True, drop_last=True)
         dataloader = DataLoader(self, batch_size=batch_size, shuffle=False, drop_last=True)
 
         # Temporary storage for filtered indices
@@ -214,18 +215,20 @@ class TestClipCocoDataset(Dataset):
             for i, original_idx in enumerate(original_indices):
                 reference = self.captions_tokens[original_idx].tolist()
                 candidate = generated_tokens_batch[i].tolist()
-                bleu_score = sentence_bleu([reference], candidate)
+                bleu_score = sentence_bleu([reference], candidate, weights=(1, 0, 0, 0))
 
                 if bleu_score <= bleu_threshold:
                     filtered_indices.append(original_idx)
             progress.update()
 
         # Update dataset based on filtered indices
+        self.captions = [self.captions[i] for i in filtered_indices]
+        self.image_ids = [self.image_ids[i] for i in filtered_indices]
         self.captions_tokens = [self.captions_tokens[i] for i in filtered_indices]
         self.caption2embedding = [self.caption2embedding[i] for i in filtered_indices]
         print(f"Before Filtered: {len(self.captions_tokens)}")
-        with open(f"{self.data_path[:-4]}_bleu1.pkl", 'wb') as f:
-            pickle.dump([self.captions_tokens, self.caption2embedding, self.max_seq_len], f)
+        # with open(f"{self.data_path[:-4]}_bleu_all.pkl", 'wb') as f:
+        #     pickle.dump([self.captions_tokens, self.caption2embedding, self.max_seq_len], f)
         print(f"Filtered test dataset to {len(self.captions_tokens)} samples with BLEU <= {bleu_threshold}")
         del tokens_batch, masks_batch, prefixes_batch, original_indices, prefix_embeds, text_embeds, embedding_cat, outputs, logits, generated_tokens_batch, reference, candidate, bleu_score
         gc.collect()
@@ -248,12 +251,12 @@ class TestClipCocoDataset(Dataset):
         print("Data size is %0d" % len(all_data["clip_embedding"]))
         sys.stdout.flush()
         self.prefixes = all_data["clip_embedding"]
-
-        if os.path.isfile(f"{data_path[:-4]}_bleu1.pkl"):
+        if 2==1:
+        # if os.path.isfile(f"{data_path[:-4]}_bleu_all.pkl"):
             del all_data
             gc.collect()
             torch.cuda.empty_cache()
-            with open(f"{data_path[:-4]}_bleu1.pkl", 'rb') as f:
+            with open(f"{data_path[:-4]}_bleu_all.pkl", 'rb') as f:
                 self.captions_tokens, self.caption2embedding, self.max_seq_len = pickle.load(f)
             all_len = torch.tensor([len(self.captions_tokens[i]) for i in range(len(self))]).float()
             self.max_seq_len = min(int(all_len.mean() + all_len.std() * 10), int(all_len.max()))
@@ -273,7 +276,7 @@ class TestClipCocoDataset(Dataset):
             self.max_seq_len = max_seq_len
             all_len = torch.tensor([len(self.captions_tokens[i]) for i in range(len(self))]).float()
             self.max_seq_len = min(int(all_len.mean() + all_len.std() * 10), int(all_len.max()))
-            self.filter_data_by_bleu(model, batch_size, bleu_threshold)
+            # self.filter_data_by_bleu(model, batch_size, bleu_threshold)
 
 class MLP(nn.Module):
 
@@ -565,7 +568,7 @@ def train(trainDataset: TrainClipCocoDataset, testDataset: TestClipCocoDataset, 
             generated_tokens = torch.argmax(logits, dim=-1)
             bleu_score = sentence_bleu([tokens.flatten().tolist()], generated_tokens.flatten().tolist(), weights=(1, 0, 0, 0))
             trainBleu += bleu_score
-            loss = loss + 3 * bleu_score
+            loss = loss - 10 * bleu_score
             loss.backward()
             optimizer.step()
             scheduler.step()
@@ -637,7 +640,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--trainData', default='../Data/Oxford_HIC/parse/oxford_only100_300k_mess_ViT-B_32_train.pkl')
     parser.add_argument('--testData', default='../Data/Oxford_HIC/parse/oxford_only100_300k_mess_ViT-B_32_test.pkl')
-    parser.add_argument('--out_dir', default='20250111_totalClip_oxford_only100_300k_mess_transformer_p40_falcon_bleu1_0.1_x3inLoss')
+    parser.add_argument('--out_dir', default='20250113_totalClip_oxford_only100_300k_mess_transformer_p40_falcon_bleu_all_x10inLoss')
     parser.add_argument('--prefix', default='checkpoint', help='prefix for saved filenames')
     parser.add_argument('--epochs', type=int, default=200)
     parser.add_argument('--save_every', type=int, default=1)
@@ -653,7 +656,7 @@ def main():
     prefix_length = args.prefix_length
     if not os.path.exists('./Model/' + args.out_dir):
         os.makedirs('./Model/' + args.out_dir)
-        os.makedirs('D:/MemeGAN/Model/' + args.out_dir)
+        # os.makedirs('D:/MemeGAN/Model/' + args.out_dir)
     args.out_dir = './Model/' + args.out_dir
 
     prefix_dim = 640 if args.is_rn else 512
@@ -668,11 +671,22 @@ def main():
         sys.stdout.flush()
     device = torch.device('cuda:0')
     model = model.to(device, dtype=torch.bfloat16)
+    # 20250112_totalClip_oxford_only100_300k_mess_transformer_p40_falcon_bleu1_0.4_x10inLoss ==> checkpoint_23
+    # 20250113_totalClip_oxford_only100_300k_mess_transformer_p40_falcon_bleu2_0.4_x10inLoss ==> checkpoint_4
+    # 20250113_totalClip_oxford_only100_300k_mess_transformer_p40_falcon_bleu3_0.4_x10inLoss ==> checkpoint_1
+    # 20250113_totalClip_oxford_only100_300k_mess_transformer_p40_falcon_bleu_all_x10inLoss ==> checkpoint_1
+    # 20250112_totalClip_oxford_only100_300k_mess_transformer_p40_falcon_bleu1_0.4 ==> checkpoint_33
+    # 20250113_totalClip_oxford_only100_300k_mess_transformer_p40_falcon_bleu2_0.4 ==> checkpoint_4
+    # 20250113_totalClip_oxford_only100_300k_mess_transformer_p40_falcon_bleu3_0.4 ==> checkpoint_1
+    # 20250113_totalClip_oxford_only100_300k_mess_transformer_p40_falcon_bleu_all ==> checkpoint_1
+    # save_file = '20250113_totalClip_oxford_only100_300k_mess_transformer_p40_falcon_bleu3_0.4_x10inLoss'
+    # i = 1
+    # model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i:03d}.pt'))
     model.eval()
-    trainDataset = TrainClipCocoDataset(args.trainData, prefix_length, normalize_prefix=args.normalize_prefix, model=model, batch_size=30, bleu_threshold=0.1)
-    testDataset = TestClipCocoDataset(args.testData, prefix_length, normalize_prefix=args.normalize_prefix, model=model, batch_size=30, bleu_threshold=0.1)
+
+    trainDataset = TrainClipCocoDataset(args.trainData, prefix_length, normalize_prefix=args.normalize_prefix, model=model, batch_size=30, bleu_threshold=0.4)
+    testDataset = TestClipCocoDataset(args.testData, prefix_length, normalize_prefix=args.normalize_prefix, model=model, batch_size=30, bleu_threshold=0.4)
     train(trainDataset, testDataset, model, args, output_dir=args.out_dir, output_prefix=args.prefix)
-
-
+    
 if __name__ == '__main__':
     main()
