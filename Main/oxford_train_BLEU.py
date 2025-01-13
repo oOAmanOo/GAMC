@@ -61,7 +61,7 @@ class TrainClipCocoDataset(Dataset):
             prefix = prefix / prefix.norm(2, -1)
         return tokens, mask, prefix, item
 
-    def filter_data_by_bleu(self, model, batch_size=20, bleu_threshold=0.1):
+    def filter_data_by_bleu(self, model, batch_size=20, bleu_threshold=0.1, file_path=None):
         """
         Filter dataset based on BLEU scores using batch processing.
 
@@ -100,14 +100,11 @@ class TrainClipCocoDataset(Dataset):
             progress.update()
 
         # Update dataset based on filtered indices
-        print(f"Before Filtered: {len(self.captions_tokens)}")
+        print(f"Before Filtered: {len(self.captions_tokens)}, After Filtered: {len(filtered_indices)}, BLEU <= {bleu_threshold}")
         self.captions = [self.captions[i] for i in filtered_indices]
         self.image_ids = [self.image_ids[i] for i in filtered_indices]
         self.captions_tokens = [self.captions_tokens[i] for i in filtered_indices]
         self.caption2embedding = [self.caption2embedding[i] for i in filtered_indices]
-        # with open(f"{self.data_path[:-4]}_bleu_0.4.pkl", 'wb') as f:
-        #     pickle.dump([self.captions_tokens, self.caption2embedding, self.max_seq_len], f)
-        print(f"Filtered train dataset to {len(self.captions_tokens)} samples with BLEU <= {bleu_threshold}")
         del tokens_batch, masks_batch, prefixes_batch, original_indices, prefix_embeds, text_embeds, embedding_cat, outputs, logits, generated_tokens_batch, reference, candidate, bleu_score
         gc.collect()
         torch.cuda.empty_cache()
@@ -126,11 +123,12 @@ class TrainClipCocoDataset(Dataset):
         self.normalize_prefix = normalize_prefix
         with open(data_path, 'rb') as f:
             all_data = pickle.load(f)
-        print("Data size is %0d" % len(all_data["clip_embedding"]))
         sys.stdout.flush()
         self.prefixes = all_data["clip_embedding"]
-        if 2 == 1:
-        # if os.path.isfile(f"{data_path[:-4]}_bleu_all.pkl"):
+        captions_raw = all_data["captions"]
+        self.image_ids = [caption["image_id"] for caption in captions_raw]
+        self.captions = [caption['caption'] for caption in captions_raw]
+        if os.path.isfile(f"{data_path[:-4]}_bleu_all.pkl"):
             del all_data
             gc.collect()
             torch.cuda.empty_cache()
@@ -138,11 +136,7 @@ class TrainClipCocoDataset(Dataset):
                 self.captions_tokens, self.caption2embedding, self.max_seq_len = pickle.load(f)
             all_len = torch.tensor([len(self.captions_tokens[i]) for i in range(len(self))]).float()
             self.max_seq_len = min(int(all_len.mean() + all_len.std() * 10), int(all_len.max()))
-            print(f"Filtered train dataset to {len(self.captions_tokens)} samples with BLEU <= {bleu_threshold} loaded")
         else:
-            captions_raw = all_data["captions"]
-            self.image_ids = [caption["image_id"] for caption in captions_raw]
-            self.captions = [caption['caption'] for caption in captions_raw]
             self.captions_tokens = []
             self.caption2embedding = []
             max_seq_len = 0
@@ -154,7 +148,10 @@ class TrainClipCocoDataset(Dataset):
             self.max_seq_len = max_seq_len
             all_len = torch.tensor([len(self.captions_tokens[i]) for i in range(len(self))]).float()
             self.max_seq_len = min(int(all_len.mean() + all_len.std() * 10), int(all_len.max()))
-            self.filter_data_by_bleu(model, batch_size, bleu_threshold)
+            with open(f"{self.data_path[:-4]}_bleu_all.pkl", 'wb') as f:
+                pickle.dump([self.captions_tokens, self.caption2embedding, self.max_seq_len], f)
+        print(f"Train Data size: {len(self.captions_tokens)}")
+        self.filter_data_by_bleu(model, batch_size, bleu_threshold)
 
 class TestClipCocoDataset(Dataset):
 
@@ -222,14 +219,12 @@ class TestClipCocoDataset(Dataset):
             progress.update()
 
         # Update dataset based on filtered indices
+        print(f"Before Filtered: {len(self.captions_tokens)}, After Filtered: {len(filtered_indices)}, BLEU <= {bleu_threshold}")
         self.captions = [self.captions[i] for i in filtered_indices]
         self.image_ids = [self.image_ids[i] for i in filtered_indices]
         self.captions_tokens = [self.captions_tokens[i] for i in filtered_indices]
         self.caption2embedding = [self.caption2embedding[i] for i in filtered_indices]
-        print(f"Before Filtered: {len(self.captions_tokens)}")
-        # with open(f"{self.data_path[:-4]}_bleu_all.pkl", 'wb') as f:
-        #     pickle.dump([self.captions_tokens, self.caption2embedding, self.max_seq_len], f)
-        print(f"Filtered test dataset to {len(self.captions_tokens)} samples with BLEU <= {bleu_threshold}")
+
         del tokens_batch, masks_batch, prefixes_batch, original_indices, prefix_embeds, text_embeds, embedding_cat, outputs, logits, generated_tokens_batch, reference, candidate, bleu_score
         gc.collect()
         torch.cuda.empty_cache()
@@ -248,11 +243,12 @@ class TestClipCocoDataset(Dataset):
         self.normalize_prefix = normalize_prefix
         with open(data_path, 'rb') as f:
             all_data = pickle.load(f)
-        print("Data size is %0d" % len(all_data["clip_embedding"]))
         sys.stdout.flush()
         self.prefixes = all_data["clip_embedding"]
-        if 2==1:
-        # if os.path.isfile(f"{data_path[:-4]}_bleu_all.pkl"):
+        captions_raw = all_data["captions"]
+        self.image_ids = [caption["image_id"] for caption in captions_raw]
+        self.captions = [caption['caption'] for caption in captions_raw]
+        if os.path.isfile(f"{data_path[:-4]}_bleu_all.pkl"):
             del all_data
             gc.collect()
             torch.cuda.empty_cache()
@@ -260,11 +256,7 @@ class TestClipCocoDataset(Dataset):
                 self.captions_tokens, self.caption2embedding, self.max_seq_len = pickle.load(f)
             all_len = torch.tensor([len(self.captions_tokens[i]) for i in range(len(self))]).float()
             self.max_seq_len = min(int(all_len.mean() + all_len.std() * 10), int(all_len.max()))
-            print(f"Filtered test dataset to {len(self.captions_tokens)} samples with BLEU <= {bleu_threshold} loaded")
         else:
-            captions_raw = all_data["captions"]
-            self.image_ids = [caption["image_id"] for caption in captions_raw]
-            self.captions = [caption['caption'] for caption in captions_raw]
             self.captions_tokens = []
             self.caption2embedding = []
             max_seq_len = 0
@@ -276,7 +268,10 @@ class TestClipCocoDataset(Dataset):
             self.max_seq_len = max_seq_len
             all_len = torch.tensor([len(self.captions_tokens[i]) for i in range(len(self))]).float()
             self.max_seq_len = min(int(all_len.mean() + all_len.std() * 10), int(all_len.max()))
-            # self.filter_data_by_bleu(model, batch_size, bleu_threshold)
+            with open(f"{self.data_path[:-4]}_bleu_all.pkl", 'wb') as f:
+                pickle.dump([self.captions_tokens, self.caption2embedding, self.max_seq_len], f)
+        print(f"Test Data size: {len(self.captions_tokens)}")
+        self.filter_data_by_bleu(model, batch_size, bleu_threshold)
 
 class MLP(nn.Module):
 
@@ -525,23 +520,10 @@ def load_model(config_path: str, epoch_or_latest: Union[str, int] = '_latest'):
     return model, parser
 
 
-def train(trainDataset: TrainClipCocoDataset, testDataset: TestClipCocoDataset, model: ClipCaptionModel, args,
-          lr: float = 2e-5, warmup_steps: int = 5000, output_dir: str = ".", output_prefix: str = ""):
+def train(trainData, testData, model: ClipCaptionModel, args,
+          lr: float = 2e-5, warmup_steps: int = 5000, output_dir: str = ".", output_prefix: str = "",
+          bleu_batch_size=30, bleu_threshold=0.05):
 
-    device = torch.device('cuda:0')
-    batch_size = args.bs
-    epochs = args.epochs
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-    model = model.to(device, dtype=torch.bfloat16)
-    model.train()
-    optimizer = AdamW(model.parameters(), lr=lr)
-    train_dataloader = DataLoader(trainDataset, batch_size=batch_size, shuffle=True, drop_last=True)
-    test_dataloader = DataLoader(testDataset, batch_size=batch_size, shuffle=True, drop_last=True)
-    scheduler = get_linear_schedule_with_warmup(
-        optimizer, num_warmup_steps=warmup_steps, num_training_steps=epochs * len(train_dataloader)
-    )
-    # save_config(args)
     train_losses = []
     test_losses = []
     best_train_loss = 9999999999
@@ -549,98 +531,148 @@ def train(trainDataset: TrainClipCocoDataset, testDataset: TestClipCocoDataset, 
     train_bleus = []
     test_bleus = []
     save = []
-    for epoch in range(epochs):
-        print(f">>> Training epoch {epoch+1}")
-        sys.stdout.flush()
-        trainLoss = 0
-        testLoss = 0
-        trainBleu = 0
-        testBleu = 0
-        model.train()
-        progress = tqdm(total=len(train_dataloader), desc=output_prefix)
-        for idx, (tokens, mask, prefix, item) in enumerate(train_dataloader):
-            model.zero_grad()
-            tokens, mask, prefix = tokens.to(device), mask.to(device), prefix.to(device, dtype=torch.bfloat16)
-            outputs = model(tokens, prefix, mask)
-            logits = outputs.logits[:, trainDataset.prefix_length - 1: -1]
-            loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens.flatten(), ignore_index=0)
-            trainLoss += loss.item()
-            generated_tokens = torch.argmax(logits, dim=-1)
-            bleu_score = sentence_bleu([tokens.flatten().tolist()], generated_tokens.flatten().tolist(), weights=(1, 0, 0, 0))
-            trainBleu += bleu_score
-            loss = loss - 10 * bleu_score
-            loss.backward()
-            optimizer.step()
-            scheduler.step()
-            optimizer.zero_grad()
-            progress.set_postfix({"loss": loss.item(), "bleu": bleu_score})
-            progress.update()
-            # if idx % 101 == 100:
-            #     break
-        trainLoss /= len(train_dataloader)
-        trainBleu /= len(train_dataloader)
-        train_losses.append(trainLoss)
-        train_bleus.append(trainBleu)
-        progress.set_postfix({"loss": trainLoss, "bleu": trainBleu})
-        progress.close()
+    bleu_threshold_list = []
+    trainData_size_list = []
+    testData_size_list = []
 
-        model.eval()
-        with torch.no_grad():
-            progress = tqdm(total=len(test_dataloader), desc=output_prefix)
-            for idx, (tokens, mask, prefix, item) in enumerate(test_dataloader):
+    device = torch.device('cuda:0')
+    batch_size = args.bs
+    epochs = args.epochs
+    normalize_prefix = args.normalize_prefix
+    prefix_length = args.prefix_length
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    model = model.to(device, dtype=torch.bfloat16)
+    model.eval()
+    trainDataset = TrainClipCocoDataset(trainData, prefix_length, normalize_prefix, model = model, batch_size = bleu_batch_size, bleu_threshold = bleu_threshold)
+    testDataset = TestClipCocoDataset(testData, prefix_length, normalize_prefix, model = model, batch_size = bleu_batch_size, bleu_threshold = bleu_threshold)
+    train_dataloader = DataLoader(trainDataset, batch_size=batch_size, shuffle=True, drop_last=True)
+    test_dataloader = DataLoader(testDataset, batch_size=batch_size, shuffle=True, drop_last=True)
+
+    while len(trainDataset) > batch_size and len(testDataset) > batch_size:
+        model.train()
+        optimizer = AdamW(model.parameters(), lr=lr)
+        scheduler = get_linear_schedule_with_warmup(
+            optimizer, num_warmup_steps=warmup_steps, num_training_steps=epochs * len(train_dataloader)
+        )
+        # save_config(args)
+
+        for epoch in range(epochs):
+            print(f">>> Training epoch {epoch+1}")
+            sys.stdout.flush()
+            trainLoss = 0
+            testLoss = 0
+            trainBleu = 0
+            testBleu = 0
+            model.train()
+            progress = tqdm(total=len(train_dataloader), desc=output_prefix)
+            for idx, (tokens, mask, prefix, original_indices) in enumerate(train_dataloader):
                 model.zero_grad()
                 tokens, mask, prefix = tokens.to(device), mask.to(device), prefix.to(device, dtype=torch.bfloat16)
                 outputs = model(tokens, prefix, mask)
-                logits = outputs.logits[:, testDataset.prefix_length - 1: -1]
+                logits = outputs.logits[:, trainDataset.prefix_length - 1: -1]
                 loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens.flatten(), ignore_index=0)
-                testLoss += loss.item()
+                trainLoss += loss.item()
                 generated_tokens = torch.argmax(logits, dim=-1)
                 bleu_score = sentence_bleu([tokens.flatten().tolist()], generated_tokens.flatten().tolist(), weights=(1, 0, 0, 0))
-                testBleu += bleu_score
+                trainBleu += bleu_score
+                # loss = loss - 10 * bleu_score
+                loss.backward()
+                optimizer.step()
+                scheduler.step()
+                optimizer.zero_grad()
                 progress.set_postfix({"loss": loss.item(), "bleu": bleu_score})
                 progress.update()
-        testLoss /= len(test_dataloader)
-        testBleu /= len(test_dataloader)
-        test_losses.append(testLoss)
-        test_bleus.append(testBleu)
-        progress.set_postfix({"loss": testLoss, "bleu": testBleu})
-        progress.close()
+                # if idx % 101 == 100:
+                #     break
+            trainLoss /= len(train_dataloader)
+            trainBleu /= len(train_dataloader)
+            train_losses.append(trainLoss)
+            train_bleus.append(trainBleu)
+            progress.set_postfix({"loss": trainLoss, "bleu": trainBleu})
+            progress.close()
 
-        if trainLoss < best_train_loss and testLoss < best_test_loss:
-            best_train_loss = trainLoss
-            best_test_loss = testLoss
-            torch.save(
-                model.state_dict(),
-                os.path.join(output_dir, f"{output_prefix}-{epoch+1:03d}.pt"),
-            )
-            save.append('V')
-        else:
-            save.append(' ')
+            model.eval()
+            with torch.no_grad():
+                progress = tqdm(total=len(test_dataloader), desc=output_prefix)
+                for idx, (tokens, mask, prefix, item) in enumerate(test_dataloader):
+                    model.zero_grad()
+                    tokens, mask, prefix = tokens.to(device), mask.to(device), prefix.to(device, dtype=torch.bfloat16)
+                    outputs = model(tokens, prefix, mask)
+                    logits = outputs.logits[:, testDataset.prefix_length - 1: -1]
+                    loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens.flatten(), ignore_index=0)
+                    testLoss += loss.item()
+                    generated_tokens = torch.argmax(logits, dim=-1)
+                    bleu_score = sentence_bleu([tokens.flatten().tolist()], generated_tokens.flatten().tolist(), weights=(1, 0, 0, 0))
+                    testBleu += bleu_score
+                    progress.set_postfix({"loss": loss.item(), "bleu": bleu_score})
+                    progress.update()
+            testLoss /= len(test_dataloader)
+            testBleu /= len(test_dataloader)
+            test_losses.append(testLoss)
+            test_bleus.append(testBleu)
+            progress.set_postfix({"loss": testLoss, "bleu": testBleu})
+            progress.close()
 
-        loss_data = pd.DataFrame()
-        loss_data['train_loss'] = train_losses
-        loss_data['train_bleu'] = train_bleus
-        loss_data['test_loss'] = test_losses
-        loss_data['test_bleu'] = test_bleus
-        loss_data['save'] = save
-        loss_data.to_csv(f"{output_dir}/{output_prefix}-loss.csv", index=False)
+            if trainLoss < best_train_loss and testLoss < best_test_loss:
+                best_train_loss = trainLoss
+                best_test_loss = testLoss
+                torch.save(
+                    model.state_dict(),
+                    os.path.join(output_dir, f"{output_prefix}-{epoch+1:03d}.pt"),
+                )
+                save.append('V')
+            else:
+                save.append(' ')
+            bleu_threshold_list.append(bleu_threshold)
+            trainData_size_list.append(len(trainDataset))
+            testData_size_list.append(len(testDataset))
 
-        plt.plot(train_losses, label='train')
-        plt.plot(test_losses, label='test')
-        plt.plot(train_bleus, label='train_bleu')
-        plt.plot(test_bleus, label='test_bleu')
-        plt.legend()
-        plt.savefig(f"{output_dir}/{output_prefix}-loss.png")
-        plt.show()
+            loss_data = pd.DataFrame()
+            loss_data['bleu_threshold'] = bleu_threshold_list
+            loss_data['trainData_size'] = trainData_size_list
+            loss_data['testData_size'] = testData_size_list
+            loss_data['train_loss'] = train_losses
+            loss_data['train_bleu'] = train_bleus
+            loss_data['test_loss'] = test_losses
+            loss_data['test_bleu'] = test_bleus
+            loss_data['save'] = save
+            loss_data.to_csv(f"{output_dir}/{output_prefix}-loss.csv", index=False)
 
+            plt.plot(train_bleus, label='train_bleu')
+            plt.plot(test_bleus, label='test_bleu')
+            plt.legend()
+            plt.savefig(f"{output_dir}/{output_prefix}-bleu.png")
+            plt.show()
+
+            plt.plot(train_losses, label='train')
+            plt.plot(test_losses, label='test')
+            plt.legend()
+            plt.savefig(f"{output_dir}/{output_prefix}-loss.png")
+            plt.show()
+
+            trainDataset.filter_data_by_bleu(model, bleu_batch_size, bleu_threshold)
+            testDataset.filter_data_by_bleu(model, bleu_batch_size, bleu_threshold)
+            train_dataloader = DataLoader(trainDataset, batch_size=batch_size, shuffle=True, drop_last=True)
+            test_dataloader = DataLoader(testDataset, batch_size=batch_size, shuffle=True, drop_last=True)
+            if len(trainDataset) < batch_size or len(testDataset) < batch_size:
+                bleu_threshold += 0.05
+                model.eval()
+                trainDataset = TrainClipCocoDataset(trainData, prefix_length, normalize_prefix, model=model, batch_size=bleu_batch_size, bleu_threshold=bleu_threshold)
+                testDataset = TestClipCocoDataset(testData, prefix_length, normalize_prefix, model=model, batch_size=bleu_batch_size, bleu_threshold=bleu_threshold)
+                trainDataset.filter_data_by_bleu(model, bleu_batch_size, bleu_threshold)
+                testDataset.filter_data_by_bleu(model, bleu_batch_size, bleu_threshold)
+                train_dataloader = DataLoader(trainDataset, batch_size=batch_size, shuffle=True, drop_last=True)
+                test_dataloader = DataLoader(testDataset, batch_size=batch_size, shuffle=True, drop_last=True)
+                break
     return model
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--trainData', default='../Data/Oxford_HIC/parse/oxford_only100_300k_mess_ViT-B_32_train.pkl')
-    parser.add_argument('--testData', default='../Data/Oxford_HIC/parse/oxford_only100_300k_mess_ViT-B_32_test.pkl')
-    parser.add_argument('--out_dir', default='20250113_totalClip_oxford_only100_300k_mess_transformer_p40_falcon_bleu_all_x10inLoss')
+    parser.add_argument('--trainData', default='../Data/Oxford_HIC/parse/oxford_only100_300k_ViT-B_32_train.pkl')
+    parser.add_argument('--testData', default='../Data/Oxford_HIC/parse/oxford_only100_300k_ViT-B_32_test.pkl')
+    parser.add_argument('--out_dir', default='20250114_totalClip_oxford_only100_300k_transformer_p40_falcon_bleu1_recursive')
     parser.add_argument('--prefix', default='checkpoint', help='prefix for saved filenames')
     parser.add_argument('--epochs', type=int, default=200)
     parser.add_argument('--save_every', type=int, default=1)
@@ -671,22 +703,13 @@ def main():
         sys.stdout.flush()
     device = torch.device('cuda:0')
     model = model.to(device, dtype=torch.bfloat16)
-    # 20250112_totalClip_oxford_only100_300k_mess_transformer_p40_falcon_bleu1_0.4_x10inLoss ==> checkpoint_23
-    # 20250113_totalClip_oxford_only100_300k_mess_transformer_p40_falcon_bleu2_0.4_x10inLoss ==> checkpoint_4
-    # 20250113_totalClip_oxford_only100_300k_mess_transformer_p40_falcon_bleu3_0.4_x10inLoss ==> checkpoint_1
-    # 20250113_totalClip_oxford_only100_300k_mess_transformer_p40_falcon_bleu_all_x10inLoss ==> checkpoint_1
-    # 20250112_totalClip_oxford_only100_300k_mess_transformer_p40_falcon_bleu1_0.4 ==> checkpoint_33
-    # 20250113_totalClip_oxford_only100_300k_mess_transformer_p40_falcon_bleu2_0.4 ==> checkpoint_4
-    # 20250113_totalClip_oxford_only100_300k_mess_transformer_p40_falcon_bleu3_0.4 ==> checkpoint_1
-    # 20250113_totalClip_oxford_only100_300k_mess_transformer_p40_falcon_bleu_all ==> checkpoint_1
     # save_file = '20250113_totalClip_oxford_only100_300k_mess_transformer_p40_falcon_bleu3_0.4_x10inLoss'
     # i = 1
     # model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i:03d}.pt'))
     model.eval()
+    train(args.trainData, args.testData, model, args, output_dir=args.out_dir, output_prefix=args.prefix
+          , bleu_batch_size=30, bleu_threshold=0.05)
 
-    trainDataset = TrainClipCocoDataset(args.trainData, prefix_length, normalize_prefix=args.normalize_prefix, model=model, batch_size=30, bleu_threshold=0.4)
-    testDataset = TestClipCocoDataset(args.testData, prefix_length, normalize_prefix=args.normalize_prefix, model=model, batch_size=30, bleu_threshold=0.4)
-    train(trainDataset, testDataset, model, args, output_dir=args.out_dir, output_prefix=args.prefix)
     
 if __name__ == '__main__':
     main()
