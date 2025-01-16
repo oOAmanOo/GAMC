@@ -34,7 +34,6 @@ class MappingType(Enum):
     MLP = 'mlp'
     Transformer = 'transformer'
 
-
 class OxfordDataset(torch.utils.data.Dataset):
     def __len__(self) -> int:
         return len(self.captions_tokens)
@@ -155,7 +154,6 @@ class OxfordDataset(torch.utils.data.Dataset):
                 pickle.dump([self.captions_tokens, self.caption2embedding, self.max_seq_len], f)
         print(f"Train Data size: {len(self.captions_tokens)}")
         # self.filter_data_by_bleu(model, batch_size, bleu_threshold)
-
 
 class ClipCocoDataset(Dataset):
 
@@ -279,7 +277,6 @@ class ClipCocoDataset(Dataset):
         print(f"Train Data size: {len(self.captions_tokens)}")
         # self.filter_data_by_bleu(model, batch_size, bleu_threshold)
 
-
 class MLP(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -293,7 +290,6 @@ class MLP(nn.Module):
             if i < len(sizes) - 2:
                 layers.append(act())
         self.model = nn.Sequential(*layers)
-
 
 class MlpTransformer(nn.Module):
     def __init__(self, in_dim, h_dim, out_d: Optional[int] = None, act=nnf.relu, dropout=0.7):
@@ -311,7 +307,6 @@ class MlpTransformer(nn.Module):
         x = self.fc2(x)
         x = self.dropout(x)
         return x
-
 
 class MultiHeadAttention(nn.Module):
 
@@ -344,7 +339,6 @@ class MultiHeadAttention(nn.Module):
         out = self.project(out)
         return out, attention
 
-
 class TransformerLayer(nn.Module):
 
     def forward_with_attention(self, x, y=None, mask=None):
@@ -365,7 +359,6 @@ class TransformerLayer(nn.Module):
         self.attn = MultiHeadAttention(dim_self, dim_ref, num_heads, bias=bias, dropout=dropout)
         self.norm2 = norm_layer(dim_self)
         self.mlp = MlpTransformer(dim_self, int(dim_self * mlp_ratio), act=act, dropout=dropout)
-
 
 class Transformer(nn.Module):
 
@@ -404,7 +397,6 @@ class Transformer(nn.Module):
                 layers.append(TransformerLayer(dim_self, dim_ref, num_heads, mlp_ratio, act=act, norm_layer=norm_layer))
         self.layers = nn.ModuleList(layers)
 
-
 class TransformerMapper(nn.Module):
 
     def forward(self, x):
@@ -420,7 +412,6 @@ class TransformerMapper(nn.Module):
         self.transformer = Transformer(dim_embedding, 8, num_layers)
         self.linear = nn.Linear(dim_clip, clip_length * dim_embedding)
         self.prefix_const = nn.Parameter(torch.randn(prefix_length, dim_embedding), requires_grad=True)
-
 
 class ClipCaptionModel(nn.Module):
 
@@ -493,7 +484,6 @@ class ClipCaptionModel(nn.Module):
             self.clip_project = TransformerMapper(prefix_size, self.embedding_size, prefix_length, clip_length,
                                                   num_layers)
 
-
 class ClipCaptionPrefix(ClipCaptionModel):
 
     def parameters(self, recurse: bool = True):
@@ -504,7 +494,6 @@ class ClipCaptionPrefix(ClipCaptionModel):
         # self.gpt.eval()
         return self
 
-
 def save_config(args: argparse.Namespace):
     config = {}
     for key, item in args._get_kwargs():
@@ -512,7 +501,6 @@ def save_config(args: argparse.Namespace):
     out_path = os.path.join(args.out_dir, f"{args.prefix}.json")
     with open(out_path, 'w') as outfile:
         json.dump(config, outfile)
-
 
 def load_model(config_path: str, epoch_or_latest: Union[str, int] = '_latest'):
     with open(config_path) as f:
@@ -533,7 +521,6 @@ def load_model(config_path: str, epoch_or_latest: Union[str, int] = '_latest'):
     else:
         print(f"{model_path} is not exist")
     return model, parser
-
 
 def train(trainData, testData, model: ClipCaptionModel, args,
           lr: float = 2e-5, warmup_steps: int = 5000, output_dir: str = ".", output_prefix: str = "",
@@ -706,55 +693,6 @@ def train(trainData, testData, model: ClipCaptionModel, args,
             break
     return model
 
-
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--trainData', default='../Data/Oxford_HIC/parse/oxford_only10_ViT-B_32_train.pkl')
-    parser.add_argument('--testData', default='../Data/Oxford_HIC/parse/oxford_only10_ViT-B_32_test.pkl')
-    parser.add_argument('--out_dir', default='20250116_totalClip_oxford_only10_transformer_p64_falcon')
-    parser.add_argument('--prefix', default='checkpoint', help='prefix for saved filenames')
-    parser.add_argument('--epochs', type=int, default=50)
-    parser.add_argument('--save_every', type=int, default=1)
-    parser.add_argument('--prefix_length', type=int, default=64)
-    parser.add_argument('--prefix_length_clip', type=int, default=64)
-    parser.add_argument('--bs', type=int, default=20)
-    parser.add_argument('--only_prefix', dest='only_prefix', action='store_true')
-    parser.add_argument('--mapping_type', type=str, default='transformer', help='mlp/transformer')
-    parser.add_argument('--num_layers', type=int, default=8)
-    parser.add_argument('--is_rn', dest='is_rn', action='store_true')
-    parser.add_argument('--normalize_prefix', dest='normalize_prefix', action='store_true')
-    args = parser.parse_args()
-    prefix_length = args.prefix_length
-    if not os.path.exists('./Model/' + args.out_dir):
-        os.makedirs('./Model/' + args.out_dir)
-        # os.makedirs('D:/MemeGAN/Model/' + args.out_dir)
-    args.out_dir = './Model/' + args.out_dir
-
-    prefix_dim = 640 if args.is_rn else 512
-    args.mapping_type = {'mlp': MappingType.MLP, 'transformer': MappingType.Transformer}[args.mapping_type]
-    print(args.mapping_type)
-    if args.only_prefix:
-        model = ClipCaptionPrefix(prefix_length, clip_length=prefix_length, prefix_size=prefix_dim,
-                                  num_layers=args.num_layers, mapping_type=args.mapping_type)
-        print("Train only prefix")
-    else:
-        model = ClipCaptionModel(prefix_length, clip_length=prefix_length, prefix_size=prefix_dim,
-                                 num_layers=args.num_layers, mapping_type=args.mapping_type)
-        print("Train both prefix and GPT")
-        sys.stdout.flush()
-    device = torch.device('cuda:0')
-    model = model.to(device, dtype=torch.bfloat16)
-    # save_file = '20250113_totalClip_oxford_only100_300k_mess_transformer_p40_falcon_bleu3_0.4_x10inLoss'
-    # i = 1
-    # model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i:03d}.pt'))
-    model.eval()
-    train(args.trainData, args.testData, model, args, output_dir=args.out_dir, output_prefix=args.prefix,
-          bleu_batch_size=64, bleu_threshold=0.05)
-
-
-if __name__ == '__main__':
-    main()
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--trainData', default='../Data/Oxford_HIC/parse/oxford_only10_ViT-B_32_train.pkl')
@@ -799,7 +737,6 @@ def main():
     model.eval()
     train(args.trainData, args.testData, model, args, output_dir=args.out_dir, output_prefix=args.prefix
           , bleu_batch_size=20, bleu_threshold=0.1)
-
 
 if __name__ == '__main__':
     main()
