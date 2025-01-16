@@ -1,15 +1,9 @@
 # Prediction interface for Cog ⚙️
 # Reference: https://github.com/replicate/cog/blob/main/docs/python.md
 from torch.utils.data import Dataset, DataLoader
-import clip
-import os
-import pandas as pd
-import pickle
 from torch import nn
-import numpy as np
 import torch
 import torch.nn.functional as nnf
-import sys
 from typing import Tuple, List, Union, Optional
 from transformers import (
     GPT2Tokenizer,
@@ -21,6 +15,18 @@ from transformers import AutoConfig, AutoTokenizer, Gemma2ForCausalLM
 from transformers import AutoTokenizer, AutoModelForCausalLM
 from peft import LoraConfig, TaskType, get_peft_model
 import PIL.Image
+from typing import Tuple, Optional, Union, Any
+import os
+import pickle
+import sys
+from typing import Tuple, Optional, Union, Any
+import numpy as np
+import pandas as pd
+# from peft import LoraConfig, TaskType, get_peft_model
+from nltk.translate.bleu_score import sentence_bleu
+import gc
+from tqdm import tqdm
+from torch import Tensor
 
 N = type(None)
 V = np.array
@@ -322,11 +328,14 @@ class Transformer(nn.Module):
                 layers.append(TransformerLayer(dim_self, dim_ref, num_heads, mlp_ratio, act=act, norm_layer=norm_layer))
         self.layers = nn.ModuleList(layers)
 
-
 class TransformerMapper(nn.Module):
 
     def forward(self, x):
-        x = self.linear(x).view(x.shape[0], self.clip_length, -1)
+        ### clip ###
+        # x = self.linear(x).view(x.shape[0], self.clip_length, -1)
+        ### swin ###
+        x = self.linear(x)
+        ############
         prefix = self.prefix_const.unsqueeze(0).expand(x.shape[0], *self.prefix_const.shape)
         prefix = torch.cat((x, prefix), dim=1)
         out = self.transformer(prefix)[:, self.clip_length:]
@@ -336,9 +345,12 @@ class TransformerMapper(nn.Module):
         super(TransformerMapper, self).__init__()
         self.clip_length = clip_length
         self.transformer = Transformer(dim_embedding, 8, num_layers)
-        self.linear = nn.Linear(dim_clip, clip_length * dim_embedding)
+        ### clip ###
+        # self.linear = nn.Linear(dim_clip, clip_length * dim_embedding)
+        ### swin ###
+        self.linear = nn.Linear(768, dim_embedding)
+        ############
         self.prefix_const = nn.Parameter(torch.randn(prefix_length, dim_embedding), requires_grad=True)
-
 
 class ClipCaptionModel(nn.Module):
 
@@ -409,7 +421,6 @@ class ClipCaptionModel(nn.Module):
         # else:
         self.clip_project = TransformerMapper(prefix_size, self.embedding_size, prefix_length, clip_length, num_layers)
 
-
 class ClipCaptionPrefix(ClipCaptionModel):
 
     def parameters(self, recurse: bool = True):
@@ -419,7 +430,6 @@ class ClipCaptionPrefix(ClipCaptionModel):
         super(ClipCaptionPrefix, self).train(mode)
         self.gpt.eval()
         return self
-
 
 def generate_beam(model, tokenizer, beam_size: int = 5, prompt=None, embed=None, entry_length=74, temperature=1.0,
                   stop_token: str = ".", ):
@@ -556,14 +566,12 @@ def generate2(model, tokenizer, tokens=None, prompt=None, embed=None, entry_coun
 
     return generated_list[0]
 
-
-class TrainClipCocoDataset(Dataset):
-
+class OxfordDataset(torch.utils.data.Dataset):
     def __len__(self) -> int:
         return len(self.captions_tokens)
 
     def pad_tokens(self, item: int):
-        tokens = self.captions_tokens[item]
+        tokens = self.captions_tokens[item].cpu()
         padding = self.max_seq_len - tokens.shape[0]
         if padding > 0:
             tokens = torch.cat((tokens, torch.zeros(padding, dtype=torch.int64) - 1))
@@ -577,48 +585,59 @@ class TrainClipCocoDataset(Dataset):
         mask = torch.cat((torch.ones(self.prefix_length), mask), dim=0)  # adding prefix mask
         return tokens, mask
 
-    def __getitem__(self, item: int) -> Tuple[torch.Tensor, ...]:
+    def __getitem__(self, item: int) -> tuple[Tensor, Tensor, Any, int]:
         tokens, mask = self.pad_tokens(item)
-        prefix = self.prefixes[self.caption2embedding[item]]
+        prefix = torch.load('../../Oxford_HIC/ImageData/' + self.image_ids[item] + '.pt', weights_only=False)
         if self.normalize_prefix:
             prefix = prefix.float()
             prefix = prefix / prefix.norm(2, -1)
         return tokens, mask, prefix
 
-    def __init__(self, data_path: str, prefix_length: int, gpt2_type: str = "gpt2",
-                 normalize_prefix=False):
+    def __init__(self, data_path: str, prefix_length: int, gpt2_type: str = "gpt2", normalize_prefix=False, model=None,
+                 batch_size=30, bleu_threshold=0.4):
+        self.data_path = data_path
+        self.bleu = False
         # self.tokenizer = GPT2Tokenizer.from_pretrained(gpt2_type)
         # self.tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
         self.tokenizer = AutoTokenizer.from_pretrained("tiiuae/Falcon3-1B-Base")
+        # self.tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B")
+        # self.tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neo-1.3B")
+        # self.tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neo-2.7B")
         self.prefix_length = prefix_length
         self.normalize_prefix = normalize_prefix
         with open(data_path, 'rb') as f:
             all_data = pickle.load(f)
-        print("Data size is %0d" % len(all_data["clip_embedding"]))
         sys.stdout.flush()
         self.prefixes = all_data["clip_embedding"]
         captions_raw = all_data["captions"]
         self.image_ids = [caption["image_id"] for caption in captions_raw]
         self.captions = [caption['caption'] for caption in captions_raw]
-        if os.path.isfile(f"{data_path[:-4]}_tokens.pkl"):
-            with open(f"{data_path[:-4]}_tokens.pkl", 'rb') as f:
+        if os.path.isfile(f"{data_path[:-4]}_bleu_all.pkl"):
+            del all_data
+            gc.collect()
+            torch.cuda.empty_cache()
+            with open(f"{data_path[:-4]}_bleu_all.pkl", 'rb') as f:
                 self.captions_tokens, self.caption2embedding, self.max_seq_len = pickle.load(f)
+            all_len = torch.tensor([len(self.captions_tokens[i]) for i in range(len(self))]).float()
+            self.max_seq_len = min(int(all_len.mean() + all_len.std() * 10), int(all_len.max()))
         else:
             self.captions_tokens = []
             self.caption2embedding = []
             max_seq_len = 0
             for caption in captions_raw:
-                self.captions_tokens.append(torch.tensor(self.tokenizer.encode(caption['caption']), dtype=torch.int64))
+                self.captions_tokens.append(
+                    torch.tensor(self.tokenizer.encode(caption['caption'], max_length=64, truncation=True),
+                                 dtype=torch.int64))
                 self.caption2embedding.append(caption["clip_embedding"])
                 max_seq_len = max(max_seq_len, self.captions_tokens[-1].shape[0])
-            # self.max_seq_len = max_seq_len
-            with open(f"{data_path[:-4]}_tokens.pkl", 'wb') as f:
-                pickle.dump([self.captions_tokens, self.caption2embedding, max_seq_len], f)
-        all_len = torch.tensor([len(self.captions_tokens[i]) for i in range(len(self))]).float()
-        self.max_seq_len = min(int(all_len.mean() + all_len.std() * 10), int(all_len.max()))
+            self.max_seq_len = max_seq_len
+            all_len = torch.tensor([len(self.captions_tokens[i]) for i in range(len(self))]).float()
+            self.max_seq_len = min(int(all_len.mean() + all_len.std() * 10), int(all_len.max()))
+            with open(f"{self.data_path[:-4]}_bleu_all.pkl", 'wb') as f:
+                pickle.dump([self.captions_tokens, self.caption2embedding, self.max_seq_len], f)
+        print(f"Train Data size: {len(self.captions_tokens)}")
 
-
-class TestClipCocoDataset(Dataset):
+class ClipCocoDataset(Dataset):
 
     def __len__(self) -> int:
         return len(self.captions_tokens)
@@ -682,10 +701,10 @@ class TestClipCocoDataset(Dataset):
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 trainData = '../Data/Oxford_HIC/parse/oxford_only10_ViT-B_32_train.pkl'
 testData = '../Data/Oxford_HIC/parse/oxford_only10_ViT-B_32_test.pkl'
-prefix_length = 40
-normalize_prefix = True
-trainDataset = TrainClipCocoDataset(trainData, prefix_length, normalize_prefix=normalize_prefix)
-testDataset = TestClipCocoDataset(testData, prefix_length, normalize_prefix=normalize_prefix)
+prefix_length = 64
+normalize_prefix = False
+trainDataset = OxfordDataset(trainData, prefix_length, normalize_prefix=normalize_prefix)
+testDataset = OxfordDataset(testData, prefix_length, normalize_prefix=normalize_prefix)
 ##################### oxford_300k #####################
 # train_image = ['imgflip_34', 'bokete_3820', 'imgflip_0', 'imgflip_8', 'imgflip_15', 'imgflip_19', 'bokete_104530',
 #                'imgflip_730', 'imgflip_130', 'imgflip_677']
@@ -825,8 +844,8 @@ test_prefix = torch.stack(prefix_list).to(device)
 print(test_tokens.shape, test_mask.shape, test_prefix.shape)
 
 model = ClipCaptionModel(prefix_length, clip_length=prefix_length, prefix_size=512, num_layers=8)
-save_file = '20250115_totalClip_oxford_only10_transformer_p40_falcon_bleu1_0.05'
-for i in range(20):
+save_file = '20250116_totalClip_oxford_only10_transformer_p64_falcon_swin'
+for i in range(15):
     if os.path.exists(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'):
         model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'))
         model = model.eval()
@@ -837,7 +856,7 @@ for i in range(20):
         pred.predict(train_tokens, train_mask, train_prefix, train_gt, model)
 
 AllCaption = pd.DataFrame()
-for i in range(20):
+for i in range(15):
     if os.path.exists(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'):
         df = pd.read_csv(f'./Model/{save_file}/{save_file}_test_{i + 1:03d}.csv')
         textAndLoss = df[['text', 'loss', 'fitCount', 'gtNum']]
