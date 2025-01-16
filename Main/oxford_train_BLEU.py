@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from torch import Tensor
 from torch.nn import functional as nnf
 from torch.utils.data import Dataset, DataLoader
 from enum import Enum
@@ -13,7 +14,7 @@ import pickle
 import sys
 import argparse
 import json
-from typing import Tuple, Optional, Union
+from typing import Tuple, Optional, Union, Any
 import numpy as np
 import random
 import matplotlib.pyplot as plt
@@ -32,6 +33,129 @@ torch.cuda.manual_seed_all(seed)
 class MappingType(Enum):
     MLP = 'mlp'
     Transformer = 'transformer'
+
+
+class OxfordDataset(torch.utils.data.Dataset):
+    def __len__(self) -> int:
+        return len(self.captions_tokens)
+
+    def pad_tokens(self, item: int):
+        tokens = self.captions_tokens[item].cpu()
+        padding = self.max_seq_len - tokens.shape[0]
+        if padding > 0:
+            tokens = torch.cat((tokens, torch.zeros(padding, dtype=torch.int64) - 1))
+            self.captions_tokens[item] = tokens
+        elif padding < 0:
+            tokens = tokens[:self.max_seq_len]
+            self.captions_tokens[item] = tokens
+        mask = tokens.ge(0)  # mask is zero where we out of sequence
+        tokens[~mask] = 0
+        mask = mask.float()
+        mask = torch.cat((torch.ones(self.prefix_length), mask), dim=0)  # adding prefix mask
+        return tokens, mask
+
+    def __getitem__(self, item: int) -> tuple[Tensor, Tensor, Any, int]:
+        tokens, mask = self.pad_tokens(item)
+        prefix = torch.load('../../Oxford_HIC/ImageData/' + self.image_ids[item] + '.pt', weights_only=False)
+        if self.normalize_prefix:
+            prefix = prefix.float()
+            prefix = prefix / prefix.norm(2, -1)
+        return tokens, mask, prefix, item
+
+    def filter_data_by_bleu(self, model, batch_size=20, bleu_threshold=0.1, file_path=None):
+        """
+        Filter dataset based on BLEU scores using batch processing.
+
+        Args:
+            model: The model used for generating sentences.
+            batch_size: Number of samples per batch.
+            bleu_threshold: Minimum BLEU score to keep a sample.
+        """
+        dataloader = DataLoader(self, batch_size=batch_size, shuffle=False, drop_last=True)
+
+        # Temporary storage for filtered indices
+        filtered_indices = []
+        device = torch.device('cuda:0')
+        progress = tqdm(total=len(dataloader), desc="Filtering train dataset")
+        for batch in dataloader:
+            tokens_batch, masks_batch, prefixes_batch, original_indices = batch
+            tokens_batch, masks_batch, prefixes_batch = tokens_batch.to(device), masks_batch.to(
+                device), prefixes_batch.to(device, dtype=torch.bfloat16)
+
+            # Forward pass
+            prefix_embeds = model.clip_project(prefixes_batch).view(-1, self.prefix_length, model.embedding_size)
+            text_embeds = model.falcon.model.embed_tokens(tokens_batch)
+            embedding_cat = torch.cat((prefix_embeds, text_embeds), dim=1)
+            outputs = model.falcon(inputs_embeds=embedding_cat, attention_mask=masks_batch)
+            logits = outputs.logits[:, self.prefix_length - 1:-1]
+            generated_tokens_batch = torch.argmax(logits, dim=-1)
+
+            # BLEU calculation and filtering
+            for i, original_idx in enumerate(original_indices):
+                reference = self.captions_tokens[original_idx].tolist()
+                candidate = generated_tokens_batch[i].tolist()
+                bleu_score = sentence_bleu([reference], candidate, weights=(1, 0, 0, 0))
+
+                if bleu_score <= bleu_threshold:
+                    filtered_indices.append(original_idx)
+            progress.update()
+
+        # Update dataset based on filtered indices
+        print(
+            f"Before Filtered: {len(self.captions_tokens)}, After Filtered: {len(filtered_indices)}, BLEU <= {bleu_threshold}")
+        self.captions = [self.captions[i] for i in filtered_indices]
+        self.image_ids = [self.image_ids[i] for i in filtered_indices]
+        self.captions_tokens = [self.captions_tokens[i] for i in filtered_indices]
+        self.caption2embedding = [self.caption2embedding[i] for i in filtered_indices]
+        del tokens_batch, masks_batch, prefixes_batch, original_indices, prefix_embeds, text_embeds, embedding_cat, outputs, logits, generated_tokens_batch, reference, candidate, bleu_score
+        gc.collect()
+        torch.cuda.empty_cache()
+
+    def __init__(self, data_path: str, prefix_length: int, gpt2_type: str = "gpt2", normalize_prefix=False, model=None,
+                 batch_size=30, bleu_threshold=0.4):
+        self.data_path = data_path
+        self.bleu = False
+        # self.tokenizer = GPT2Tokenizer.from_pretrained(gpt2_type)
+        # self.tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
+        self.tokenizer = AutoTokenizer.from_pretrained("tiiuae/Falcon3-1B-Base")
+        # self.tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B")
+        # self.tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neo-1.3B")
+        # self.tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neo-2.7B")
+        self.prefix_length = prefix_length
+        self.normalize_prefix = normalize_prefix
+        with open(data_path, 'rb') as f:
+            all_data = pickle.load(f)
+        sys.stdout.flush()
+        self.prefixes = all_data["clip_embedding"]
+        captions_raw = all_data["captions"]
+        self.image_ids = [caption["image_id"] for caption in captions_raw]
+        self.captions = [caption['caption'] for caption in captions_raw]
+        if os.path.isfile(f"{data_path[:-4]}_bleu_all.pkl"):
+            del all_data
+            gc.collect()
+            torch.cuda.empty_cache()
+            with open(f"{data_path[:-4]}_bleu_all.pkl", 'rb') as f:
+                self.captions_tokens, self.caption2embedding, self.max_seq_len = pickle.load(f)
+            all_len = torch.tensor([len(self.captions_tokens[i]) for i in range(len(self))]).float()
+            self.max_seq_len = min(int(all_len.mean() + all_len.std() * 10), int(all_len.max()))
+        else:
+            self.captions_tokens = []
+            self.caption2embedding = []
+            max_seq_len = 0
+            for caption in captions_raw:
+                self.captions_tokens.append(
+                    torch.tensor(self.tokenizer.encode(caption['caption'], max_length=64, truncation=True),
+                                 dtype=torch.int64))
+                self.caption2embedding.append(caption["clip_embedding"])
+                max_seq_len = max(max_seq_len, self.captions_tokens[-1].shape[0])
+            self.max_seq_len = max_seq_len
+            all_len = torch.tensor([len(self.captions_tokens[i]) for i in range(len(self))]).float()
+            self.max_seq_len = min(int(all_len.mean() + all_len.std() * 10), int(all_len.max()))
+            with open(f"{self.data_path[:-4]}_bleu_all.pkl", 'wb') as f:
+                pickle.dump([self.captions_tokens, self.caption2embedding, self.max_seq_len], f)
+        print(f"Train Data size: {len(self.captions_tokens)}")
+        # self.filter_data_by_bleu(model, batch_size, bleu_threshold)
+
 
 class ClipCocoDataset(Dataset):
 
@@ -155,6 +279,7 @@ class ClipCocoDataset(Dataset):
         print(f"Train Data size: {len(self.captions_tokens)}")
         # self.filter_data_by_bleu(model, batch_size, bleu_threshold)
 
+
 class MLP(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -168,6 +293,7 @@ class MLP(nn.Module):
             if i < len(sizes) - 2:
                 layers.append(act())
         self.model = nn.Sequential(*layers)
+
 
 class MlpTransformer(nn.Module):
     def __init__(self, in_dim, h_dim, out_d: Optional[int] = None, act=nnf.relu, dropout=0.7):
@@ -185,6 +311,7 @@ class MlpTransformer(nn.Module):
         x = self.fc2(x)
         x = self.dropout(x)
         return x
+
 
 class MultiHeadAttention(nn.Module):
 
@@ -217,6 +344,7 @@ class MultiHeadAttention(nn.Module):
         out = self.project(out)
         return out, attention
 
+
 class TransformerLayer(nn.Module):
 
     def forward_with_attention(self, x, y=None, mask=None):
@@ -237,6 +365,7 @@ class TransformerLayer(nn.Module):
         self.attn = MultiHeadAttention(dim_self, dim_ref, num_heads, bias=bias, dropout=dropout)
         self.norm2 = norm_layer(dim_self)
         self.mlp = MlpTransformer(dim_self, int(dim_self * mlp_ratio), act=act, dropout=dropout)
+
 
 class Transformer(nn.Module):
 
@@ -275,6 +404,7 @@ class Transformer(nn.Module):
                 layers.append(TransformerLayer(dim_self, dim_ref, num_heads, mlp_ratio, act=act, norm_layer=norm_layer))
         self.layers = nn.ModuleList(layers)
 
+
 class TransformerMapper(nn.Module):
 
     def forward(self, x):
@@ -290,6 +420,7 @@ class TransformerMapper(nn.Module):
         self.transformer = Transformer(dim_embedding, 8, num_layers)
         self.linear = nn.Linear(dim_clip, clip_length * dim_embedding)
         self.prefix_const = nn.Parameter(torch.randn(prefix_length, dim_embedding), requires_grad=True)
+
 
 class ClipCaptionModel(nn.Module):
 
@@ -362,6 +493,7 @@ class ClipCaptionModel(nn.Module):
             self.clip_project = TransformerMapper(prefix_size, self.embedding_size, prefix_length, clip_length,
                                                   num_layers)
 
+
 class ClipCaptionPrefix(ClipCaptionModel):
 
     def parameters(self, recurse: bool = True):
@@ -372,6 +504,7 @@ class ClipCaptionPrefix(ClipCaptionModel):
         # self.gpt.eval()
         return self
 
+
 def save_config(args: argparse.Namespace):
     config = {}
     for key, item in args._get_kwargs():
@@ -379,6 +512,7 @@ def save_config(args: argparse.Namespace):
     out_path = os.path.join(args.out_dir, f"{args.prefix}.json")
     with open(out_path, 'w') as outfile:
         json.dump(config, outfile)
+
 
 def load_model(config_path: str, epoch_or_latest: Union[str, int] = '_latest'):
     with open(config_path) as f:
@@ -399,6 +533,7 @@ def load_model(config_path: str, epoch_or_latest: Union[str, int] = '_latest'):
     else:
         print(f"{model_path} is not exist")
     return model, parser
+
 
 def train(trainData, testData, model: ClipCaptionModel, args,
           lr: float = 2e-5, warmup_steps: int = 5000, output_dir: str = ".", output_prefix: str = "",
@@ -423,8 +558,10 @@ def train(trainData, testData, model: ClipCaptionModel, args,
         os.makedirs(output_dir)
     model = model.to(device, dtype=torch.bfloat16)
     model.eval()
-    trainDataset = ClipCocoDataset(trainData, prefix_length, normalize_prefix, model=model, batch_size=bleu_batch_size, bleu_threshold=bleu_threshold)
-    testDataset = ClipCocoDataset(testData, prefix_length, normalize_prefix, model=model, batch_size=bleu_batch_size, bleu_threshold=bleu_threshold)
+    trainDataset = ClipCocoDataset(trainData, prefix_length, normalize_prefix, model=model, batch_size=bleu_batch_size,
+                                   bleu_threshold=bleu_threshold)
+    testDataset = ClipCocoDataset(testData, prefix_length, normalize_prefix, model=model, batch_size=bleu_batch_size,
+                                  bleu_threshold=bleu_threshold)
     train_dataloader = DataLoader(trainDataset, batch_size=batch_size, shuffle=True, drop_last=True)
     test_dataloader = DataLoader(testDataset, batch_size=batch_size, shuffle=True, drop_last=True)
     epoch = 0
@@ -451,7 +588,8 @@ def train(trainData, testData, model: ClipCaptionModel, args,
             loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens.flatten(), ignore_index=0)
             trainLoss += loss.item()
             generated_tokens = torch.argmax(logits, dim=-1)
-            bleu_score = sentence_bleu([tokens.flatten().tolist()], generated_tokens.flatten().tolist(), weights=(1, 0, 0, 0))
+            bleu_score = sentence_bleu([tokens.flatten().tolist()], generated_tokens.flatten().tolist(),
+                                       weights=(1, 0, 0, 0))
             trainBleu += bleu_score
             # loss = loss - 10 * bleu_score
             loss.backward()
@@ -485,7 +623,8 @@ def train(trainData, testData, model: ClipCaptionModel, args,
                 outputs = model.falcon(inputs_embeds=prefix_embeds, attention_mask=mask)
                 logits = outputs.logits
                 generated_tokens = torch.argmax(logits, dim=-1)
-                bleu_score = sentence_bleu([tokens.flatten().tolist()], generated_tokens.flatten().tolist(), weights=(1, 0, 0, 0))
+                bleu_score = sentence_bleu([tokens.flatten().tolist()], generated_tokens.flatten().tolist(),
+                                           weights=(1, 0, 0, 0))
                 testBleu += bleu_score
 
                 progress.set_postfix({"loss": loss.item(), "bleu": bleu_score})
@@ -541,8 +680,10 @@ def train(trainData, testData, model: ClipCaptionModel, args,
             del trainDataset, testDataset, train_dataloader, test_dataloader, optimizer, scheduler, progress, tokens, mask, prefix, outputs, logits, generated_tokens, bleu_score
             gc.collect()
             torch.cuda.empty_cache()
-            trainDataset = ClipCocoDataset(trainData, prefix_length, normalize_prefix, model=model, batch_size=batch_size, bleu_threshold=bleu_threshold)
-            testDataset = ClipCocoDataset(testData, prefix_length, normalize_prefix, model=model, batch_size=batch_size, bleu_threshold=bleu_threshold)
+            trainDataset = ClipCocoDataset(trainData, prefix_length, normalize_prefix, model=model,
+                                           batch_size=batch_size, bleu_threshold=bleu_threshold)
+            testDataset = ClipCocoDataset(testData, prefix_length, normalize_prefix, model=model, batch_size=batch_size,
+                                          bleu_threshold=bleu_threshold)
             train_dataloader = DataLoader(trainDataset, batch_size=batch_size, shuffle=True, drop_last=True)
             test_dataloader = DataLoader(testDataset, batch_size=batch_size, shuffle=True, drop_last=True)
             best_train_loss = 9999999999
@@ -553,8 +694,10 @@ def train(trainData, testData, model: ClipCaptionModel, args,
                 del trainDataset, testDataset, train_dataloader, test_dataloader
                 gc.collect()
                 torch.cuda.empty_cache()
-                trainDataset = ClipCocoDataset(trainData, prefix_length, normalize_prefix, model=model, batch_size=batch_size, bleu_threshold=bleu_threshold)
-                testDataset = ClipCocoDataset(testData, prefix_length, normalize_prefix, model=model, batch_size=batch_size, bleu_threshold=bleu_threshold)
+                trainDataset = ClipCocoDataset(trainData, prefix_length, normalize_prefix, model=model,
+                                               batch_size=batch_size, bleu_threshold=bleu_threshold)
+                testDataset = ClipCocoDataset(testData, prefix_length, normalize_prefix, model=model,
+                                              batch_size=batch_size, bleu_threshold=bleu_threshold)
                 train_dataloader = DataLoader(trainDataset, batch_size=batch_size, shuffle=True, drop_last=True)
                 test_dataloader = DataLoader(testDataset, batch_size=batch_size, shuffle=True, drop_last=True)
                 best_train_loss = 9999999999
@@ -563,16 +706,65 @@ def train(trainData, testData, model: ClipCaptionModel, args,
             break
     return model
 
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--trainData', default='../Data/Oxford_HIC/parse/oxford_only10_ViT-B_32_train.pkl')
     parser.add_argument('--testData', default='../Data/Oxford_HIC/parse/oxford_only10_ViT-B_32_test.pkl')
-    parser.add_argument('--out_dir', default='20250116_totalClip_oxford_only10_transformer_p64_falcon_swin')
+    parser.add_argument('--out_dir', default='20250116_totalClip_oxford_only10_transformer_p64_falcon')
     parser.add_argument('--prefix', default='checkpoint', help='prefix for saved filenames')
     parser.add_argument('--epochs', type=int, default=50)
     parser.add_argument('--save_every', type=int, default=1)
     parser.add_argument('--prefix_length', type=int, default=64)
     parser.add_argument('--prefix_length_clip', type=int, default=64)
+    parser.add_argument('--bs', type=int, default=20)
+    parser.add_argument('--only_prefix', dest='only_prefix', action='store_true')
+    parser.add_argument('--mapping_type', type=str, default='transformer', help='mlp/transformer')
+    parser.add_argument('--num_layers', type=int, default=8)
+    parser.add_argument('--is_rn', dest='is_rn', action='store_true')
+    parser.add_argument('--normalize_prefix', dest='normalize_prefix', action='store_true')
+    args = parser.parse_args()
+    prefix_length = args.prefix_length
+    if not os.path.exists('./Model/' + args.out_dir):
+        os.makedirs('./Model/' + args.out_dir)
+        # os.makedirs('D:/MemeGAN/Model/' + args.out_dir)
+    args.out_dir = './Model/' + args.out_dir
+
+    prefix_dim = 640 if args.is_rn else 512
+    args.mapping_type = {'mlp': MappingType.MLP, 'transformer': MappingType.Transformer}[args.mapping_type]
+    print(args.mapping_type)
+    if args.only_prefix:
+        model = ClipCaptionPrefix(prefix_length, clip_length=prefix_length, prefix_size=prefix_dim,
+                                  num_layers=args.num_layers, mapping_type=args.mapping_type)
+        print("Train only prefix")
+    else:
+        model = ClipCaptionModel(prefix_length, clip_length=prefix_length, prefix_size=prefix_dim,
+                                 num_layers=args.num_layers, mapping_type=args.mapping_type)
+        print("Train both prefix and GPT")
+        sys.stdout.flush()
+    device = torch.device('cuda:0')
+    model = model.to(device, dtype=torch.bfloat16)
+    # save_file = '20250113_totalClip_oxford_only100_300k_mess_transformer_p40_falcon_bleu3_0.4_x10inLoss'
+    # i = 1
+    # model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i:03d}.pt'))
+    model.eval()
+    train(args.trainData, args.testData, model, args, output_dir=args.out_dir, output_prefix=args.prefix,
+          bleu_batch_size=64, bleu_threshold=0.05)
+
+
+if __name__ == '__main__':
+    main()
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--trainData', default='../Data/Oxford_HIC/parse/oxford_only10_ViT-B_32_train.pkl')
+    parser.add_argument('--testData', default='../Data/Oxford_HIC/parse/oxford_only10_ViT-B_32_test.pkl')
+    parser.add_argument('--out_dir', default='20250116_totalClip_oxford_only10_transformer_p50_falcon')
+    parser.add_argument('--prefix', default='checkpoint', help='prefix for saved filenames')
+    parser.add_argument('--epochs', type=int, default=50)
+    parser.add_argument('--save_every', type=int, default=1)
+    parser.add_argument('--prefix_length', type=int, default=50)
+    parser.add_argument('--prefix_length_clip', type=int, default=50)
     parser.add_argument('--bs', type=int, default=20)
     parser.add_argument('--only_prefix', dest='only_prefix', action='store_true')
     parser.add_argument('--mapping_type', type=str, default='transformer', help='mlp/transformer')
