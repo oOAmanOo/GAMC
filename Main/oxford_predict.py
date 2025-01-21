@@ -332,9 +332,9 @@ class TransformerMapper(nn.Module):
 
     def forward(self, x):
         ### clip ###
-        # x = self.linear(x).view(x.shape[0], self.clip_length, -1)
+        x = self.linear(x).view(x.shape[0], self.clip_length, -1)
         ### swin ###
-        x = self.linear(x)
+        # x = self.linear(x)
         ############
         prefix = self.prefix_const.unsqueeze(0).expand(x.shape[0], *self.prefix_const.shape)
         prefix = torch.cat((x, prefix), dim=1)
@@ -346,9 +346,9 @@ class TransformerMapper(nn.Module):
         self.clip_length = clip_length
         self.transformer = Transformer(dim_embedding, 8, num_layers)
         ### clip ###
-        # self.linear = nn.Linear(dim_clip, clip_length * dim_embedding)
+        self.linear = nn.Linear(dim_clip, clip_length * dim_embedding)
         ### swin ###
-        self.linear = nn.Linear(768, dim_embedding)
+        # self.linear = nn.Linear(768, dim_embedding)
         ############
         self.prefix_const = nn.Parameter(torch.randn(prefix_length, dim_embedding), requires_grad=True)
 
@@ -701,24 +701,22 @@ class ClipCocoDataset(Dataset):
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 trainData = '../Data/Oxford_HIC/parse/oxford_only10_ViT-B_32_train.pkl'
 testData = '../Data/Oxford_HIC/parse/oxford_only10_ViT-B_32_test.pkl'
-prefix_length = 64
+prefix_length = 50
 normalize_prefix = False
-trainDataset = OxfordDataset(trainData, prefix_length, normalize_prefix=normalize_prefix)
-testDataset = OxfordDataset(testData, prefix_length, normalize_prefix=normalize_prefix)
+trainDataset = ClipCocoDataset(trainData, prefix_length, normalize_prefix=normalize_prefix)
+testDataset = ClipCocoDataset(testData, prefix_length, normalize_prefix=normalize_prefix)
 ##################### oxford_300k #####################
-# train_image = ['imgflip_34', 'bokete_3820', 'imgflip_0', 'imgflip_8', 'imgflip_15', 'imgflip_19', 'bokete_104530',
-#                'imgflip_730', 'imgflip_130', 'imgflip_677']
-# train_text = [
-#     'You finish doing something at your friends house and look at your phone; 7 missed calls from your mom; 7 missed calls from your mom'
-#     , 'I\'m in my 50s!'
-#     , 'School; Memes'
-#     , 'image tagged in memes,one does not simply'
-#     , 'THAT; IS WHAT A GOOD MEME LOOKS LIKE'
-#     , 'NOT SURE IF PEOPLE ARE UPVOTING MEMES; OR USER NAMES'
-#     , 'It\'s a family night runaway.'
-#     , 'CHUCK IS THE GOOD TYPE OF SCUMBAG; CUZ HE ONLY ROASTS YOU FROM YOUR INSIDES'
-#     , 'SO YOUR TELLIN\' ME THAT SCHOOLS GOOD FOR YOU'
-#     , 'Y\'ALL GOT ANY MORE OF THEM; JOBS?']
+# train_image = ['imgflip_34', 'bokete_3820', 'imgflip_0','imgflip_8', 'imgflip_15', 'imgflip_19', 'bokete_104530','imgflip_730', 'imgflip_130', 'imgflip_677']
+# train_text = ['You finish doing something at your friends house and look at your phone; 7 missed calls from your mom; 7 missed calls from your mom'
+#               ,'I\'m in my 50s!'
+#               ,'School; Memes'
+#               ,'image tagged in memes,one does not simply'
+#               ,'THAT; IS WHAT A GOOD MEME LOOKS LIKE'
+#               ,'NOT SURE IF PEOPLE ARE UPVOTING MEMES; OR USER NAMES'
+#               ,'It\'s a family night runaway.'
+#               ,'CHUCK IS THE GOOD TYPE OF SCUMBAG; CUZ HE ONLY ROASTS YOU FROM YOUR INSIDES'
+#               ,'SO YOUR TELLIN\' ME THAT SCHOOLS GOOD FOR YOU'
+#               ,'Y\'ALL GOT ANY MORE OF THEM; JOBS?']
 ##################### oxford_100k #####################
 # train_image = ['imgflip_34', 'bokete_3820', 'imgflip_0','imgflip_8', 'imgflip_15', 'imgflip_19', 'bokete_104530','imgflip_730', 'imgflip_130', 'imgflip_677']
 # train_text = ['You finish doing something at your friends house and look at your phone; 7 missed calls from your mom; 7 missed calls from your mom'
@@ -731,6 +729,54 @@ testDataset = OxfordDataset(testData, prefix_length, normalize_prefix=normalize_
 #               ,'Chuck Norris doesn\'t go washroom; He goes washBOOM!'
 #               ,'SO YOUR TELLIN\' ME THAT SCHOOLS GOOD FOR YOU'
 #               ,'Y\'ALL GOT ANY MORE OF THEM; JOBS?']
+##################### oxford_Top10_300k #####################
+# train_image = ['bokete_100136', 'bokete_100144', 'bokete_100174','bokete_100193', 'bokete_100268', 'bokete_100287', 'bokete_100295','bokete_10031', 'bokete_100498', 'bokete_24339']
+# train_text = ['The wax isn\'t dry yet.'
+#               ,'I\'m sorry to hear that.'
+#               ,'You didn\'t put that microphone in the register, did you?'
+#               ,'I\'m showing my brother the privilege of being the youngest.'
+#               ,'Are you ready to join us?'
+#               ,'He\'s cute, he\'s 100% capable of killing.'
+#               ,'The ground suddenly fell to the left.'
+#               ,'"Mama, there\'s something in the front mat!"'
+#               ,'"You don\'t have a dad?" "You don\'t have a mom?"'
+#               ,'This month, I\'ve only got this much to offer.']
+##################### oxford_Top10_300k_mess #####################
+# train_image = ['bokete_100345', 'bokete_100360', 'bokete_100364','bokete_100193', 'bokete_100372', 'bokete_100432', 'bokete_100295','bokete_100453', 'bokete_100498', 'bokete_100459']
+# train_text = ['I had a dream about going to school, so I want to take a day off from school.'
+#               ,'I went to the woods for a jog, and there was a lot of spider webs.'
+#               ,'I\'d like to ask you a different color.'
+#               ,'I\'m showing my brother the privilege of being the youngest.'
+#               ,'Ah! You bumped into me in the morning!'
+#               ,'Are you sure it\'s your dad who left you when you were three?'
+#               ,'The ground suddenly fell to the left.'
+#               ,'In the first place, there\'s a problem with Snow White, who eats apples given to an old lady who looks so bad.'
+#               ,'It was at this time that they switched.'
+#               ,'Did you think it was corn?']
+##################### oxford_Only1200_300k #####################
+# train_image = ['imgflip_0', 'imgflip_101', 'imgflip_1033','imgflip_11', 'imgflip_117', 'imgflip_16', 'imgflip_189','imgflip_23', 'imgflip_47', 'imgflip_504']
+# train_text = ['12 dollars; 11 dollars with 1 dollar shipping'
+#               ,'I HAD A GIRLFRIEND; AAAAAAND ITS GONE'
+#               ,'I POUR THE CEREAL AFTER I POUR THE MILK'
+#               ,'WAITING FOR MY PHONE TO GET  TO 100%'
+#               ,'You when you have over one test at school in a day'
+#               ,'IF SOMEONE WANTS TO KILL YOU; GO TO A LIVING ROOM'
+#               ,'you; eating 5 pounds of cheese; every day; your stomach'
+#               ,'Me:stands up to stretch my legs; The person who had been pushing my wheelchair for the last 26 years'
+#               ,'Me: Opens door for some fresh air; Everyone else in the submarine:'
+#               ,'THEY TOOK AWAY MY HAPPY MEAL I TOOK AWAY THEIR HAPPINESS']
+##################### oxford_Only100_300k #####################
+# train_image = ['2spbgym', 'all-the-things', 'imgflip_0', 'imgflip_1033','imgflip_11', 'imgflip_117', 'imgflip_16', 'imgflip_189','imgflip_23', 'imgflip_504']
+# train_text = ['climb a mountain? pff, i have wings...'
+#               ,'go to a pizza buffet eat all the pizza'
+#               ,'12 dollars; 11 dollars with 1 dollar shipping'
+#               ,'I POUR MILK BEFORE CEREAL'
+#               ,'ME WAITING FOR MY INTERNET TO RECONNECT'
+#               ,'calling the teacher mom'
+#               ,'IF SOMEONE DIES IN THE LIVING ROOM... IS IT STILL CALLED THE LIVING ROOM?'
+#               ,'you; losing a few seconds of your life looking at this'
+#               ,'me: gets up and starts clapping because the chiefs won; the guy who has been pushing my wheelchair for 10 years'
+#               ,'THEY TOOK AWAY MY HAPPY MEAL I TOOK AWAY THEIR HAPPINESS']
 ##################### oxford_only10 #####################
 train_image = ['2spbgym', 'all-the-things', 'imgflip_0', 'imgflip_1033','imgflip_11', 'imgflip_117', 'imgflip_16', 'imgflip_189','imgflip_23', 'imgflip_504']
 train_text = ['i\'ll take it sure ur not chicken?',
@@ -783,22 +829,34 @@ train_mask = torch.stack(mask_list).to(device)
 train_prefix = torch.stack(prefix_list).to(device)
 print(train_tokens.shape, train_mask.shape, train_prefix.shape, len(train_image_id_list))
 ##################### oxford_300k #####################
-# Image ID: imgflip_7, Caption: CHEESE; ME AT 3 AM; CHEESE; MY MOM WHO WAS WAITING; ME
-# Image ID: imgflip_32, Caption: IS THIS A PIGEON?
 # test_image = ['imgflip_7', 'imgflip_32']
 # test_text = ['CHEESE; ME AT 3 AM; CHEESE; MY MOM WHO WAS WAITING; ME'
-#               , 'IS THIS A PIGEON?']
+#               ,'IS THIS A PIGEON?']
 ##################### oxford_100k #####################
 # test_image = ['imgflip_7', 'imgflip_32']
 # test_text = ['THE DOG FOOD; MY DOG; DOG FOOD; ME LOOKING AT HIM; MY DOG'
 #               ,'MATH; ME; IS THIS THE REASON I DROPPED OUT OF COLLEGE?']
 ##################### oxford_10 k #####################
-# # Image ID: bokete_111723, Caption: I'm going to take care of you. I'm going to take care of you. I'm going to take care of you.
-# # Image ID: imgflip_57, Caption: WHAT'S DONE IN THE DARK WILL ALWAYS COME OUT IN THE LIGHT; BUT THATS NONE OF MY BUSINESS
 # test_image = ['bokete_111723', 'imgflip_57']
 # test_text = ['I\'m going to take care of you. I\'m going to take care of you. I\'m going to take care of you.'
 #               ,'WHAT\'S DONE IN THE DARK WILL ALWAYS COME OUT IN THE LIGHT; BUT THATS NONE OF MY BUSINESS']
-##################### oxford_only10 #####################
+##################### oxford_Top10_300k ###############
+# test_image = ['are-you-serious-face', 'bokete_24326']
+# test_text = ['you have windows 98 seriously?'
+#               ,'The answer is 10.']
+##################### oxford_Top10_300k_mess ##########
+# test_image = ['imgflip_156', 'bokete_24326']
+# test_text = ['Friend: I just had a dream in which I married my crush! My dreams:'
+#               ,'The answer is 10.']
+##################### oxford_Only1200_300k ############
+# test_image = ['imgflip_130', 'imgflip_659']
+# test_text = ['0 VIEWS 5 DISLIKES'
+#               ,'when the mobile game ad is so laggy that it crashes your game and you lose out on a reward:']
+##################### oxford_Only100_300k #############
+# test_image = ['i-love-coloring-kid', 'imgflip_130']
+# test_text = ['she started writing notes !!'
+#               ,'WHEN YOUR FRIEND; DOSENT LIKE ROOT BEER']
+##################### oxford_only10 ###################
 test_image = ['bokete_100174', 'imgflip_834']
 test_text = ['get out of my way. i\'ll do it.'
                 ,'me fully prepared for the test; question 1']
@@ -844,7 +902,7 @@ test_prefix = torch.stack(prefix_list).to(device)
 print(test_tokens.shape, test_mask.shape, test_prefix.shape)
 
 model = ClipCaptionModel(prefix_length, clip_length=prefix_length, prefix_size=512, num_layers=8)
-save_file = '20250116_totalClip_oxford_only10_transformer_p64_falcon_swin'
+save_file = '20250116_totalClip_oxford_only10_transformer_p50_falcon'
 for i in range(15):
     if os.path.exists(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'):
         model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'))
