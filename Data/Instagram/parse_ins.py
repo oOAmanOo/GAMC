@@ -18,6 +18,7 @@ def main(clip_model_type: str):
     # with open('C:/Users/user/fiftyone/coco-2014/raw/captions_train2014.json', 'r') as f:
     #     data = json.load(f)
     # data = data['annotations']
+<<<<<<< HEAD
     dirPath = './Generate_sonicdrivein.csv'
     data = pd.read_csv(dirPath)
     print("shape of data: ", data.shape)
@@ -73,6 +74,39 @@ def main(clip_model_type: str):
     #     .head(200)
     # )
     # print(f'Number of data 200: {test.shape[0]}')
+=======
+    dirPath = './Generate_mcdonalds_switzerland.csv'
+    data = pd.read_csv(dirPath)
+    print("shape of data: ", data.shape)
+
+    ######################################################################################################
+    image_id_counts = data['image_id'].value_counts()
+    print(f'Number of unique image_id: {len(image_id_counts)}')
+    print("=============== Train ================")
+    valid_image_ids = image_id_counts[image_id_counts >= 300].index
+    print(f'Number of image_id with 300 captions: {len(valid_image_ids)}')
+    filtered_data = data[data['image_id'].isin(valid_image_ids)]
+    print(f'Number of data all: {filtered_data.shape[0]}')
+    train = (
+        filtered_data.sort_values(by=['image_id', 'funny_score'], ascending=[True, False])
+        .groupby('image_id')
+        .head(300)
+    )
+    print(f'Number of data 300: {train.shape[0]}')
+
+    print("=============== Test ================")
+    valid_image_ids = image_id_counts[(image_id_counts >= 200) & (image_id_counts < 300)].index
+    print(f'Number of image_id with 200 captions: {len(valid_image_ids)}')
+    # 篩選原始資料
+    filtered_data = data[data['image_id'].isin(valid_image_ids)]
+    print(f'Number of data all: {filtered_data.shape[0]}')
+    test = (
+        filtered_data.sort_values(by=['image_id', 'funny_score'], ascending=[True, False])
+        .groupby('image_id')
+        .head(200)
+    )
+    print(f'Number of data 200: {test.shape[0]}')
+>>>>>>> 699ae6b64d1ab83062d53aae2e3d80a1ea7b503b
     ######################################################################################################
     # train = pd.DataFrame()
     # test = pd.DataFrame()
@@ -106,7 +140,11 @@ def main(clip_model_type: str):
             d = data.iloc[i]
             d = d.to_dict()
             img_id = d["image_id"]
+<<<<<<< HEAD
             filename = f"./sonicdrivein_img/{img_id}.jpg"
+=======
+            filename = f"./mcdonalds_switzerland_img/{img_id}.jpg"
+>>>>>>> 699ae6b64d1ab83062d53aae2e3d80a1ea7b503b
             image = io.imread(filename)
             image = preprocess(Image.fromarray(image)).unsqueeze(0).to(device)
             with torch.no_grad():
@@ -122,10 +160,16 @@ def main(clip_model_type: str):
         print('Done')
         print("%0d embeddings saved " % len(all_embeddings))
         return 0
+<<<<<<< HEAD
 
     out_path_train = f"./parse/500up_only500_sonicdrivein_{clip_model_name}_train.pkl"
     parse(out_path_train, train)
     out_path_test = f"./parse/500up_only500_rest_300up_top300_sonicdrivein_{clip_model_name}_test.pkl"
+=======
+    out_path_train = f"./parse/Generate_mcdonalds_switzerland_300up_top300_{clip_model_name}_train.pkl"
+    parse(out_path_train, train)
+    out_path_test = f"./parse/Generate_mcdonalds_switzerland_200up_top200_{clip_model_name}_test.pkl"
+>>>>>>> 699ae6b64d1ab83062d53aae2e3d80a1ea7b503b
     parse(out_path_test, test)
     # out_path_data = f"./parse/Generate_mcdonalds_all_{clip_model_name}.pkl"
     # parse(out_path_data, data)
