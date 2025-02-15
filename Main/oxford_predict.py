@@ -27,6 +27,9 @@ from nltk.translate.bleu_score import sentence_bleu
 import gc
 from tqdm import tqdm
 from torch import Tensor
+from nltk.translate.bleu_score import sentence_bleu
+import gc
+import loralib as lora
 
 N = type(None)
 V = np.array
@@ -65,6 +68,18 @@ class Predictor(object):
         self.generate_beam_gtNum = []
         self.generate2_gtNum = []
         self.train_gtNum = []
+        self.generate_beam_bleu1 = []
+        self.generate_beam_bleu2 = []
+        self.generate_beam_bleu3 = []
+        self.generate_beam_bleu4 = []
+        self.generate2_bleu1 = []
+        self.generate2_bleu2 = []
+        self.generate2_bleu3 = []
+        self.generate2_bleu4 = []
+        self.train_bleu1 = []
+        self.train_bleu2 = []
+        self.train_bleu3 = []
+        self.train_bleu4 = []
         self.train_loss = []
         self.prefix_length = prefix_length
         self.cp_num = cp_num
@@ -74,11 +89,19 @@ class Predictor(object):
         self.test_image_id_list = test_image_id_list
 
     def fitCounter(self, data_mode, caption, dataIndex):
+        bleu1_sum = 0
+        bleu2_sum = 0
+        bleu3_sum = 0
+        bleu4_sum = 0
         if data_mode == "test":
             fitCount = 0
             caption_words = caption.split()
             index = self.test_image_id_list[dataIndex]
             for j in range(len(self.test_caption[index])):
+                bleu1_sum += sentence_bleu([self.test_caption[index][j].split()], caption_words, weights=(1, 0, 0, 0))
+                bleu2_sum += sentence_bleu([self.test_caption[index][j].split()], caption_words, weights=(0, 1, 0, 0))
+                bleu3_sum += sentence_bleu([self.test_caption[index][j].split()], caption_words, weights=(0, 0, 1, 0))
+                bleu4_sum += sentence_bleu([self.test_caption[index][j].split()], caption_words, weights=(0, 0, 0, 1))
                 gt_words = self.test_caption[index][j].split()
                 for k in range(len(caption_words)):
                     if caption_words[k] in gt_words:
@@ -89,14 +112,22 @@ class Predictor(object):
             caption_words = caption.split()
             index = self.train_image_id_list[dataIndex]
             for j in range(len(self.train_caption[index])):
+                bleu1_sum += sentence_bleu([self.train_caption[index][j].split()], caption_words, weights=(1, 0, 0, 0))
+                bleu2_sum += sentence_bleu([self.train_caption[index][j].split()], caption_words, weights=(0, 1, 0, 0))
+                bleu3_sum += sentence_bleu([self.train_caption[index][j].split()], caption_words, weights=(0, 0, 1, 0))
+                bleu4_sum += sentence_bleu([self.train_caption[index][j].split()], caption_words, weights=(0, 0, 0, 1))
                 gt_words = self.train_caption[index][j].split()
                 for k in range(len(caption_words)):
                     if caption_words[k] in gt_words:
                         fitCount += 1
             gtNum = len(self.train_caption[index])
-        return fitCount, gtNum
+        bleu1_sum /= gtNum
+        bleu2_sum /= gtNum
+        bleu3_sum /= gtNum
+        bleu4_sum /= gtNum
+        return fitCount, gtNum, bleu1_sum, bleu2_sum, bleu3_sum, bleu4_sum
 
-    def predict(self, tokens, masks, prefixs, text_gt, model):
+    def predict(self, data_mode,tokens, masks, prefixs, text_gt, model):
         self.embedding_size = model.embedding_size
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         tokens, masks, prefixs = tokens.to(device), masks.to(device), prefixs.to(device, dtype=torch.bfloat16)
@@ -108,10 +139,6 @@ class Predictor(object):
 
         model.eval()
         model.to(device, dtype=torch.bfloat16)
-        if len(text_gt) == 2:
-            data_mode = "test"
-        else:
-            data_mode = "train"
         for i, text in enumerate(text_gt):
             print('====================== '+data_mode+' '+ str(i+1) +'======================')
             print('--------- ground truth ---------')
@@ -120,15 +147,20 @@ class Predictor(object):
             prefix_embed = model.clip_project(prefixs[i].unsqueeze(0)).view(-1, self.prefix_length, self.embedding_size)
             caption = generate_beam(model, tokenizer, embed=prefix_embed)[0]
             caption_token = tokenizer(caption, return_tensors='pt', padding='max_length', truncation=True, max_length=74)
+
             print(caption)
             if self.generate_beam_output != None:
                 self.generate_beam_output = torch.cat((self.generate_beam_output, caption_token['input_ids']), dim=0)
             else:
                 self.generate_beam_output = caption_token['input_ids']
             self.generate_beam_text.append(caption)
-            fitCount, gtNum = self.fitCounter(data_mode, caption, i)
+            fitCount, gtNum, bleu1, bleu2, bleu3, bleu4 = self.fitCounter(data_mode, caption, i)
             self.generate_beam_fitCount.append(fitCount)
             self.generate_beam_gtNum.append(gtNum)
+            self.generate_beam_bleu1.append(bleu1)
+            self.generate_beam_bleu2.append(bleu2)
+            self.generate_beam_bleu3.append(bleu3)
+            self.generate_beam_bleu4.append(bleu4)
             print('---------generate2---------')
             caption = generate2(model, tokenizer, embed=prefix_embed)
             caption_token = tokenizer(caption, return_tensors='pt', padding='max_length', truncation=True, max_length=74)
@@ -138,14 +170,21 @@ class Predictor(object):
             else:
                 self.generate2_output = caption_token['input_ids']
             self.generate2_text.append(caption)
-            fitCount, gtNum = self.fitCounter(data_mode, caption, i)
+            fitCount, gtNum, bleu1, bleu2, bleu3, bleu4 = self.fitCounter(data_mode, caption, i)
             self.generate2_fitCount.append(fitCount)
             self.generate2_gtNum.append(gtNum)
+            self.generate2_bleu1.append(bleu1)
+            self.generate2_bleu2.append(bleu2)
+            self.generate2_bleu3.append(bleu3)
+            self.generate2_bleu4.append(bleu4)
             print('---------train---------')
             # embedding_text = model.gemma.model.embed_tokens(tokens[i].unsqueeze(0))
             # embedding_text = model.gemma.base_model.model.model.embed_tokens(tokens[i].unsqueeze(0))
             # embedding_text = model.gpt.transformer.wte(tokens[i].unsqueeze(0))
-            embedding_text = model.falcon.model.embed_tokens(tokens[i].unsqueeze(0))
+            if adapter:
+                embedding_text = model.falcon.base_model.model.model.embed_tokens(tokens[i].unsqueeze(0))
+            else:
+                embedding_text = model.falcon.model.embed_tokens(tokens[i].unsqueeze(0))
             print(prefix_embed.shape, embedding_text.shape)
             embedding_cat = torch.cat((prefix_embed, embedding_text), dim=1)
             # out = model.gemma(inputs_embeds=embedding_cat, attention_mask=masks[i].unsqueeze(0))
@@ -165,11 +204,15 @@ class Predictor(object):
                 self.train_output = caption_token
             self.train_text.append(caption)
             self.train_loss.append(loss.item())
-            fitCount, gtNum = self.fitCounter(data_mode, caption, i)
+            fitCount, gtNum, bleu1, bleu2, bleu3, bleu4 = self.fitCounter(data_mode, caption, i)
             self.train_fitCount.append(fitCount)
             self.train_gtNum.append(gtNum)
+            self.train_bleu1.append(bleu1)
+            self.train_bleu2.append(bleu2)
+            self.train_bleu3.append(bleu3)
+            self.train_bleu4.append(bleu4)
 
-        if len(text_gt) != 2:
+        if data_mode == "train":
             def dataframe_Name(name, count=489, rows=1):
                 if rows == 1:
                     name_df = pd.DataFrame([[name]], columns=["Name"])
@@ -181,24 +224,37 @@ class Predictor(object):
                     return name_df
 
             test = pd.DataFrame()
-            test['Name'] = ['test1', 'test2', 'train1', 'train2', 'train3', 'train4', 'train5', 'train6', 'train7',
+            test['Name'] = ['test1', 'test2', 'test3', 'test4', 'test5', 'test6', 'test7', 'test8', 'test9','test10',
+                            'train1', 'train2', 'train3', 'train4', 'train5', 'train6', 'train7',
                             'train8', 'train9', 'train10']
             generate_beam_df = pd.DataFrame(self.generate_beam_output.cpu().detach(),columns=[f"{i}" for i in range(0, 74)])
-            generate_beam_df = pd.concat([test, generate_beam_df, dataframe_Name("-", 74, 12)], axis=1)
+            generate_beam_df = pd.concat([test, generate_beam_df, dataframe_Name("-", 74, 16)], axis=1)
             generate_beam_df['text'] = self.generate_beam_text
             generate_beam_df['fitCount'] = self.generate_beam_fitCount
             generate_beam_df['gtNum'] = self.generate_beam_gtNum
+            generate_beam_df['bleu1'] = self.generate_beam_bleu1
+            generate_beam_df['bleu2'] = self.generate_beam_bleu2
+            generate_beam_df['bleu3'] = self.generate_beam_bleu3
+            generate_beam_df['bleu4'] = self.generate_beam_bleu4
             generate2_df = pd.DataFrame(self.generate2_output.cpu().detach(), columns=[f"{i}" for i in range(0, 74)])
-            generate2_df = pd.concat([test, generate2_df, dataframe_Name("-", 74, 12)], axis=1)
+            generate2_df = pd.concat([test, generate2_df, dataframe_Name("-", 74, 16)], axis=1)
             generate2_df['text'] = self.generate2_text
             generate2_df['fitCount'] = self.generate2_fitCount
             generate2_df['gtNum'] = self.generate2_gtNum
+            generate2_df['bleu1'] = self.generate2_bleu1
+            generate2_df['bleu2'] = self.generate2_bleu2
+            generate2_df['bleu3'] = self.generate2_bleu3
+            generate2_df['bleu4'] = self.generate2_bleu4
             train_df = pd.DataFrame(self.train_output.cpu().detach(), columns=[f"{i}" for i in range(0, 489)])
             train_df = pd.concat([test, train_df], axis=1)
             train_df['loss'] = self.train_loss
             train_df['text'] = self.train_text
             train_df['fitCount'] = self.train_fitCount
             train_df['gtNum'] = self.train_gtNum
+            train_df['bleu1'] = self.train_bleu1
+            train_df['bleu2'] = self.train_bleu2
+            train_df['bleu3'] = self.train_bleu3
+            train_df['bleu4'] = self.train_bleu4
             print(dataframe_Name("generate_beam").shape, generate_beam_df.shape, dataframe_Name("generate2").shape,
                   generate2_df.shape, dataframe_Name("train").shape, train_df.shape)
             final = pd.concat([dataframe_Name("generate_beam"), generate_beam_df, dataframe_Name("generate2"),
@@ -207,7 +263,7 @@ class Predictor(object):
             print(final.columns)
 
             final.to_csv(f'./Model/{save_file}/{save_file}_test_{self.cp_num:03d}.csv', index=False)
-
+            # final.to_csv(f'./Model/{save_file}/Generate_mcdonalds_all.csv', index=False)
 class MLP(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -223,7 +279,7 @@ class MLP(nn.Module):
         self.model = nn.Sequential(*layers)
 
 class MlpTransformer(nn.Module):
-    def __init__(self, in_dim, h_dim, out_d: Optional[int] = None, act=nnf.relu, dropout=0.7):
+    def __init__(self, in_dim, h_dim, out_d: Optional[int] = None, act=nnf.relu, dropout=0.):
         super().__init__()
         out_d = out_d if out_d is not None else in_dim
         self.fc1 = nn.Linear(in_dim, h_dim)
@@ -241,7 +297,7 @@ class MlpTransformer(nn.Module):
 
 class MultiHeadAttention(nn.Module):
 
-    def __init__(self, dim_self, dim_ref, num_heads, bias=True, dropout=0.7):
+    def __init__(self, dim_self, dim_ref, num_heads, bias=True, dropout=0.):
         super().__init__()
         self.num_heads = num_heads
         head_dim = dim_self // num_heads
@@ -283,7 +339,7 @@ class TransformerLayer(nn.Module):
         x = x + self.mlp(self.norm2(x))
         return x
 
-    def __init__(self, dim_self, dim_ref, num_heads, mlp_ratio=4., bias=False, dropout=0.7, act=nnf.relu,
+    def __init__(self, dim_self, dim_ref, num_heads, mlp_ratio=4., bias=True, dropout=0., act=nnf.relu,
                  norm_layer: nn.Module = nn.LayerNorm):
         super().__init__()
         self.norm1 = norm_layer(dim_self)
@@ -332,9 +388,9 @@ class TransformerMapper(nn.Module):
 
     def forward(self, x):
         ### clip ###
-        x = self.linear(x).view(x.shape[0], self.clip_length, -1)
+        # x = self.linear(x).view(x.shape[0], self.clip_length, -1)
         ### swin ###
-        # x = self.linear(x)
+        x = self.linear(x)
         ############
         prefix = self.prefix_const.unsqueeze(0).expand(x.shape[0], *self.prefix_const.shape)
         prefix = torch.cat((x, prefix), dim=1)
@@ -346,9 +402,9 @@ class TransformerMapper(nn.Module):
         self.clip_length = clip_length
         self.transformer = Transformer(dim_embedding, 8, num_layers)
         ### clip ###
-        self.linear = nn.Linear(dim_clip, clip_length * dim_embedding)
+        # self.linear = nn.Linear(dim_clip, clip_length * dim_embedding)
         ### swin ###
-        # self.linear = nn.Linear(768, dim_embedding)
+        self.linear = nn.Linear(768, dim_embedding)
         ############
         self.prefix_const = nn.Parameter(torch.randn(prefix_length, dim_embedding), requires_grad=True)
 
@@ -362,7 +418,10 @@ class ClipCaptionModel(nn.Module):
         # embedding_text = self.gemma.model.embed_tokens(tokens)
         # embedding_text = self.gemma.base_model.model.model.embed_tokens(tokens)
         # embedding_text = self.gpt.transformer.wte(tokens)
-        embedding_text = self.falcon.model.embed_tokens(tokens)
+        if adapter:
+            embedding_text = self.falcon.base_model.model.model.embed_tokens(tokens)
+        else:
+            embedding_text = self.falcon.model.embed_tokens(tokens)
         prefix_projections = self.clip_project(prefix).view(-1, self.prefix_length, self.embedding_size)
         embedding_cat = torch.cat((prefix_projections, embedding_text), dim=1)
         if labels is not None:
@@ -420,6 +479,27 @@ class ClipCaptionModel(nn.Module):
         #         (prefix_size, (self.embedding_size * prefix_length) // 2, self.embedding_size * prefix_length))
         # else:
         self.clip_project = TransformerMapper(prefix_size, self.embedding_size, prefix_length, clip_length, num_layers)
+    def activateLoRa(self):
+        LORAconfig = LoraConfig(
+            task_type=TaskType.CAUSAL_LM,
+            target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+            inference_mode=False,  # 训练模式
+            r=8,  # Lora 秩
+            lora_alpha=32,  # Lora alaph，具体作用参见 Lora 原理
+            lora_dropout=0.1  # Dropout 比例
+        )
+
+        def count_trainable_parameters(model):
+            model_parameters = filter(lambda p: p.requires_grad, model.parameters())
+            params = sum([np.prod(p.size()) for p in model_parameters])
+            return params
+
+        a = count_trainable_parameters(self.falcon)
+        self.falcon = get_peft_model(self.falcon, LORAconfig)
+        b = count_trainable_parameters(self.falcon)
+        # 留下小數點後兩位就好
+        percent = round((b / a) * 100, 3)
+        print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
 
 class ClipCaptionPrefix(ClipCaptionModel):
 
@@ -488,7 +568,10 @@ def generate_beam(model, tokenizer, beam_size: int = 5, prompt=None, embed=None,
             # next_token_embed = model.gpt.transformer.wte(next_tokens.squeeze()).view(generated.shape[0], 1, -1)
             # next_token_embed = model.gemma.model.embed_tokens(next_tokens.squeeze()).view(generated.shape[0], 1, -1)
             # next_token_embed = model.gemma.base_model.model.model.embed_tokens(next_tokens.squeeze()).view( generated.shape[0], 1, -1)
-            next_token_embed = model.falcon.model.embed_tokens(next_tokens.squeeze()).view(generated.shape[0], 1, -1)
+            if adapter:
+                next_token_embed = model.falcon.base_model.model.model.embed_tokens(next_tokens.squeeze()).view(generated.shape[0], 1, -1)
+            else:
+                next_token_embed = model.falcon.model.embed_tokens(next_tokens.squeeze()).view(generated.shape[0], 1, -1)
             generated = torch.cat((generated, next_token_embed), dim=1)
             is_stopped = is_stopped + next_tokens.eq(stop_token_index).squeeze()
             if is_stopped.all():
@@ -502,7 +585,6 @@ def generate_beam(model, tokenizer, beam_size: int = 5, prompt=None, embed=None,
     order = scores.argsort(descending=True)
     output_texts = [output_texts[i] for i in order]
     return output_texts
-
 
 def generate2(model, tokenizer, tokens=None, prompt=None, embed=None, entry_count=1, entry_length=74, top_p=0.8,
               temperature=1.0, stop_token: str = ".", ):
@@ -526,7 +608,10 @@ def generate2(model, tokenizer, tokens=None, prompt=None, embed=None, entry_coun
                 # generated = model.gpt.transformer.wte(tokens)
                 # generated = model.gemma.model.embed_tokens(tokens)
                 # generated = model.gemma.base_model.model.model.embed_tokens(tokens)
-                generated = model.falcon.model.embed_tokens(tokens)
+                if adapter:
+                    generated = model.falcon.base_model.model.model.embed_tokens(tokens)
+                else:
+                    generated = model.falcon.model.embed_tokens(tokens)
             for i in range(entry_length):
                 # outputs = model.gemma(inputs_embeds=generated)
                 # outputs = model.gpt(inputs_embeds=generated)
@@ -549,7 +634,10 @@ def generate2(model, tokenizer, tokens=None, prompt=None, embed=None, entry_coun
                 # next_token_embed = model.gemma.model.embed_tokens(next_token)
                 # next_token_embed = model.gemma.base_model.model.model.embed_tokens(next_token)
                 # next_token_embed = model.gpt.transformer.wte(next_token)
-                next_token_embed = model.falcon.model.embed_tokens(next_token)
+                if adapter:
+                    next_token_embed = model.falcon.base_model.model.model.embed_tokens(next_token)
+                else:
+                    next_token_embed = model.falcon.model.embed_tokens(next_token)
                 if tokens is None:
                     tokens = next_token
                 else:
@@ -587,15 +675,19 @@ class OxfordDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, item: int) -> tuple[Tensor, Tensor, Any, int]:
         tokens, mask = self.pad_tokens(item)
-        prefix = torch.load('../../Oxford_HIC/ImageData/' + self.image_ids[item] + '.pt', weights_only=False)
+        if self.dataFrom == 'Oxford':
+            prefix = torch.load('../../Oxford_HIC/ImageData/' + self.image_ids[item] + '.pt', weights_only=False)
+        else:
+            prefix = torch.load('../../Instagram/ImageData/'+ self.dataFrom +'/' + self.image_ids[item] + '.pt', weights_only=False)
         if self.normalize_prefix:
             prefix = prefix.float()
             prefix = prefix / prefix.norm(2, -1)
         return tokens, mask, prefix
 
     def __init__(self, data_path: str, prefix_length: int, gpt2_type: str = "gpt2", normalize_prefix=False, model=None,
-                 batch_size=30, bleu_threshold=0.4):
+                 batch_size=30, bleu_threshold=0.4, dataFrom='Oxford'):
         self.data_path = data_path
+        self.dataFrom = dataFrom
         self.bleu = False
         # self.tokenizer = GPT2Tokenizer.from_pretrained(gpt2_type)
         # self.tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
@@ -699,12 +791,14 @@ class ClipCocoDataset(Dataset):
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-trainData = '../Data/Oxford_HIC/parse/oxford_only10_ViT-B_32_train.pkl'
-testData = '../Data/Oxford_HIC/parse/oxford_only10_ViT-B_32_test.pkl'
-prefix_length = 50
+trainData = '../Data/Oxford_HIC/parse/oxford_800up_only800_all_ViT-B_32_train.pkl'
+testData = '../Data/Oxford_HIC/parse/oxford_800up_only800_rest_300up_top300_ViT-B_32_test.pkl'
+# trainData = '../Data/Instagram/parse/10up_sonicdrivein_ViT-B_32_train.pkl'
+# testData = '../Data/Instagram/parse/10up_sonicdrivein_ViT-B_32_test.pkl'
+prefix_length = 64
 normalize_prefix = False
-trainDataset = ClipCocoDataset(trainData, prefix_length, normalize_prefix=normalize_prefix)
-testDataset = ClipCocoDataset(testData, prefix_length, normalize_prefix=normalize_prefix)
+trainDataset = OxfordDataset(trainData, prefix_length, normalize_prefix=normalize_prefix, dataFrom = "Oxford")
+testDataset = OxfordDataset(testData, prefix_length, normalize_prefix=normalize_prefix, dataFrom = "Oxford")
 ##################### oxford_300k #####################
 # train_image = ['imgflip_34', 'bokete_3820', 'imgflip_0','imgflip_8', 'imgflip_15', 'imgflip_19', 'bokete_104530','imgflip_730', 'imgflip_130', 'imgflip_677']
 # train_text = ['You finish doing something at your friends house and look at your phone; 7 missed calls from your mom; 7 missed calls from your mom'
@@ -778,29 +872,29 @@ testDataset = ClipCocoDataset(testData, prefix_length, normalize_prefix=normaliz
 #               ,'me: gets up and starts clapping because the chiefs won; the guy who has been pushing my wheelchair for 10 years'
 #               ,'THEY TOOK AWAY MY HAPPY MEAL I TOOK AWAY THEIR HAPPINESS']
 ##################### oxford_only10 #####################
-train_image = ['2spbgym', 'all-the-things', 'imgflip_0', 'imgflip_1033','imgflip_11', 'imgflip_117', 'imgflip_16', 'imgflip_189','imgflip_23', 'imgflip_504']
-train_text = ['i\'ll take it sure ur not chicken?',
-              'avoid all the work',
-              'due tomorrow; do tomorrow',
-              'i want to speak to your manager',
-              'school: *closes*; the kid who was in the bathroom:',
-              'almost getting pass an extremely hard level but failing last minute',
-              'you can\'t lose your mind; if you don\'t have one',
-              'you; doing nothing; today; teacher',
-              'students: *acting crazy*; teacher: pay attention! that kid named attention:',
-              'they called me four eyes. i call them no eyes.']
+# train_image = ['2spbgym', 'all-the-things', 'imgflip_0', 'imgflip_1033','imgflip_11', 'imgflip_117', 'imgflip_16', 'imgflip_189','imgflip_23', 'imgflip_504']
+# train_text = ['i\'ll take it sure ur not chicken?',
+#               'avoid all the work',
+#               'due tomorrow; do tomorrow',
+#               'i want to speak to your manager',
+#               'school: *closes*; the kid who was in the bathroom:',
+#               'almost getting pass an extremely hard level but failing last minute',
+#               'you can\'t lose your mind; if you don\'t have one',
+#               'you; doing nothing; today; teacher',
+#               'students: *acting crazy*; teacher: pay attention! that kid named attention:',
+#               'they called me four eyes. i call them no eyes.']
 ####################### default #######################
-# train_image = []
-# train_text = []
-# for i in range(len(trainDataset)):
-#     caption = trainDataset.captions[i]
-#     image_id = trainDataset.image_ids[i]
-#     if image_id not in train_image:
-#         print(f"Image ID: {image_id}, Caption: {caption}")
-#         train_image.append(image_id)
-#         train_text.append(caption)
-#         if len(train_image) == 10:
-#             break
+train_image = []
+train_text = []
+for i in range(len(trainDataset)):
+    caption = trainDataset.captions[i]
+    image_id = trainDataset.image_ids[i]
+    if image_id not in train_image:
+        print(f"Image ID: {image_id}, Caption: {caption}")
+        train_image.append(image_id)
+        train_text.append(caption)
+        if len(train_image) == 10:
+            break
 #######################################################
 tokens_list = []
 mask_list = []
@@ -857,21 +951,21 @@ print(train_tokens.shape, train_mask.shape, train_prefix.shape, len(train_image_
 # test_text = ['she started writing notes !!'
 #               ,'WHEN YOUR FRIEND; DOSENT LIKE ROOT BEER']
 ##################### oxford_only10 ###################
-test_image = ['bokete_100174', 'imgflip_834']
-test_text = ['get out of my way. i\'ll do it.'
-                ,'me fully prepared for the test; question 1']
+# test_image = ['bokete_100174', 'imgflip_834']
+# test_text = ['get out of my way. i\'ll do it.'
+#                 ,'me fully prepared for the test; question 1']
 ####################### default #######################
-# test_image = []
-# test_text = []
-# for i in range(len(testDataset)):
-#     caption = testDataset.captions[i]
-#     image_id = testDataset.image_ids[i]
-#     if image_id not in test_image:
-#         print(f"Image ID: {image_id}, Caption: {caption}")
-#         test_image.append(image_id)
-#         test_text.append(caption)
-#         if len(test_image) == 2:
-#             break
+test_image = []
+test_text = []
+for i in range(len(testDataset)):
+    caption = testDataset.captions[i]
+    image_id = testDataset.image_ids[i]
+    if image_id not in test_image:
+        print(f"Image ID: {image_id}, Caption: {caption}")
+        test_image.append(image_id)
+        test_text.append(caption)
+        if len(test_image) == 10:
+            break
 #######################################################
 tokens_list = []
 mask_list = []
@@ -902,22 +996,52 @@ test_prefix = torch.stack(prefix_list).to(device)
 print(test_tokens.shape, test_mask.shape, test_prefix.shape)
 
 model = ClipCaptionModel(prefix_length, clip_length=prefix_length, prefix_size=512, num_layers=8)
-save_file = '20250116_totalClip_oxford_only10_transformer_p50_falcon'
-for i in range(15):
+adapter = True
+save_file = '20250213_300up_only300_rest_200up_top200_sonicdrivein_transformer_p64_falcon_swin_tf8'
+i = 1
+if adapter :
+    model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i:03d}.pt'))
+
+    def count_trainable_parameters(model):
+        model_parameters = filter(lambda p: p.requires_grad, model.parameters())
+        params = sum([np.prod(p.size()) for p in model_parameters])
+        return params
+
+    a = count_trainable_parameters(model)
+    re_grad_list = ['fc1', 'fc2', 'to_queries', 'to_keys_values', 'project', 'linear']
+    for name, param in model.named_parameters():
+        if 'clip_project' in name:
+            if 'bias' in name:
+                param.requires_grad = True
+            elif name in re_grad_list:
+                param.requires_grad = True
+            else:
+                param.requires_grad = False
+    b = count_trainable_parameters(model)
+    # 留下小數點後兩位就好
+    percent = round((b / a) * 100, 3)
+    print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
+    # Set requires_grad = True for LoRa and bias parameters only
+
+    model.activateLoRa()
+
+save_file = '202502014_oxford_only800_base_sonicdrivein_only300_transformer_lora_p64_falcon_swin_tf8'
+for i in range(10):
     if os.path.exists(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'):
         model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'))
         model = model.eval()
         model = model.to(device, dtype=torch.bfloat16)
         pred = Predictor(prefix_length, cp_num=i + 1, train_caption=train_caption, test_caption=test_caption,
                          train_image_id_list=train_image_id_list, test_image_id_list=test_image_id_list)
-        pred.predict(test_tokens, test_mask, test_prefix, test_gt, model)
-        pred.predict(train_tokens, train_mask, train_prefix, train_gt, model)
+        print(f"Model {i + 1:03d} loaded.")
+        pred.predict("test", test_tokens, test_mask, test_prefix, test_gt, model)
+        pred.predict("train", train_tokens, train_mask, train_prefix, train_gt, model)
 
 AllCaption = pd.DataFrame()
-for i in range(15):
+for i in range(10):
     if os.path.exists(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'):
         df = pd.read_csv(f'./Model/{save_file}/{save_file}_test_{i + 1:03d}.csv')
-        textAndLoss = df[['text', 'loss', 'fitCount', 'gtNum']]
+        textAndLoss = df[['text', 'loss', 'fitCount', 'gtNum', 'bleu1', 'bleu2', 'bleu3', 'bleu4']]
         AllCaption = pd.concat([AllCaption, textAndLoss], axis=1)
 AllCaption.to_csv(f'./Model/{save_file}/{save_file}_test_all.csv', index=False)
 
