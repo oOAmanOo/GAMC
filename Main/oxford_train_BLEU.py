@@ -55,7 +55,11 @@ class OxfordDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, item: int) -> tuple[Tensor, Tensor, Any, int]:
         tokens, mask = self.pad_tokens(item)
-        prefix = torch.load('../../Oxford_HIC/ImageData/' + self.image_ids[item] + '.pt', weights_only=False)
+        if self.dataFrom == 'Oxford':
+            prefix = torch.load('../../Oxford_HIC/ImageData/' + self.image_ids[item] + '.pt', weights_only=False)
+        else:
+            prefix = torch.load('../../Instagram/ImageData/' + self.dataFrom + '/' + self.image_ids[item] + '.pt',
+                                weights_only=False)
         if self.normalize_prefix:
             prefix = prefix.float()
             prefix = prefix / prefix.norm(2, -1)
@@ -100,8 +104,7 @@ class OxfordDataset(torch.utils.data.Dataset):
             progress.update()
 
         # Update dataset based on filtered indices
-        print(
-            f"Before Filtered: {len(self.captions_tokens)}, After Filtered: {len(filtered_indices)}, BLEU <= {bleu_threshold}")
+        print(f"Before Filtered: {len(self.captions_tokens)}, After Filtered: {len(filtered_indices)}, BLEU <= {bleu_threshold}")
         self.captions = [self.captions[i] for i in filtered_indices]
         self.image_ids = [self.image_ids[i] for i in filtered_indices]
         self.captions_tokens = [self.captions_tokens[i] for i in filtered_indices]
@@ -111,8 +114,9 @@ class OxfordDataset(torch.utils.data.Dataset):
         torch.cuda.empty_cache()
 
     def __init__(self, data_path: str, prefix_length: int, gpt2_type: str = "gpt2", normalize_prefix=False, model=None,
-                 batch_size=30, bleu_threshold=0.4):
+                 batch_size=30, bleu_threshold=0.4, dataFrom='Oxford'):
         self.data_path = data_path
+        self.dataFrom = dataFrom
         self.bleu = False
         # self.tokenizer = GPT2Tokenizer.from_pretrained(gpt2_type)
         # self.tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
@@ -204,11 +208,12 @@ class ClipCocoDataset(Dataset):
                 device), prefixes_batch.to(device, dtype=torch.bfloat16)
 
             # Forward pass
-            prefix_embeds = model.clip_project(prefixes_batch).view(-1, self.prefix_length, model.embedding_size)
+            # prefix_embeds = model.clip_project(prefixes_batch).view(-1, self.prefix_length, model.embedding_size)
             # text_embeds = model.falcon.model.embed_tokens(tokens_batch)
             # embedding_cat = torch.cat((prefix_embeds, text_embeds), dim=1)
-            outputs = model.falcon(inputs_embeds=prefix_embeds, attention_mask=masks_batch)
-            logits = outputs.logits
+            # outputs = model.falcon(inputs_embeds=embedding_cat, attention_mask=masks_batch)
+            outputs = model(tokens_batch, prefixes_batch, masks_batch)
+            logits = outputs.logits[:, self.prefix_length - 1: -1]
             generated_tokens_batch = torch.argmax(logits, dim=-1)
 
             # BLEU calculation and filtering
@@ -222,13 +227,12 @@ class ClipCocoDataset(Dataset):
             progress.update()
 
         # Update dataset based on filtered indices
-        print(
-            f"Before Filtered: {len(self.captions_tokens)}, After Filtered: {len(filtered_indices)}, BLEU <= {bleu_threshold}")
+        print(f"Before Filtered: {len(self.captions_tokens)}, After Filtered: {len(filtered_indices)}, BLEU <= {bleu_threshold}")
         self.captions = [self.captions[i] for i in filtered_indices]
         self.image_ids = [self.image_ids[i] for i in filtered_indices]
         self.captions_tokens = [self.captions_tokens[i] for i in filtered_indices]
         self.caption2embedding = [self.caption2embedding[i] for i in filtered_indices]
-        del tokens_batch, masks_batch, prefixes_batch, original_indices, prefix_embeds, outputs, logits, generated_tokens_batch, reference, candidate, bleu_score
+        del tokens_batch, masks_batch, prefixes_batch, original_indices, outputs, logits, generated_tokens_batch, reference, candidate, bleu_score
         gc.collect()
         torch.cuda.empty_cache()
 
@@ -275,7 +279,7 @@ class ClipCocoDataset(Dataset):
             with open(f"{self.data_path[:-4]}_bleu_all.pkl", 'wb') as f:
                 pickle.dump([self.captions_tokens, self.caption2embedding, self.max_seq_len], f)
         print(f"Train Data size: {len(self.captions_tokens)}")
-        # self.filter_data_by_bleu(model, batch_size, bleu_threshold)
+        self.filter_data_by_bleu(model, batch_size, bleu_threshold)
 
 class MLP(nn.Module):
 
@@ -292,7 +296,7 @@ class MLP(nn.Module):
         self.model = nn.Sequential(*layers)
 
 class MlpTransformer(nn.Module):
-    def __init__(self, in_dim, h_dim, out_d: Optional[int] = None, act=nnf.relu, dropout=0.7):
+    def __init__(self, in_dim, h_dim, out_d: Optional[int] = None, act=nnf.relu, dropout=0.):
         super().__init__()
         out_d = out_d if out_d is not None else in_dim
         self.fc1 = nn.Linear(in_dim, h_dim)
@@ -310,7 +314,7 @@ class MlpTransformer(nn.Module):
 
 class MultiHeadAttention(nn.Module):
 
-    def __init__(self, dim_self, dim_ref, num_heads, bias=True, dropout=0.7):
+    def __init__(self, dim_self, dim_ref, num_heads, bias=True, dropout=0.):
         super().__init__()
         self.num_heads = num_heads
         head_dim = dim_self // num_heads
@@ -352,7 +356,7 @@ class TransformerLayer(nn.Module):
         x = x + self.mlp(self.norm2(x))
         return x
 
-    def __init__(self, dim_self, dim_ref, num_heads, mlp_ratio=4., bias=False, dropout=0.7, act=nnf.relu,
+    def __init__(self, dim_self, dim_ref, num_heads, mlp_ratio=4., bias=True, dropout=0., act=nnf.relu,
                  norm_layer: nn.Module = nn.LayerNorm):
         super().__init__()
         self.norm1 = norm_layer(dim_self)
@@ -401,9 +405,9 @@ class TransformerMapper(nn.Module):
 
     def forward(self, x):
         ### clip ###
-        x = self.linear(x).view(x.shape[0], self.clip_length, -1)
+        # x = self.linear(x).view(x.shape[0], self.clip_length, -1)
         ### swin ###
-        # x = self.linear(x)
+        x = self.linear(x)
         ############
         prefix = self.prefix_const.unsqueeze(0).expand(x.shape[0], *self.prefix_const.shape)
         prefix = torch.cat((x, prefix), dim=1)
@@ -415,9 +419,9 @@ class TransformerMapper(nn.Module):
         self.clip_length = clip_length
         self.transformer = Transformer(dim_embedding, 8, num_layers)
         ### clip ###
-        self.linear = nn.Linear(dim_clip, clip_length * dim_embedding)
+        # self.linear = nn.Linear(dim_clip, clip_length * dim_embedding)
         ### swin ###
-        # self.linear = nn.Linear(768, dim_embedding)
+        self.linear = nn.Linear(768, dim_embedding)
         ############
         self.prefix_const = nn.Parameter(torch.randn(prefix_length, dim_embedding), requires_grad=True)
 
@@ -489,8 +493,7 @@ class ClipCaptionModel(nn.Module):
             self.clip_project = MLP(
                 (prefix_size, (self.embedding_size * prefix_length) // 2, self.embedding_size * prefix_length))
         else:
-            self.clip_project = TransformerMapper(prefix_size, self.embedding_size, prefix_length, clip_length,
-                                                  num_layers)
+            self.clip_project = TransformerMapper(prefix_size, self.embedding_size, prefix_length, clip_length, num_layers)
 
 class ClipCaptionPrefix(ClipCaptionModel):
 
@@ -553,10 +556,8 @@ def train(trainData, testData, model: ClipCaptionModel, args,
         os.makedirs(output_dir)
     model = model.to(device, dtype=torch.bfloat16)
     model.eval()
-    trainDataset = ClipCocoDataset(trainData, prefix_length, normalize_prefix, model=model, batch_size=bleu_batch_size,
-                                   bleu_threshold=bleu_threshold)
-    testDataset = ClipCocoDataset(testData, prefix_length, normalize_prefix, model=model, batch_size=bleu_batch_size,
-                                  bleu_threshold=bleu_threshold)
+    trainDataset = OxfordDataset(trainData, prefix_length, normalize_prefix, model=model, batch_size=bleu_batch_size, bleu_threshold=bleu_threshold, dataFrom=args.dataFrom)
+    testDataset = OxfordDataset(testData, prefix_length, normalize_prefix, model=model, batch_size=bleu_batch_size, bleu_threshold=bleu_threshold, dataFrom=args.dataFrom)
     train_dataloader = DataLoader(trainDataset, batch_size=batch_size, shuffle=True, drop_last=True)
     test_dataloader = DataLoader(testDataset, batch_size=batch_size, shuffle=True, drop_last=True)
     epoch = 0
@@ -641,6 +642,7 @@ def train(trainData, testData, model: ClipCaptionModel, args,
             save.append('V')
         else:
             save.append(' ')
+
         bleu_threshold_list.append(bleu_threshold)
         trainData_size_list.append(len(trainDataset))
         testData_size_list.append(len(testDataset))
@@ -669,48 +671,51 @@ def train(trainData, testData, model: ClipCaptionModel, args,
         plt.show()
 
         epoch += 1
-        if testBleu > bleu_threshold:
-            bleu_threshold += 0.05
-            model.eval()
-            del trainDataset, testDataset, train_dataloader, test_dataloader, optimizer, scheduler, progress, tokens, mask, prefix, outputs, logits, generated_tokens, bleu_score
-            gc.collect()
-            torch.cuda.empty_cache()
-            trainDataset = ClipCocoDataset(trainData, prefix_length, normalize_prefix, model=model,
-                                           batch_size=batch_size, bleu_threshold=bleu_threshold)
-            testDataset = ClipCocoDataset(testData, prefix_length, normalize_prefix, model=model, batch_size=batch_size,
-                                          bleu_threshold=bleu_threshold)
-            train_dataloader = DataLoader(trainDataset, batch_size=batch_size, shuffle=True, drop_last=True)
-            test_dataloader = DataLoader(testDataset, batch_size=batch_size, shuffle=True, drop_last=True)
-            best_train_loss = 9999999999
-            best_test_loss = 9999999999
-            while len(trainDataset) < batch_size or len(testDataset) < batch_size:
-                bleu_threshold += 0.05
-                model.eval()
-                del trainDataset, testDataset, train_dataloader, test_dataloader
-                gc.collect()
-                torch.cuda.empty_cache()
-                trainDataset = ClipCocoDataset(trainData, prefix_length, normalize_prefix, model=model,
-                                               batch_size=batch_size, bleu_threshold=bleu_threshold)
-                testDataset = ClipCocoDataset(testData, prefix_length, normalize_prefix, model=model,
-                                              batch_size=batch_size, bleu_threshold=bleu_threshold)
-                train_dataloader = DataLoader(trainDataset, batch_size=batch_size, shuffle=True, drop_last=True)
-                test_dataloader = DataLoader(testDataset, batch_size=batch_size, shuffle=True, drop_last=True)
-                best_train_loss = 9999999999
-                best_test_loss = 9999999999
-        if bleu_threshold > 1:
-            break
+        # if testBleu > bleu_threshold:
+        #     bleu_threshold += 0.05
+        #     model.eval()
+        #     del trainDataset, testDataset, train_dataloader, test_dataloader, optimizer, scheduler, progress, tokens, mask, prefix, outputs, logits, generated_tokens, bleu_score
+        #     gc.collect()
+        #     torch.cuda.empty_cache()
+        #     trainDataset = ClipCocoDataset(trainData, prefix_length, normalize_prefix, model=model,
+        #                                    batch_size=batch_size, bleu_threshold=bleu_threshold)
+        #     testDataset = ClipCocoDataset(testData, prefix_length, normalize_prefix, model=model, batch_size=batch_size,
+        #                                   bleu_threshold=bleu_threshold)
+        #     train_dataloader = DataLoader(trainDataset, batch_size=batch_size, shuffle=True, drop_last=True)
+        #     test_dataloader = DataLoader(testDataset, batch_size=batch_size, shuffle=True, drop_last=True)
+        #     best_train_loss = 9999999999
+        #     best_test_loss = 9999999999
+        #     while len(trainDataset) < batch_size or len(testDataset) < batch_size:
+        #         bleu_threshold += 0.05
+        #         model.eval()
+        #         del trainDataset, testDataset, train_dataloader, test_dataloader
+        #         gc.collect()
+        #         torch.cuda.empty_cache()
+        #         trainDataset = ClipCocoDataset(trainData, prefix_length, normalize_prefix, model=model,
+        #                                        batch_size=batch_size, bleu_threshold=bleu_threshold)
+        #         testDataset = ClipCocoDataset(testData, prefix_length, normalize_prefix, model=model,
+        #                                       batch_size=batch_size, bleu_threshold=bleu_threshold)
+        #         train_dataloader = DataLoader(trainDataset, batch_size=batch_size, shuffle=True, drop_last=True)
+        #         test_dataloader = DataLoader(testDataset, batch_size=batch_size, shuffle=True, drop_last=True)
+        #         best_train_loss = 9999999999
+        #         best_test_loss = 9999999999
+        # if bleu_threshold > 1:
+        #     break
     return model
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--trainData', default='../Data/Oxford_HIC/parse/oxford_only10_ViT-B_32_train.pkl')
-    parser.add_argument('--testData', default='../Data/Oxford_HIC/parse/oxford_only10_ViT-B_32_test.pkl')
-    parser.add_argument('--out_dir', default='20250116_totalClip_oxford_only10_transformer_p50_falcon')
+    # parser.add_argument('--trainData', default='../Data/Oxford_HIC/parse/oxford_300up_only300_ViT-B_32_train.pkl')
+    # parser.add_argument('--testData', default='../Data/Oxford_HIC/parse/oxford_300up_only300_ViT-B_32_test.pkl')
+    parser.add_argument('--trainData', default='../Data/Instagram/parse/10up_only10_sonicdrivein_ViT-B_32_train.pkl')
+    parser.add_argument('--testData', default='../Data/Instagram/parse/10up_only10_sonicdrivein_ViT-B_32_test.pkl')
+    parser.add_argument('--dataFrom', default='sonicdrivein')
+    parser.add_argument('--out_dir', default='20250214_10up_only10_sonicdrivein_transformer_p64_falcon_swin_tf8')
     parser.add_argument('--prefix', default='checkpoint', help='prefix for saved filenames')
     parser.add_argument('--epochs', type=int, default=50)
     parser.add_argument('--save_every', type=int, default=1)
-    parser.add_argument('--prefix_length', type=int, default=50)
-    parser.add_argument('--prefix_length_clip', type=int, default=50)
+    parser.add_argument('--prefix_length', type=int, default=64)
+    parser.add_argument('--prefix_length_clip', type=int, default=64)
     parser.add_argument('--bs', type=int, default=20)
     parser.add_argument('--only_prefix', dest='only_prefix', action='store_true')
     parser.add_argument('--mapping_type', type=str, default='transformer', help='mlp/transformer')
@@ -739,12 +744,12 @@ def main():
     device = torch.device('cuda:0')
     model = model.to(device, dtype=torch.bfloat16)
     # 20250115_totalClip_oxford_only100_300k_transformer_p40_falcon_bleu1_0.05 == 32
-    # save_file = '20250115_totalClip_oxford_only100_300k_transformer_p40_falcon_bleu1_0.1'
-    # i = 7
+    # save_file = '20250204_totalClip_oxford_1000up_only1000_rest_300up_top300_transformer_p64_falcon_swin_tf8_ins'
+    # i = 27
     # model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i:03d}.pt'))
     model.eval()
     train(args.trainData, args.testData, model, args, output_dir=args.out_dir, output_prefix=args.prefix
-          , bleu_batch_size=20, bleu_threshold=0.1)
+          , bleu_batch_size=20, bleu_threshold=0.05)
 
 if __name__ == '__main__':
     main()
