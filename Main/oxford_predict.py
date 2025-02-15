@@ -797,8 +797,10 @@ testData = '../Data/Oxford_HIC/parse/oxford_800up_only800_rest_300up_top300_ViT-
 # testData = '../Data/Instagram/parse/10up_sonicdrivein_ViT-B_32_test.pkl'
 prefix_length = 64
 normalize_prefix = False
-trainDataset = OxfordDataset(trainData, prefix_length, normalize_prefix=normalize_prefix, dataFrom = "Oxford")
-testDataset = OxfordDataset(testData, prefix_length, normalize_prefix=normalize_prefix, dataFrom = "Oxford")
+train_dataform = "Oxford"
+test_dataform = "Oxford"
+trainDataset = OxfordDataset(trainData, prefix_length, normalize_prefix=normalize_prefix, dataFrom = train_dataform)
+testDataset = OxfordDataset(testData, prefix_length, normalize_prefix=normalize_prefix, dataFrom = test_dataform)
 ##################### oxford_300k #####################
 # train_image = ['imgflip_34', 'bokete_3820', 'imgflip_0','imgflip_8', 'imgflip_15', 'imgflip_19', 'bokete_104530','imgflip_730', 'imgflip_130', 'imgflip_677']
 # train_text = ['You finish doing something at your friends house and look at your phone; 7 missed calls from your mom; 7 missed calls from your mom'
@@ -902,22 +904,41 @@ prefix_list = []
 train_gt = []
 train_caption = dict()
 train_image_id_list = []
-for i in range(len(trainDataset)):
-    caption = trainDataset.captions[i]
-    image_id = trainDataset.image_ids[i]
-    if image_id in train_image:
-        if train_caption.get(image_id) is not None:
-            train_caption[image_id].append(caption)
-        else:
+if train_dataform != "Oxford":
+    load = pd.read_csv(f'../Data/Instagram/CaptionID_{train_dataform}.csv')
+    train_text = []
+    for i in range(len(train_image)):
+        caption = load[load['CaptionID'] == train_image[i]]['Caption'].values[0]
+        train_text.append(caption)
+    for i in range(len(trainDataset)):
+        caption = trainDataset.captions[i]
+        image_id = trainDataset.image_ids[i]
+        if image_id in train_image and caption in train_text and image_id not in train_image_id_list:
             train_caption[image_id] = []
             train_caption[image_id].append(caption)
-        if caption in train_text and image_id not in train_image_id_list:
             tokens, mask, prefix = trainDataset[i]
             tokens_list.append(tokens)
             mask_list.append(mask)
             prefix_list.append(prefix)
             train_gt.append(caption)
             train_image_id_list.append(image_id)
+else:
+    for i in range(len(trainDataset)):
+        caption = trainDataset.captions[i]
+        image_id = trainDataset.image_ids[i]
+        if image_id in train_image:
+            if train_caption.get(image_id) is not None:
+                train_caption[image_id].append(caption)
+            else:
+                train_caption[image_id] = []
+                train_caption[image_id].append(caption)
+            if caption in train_text and image_id not in train_image_id_list:
+                tokens, mask, prefix = trainDataset[i]
+                tokens_list.append(tokens)
+                mask_list.append(mask)
+                prefix_list.append(prefix)
+                train_gt.append(caption)
+                train_image_id_list.append(image_id)
 train_tokens = torch.stack(tokens_list).to(device)
 train_mask = torch.stack(mask_list).to(device)
 train_prefix = torch.stack(prefix_list).to(device)
@@ -973,23 +994,44 @@ prefix_list = []
 test_gt = []
 test_caption = dict()
 test_image_id_list = []
-for i in range(len(testDataset)):
-    caption = testDataset.captions[i]
-    image_id = testDataset.image_ids[i]
-    if image_id in test_image:
-        if test_caption.get(image_id) is not None:
-            test_caption[image_id].append(caption)
-        else:
+
+if test_dataform != "Oxford":
+    load = pd.read_csv(f'../Data/Instagram/CaptionID_{test_dataform}.csv')
+    test_text = []
+    for i in range(len(test_image)):
+        caption = load[load['CaptionID'] == test_image[i]]['Caption'].values[0]
+        test_text.append(caption)
+    for i in range(len(testDataset)):
+        caption = testDataset.captions[i]
+        image_id = testDataset.image_ids[i]
+        if image_id in test_image and caption in test_text and image_id not in test_image_id_list:
             test_caption[image_id] = []
             test_caption[image_id].append(caption)
-        if caption in test_text and image_id not in test_image_id_list:
-            # print(f"Image ID: {image_id}, Caption: {caption}")
             tokens, mask, prefix = testDataset[i]
             tokens_list.append(tokens)
             mask_list.append(mask)
             prefix_list.append(prefix)
             test_gt.append(caption)
             test_image_id_list.append(image_id)
+else:
+    for i in range(len(testDataset)):
+        caption = testDataset.captions[i]
+        image_id = testDataset.image_ids[i]
+        if image_id in test_image:
+            if test_caption.get(image_id) is not None:
+                test_caption[image_id].append(caption)
+            else:
+                test_caption[image_id] = []
+                test_caption[image_id].append(caption)
+            if caption in test_text and image_id not in test_image_id_list:
+                # print(f"Image ID: {image_id}, Caption: {caption}")
+                tokens, mask, prefix = testDataset[i]
+                tokens_list.append(tokens)
+                mask_list.append(mask)
+                prefix_list.append(prefix)
+                test_gt.append(caption)
+                test_image_id_list.append(image_id)
+
 test_tokens = torch.stack(tokens_list).to(device)
 test_mask = torch.stack(mask_list).to(device)
 test_prefix = torch.stack(prefix_list).to(device)
