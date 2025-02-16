@@ -705,12 +705,12 @@ def train(trainData, testData, model: ClipCaptionModel, args,
 
 def main():
     parser = argparse.ArgumentParser()
-    # parser.add_argument('--trainData', default='../Data/Oxford_HIC/parse/oxford_300up_only300_ViT-B_32_train.pkl')
-    # parser.add_argument('--testData', default='../Data/Oxford_HIC/parse/oxford_300up_only300_ViT-B_32_test.pkl')
-    parser.add_argument('--trainData', default='../Data/Instagram/parse/10up_only10_sonicdrivein_ViT-B_32_train.pkl')
-    parser.add_argument('--testData', default='../Data/Instagram/parse/10up_only10_sonicdrivein_ViT-B_32_test.pkl')
-    parser.add_argument('--dataFrom', default='sonicdrivein')
-    parser.add_argument('--out_dir', default='20250214_10up_only10_sonicdrivein_transformer_p64_falcon_swin_tf8')
+    parser.add_argument('--trainData', default='../Data/Oxford_HIC/parse/oxford_lower_800up_only800_all_ViT-B_32_train.pkl')
+    parser.add_argument('--testData', default='../Data/Oxford_HIC/parse/oxford_lower_800up_only800_rest_300up_top300_ViT-B_32_test.pkl')
+    # parser.add_argument('--trainData', default='../Data/Instagram/parse/10up_only10_sonicdrivein_ViT-B_32_train.pkl')
+    # parser.add_argument('--testData', default='../Data/Instagram/parse/10up_only10_sonicdrivein_ViT-B_32_test.pkl')
+    parser.add_argument('--dataFrom', default='Oxford')
+    parser.add_argument('--out_dir', default='20250216_oxford_lower_800up_only800_rest_300up_top300_transformer_p64_falcon_swin_tf8')
     parser.add_argument('--prefix', default='checkpoint', help='prefix for saved filenames')
     parser.add_argument('--epochs', type=int, default=50)
     parser.add_argument('--save_every', type=int, default=1)
