@@ -22,6 +22,7 @@ import pandas as pd
 from peft import LoraConfig, TaskType, get_peft_model
 from nltk.translate.bleu_score import sentence_bleu
 import gc
+import loralib as lora
 
 seed = 42
 random.seed(seed)
@@ -290,18 +291,18 @@ class MLP(nn.Module):
         super(MLP, self).__init__()
         layers = []
         for i in range(len(sizes) - 1):
-            layers.append(nn.Linear(sizes[i], sizes[i + 1], bias=bias))
+            layers.append(lora.Linear(sizes[i], sizes[i + 1], bias=bias))
             if i < len(sizes) - 2:
                 layers.append(act())
         self.model = nn.Sequential(*layers)
 
 class MlpTransformer(nn.Module):
-    def __init__(self, in_dim, h_dim, out_d: Optional[int] = None, act=nnf.relu, dropout=0.7):
+    def __init__(self, in_dim, h_dim, out_d: Optional[int] = None, act=nnf.relu, dropout=0.):
         super().__init__()
         out_d = out_d if out_d is not None else in_dim
-        self.fc1 = nn.Linear(in_dim, h_dim)
+        self.fc1 = lora.Linear(in_dim, h_dim)
         self.act = act
-        self.fc2 = nn.Linear(h_dim, out_d)
+        self.fc2 = lora.Linear(h_dim, out_d)
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x):
@@ -314,14 +315,14 @@ class MlpTransformer(nn.Module):
 
 class MultiHeadAttention(nn.Module):
 
-    def __init__(self, dim_self, dim_ref, num_heads, bias=True, dropout=0.7):
+    def __init__(self, dim_self, dim_ref, num_heads, bias=True, dropout=0.):
         super().__init__()
         self.num_heads = num_heads
         head_dim = dim_self // num_heads
         self.scale = head_dim ** -0.5
-        self.to_queries = nn.Linear(dim_self, dim_self, bias=bias)
-        self.to_keys_values = nn.Linear(dim_ref, dim_self * 2, bias=bias)
-        self.project = nn.Linear(dim_self, dim_self)
+        self.to_queries = lora.Linear(dim_self, dim_self, bias=bias)
+        self.to_keys_values = lora.Linear(dim_ref, dim_self * 2, bias=bias)
+        self.project = lora.Linear(dim_self, dim_self)
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x, y=None, mask=None):
@@ -343,6 +344,7 @@ class MultiHeadAttention(nn.Module):
         out = self.project(out)
         return out, attention
 
+
 class TransformerLayer(nn.Module):
 
     def forward_with_attention(self, x, y=None, mask=None):
@@ -356,7 +358,7 @@ class TransformerLayer(nn.Module):
         x = x + self.mlp(self.norm2(x))
         return x
 
-    def __init__(self, dim_self, dim_ref, num_heads, mlp_ratio=4., bias=False, dropout=0.7, act=nnf.relu,
+    def __init__(self, dim_self, dim_ref, num_heads, mlp_ratio=4., bias=True, dropout=0., act=nnf.relu,
                  norm_layer: nn.Module = nn.LayerNorm):
         super().__init__()
         self.norm1 = norm_layer(dim_self)
@@ -419,9 +421,9 @@ class TransformerMapper(nn.Module):
         self.clip_length = clip_length
         self.transformer = Transformer(dim_embedding, 8, num_layers)
         ### clip ###
-        # self.linear = nn.Linear(dim_clip, clip_length * dim_embedding)
+        # self.linear = lora.Linear(dim_clip, clip_length * dim_embedding)
         ### swin ###
-        self.linear = nn.Linear(768, dim_embedding)
+        self.linear = lora.Linear(768, dim_embedding)
         ############
         self.prefix_const = nn.Parameter(torch.randn(prefix_length, dim_embedding), requires_grad=True)
 
@@ -435,7 +437,8 @@ class ClipCaptionModel(nn.Module):
         # embedding_text = self.gemma.model.embed_tokens(tokens)
         # embedding_text = self.gemma.base_model.model.model.embed_tokens(tokens)
         # embedding_text = self.gpt.transformer.wte(tokens)
-        embedding_text = self.falcon.model.embed_tokens(tokens)
+        # embedding_text = self.falcon.model.embed_tokens(tokens)
+        embedding_text = self.falcon.base_model.model.model.embed_tokens(tokens)
         prefix_projections = self.clip_project(prefix).view(-1, self.prefix_length, self.embedding_size)
         embedding_cat = torch.cat((prefix_projections, embedding_text), dim=1)
         if labels is not None:
@@ -486,6 +489,8 @@ class ClipCaptionModel(nn.Module):
         self.falcon = AutoModelForCausalLM.from_pretrained("tiiuae/Falcon3-1B-Base")
         # self.falcon = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B")
         self.embedding_size = self.falcon.model.embed_tokens.weight.shape[1]
+
+
         # self.falcon.eval()
         # for param in self.falcon.parameters():
         #     param.requires_grad = False
@@ -494,6 +499,27 @@ class ClipCaptionModel(nn.Module):
                 (prefix_size, (self.embedding_size * prefix_length) // 2, self.embedding_size * prefix_length))
         else:
             self.clip_project = TransformerMapper(prefix_size, self.embedding_size, prefix_length, clip_length, num_layers)
+    def activateLoRa(self):
+        LORAconfig = LoraConfig(
+            task_type=TaskType.CAUSAL_LM,
+            target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+            inference_mode=False,  # 训练模式
+            r=8,  # Lora 秩
+            lora_alpha=32,  # Lora alaph，具体作用参见 Lora 原理
+            lora_dropout=0.1  # Dropout 比例
+        )
+
+        def count_trainable_parameters(model):
+            model_parameters = filter(lambda p: p.requires_grad, model.parameters())
+            params = sum([np.prod(p.size()) for p in model_parameters])
+            return params
+
+        a = count_trainable_parameters(self.falcon)
+        self.falcon = get_peft_model(self.falcon, LORAconfig)
+        b = count_trainable_parameters(self.falcon)
+        # 留下小數點後兩位就好
+        percent = round((b / a) * 100, 3)
+        print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
 
 class ClipCaptionPrefix(ClipCaptionModel):
 
@@ -705,12 +731,12 @@ def train(trainData, testData, model: ClipCaptionModel, args,
 
 def main():
     parser = argparse.ArgumentParser()
-    # parser.add_argument('--trainData', default='../Data/Oxford_HIC/parse/oxford_1000up_only1000_all_ViT-B_32_train.pkl')
-    # parser.add_argument('--testData', default='../Data/Oxford_HIC/parse/oxford_1000up_only1000_rest_300up_top300_ViT-B_32_test.pkl')
-    parser.add_argument('--trainData', default='../Data/Instagram/parse/Generate_mcdonalds_switzerland_300up_top300_ViT-B_32_train.pkl')
-    parser.add_argument('--testData', default='../Data/Instagram/parse/Generate_mcdonalds_switzerland_200up_top200_ViT-B_32_test.pkl')
-    parser.add_argument('--dataFrom', default='mcdonalds_switzerland')
-    parser.add_argument('--out_dir', default='20250208_Generate_mcdonalds_switzerland_300up_top300_200up_top200_transformer_lora_p64_falcon_swin_tf8')
+    parser.add_argument('--trainData', default='../Data/Oxford_HIC/parse/oxford_lower_800up_only800_all_ViT-B_32_train.pkl')
+    parser.add_argument('--testData', default='../Data/Oxford_HIC/parse/oxford_lower_800up_only800_rest_300up_top300_ViT-B_32_test.pkl')
+    # parser.add_argument('--trainData', default='../Data/Instagram/parse/300up_only300_all_sonicdrivein_ViT-B_32_train.pkl')
+    # parser.add_argument('--testData', default='../Data/Instagram/parse/300up_only300_rest_200up_top200_sonicdrivein_ViT-B_32_test.pkl')
+    parser.add_argument('--dataFrom', default='Oxford')
+    parser.add_argument('--out_dir', default='202502016_oxford_lower_only800_base_sonicdrivein_only300_transformer_lora_p64_falcon_swin_tf8')
     parser.add_argument('--prefix', default='checkpoint', help='prefix for saved filenames')
     parser.add_argument('--epochs', type=int, default=50)
     parser.add_argument('--save_every', type=int, default=1)
@@ -744,20 +770,33 @@ def main():
     device = torch.device('cuda:0')
     model = model.to(device, dtype=torch.bfloat16)
     # 20250115_totalClip_oxford_only100_300k_transformer_p40_falcon_bleu1_0.05 == 32
-    save_file = '20250204_totalClip_oxford_1000up_only1000_rest_300up_top300_transformer_p64_falcon_swin_tf8'
-    i = 27
+    save_file = '20250213_300up_only300_rest_200up_top200_sonicdrivein_transformer_p64_falcon_swin_tf8'
+    i = 1
     model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i:03d}.pt'))
 
     def count_trainable_parameters(model):
         model_parameters = filter(lambda p: p.requires_grad, model.parameters())
         params = sum([np.prod(p.size()) for p in model_parameters])
         return params
+
     a = count_trainable_parameters(model)
-    model = get_peft_model(model, LORAconfig)
+    re_grad_list = ['fc1', 'fc2', 'to_queries', 'to_keys_values', 'project', 'linear']
+    for name, param in model.named_parameters():
+        if 'clip_project' in name:
+            if 'bias' in name:
+                param.requires_grad = True
+            elif name in re_grad_list:
+                param.requires_grad = True
+            else:
+                param.requires_grad = False
     b = count_trainable_parameters(model)
-    #留下小數點後兩位就好
+    # 留下小數點後兩位就好
     percent = round((b / a) * 100, 3)
     print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
+    # Set requires_grad = True for LoRa and bias parameters only
+
+    model.activateLoRa()
+
     model.eval()
     train(args.trainData, args.testData, model, args, output_dir=args.out_dir, output_prefix=args.prefix
           , bleu_batch_size=20, bleu_threshold=0.05)
