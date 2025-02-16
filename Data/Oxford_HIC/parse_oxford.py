@@ -18,18 +18,40 @@ def main(clip_model_type: str):
     # with open('C:/Users/user/fiftyone/coco-2014/raw/captions_train2014.json', 'r') as f:
     #     data = json.load(f)
     # data = data['annotations']
-    dirPath = './Only100_oxford_hic_data.csv'
+    dirPath = './Only10_split_simCOCO_oxford_hic_data.csv'
     data = pd.read_csv(dirPath)
-    print("shape of data: ", data.shape)
+    image_id_counts = data['image_id'].value_counts()
+
+    # valid_image_ids = image_id_counts[image_id_counts >= 10].index
+    # print("shape of valid_image_ids: ", valid_image_ids.shape)
+    # filtered_data = data[data['image_id'].isin(valid_image_ids)]
+    # print("shape of filtered_data: ", data.shape)
+    # train = (
+    #     filtered_data.sort_values(by=['image_id', 'funny_score'], ascending=[True, False])
+    #     .groupby('image_id')
+    #     .head(10)
+    # )
+    # print("shape of train: ", train.shape)
+    #
+    # valid_image_ids = image_id_counts[(image_id_counts >= 300) & (image_id_counts < 400)].index
+    # print("shape of valid_image_ids: ", valid_image_ids.shape)
+    # filtered_data = data[data['image_id'].isin(valid_image_ids)]
+    # print("shape of filtered_data: ", data.shape)
+    # test = (
+    #     filtered_data.sort_values(by=['image_id', 'funny_score'], ascending=[True, False])
+    #     .groupby('image_id')
+    #     .head(300)
+    # )
+    # print("shape of test: ", test.shape)
     ######################################################################################################
-    train = pd.DataFrame()
-    test = pd.DataFrame()
-    for image_id, group in data.groupby("image_id"):
-        train_split, test_split = train_test_split(group, test_size=0.2, random_state=42)
-        train = pd.concat([train, train_split])
-        test = pd.concat([test, test_split])
-    print(f'train: {train.shape}')
-    print(f'test: {test.shape}')
+    # train = pd.DataFrame()
+    # test = pd.DataFrame()
+    # for image_id, group in data.groupby("image_id"):
+    #     train_split, test_split = train_test_split(group, test_size=0.2, random_state=42)
+    #     train = pd.concat([train, train_split])
+    #     test = pd.concat([test, test_split])
+    # print(f'train: {train.shape}')
+    # print(f'test: {test.shape}')
     ######################################################################################################
     # data = data.sample(n=300000, random_state=42, replace=True).reset_index(drop=True)
     # print("sample of data: ", data.shape)
@@ -37,14 +59,14 @@ def main(clip_model_type: str):
     # print(data.shape)
     # print("%0d captions loaded from json " % len(data))
     ######################################################################################################
-    # unique_image_ids = data['image_id'].unique()
-    # # unique_image_ids = unique_image_ids[:30000]
-    # # unique_image_ids, rest = train_test_split(unique_image_ids, test_size=0.7, random_state=42)
-    # # print(unique_image_ids.shape)
-    # train_ids, test_ids = train_test_split(unique_image_ids, test_size=0.2, random_state=42)
-    # train = data[data['image_id'].isin(train_ids)]
-    # test = data[data['image_id'].isin(test_ids)]
-    # print(train.shape, test.shape)
+    unique_image_ids = data['image_id'].unique()
+    # unique_image_ids = unique_image_ids[:30000]
+    # unique_image_ids, rest = train_test_split(unique_image_ids, test_size=0.7, random_state=42)
+    # print(unique_image_ids.shape)
+    train_ids, test_ids = train_test_split(unique_image_ids, test_size=0.2, random_state=42)
+    train = data[data['image_id'].isin(train_ids)]
+    test = data[data['image_id'].isin(test_ids)]
+    print(train.shape, test.shape)
     ######################################################################################################
 
     def parse(out_path, data):
@@ -68,10 +90,10 @@ def main(clip_model_type: str):
         with open(out_path, 'wb') as f:
             pickle.dump({"clip_embedding": torch.cat(all_embeddings, dim=0), "captions": all_captions}, f)
         print('Done')
-        print("%0d embeddings saved " % len(all_embeddings))
+        print("%0d embeddings saved| " % len(all_embeddings))
         return 0
-    out_path_train = f"./parse/oxford_only100_300k_mess_{clip_model_name}_train.pkl"
-    out_path_test = f"./parse/oxford_only100_300k_mess_{clip_model_name}_test.pkl"
+    out_path_train = f"./parse/oxford_Only10_split_simCOCO_{clip_model_name}_train.pkl"
+    out_path_test = f"./parse/oxford_Only10_split_simCOCO_{clip_model_name}_test.pkl"
     parse(out_path_train, train)
     parse(out_path_test, test)
     return 0
