@@ -22,6 +22,7 @@ import pandas as pd
 from peft import LoraConfig, TaskType, get_peft_model
 from nltk.translate.bleu_score import sentence_bleu
 import gc
+import loralib as lora
 
 seed = 42
 random.seed(seed)
@@ -290,7 +291,7 @@ class MLP(nn.Module):
         super(MLP, self).__init__()
         layers = []
         for i in range(len(sizes) - 1):
-            layers.append(nn.Linear(sizes[i], sizes[i + 1], bias=bias))
+            layers.append(lora.Linear(sizes[i], sizes[i + 1], bias=bias))
             if i < len(sizes) - 2:
                 layers.append(act())
         self.model = nn.Sequential(*layers)
@@ -299,9 +300,9 @@ class MlpTransformer(nn.Module):
     def __init__(self, in_dim, h_dim, out_d: Optional[int] = None, act=nnf.relu, dropout=0.7):
         super().__init__()
         out_d = out_d if out_d is not None else in_dim
-        self.fc1 = nn.Linear(in_dim, h_dim)
+        self.fc1 = lora.Linear(in_dim, h_dim)
         self.act = act
-        self.fc2 = nn.Linear(h_dim, out_d)
+        self.fc2 = lora.Linear(h_dim, out_d)
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x):
@@ -319,9 +320,9 @@ class MultiHeadAttention(nn.Module):
         self.num_heads = num_heads
         head_dim = dim_self // num_heads
         self.scale = head_dim ** -0.5
-        self.to_queries = nn.Linear(dim_self, dim_self, bias=bias)
-        self.to_keys_values = nn.Linear(dim_ref, dim_self * 2, bias=bias)
-        self.project = nn.Linear(dim_self, dim_self)
+        self.to_queries = lora.Linear(dim_self, dim_self, bias=bias)
+        self.to_keys_values = lora.Linear(dim_ref, dim_self * 2, bias=bias)
+        self.project = lora.Linear(dim_self, dim_self)
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x, y=None, mask=None):
@@ -342,6 +343,7 @@ class MultiHeadAttention(nn.Module):
         out = torch.einsum('bnmh,bmhd->bnhd', attention, values).reshape(b, n, c)
         out = self.project(out)
         return out, attention
+
 
 class TransformerLayer(nn.Module):
 
@@ -419,9 +421,9 @@ class TransformerMapper(nn.Module):
         self.clip_length = clip_length
         self.transformer = Transformer(dim_embedding, 8, num_layers)
         ### clip ###
-        # self.linear = nn.Linear(dim_clip, clip_length * dim_embedding)
+        # self.linear = lora.Linear(dim_clip, clip_length * dim_embedding)
         ### swin ###
-        self.linear = nn.Linear(768, dim_embedding)
+        self.linear = lora.Linear(768, dim_embedding)
         ############
         self.prefix_const = nn.Parameter(torch.randn(prefix_length, dim_embedding), requires_grad=True)
 
@@ -435,7 +437,8 @@ class ClipCaptionModel(nn.Module):
         # embedding_text = self.gemma.model.embed_tokens(tokens)
         # embedding_text = self.gemma.base_model.model.model.embed_tokens(tokens)
         # embedding_text = self.gpt.transformer.wte(tokens)
-        embedding_text = self.falcon.model.embed_tokens(tokens)
+        # embedding_text = self.falcon.model.embed_tokens(tokens)
+        embedding_text = self.falcon.base_model.model.model.embed_tokens(tokens)
         prefix_projections = self.clip_project(prefix).view(-1, self.prefix_length, self.embedding_size)
         embedding_cat = torch.cat((prefix_projections, embedding_text), dim=1)
         if labels is not None:
@@ -486,6 +489,8 @@ class ClipCaptionModel(nn.Module):
         self.falcon = AutoModelForCausalLM.from_pretrained("tiiuae/Falcon3-1B-Base")
         # self.falcon = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B")
         self.embedding_size = self.falcon.model.embed_tokens.weight.shape[1]
+
+
         # self.falcon.eval()
         # for param in self.falcon.parameters():
         #     param.requires_grad = False
@@ -494,6 +499,27 @@ class ClipCaptionModel(nn.Module):
                 (prefix_size, (self.embedding_size * prefix_length) // 2, self.embedding_size * prefix_length))
         else:
             self.clip_project = TransformerMapper(prefix_size, self.embedding_size, prefix_length, clip_length, num_layers)
+    def activateLoRa(self):
+        LORAconfig = LoraConfig(
+            task_type=TaskType.CAUSAL_LM,
+            target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+            inference_mode=False,  # 训练模式
+            r=8,  # Lora 秩
+            lora_alpha=32,  # Lora alaph，具体作用参见 Lora 原理
+            lora_dropout=0.1  # Dropout 比例
+        )
+
+        def count_trainable_parameters(model):
+            model_parameters = filter(lambda p: p.requires_grad, model.parameters())
+            params = sum([np.prod(p.size()) for p in model_parameters])
+            return params
+
+        a = count_trainable_parameters(self.falcon)
+        self.falcon = get_peft_model(self.falcon, LORAconfig)
+        b = count_trainable_parameters(self.falcon)
+        # 留下小數點後兩位就好
+        percent = round((b / a) * 100, 3)
+        print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
 
 class ClipCaptionPrefix(ClipCaptionModel):
 
@@ -752,12 +778,25 @@ def main():
         model_parameters = filter(lambda p: p.requires_grad, model.parameters())
         params = sum([np.prod(p.size()) for p in model_parameters])
         return params
+
     a = count_trainable_parameters(model)
-    model = get_peft_model(model, LORAconfig)
+    re_grad_list = ['fc1', 'fc2', 'to_queries', 'to_keys_values', 'project', 'linear']
+    for name, param in model.named_parameters():
+        if 'clip_project' in name:
+            if 'bias' in name:
+                param.requires_grad = True
+            elif name in re_grad_list:
+                param.requires_grad = True
+            else:
+                param.requires_grad = False
     b = count_trainable_parameters(model)
-    #留下小數點後兩位就好
+    # 留下小數點後兩位就好
     percent = round((b / a) * 100, 3)
     print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
+    # Set requires_grad = True for LoRa and bias parameters only
+
+    model.activateLoRa()
+
     model.eval()
     train(args.trainData, args.testData, model, args, output_dir=args.out_dir, output_prefix=args.prefix
           , bleu_batch_size=20, bleu_threshold=0.05)
