@@ -44,15 +44,12 @@ TN = Optional[T]
 TNS = Union[Tuple[TN, ...], List[TN]]
 TSN = Optional[TS]
 TA = Union[T, ARRAY]
-
 WEIGHTS_PATHS = {
     "coco": "coco_weights.pt",
     "conceptual-captions": "conceptual_weights.pt",
 }
-
 D = torch.device
 CPU = torch.device("cpu")
-
 
 class Predictor(object):
     def __init__(self, prefix_length, cp_num, train_caption, test_caption, train_image_id_list, test_image_id_list):
@@ -236,6 +233,20 @@ class Predictor(object):
             generate_beam_df['bleu2'] = self.generate_beam_bleu2
             generate_beam_df['bleu3'] = self.generate_beam_bleu3
             generate_beam_df['bleu4'] = self.generate_beam_bleu4
+            test_avgscore = pd.DataFrame()
+            train_avgscore = pd.DataFrame()
+            for column in generate_beam_df.columns:
+                if column == 'Name':
+                    train_avgscore[column] = ["train_avg"]
+                    test_avgscore[column] = ["test_avg"]
+                elif pd.api.types.is_numeric_dtype(generate_beam_df[column]):
+                    train_avgscore[column] = [generate_beam_df[column][10:].mean()]
+                    test_avgscore[column] = [generate_beam_df[column][:10].mean()]
+                else:
+                    train_avgscore[column] = ["-"]
+                    test_avgscore[column] = ["-"]
+            generate_beam_df = pd.concat([generate_beam_df, test_avgscore, train_avgscore], axis=0)
+
             generate2_df = pd.DataFrame(self.generate2_output.cpu().detach(), columns=[f"{i}" for i in range(0, 74)])
             generate2_df = pd.concat([test, generate2_df, dataframe_Name("-", 74, 16)], axis=1)
             generate2_df['text'] = self.generate2_text
@@ -245,6 +256,20 @@ class Predictor(object):
             generate2_df['bleu2'] = self.generate2_bleu2
             generate2_df['bleu3'] = self.generate2_bleu3
             generate2_df['bleu4'] = self.generate2_bleu4
+            test_avgscore = pd.DataFrame()
+            train_avgscore = pd.DataFrame()
+            for column in generate2_df.columns:
+                if column == 'Name':
+                    train_avgscore[column] = ["train_avg"]
+                    test_avgscore[column] = ["test_avg"]
+                elif pd.api.types.is_numeric_dtype(generate2_df[column]):
+                    train_avgscore[column] = [generate2_df[column][10:].mean()]
+                    test_avgscore[column] = [generate2_df[column][:10].mean()]
+                else:
+                    train_avgscore[column] = ["-"]
+                    test_avgscore[column] = ["-"]
+            generate2_df = pd.concat([generate2_df, test_avgscore, train_avgscore], axis=0)
+
             train_df = pd.DataFrame(self.train_output.cpu().detach(), columns=[f"{i}" for i in range(0, 489)])
             train_df = pd.concat([test, train_df], axis=1)
             train_df['loss'] = self.train_loss
@@ -255,6 +280,20 @@ class Predictor(object):
             train_df['bleu2'] = self.train_bleu2
             train_df['bleu3'] = self.train_bleu3
             train_df['bleu4'] = self.train_bleu4
+            test_avgscore = pd.DataFrame()
+            train_avgscore = pd.DataFrame()
+            for column in train_df.columns:
+                if column == 'Name':
+                    train_avgscore[column] = ["train_avg"]
+                    test_avgscore[column] = ["test_avg"]
+                elif pd.api.types.is_numeric_dtype(train_df[column]):
+                    train_avgscore[column] = [train_df[column][10:].mean()]
+                    test_avgscore[column] = [train_df[column][:10].mean()]
+                else:
+                    train_avgscore[column] = ["-"]
+                    test_avgscore[column] = ["-"]
+            train_df = pd.concat([train_df, test_avgscore, train_avgscore], axis=0)
+
             print(dataframe_Name("generate_beam").shape, generate_beam_df.shape, dataframe_Name("generate2").shape,
                   generate2_df.shape, dataframe_Name("train").shape, train_df.shape)
             final = pd.concat([dataframe_Name("generate_beam"), generate_beam_df, dataframe_Name("generate2"),
@@ -262,8 +301,9 @@ class Predictor(object):
             print(final.shape)
             print(final.columns)
 
-            final.to_csv(f'./Model/{save_file}/{save_file}_test_{self.cp_num:03d}.csv', index=False)
+            final.to_csv(f'./Model/{save_file}/{save_file}_test_{self.cp_num:03d}.csv', float_format='%.15f', index=False)
             # final.to_csv(f'./Model/{save_file}/Generate_mcdonalds_all.csv', index=False)
+
 class MLP(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
@@ -791,256 +831,267 @@ class ClipCocoDataset(Dataset):
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-trainData = '../Data/Oxford_HIC/parse/oxford_800up_only800_all_ViT-B_32_train.pkl'
-testData = '../Data/Oxford_HIC/parse/oxford_800up_only800_rest_300up_top300_ViT-B_32_test.pkl'
-# trainData = '../Data/Instagram/parse/10up_sonicdrivein_ViT-B_32_train.pkl'
-# testData = '../Data/Instagram/parse/10up_sonicdrivein_ViT-B_32_test.pkl'
+# trainData = '../Data/Oxford_HIC/parse/oxford_800up_only800_all_ViT-B_32_train.pkl'
+# testData = '../Data/Oxford_HIC/parse/oxford_800up_only800_rest_300up_top300_ViT-B_32_test.pkl'
+trainData = '../Data/Instagram/parse/300up_only300_all_sonicdrivein_ViT-B_32_train.pkl'
+testData = '../Data/Instagram/parse/300up_only300_rest_200up_top200_sonicdrivein_ViT-B_32_test.pkl'
 prefix_length = 64
 normalize_prefix = False
-train_dataform = "Oxford"
-test_dataform = "Oxford"
+train_dataform = "sonicdrivein"
+test_dataform = "sonicdrivein"
 trainDataset = OxfordDataset(trainData, prefix_length, normalize_prefix=normalize_prefix, dataFrom = train_dataform)
 testDataset = OxfordDataset(testData, prefix_length, normalize_prefix=normalize_prefix, dataFrom = test_dataform)
-##################### oxford_300k #####################
-# train_image = ['imgflip_34', 'bokete_3820', 'imgflip_0','imgflip_8', 'imgflip_15', 'imgflip_19', 'bokete_104530','imgflip_730', 'imgflip_130', 'imgflip_677']
-# train_text = ['You finish doing something at your friends house and look at your phone; 7 missed calls from your mom; 7 missed calls from your mom'
-#               ,'I\'m in my 50s!'
-#               ,'School; Memes'
-#               ,'image tagged in memes,one does not simply'
-#               ,'THAT; IS WHAT A GOOD MEME LOOKS LIKE'
-#               ,'NOT SURE IF PEOPLE ARE UPVOTING MEMES; OR USER NAMES'
-#               ,'It\'s a family night runaway.'
-#               ,'CHUCK IS THE GOOD TYPE OF SCUMBAG; CUZ HE ONLY ROASTS YOU FROM YOUR INSIDES'
-#               ,'SO YOUR TELLIN\' ME THAT SCHOOLS GOOD FOR YOU'
-#               ,'Y\'ALL GOT ANY MORE OF THEM; JOBS?']
-##################### oxford_100k #####################
-# train_image = ['imgflip_34', 'bokete_3820', 'imgflip_0','imgflip_8', 'imgflip_15', 'imgflip_19', 'bokete_104530','imgflip_730', 'imgflip_130', 'imgflip_677']
-# train_text = ['You finish doing something at your friends house and look at your phone; 7 missed calls from your mom; 7 missed calls from your mom'
-#               ,'I\'m in my 50s!'
-#               ,'School; Memes'
-#               ,'image tagged in memes,one does not simply'
-#               ,'THAT; IS WHAT A GOOD MEME LOOKS LIKE'
-#               ,'NOT SURE IF PEOPLE ARE UPVOTING MEMES; OR USER NAMES'
-#               ,'It\'s a family night runaway.'
-#               ,'Chuck Norris doesn\'t go washroom; He goes washBOOM!'
-#               ,'SO YOUR TELLIN\' ME THAT SCHOOLS GOOD FOR YOU'
-#               ,'Y\'ALL GOT ANY MORE OF THEM; JOBS?']
-##################### oxford_Top10_300k #####################
-# train_image = ['bokete_100136', 'bokete_100144', 'bokete_100174','bokete_100193', 'bokete_100268', 'bokete_100287', 'bokete_100295','bokete_10031', 'bokete_100498', 'bokete_24339']
-# train_text = ['The wax isn\'t dry yet.'
-#               ,'I\'m sorry to hear that.'
-#               ,'You didn\'t put that microphone in the register, did you?'
-#               ,'I\'m showing my brother the privilege of being the youngest.'
-#               ,'Are you ready to join us?'
-#               ,'He\'s cute, he\'s 100% capable of killing.'
-#               ,'The ground suddenly fell to the left.'
-#               ,'"Mama, there\'s something in the front mat!"'
-#               ,'"You don\'t have a dad?" "You don\'t have a mom?"'
-#               ,'This month, I\'ve only got this much to offer.']
-##################### oxford_Top10_300k_mess #####################
-# train_image = ['bokete_100345', 'bokete_100360', 'bokete_100364','bokete_100193', 'bokete_100372', 'bokete_100432', 'bokete_100295','bokete_100453', 'bokete_100498', 'bokete_100459']
-# train_text = ['I had a dream about going to school, so I want to take a day off from school.'
-#               ,'I went to the woods for a jog, and there was a lot of spider webs.'
-#               ,'I\'d like to ask you a different color.'
-#               ,'I\'m showing my brother the privilege of being the youngest.'
-#               ,'Ah! You bumped into me in the morning!'
-#               ,'Are you sure it\'s your dad who left you when you were three?'
-#               ,'The ground suddenly fell to the left.'
-#               ,'In the first place, there\'s a problem with Snow White, who eats apples given to an old lady who looks so bad.'
-#               ,'It was at this time that they switched.'
-#               ,'Did you think it was corn?']
-##################### oxford_Only1200_300k #####################
-# train_image = ['imgflip_0', 'imgflip_101', 'imgflip_1033','imgflip_11', 'imgflip_117', 'imgflip_16', 'imgflip_189','imgflip_23', 'imgflip_47', 'imgflip_504']
-# train_text = ['12 dollars; 11 dollars with 1 dollar shipping'
-#               ,'I HAD A GIRLFRIEND; AAAAAAND ITS GONE'
-#               ,'I POUR THE CEREAL AFTER I POUR THE MILK'
-#               ,'WAITING FOR MY PHONE TO GET  TO 100%'
-#               ,'You when you have over one test at school in a day'
-#               ,'IF SOMEONE WANTS TO KILL YOU; GO TO A LIVING ROOM'
-#               ,'you; eating 5 pounds of cheese; every day; your stomach'
-#               ,'Me:stands up to stretch my legs; The person who had been pushing my wheelchair for the last 26 years'
-#               ,'Me: Opens door for some fresh air; Everyone else in the submarine:'
-#               ,'THEY TOOK AWAY MY HAPPY MEAL I TOOK AWAY THEIR HAPPINESS']
-##################### oxford_Only100_300k #####################
-# train_image = ['2spbgym', 'all-the-things', 'imgflip_0', 'imgflip_1033','imgflip_11', 'imgflip_117', 'imgflip_16', 'imgflip_189','imgflip_23', 'imgflip_504']
-# train_text = ['climb a mountain? pff, i have wings...'
-#               ,'go to a pizza buffet eat all the pizza'
-#               ,'12 dollars; 11 dollars with 1 dollar shipping'
-#               ,'I POUR MILK BEFORE CEREAL'
-#               ,'ME WAITING FOR MY INTERNET TO RECONNECT'
-#               ,'calling the teacher mom'
-#               ,'IF SOMEONE DIES IN THE LIVING ROOM... IS IT STILL CALLED THE LIVING ROOM?'
-#               ,'you; losing a few seconds of your life looking at this'
-#               ,'me: gets up and starts clapping because the chiefs won; the guy who has been pushing my wheelchair for 10 years'
-#               ,'THEY TOOK AWAY MY HAPPY MEAL I TOOK AWAY THEIR HAPPINESS']
-##################### oxford_only10 #####################
-# train_image = ['2spbgym', 'all-the-things', 'imgflip_0', 'imgflip_1033','imgflip_11', 'imgflip_117', 'imgflip_16', 'imgflip_189','imgflip_23', 'imgflip_504']
-# train_text = ['i\'ll take it sure ur not chicken?',
-#               'avoid all the work',
-#               'due tomorrow; do tomorrow',
-#               'i want to speak to your manager',
-#               'school: *closes*; the kid who was in the bathroom:',
-#               'almost getting pass an extremely hard level but failing last minute',
-#               'you can\'t lose your mind; if you don\'t have one',
-#               'you; doing nothing; today; teacher',
-#               'students: *acting crazy*; teacher: pay attention! that kid named attention:',
-#               'they called me four eyes. i call them no eyes.']
-####################### default #######################
-train_image = []
-train_text = []
-for i in range(len(trainDataset)):
-    caption = trainDataset.captions[i]
-    image_id = trainDataset.image_ids[i]
-    if image_id not in train_image:
-        print(f"Image ID: {image_id}, Caption: {caption}")
-        train_image.append(image_id)
-        train_text.append(caption)
-        if len(train_image) == 10:
-            break
-#######################################################
-tokens_list = []
-mask_list = []
-prefix_list = []
-train_gt = []
-train_caption = dict()
-train_image_id_list = []
-if train_dataform != "Oxford":
-    load = pd.read_csv(f'../Data/Instagram/CaptionID_{train_dataform}.csv')
+
+if train_dataform:
+    ##################### oxford_300k #####################
+    # train_image = ['imgflip_34', 'bokete_3820', 'imgflip_0','imgflip_8', 'imgflip_15', 'imgflip_19', 'bokete_104530','imgflip_730', 'imgflip_130', 'imgflip_677']
+    # train_text = ['You finish doing something at your friends house and look at your phone; 7 missed calls from your mom; 7 missed calls from your mom'
+    #               ,'I\'m in my 50s!'
+    #               ,'School; Memes'
+    #               ,'image tagged in memes,one does not simply'
+    #               ,'THAT; IS WHAT A GOOD MEME LOOKS LIKE'
+    #               ,'NOT SURE IF PEOPLE ARE UPVOTING MEMES; OR USER NAMES'
+    #               ,'It\'s a family night runaway.'
+    #               ,'CHUCK IS THE GOOD TYPE OF SCUMBAG; CUZ HE ONLY ROASTS YOU FROM YOUR INSIDES'
+    #               ,'SO YOUR TELLIN\' ME THAT SCHOOLS GOOD FOR YOU'
+    #               ,'Y\'ALL GOT ANY MORE OF THEM; JOBS?']
+    ##################### oxford_100k #####################
+    # train_image = ['imgflip_34', 'bokete_3820', 'imgflip_0','imgflip_8', 'imgflip_15', 'imgflip_19', 'bokete_104530','imgflip_730', 'imgflip_130', 'imgflip_677']
+    # train_text = ['You finish doing something at your friends house and look at your phone; 7 missed calls from your mom; 7 missed calls from your mom'
+    #               ,'I\'m in my 50s!'
+    #               ,'School; Memes'
+    #               ,'image tagged in memes,one does not simply'
+    #               ,'THAT; IS WHAT A GOOD MEME LOOKS LIKE'
+    #               ,'NOT SURE IF PEOPLE ARE UPVOTING MEMES; OR USER NAMES'
+    #               ,'It\'s a family night runaway.'
+    #               ,'Chuck Norris doesn\'t go washroom; He goes washBOOM!'
+    #               ,'SO YOUR TELLIN\' ME THAT SCHOOLS GOOD FOR YOU'
+    #               ,'Y\'ALL GOT ANY MORE OF THEM; JOBS?']
+    ##################### oxford_Top10_300k #####################
+    # train_image = ['bokete_100136', 'bokete_100144', 'bokete_100174','bokete_100193', 'bokete_100268', 'bokete_100287', 'bokete_100295','bokete_10031', 'bokete_100498', 'bokete_24339']
+    # train_text = ['The wax isn\'t dry yet.'
+    #               ,'I\'m sorry to hear that.'
+    #               ,'You didn\'t put that microphone in the register, did you?'
+    #               ,'I\'m showing my brother the privilege of being the youngest.'
+    #               ,'Are you ready to join us?'
+    #               ,'He\'s cute, he\'s 100% capable of killing.'
+    #               ,'The ground suddenly fell to the left.'
+    #               ,'"Mama, there\'s something in the front mat!"'
+    #               ,'"You don\'t have a dad?" "You don\'t have a mom?"'
+    #               ,'This month, I\'ve only got this much to offer.']
+    ##################### oxford_Top10_300k_mess #####################
+    # train_image = ['bokete_100345', 'bokete_100360', 'bokete_100364','bokete_100193', 'bokete_100372', 'bokete_100432', 'bokete_100295','bokete_100453', 'bokete_100498', 'bokete_100459']
+    # train_text = ['I had a dream about going to school, so I want to take a day off from school.'
+    #               ,'I went to the woods for a jog, and there was a lot of spider webs.'
+    #               ,'I\'d like to ask you a different color.'
+    #               ,'I\'m showing my brother the privilege of being the youngest.'
+    #               ,'Ah! You bumped into me in the morning!'
+    #               ,'Are you sure it\'s your dad who left you when you were three?'
+    #               ,'The ground suddenly fell to the left.'
+    #               ,'In the first place, there\'s a problem with Snow White, who eats apples given to an old lady who looks so bad.'
+    #               ,'It was at this time that they switched.'
+    #               ,'Did you think it was corn?']
+    ##################### oxford_Only1200_300k #####################
+    # train_image = ['imgflip_0', 'imgflip_101', 'imgflip_1033','imgflip_11', 'imgflip_117', 'imgflip_16', 'imgflip_189','imgflip_23', 'imgflip_47', 'imgflip_504']
+    # train_text = ['12 dollars; 11 dollars with 1 dollar shipping'
+    #               ,'I HAD A GIRLFRIEND; AAAAAAND ITS GONE'
+    #               ,'I POUR THE CEREAL AFTER I POUR THE MILK'
+    #               ,'WAITING FOR MY PHONE TO GET  TO 100%'
+    #               ,'You when you have over one test at school in a day'
+    #               ,'IF SOMEONE WANTS TO KILL YOU; GO TO A LIVING ROOM'
+    #               ,'you; eating 5 pounds of cheese; every day; your stomach'
+    #               ,'Me:stands up to stretch my legs; The person who had been pushing my wheelchair for the last 26 years'
+    #               ,'Me: Opens door for some fresh air; Everyone else in the submarine:'
+    #               ,'THEY TOOK AWAY MY HAPPY MEAL I TOOK AWAY THEIR HAPPINESS']
+    ##################### oxford_Only100_300k #####################
+    # train_image = ['2spbgym', 'all-the-things', 'imgflip_0', 'imgflip_1033','imgflip_11', 'imgflip_117', 'imgflip_16', 'imgflip_189','imgflip_23', 'imgflip_504']
+    # train_text = ['climb a mountain? pff, i have wings...'
+    #               ,'go to a pizza buffet eat all the pizza'
+    #               ,'12 dollars; 11 dollars with 1 dollar shipping'
+    #               ,'I POUR MILK BEFORE CEREAL'
+    #               ,'ME WAITING FOR MY INTERNET TO RECONNECT'
+    #               ,'calling the teacher mom'
+    #               ,'IF SOMEONE DIES IN THE LIVING ROOM... IS IT STILL CALLED THE LIVING ROOM?'
+    #               ,'you; losing a few seconds of your life looking at this'
+    #               ,'me: gets up and starts clapping because the chiefs won; the guy who has been pushing my wheelchair for 10 years'
+    #               ,'THEY TOOK AWAY MY HAPPY MEAL I TOOK AWAY THEIR HAPPINESS']
+    ##################### oxford_only10 #####################
+    # train_image = ['2spbgym', 'all-the-things', 'imgflip_0', 'imgflip_1033','imgflip_11', 'imgflip_117', 'imgflip_16', 'imgflip_189','imgflip_23', 'imgflip_504']
+    # train_text = ['i\'ll take it sure ur not chicken?',
+    #               'avoid all the work',
+    #               'due tomorrow; do tomorrow',
+    #               'i want to speak to your manager',
+    #               'school: *closes*; the kid who was in the bathroom:',
+    #               'almost getting pass an extremely hard level but failing last minute',
+    #               'you can\'t lose your mind; if you don\'t have one',
+    #               'you; doing nothing; today; teacher',
+    #               'students: *acting crazy*; teacher: pay attention! that kid named attention:',
+    #               'they called me four eyes. i call them no eyes.']
+    ####################### default #######################
+    train_image = []
     train_text = []
-    for i in range(len(train_image)):
-        caption = load[load['CaptionID'] == train_image[i]]['Caption'].values[0]
-        train_text.append(caption)
     for i in range(len(trainDataset)):
         caption = trainDataset.captions[i]
         image_id = trainDataset.image_ids[i]
-        if image_id in train_image and caption in train_text and image_id not in train_image_id_list:
-            train_caption[image_id] = []
-            train_caption[image_id].append(caption)
-            tokens, mask, prefix = trainDataset[i]
-            tokens_list.append(tokens)
-            mask_list.append(mask)
-            prefix_list.append(prefix)
-            train_gt.append(caption)
-            train_image_id_list.append(image_id)
-else:
-    for i in range(len(trainDataset)):
-        caption = trainDataset.captions[i]
-        image_id = trainDataset.image_ids[i]
-        if image_id in train_image:
-            if train_caption.get(image_id) is not None:
-                train_caption[image_id].append(caption)
-            else:
+        if image_id not in train_image:
+            print(f"Image ID: {image_id}, Caption: {caption}")
+            train_image.append(image_id)
+            train_text.append(caption)
+            if len(train_image) == 10:
+                break
+    #######################################################
+    tokens_list = []
+    mask_list = []
+    prefix_list = []
+    train_gt = []
+    train_caption = dict()
+    train_image_id_list = []
+    if train_dataform != "Oxford":
+        load = pd.read_csv(f'../Data/Instagram/CaptionID_{train_dataform}.csv')
+        load['caption'] = load['caption'].str.lower()
+        train_text = []
+        for i in range(len(train_image)):
+            caption = load[load['image_id'] == train_image[i]]['caption'].values[0]
+            train_text.append(caption)
+        inside = []
+        for i in range(len(trainDataset)):
+            caption = trainDataset.captions[i]
+            image_id = trainDataset.image_ids[i]
+            if image_id in train_image and image_id not in train_image_id_list:
                 train_caption[image_id] = []
                 train_caption[image_id].append(caption)
-            if caption in train_text and image_id not in train_image_id_list:
                 tokens, mask, prefix = trainDataset[i]
                 tokens_list.append(tokens)
                 mask_list.append(mask)
                 prefix_list.append(prefix)
                 train_gt.append(caption)
                 train_image_id_list.append(image_id)
-train_tokens = torch.stack(tokens_list).to(device)
-train_mask = torch.stack(mask_list).to(device)
-train_prefix = torch.stack(prefix_list).to(device)
-print(train_tokens.shape, train_mask.shape, train_prefix.shape, len(train_image_id_list))
-##################### oxford_300k #####################
-# test_image = ['imgflip_7', 'imgflip_32']
-# test_text = ['CHEESE; ME AT 3 AM; CHEESE; MY MOM WHO WAS WAITING; ME'
-#               ,'IS THIS A PIGEON?']
-##################### oxford_100k #####################
-# test_image = ['imgflip_7', 'imgflip_32']
-# test_text = ['THE DOG FOOD; MY DOG; DOG FOOD; ME LOOKING AT HIM; MY DOG'
-#               ,'MATH; ME; IS THIS THE REASON I DROPPED OUT OF COLLEGE?']
-##################### oxford_10 k #####################
-# test_image = ['bokete_111723', 'imgflip_57']
-# test_text = ['I\'m going to take care of you. I\'m going to take care of you. I\'m going to take care of you.'
-#               ,'WHAT\'S DONE IN THE DARK WILL ALWAYS COME OUT IN THE LIGHT; BUT THATS NONE OF MY BUSINESS']
-##################### oxford_Top10_300k ###############
-# test_image = ['are-you-serious-face', 'bokete_24326']
-# test_text = ['you have windows 98 seriously?'
-#               ,'The answer is 10.']
-##################### oxford_Top10_300k_mess ##########
-# test_image = ['imgflip_156', 'bokete_24326']
-# test_text = ['Friend: I just had a dream in which I married my crush! My dreams:'
-#               ,'The answer is 10.']
-##################### oxford_Only1200_300k ############
-# test_image = ['imgflip_130', 'imgflip_659']
-# test_text = ['0 VIEWS 5 DISLIKES'
-#               ,'when the mobile game ad is so laggy that it crashes your game and you lose out on a reward:']
-##################### oxford_Only100_300k #############
-# test_image = ['i-love-coloring-kid', 'imgflip_130']
-# test_text = ['she started writing notes !!'
-#               ,'WHEN YOUR FRIEND; DOSENT LIKE ROOT BEER']
-##################### oxford_only10 ###################
-# test_image = ['bokete_100174', 'imgflip_834']
-# test_text = ['get out of my way. i\'ll do it.'
-#                 ,'me fully prepared for the test; question 1']
-####################### default #######################
-test_image = []
-test_text = []
-for i in range(len(testDataset)):
-    caption = testDataset.captions[i]
-    image_id = testDataset.image_ids[i]
-    if image_id not in test_image:
-        print(f"Image ID: {image_id}, Caption: {caption}")
-        test_image.append(image_id)
-        test_text.append(caption)
-        if len(test_image) == 10:
-            break
-#######################################################
-tokens_list = []
-mask_list = []
-prefix_list = []
-test_gt = []
-test_caption = dict()
-test_image_id_list = []
+    else:
+        for i in range(len(trainDataset)):
+            caption = trainDataset.captions[i]
+            image_id = trainDataset.image_ids[i]
+            if image_id in train_image:
+                if train_caption.get(image_id) is not None:
+                    train_caption[image_id].append(caption)
+                else:
+                    train_caption[image_id] = []
+                    train_caption[image_id].append(caption)
+                if caption in train_text and image_id not in train_image_id_list:
+                    tokens, mask, prefix = trainDataset[i]
+                    tokens_list.append(tokens)
+                    mask_list.append(mask)
+                    prefix_list.append(prefix)
+                    train_gt.append(caption)
+                    train_image_id_list.append(image_id)
+    train_tokens = torch.stack(tokens_list).to(device)
+    train_mask = torch.stack(mask_list).to(device)
+    train_prefix = torch.stack(prefix_list).to(device)
+    print(train_tokens.shape, train_mask.shape, train_prefix.shape, len(train_image_id_list))
+    for i in range(len(train_text)):
+        print(f'Image ID: {train_image[i]}, Caption: {train_text[i]}')
+        print(train_text[i] in inside)
 
-if test_dataform != "Oxford":
-    load = pd.read_csv(f'../Data/Instagram/CaptionID_{test_dataform}.csv')
+if test_dataform:
+    ##################### oxford_300k #####################
+    # test_image = ['imgflip_7', 'imgflip_32']
+    # test_text = ['CHEESE; ME AT 3 AM; CHEESE; MY MOM WHO WAS WAITING; ME'
+    #               ,'IS THIS A PIGEON?']
+    ##################### oxford_100k #####################
+    # test_image = ['imgflip_7', 'imgflip_32']
+    # test_text = ['THE DOG FOOD; MY DOG; DOG FOOD; ME LOOKING AT HIM; MY DOG'
+    #               ,'MATH; ME; IS THIS THE REASON I DROPPED OUT OF COLLEGE?']
+    ##################### oxford_10 k #####################
+    # test_image = ['bokete_111723', 'imgflip_57']
+    # test_text = ['I\'m going to take care of you. I\'m going to take care of you. I\'m going to take care of you.'
+    #               ,'WHAT\'S DONE IN THE DARK WILL ALWAYS COME OUT IN THE LIGHT; BUT THATS NONE OF MY BUSINESS']
+    ##################### oxford_Top10_300k ###############
+    # test_image = ['are-you-serious-face', 'bokete_24326']
+    # test_text = ['you have windows 98 seriously?'
+    #               ,'The answer is 10.']
+    ##################### oxford_Top10_300k_mess ##########
+    # test_image = ['imgflip_156', 'bokete_24326']
+    # test_text = ['Friend: I just had a dream in which I married my crush! My dreams:'
+    #               ,'The answer is 10.']
+    ##################### oxford_Only1200_300k ############
+    # test_image = ['imgflip_130', 'imgflip_659']
+    # test_text = ['0 VIEWS 5 DISLIKES'
+    #               ,'when the mobile game ad is so laggy that it crashes your game and you lose out on a reward:']
+    ##################### oxford_Only100_300k #############
+    # test_image = ['i-love-coloring-kid', 'imgflip_130']
+    # test_text = ['she started writing notes !!'
+    #               ,'WHEN YOUR FRIEND; DOSENT LIKE ROOT BEER']
+    ##################### oxford_only10 ###################
+    # test_image = ['bokete_100174', 'imgflip_834']
+    # test_text = ['get out of my way. i\'ll do it.'
+    #                 ,'me fully prepared for the test; question 1']
+    ####################### default #######################
+    test_image = []
     test_text = []
-    for i in range(len(test_image)):
-        caption = load[load['CaptionID'] == test_image[i]]['Caption'].values[0]
-        test_text.append(caption)
     for i in range(len(testDataset)):
         caption = testDataset.captions[i]
         image_id = testDataset.image_ids[i]
-        if image_id in test_image and caption in test_text and image_id not in test_image_id_list:
-            test_caption[image_id] = []
-            test_caption[image_id].append(caption)
-            tokens, mask, prefix = testDataset[i]
-            tokens_list.append(tokens)
-            mask_list.append(mask)
-            prefix_list.append(prefix)
-            test_gt.append(caption)
-            test_image_id_list.append(image_id)
-else:
-    for i in range(len(testDataset)):
-        caption = testDataset.captions[i]
-        image_id = testDataset.image_ids[i]
-        if image_id in test_image:
-            if test_caption.get(image_id) is not None:
-                test_caption[image_id].append(caption)
-            else:
+        if image_id not in test_image:
+            print(f"Image ID: {image_id}, Caption: {caption}")
+            test_image.append(image_id)
+            test_text.append(caption)
+            if len(test_image) == 10:
+                break
+    #######################################################
+    tokens_list = []
+    mask_list = []
+    prefix_list = []
+    test_gt = []
+    test_caption = dict()
+    test_image_id_list = []
+
+    if test_dataform != "Oxford":
+        load = pd.read_csv(f'../Data/Instagram/CaptionID_{test_dataform}.csv')
+        load['caption'] = load['caption'].str.lower()
+        test_text = []
+        for i in range(len(test_image)):
+            caption = load[load['image_id'] == test_image[i]]['caption'].values[0]
+            test_text.append(caption)
+        for i in range(len(testDataset)):
+            caption = testDataset.captions[i]
+            image_id = testDataset.image_ids[i]
+            if image_id in test_image and image_id not in test_image_id_list:
                 test_caption[image_id] = []
                 test_caption[image_id].append(caption)
-            if caption in test_text and image_id not in test_image_id_list:
-                # print(f"Image ID: {image_id}, Caption: {caption}")
                 tokens, mask, prefix = testDataset[i]
                 tokens_list.append(tokens)
                 mask_list.append(mask)
                 prefix_list.append(prefix)
                 test_gt.append(caption)
                 test_image_id_list.append(image_id)
+    else:
+        for i in range(len(testDataset)):
+            caption = testDataset.captions[i]
+            image_id = testDataset.image_ids[i]
+            if image_id in test_image:
+                if test_caption.get(image_id) is not None:
+                    test_caption[image_id].append(caption)
+                else:
+                    test_caption[image_id] = []
+                    test_caption[image_id].append(caption)
+                if caption in test_text and image_id not in test_image_id_list:
+                    # print(f"Image ID: {image_id}, Caption: {caption}")
+                    tokens, mask, prefix = testDataset[i]
+                    tokens_list.append(tokens)
+                    mask_list.append(mask)
+                    prefix_list.append(prefix)
+                    test_gt.append(caption)
+                    test_image_id_list.append(image_id)
 
-test_tokens = torch.stack(tokens_list).to(device)
-test_mask = torch.stack(mask_list).to(device)
-test_prefix = torch.stack(prefix_list).to(device)
-print(test_tokens.shape, test_mask.shape, test_prefix.shape)
+    test_tokens = torch.stack(tokens_list).to(device)
+    test_mask = torch.stack(mask_list).to(device)
+    test_prefix = torch.stack(prefix_list).to(device)
+    print(test_tokens.shape, test_mask.shape, test_prefix.shape)
 
 model = ClipCaptionModel(prefix_length, clip_length=prefix_length, prefix_size=512, num_layers=8)
-adapter = True
-save_file = '20250213_300up_only300_rest_200up_top200_sonicdrivein_transformer_p64_falcon_swin_tf8'
+adapter = False
+# save_file = '202502014_oxford_only800_base_sonicdrivein_only300_transformer_lora_p64_falcon_swin_tf8'
 i = 1
+
 if adapter :
     model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i:03d}.pt'))
 
@@ -1084,6 +1135,8 @@ for i in range(10):
     if os.path.exists(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'):
         df = pd.read_csv(f'./Model/{save_file}/{save_file}_test_{i + 1:03d}.csv')
         textAndLoss = df[['text', 'loss', 'fitCount', 'gtNum', 'bleu1', 'bleu2', 'bleu3', 'bleu4']]
+        if AllCaption.empty:
+            AllCaption = df[['Name']]
         AllCaption = pd.concat([AllCaption, textAndLoss], axis=1)
-AllCaption.to_csv(f'./Model/{save_file}/{save_file}_test_all.csv', index=False)
+AllCaption.to_csv(f'./Model/{save_file}/{save_file}_test_all.csv', float_format='%.15f', index=False)
 
