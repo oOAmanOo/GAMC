@@ -144,21 +144,57 @@ class Predictor(object):
             print(text)
             print('--------- generate_beam ---------')
             if adapter:
-                embedding_emotion = self.falcon.base_model.model.model.embed_tokens(emotion[i].unsqueeze(0))
-                embedding_sentiment = self.falcon.base_model.model.model.embed_tokens(sentiment[i].unsqueeze(0))
-                embedding_humor = self.falcon.base_model.model.model.embed_tokens(humor[i].unsqueeze(0))
+                embedding_emotion = model.falcon.base_model.model.model.embed_tokens(emotion[i].unsqueeze(0))
+                embedding_sentiment = model.falcon.base_model.model.model.embed_tokens(sentiment[i].unsqueeze(0))
+                embedding_humor = model.falcon.base_model.model.model.embed_tokens(humor[i].unsqueeze(0))
             else:
                 embedding_emotion = model.falcon.model.embed_tokens(emotion[i].unsqueeze(0))
                 embedding_sentiment = model.falcon.model.embed_tokens(sentiment[i].unsqueeze(0))
                 embedding_humor = model.falcon.model.embed_tokens(humor[i].unsqueeze(0))
 
-            empty_EHS = torch.zeros(embedding_emotion.shape[0], 1, embedding_emotion.shape[2], dtype=torch.bfloat16, device=embedding_text.device)
-            embedding_EHS = torch.cat((empty_EHS, embedding_emotion, embedding_sentiment, embedding_humor), dim=1)
-            visual_projections_swin = self.visual_project_swin(embedding_EHS, prefix)
-            visual_projections_ESH = self.visual_project_ESH(embedding_EHS, prefix)
-            visual_projections = visual_projections_swin + visual_projections_ESH
+            empty_ESH = torch.zeros(embedding_emotion.shape[0], 1, embedding_emotion.shape[2], dtype=torch.bfloat16, device=embedding_emotion.device)
+            embedding_ESH = torch.cat((empty_ESH, embedding_emotion, embedding_sentiment, embedding_humor), dim=1)
 
-            prefix_embed = model.clip_project(visual_projections).view(-1, self.prefix_length, self.embedding_size)
+            ############################################ 202502 ##############################################
+            visual_projections_swin = model.visual_project_swin(embedding_ESH, prefixs[i].unsqueeze(0))
+            visual_projections_ESH = model.visual_project_ESH(prefixs[i].unsqueeze(0), embedding_ESH)
+            ########################################################################################
+            ##### 20250226_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_swin_tf8 #####
+            ########################################################################################
+            # visual_projections = visual_projections_swin + visual_projections_ESH
+            ########################################################################################
+            ### 20250228_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8  ###
+            ########################################################################################
+            # visual_projections = torch.cat((visual_projections_swin, visual_projections_ESH), dim=1)
+            # visual_projections = model.visual_project(visual_projections.transpose(1, 2)).transpose(1, 2)
+            ########################################################################################
+            #######  20250304_oxford_lower_800up_only800_rest_300up_top300_ESH_co_swin_tf8   #######
+            ########################################################################################
+            visual_projections = visual_projections_swin
+            ##################################################################################################
+            prefix_embed = model.clip_project(visual_projections).view(-1, model.prefix_length, model.embedding_size)
+            ##################################################################################################
+
+            # ############################################ 202503 ##############################################
+            # clip_projections = model.clip_project(prefixs[i].unsqueeze(0)).view(-1, model.prefix_length, model.embedding_size)
+            # visual_projections_swin = model.visual_project_swin(embedding_ESH, clip_projections)
+            # visual_projections_ESH = model.visual_project_ESH(clip_projections, embedding_ESH)
+            # ########################################################################################
+            # ##### 20250301_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_swin_tf8 #####
+            # ########################################################################################
+            # # prefix_embed = visual_projections_swin + visual_projections_ESH
+            # ########################################################################################
+            # ### 20250302_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8  ###
+            # ########################################################################################
+            # # prefix_embed = torch.cat((visual_projections_swin, visual_projections_ESH), dim=1)
+            # # prefix_embed = model.visual_project(prefix_embed.transpose(1, 2)).transpose(1, 2)
+            # ########################################################################################
+            # #### 20250303_oxford_lower_800up_only800_rest_300up_top300_ESH_co_concat_swin_tf8   ####
+            # ########################################################################################
+            # prefix_embed = visual_projections_swin
+            # ########################################################################################
+            # ##################################################################################################
+
             caption = generate_beam(model, tokenizer, embed=prefix_embed)[0]
             caption_token = tokenizer(caption, return_tensors='pt', padding='max_length', truncation=True, max_length=74)
 
@@ -206,8 +242,8 @@ class Predictor(object):
             out = model.falcon(inputs_embeds=embedding_cat, attention_mask=masks[i].unsqueeze(0))
 
             logits = out.logits[:, self.prefix_length-1: -1]
-            # loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens[i].flatten(), ignore_index=0)
-            loss = PCloss(logits, tokens[i].unsqueeze(0))
+            loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens[i].flatten(), ignore_index=0)
+            # loss = PCloss(logits, tokens[i].unsqueeze(0))
             print(loss)
             caption_token = logits.argmax(-1)[0].cpu()
             caption = tokenizer.decode(caption_token, skip_special_tokens=True)
@@ -318,9 +354,9 @@ class Predictor(object):
                                generate2_df, dataframe_Name("train"), train_df], axis=0)
             print(final.shape)
             print(final.columns)
-            final.to_csv(f'./Model/{save_file}/test_{self.cp_num:03d}.csv', float_format='%.15f', index=False)
+            # final.to_csv(f'./Model/{save_file}/test_{self.cp_num:03d}.csv', float_format='%.15f', index=False)
 
-            # final.to_csv(f'./Model/{save_file}/{save_file}_test_{self.cp_num:03d}.csv', float_format='%.15f', index=False)
+            final.to_csv(f'./Model/{save_file}/{save_file}_test_{self.cp_num:03d}.csv', float_format='%.15f', index=False)
             # final.to_csv(f'./Model/{save_file}/Generate_mcdonalds_all.csv', index=False)
 
 class MLP(nn.Module):
@@ -463,16 +499,15 @@ class TransformerMapper(nn.Module):
         self.clip_length = clip_length
         self.transformer = Transformer(dim_embedding, 8, num_layers)
         ### clip ###
-        # self.linear = lora.Linear(dim_clip, clip_length * dim_embedding)
+        # self.linear = nn.Linear(dim_clip, clip_length * dim_embedding)
         ### swin ###
-        # self.linear = lora.Linear(768, dim_embedding)
+        self.linear = nn.Linear(768, dim_embedding)
         ############
         self.prefix_const = nn.Parameter(torch.randn(prefix_length, dim_embedding), requires_grad=True)
 
 class CrossTransformerMapper(nn.Module):
 
     def forward(self, x, y):
-        print(f"x: {x.shape}, y: {y.shape}")
         ### clip ###
         # x = self.linear(x).view(x.shape[0], self.clip_length, -1)
         ### swin ###
@@ -480,7 +515,6 @@ class CrossTransformerMapper(nn.Module):
             x = self.linear(x)
         if y.shape[2] == 768:
             y = self.linear(y)
-        print(f"x: {x.shape}, y: {y.shape}")
         ############
         out = self.transformer(x, y)
         return out
@@ -492,7 +526,7 @@ class CrossTransformerMapper(nn.Module):
         ### clip ###
         # self.linear = lora.Linear(dim_clip, clip_length * dim_embedding)
         ### swin ###
-        self.linear = lora.Linear(768, dim_embedding)
+        self.linear = nn.Linear(768, dim_embedding)
         ############
 
 class ClipCaptionModel(nn.Module):
@@ -501,22 +535,60 @@ class ClipCaptionModel(nn.Module):
         return torch.zeros(batch_size, self.prefix_length, dtype=torch.int64, device=device)
 
     def forward(self, tokens: torch.Tensor, prefix: torch.Tensor, mask: Optional[torch.Tensor] = None,
-                labels: Optional[torch.Tensor] = None, emotion: torch.Tensor = None, sentiment: torch.Tensor = None, humor: torch.Tensor = None) -> torch.Tensor:
+                labels: Optional[torch.Tensor] = None, emotion: torch.Tensor = None, sentiment: torch.Tensor = None,
+                humor: torch.Tensor = None) -> torch.Tensor:
         # embedding_text = self.gemma.model.embed_tokens(tokens)
         # embedding_text = self.gemma.base_model.model.model.embed_tokens(tokens)
         # embedding_text = self.gpt.transformer.wte(tokens)
-        # embedding_text = self.falcon.model.embed_tokens(tokens)
-        embedding_text = self.falcon.base_model.model.model.embed_tokens(tokens)
-        embedding_emotion = self.falcon.base_model.model.model.embed_tokens(emotion)
-        embedding_sentiment = self.falcon.base_model.model.model.embed_tokens(sentiment)
-        embedding_humor = self.falcon.base_model.model.model.embed_tokens(humor)
-        empty_EHS = torch.zeros(embedding_emotion.shape[0], 1, embedding_emotion.shape[2], dtype=torch.bfloat16, device=embedding_text.device)
-        embedding_EHS = torch.cat((empty_EHS, embedding_emotion, embedding_sentiment, embedding_humor), dim=1)
-        visual_projections_swin = self.visual_project_swin(embedding_EHS, prefix)
-        visual_projections_ESH = self.visual_project_ESH(embedding_EHS, prefix)
-        visual_projections = visual_projections_swin + visual_projections_ESH
+        embedding_text = self.falcon.model.embed_tokens(tokens)
+        embedding_emotion = self.falcon.model.embed_tokens(emotion)
+        embedding_sentiment = self.falcon.model.embed_tokens(sentiment)
+        embedding_humor = self.falcon.model.embed_tokens(humor)
+        empty_ESH = torch.zeros(embedding_emotion.shape[0], 1, embedding_emotion.shape[2], dtype=torch.bfloat16,
+                                device=embedding_text.device)
+        embedding_ESH = torch.cat((empty_ESH, embedding_emotion, embedding_sentiment, embedding_humor), dim=1)
+        ############################################ 202502 ##############################################
+        visual_projections_swin = self.visual_project_swin(embedding_ESH, prefix)
+        visual_projections_ESH = self.visual_project_ESH(prefix, embedding_ESH)
+        ########################################################################################
+        ##### 20250226_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_swin_tf8 #####
+        ########################################################################################
+        # visual_projections = visual_projections_swin + visual_projections_ESH
+        ########################################################################################
+        ### 20250228_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8  ###
+        ########################################################################################
+        # visual_projections = torch.cat((visual_projections_swin, visual_projections_ESH), dim=1)
+        # visual_projections = self.visual_project(visual_projections.transpose(1, 2)).transpose(1, 2)
+        ########################################################################################
+        #######  20250304_oxford_lower_800up_only800_rest_300up_top300_ESH_co_swin_tf8   #######
+        ########################################################################################
+        visual_projections = visual_projections_swin
+        ########################################################################################
         prefix_projections = self.clip_project(visual_projections).view(-1, self.prefix_length, self.embedding_size)
         embedding_cat = torch.cat((prefix_projections, embedding_text), dim=1)
+        ##################################################################################################
+
+        # ############################################ 202503 ##############################################
+        # clip_projections = self.clip_project(prefix).view(-1, self.prefix_length, self.embedding_size)
+        # visual_projections_swin = self.visual_project_swin(embedding_ESH, clip_projections)
+        # visual_projections_ESH = self.visual_project_ESH(clip_projections, embedding_ESH)
+        # ########################################################################################
+        # ##### 20250301_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_swin_tf8 #####
+        # ########################################################################################
+        # # visual_projections = visual_projections_swin + visual_projections_ESH
+        # ########################################################################################
+        # ### 20250302_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8  ###
+        # ########################################################################################
+        # # visual_projections = torch.cat((visual_projections_swin, visual_projections_ESH), dim=1)
+        # # visual_projections = self.visual_project(visual_projections.transpose(1, 2)).transpose(1, 2)
+        # ########################################################################################
+        # #######  20250303_oxford_lower_800up_only800_rest_300up_top300_ESH_co_swin_tf8   #######
+        # ########################################################################################
+        # visual_projections = visual_projections_swin
+        # ########################################################################################
+        # embedding_cat = torch.cat((visual_projections, embedding_text), dim=1)
+        # ##################################################################################################
+
         if labels is not None:
             dummy_token = self.get_dummy_token(tokens.shape[0], tokens.device)
             labels = torch.cat((dummy_token, tokens), dim=1)
@@ -526,7 +598,7 @@ class ClipCaptionModel(nn.Module):
         return out
 
     def __init__(self, prefix_length: int, clip_length: Optional[int] = None, prefix_size: int = 512,
-                 num_layers: int = 8, mapping_type: MappingType = MappingType.MLP, ):
+                 num_layers: int = 8):
         super(ClipCaptionModel, self).__init__()
         self.prefix_length = prefix_length
         # self.gemma = Gemma2ForCausalLM.from_pretrained("google/gemma-2-2b-it", device_map="auto", torch_dtype=torch.bfloat16)
@@ -565,8 +637,6 @@ class ClipCaptionModel(nn.Module):
         self.falcon = AutoModelForCausalLM.from_pretrained("tiiuae/Falcon3-1B-Base")
         # self.falcon = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B")
         self.embedding_size = self.falcon.model.embed_tokens.weight.shape[1]
-
-
         # self.falcon.eval()
         # for param in self.falcon.parameters():
         #     param.requires_grad = False
@@ -577,28 +647,10 @@ class ClipCaptionModel(nn.Module):
         self.clip_project = TransformerMapper(prefix_size, self.embedding_size, prefix_length, clip_length, num_layers)
         self.visual_project_swin = CrossTransformerMapper(prefix_size, self.embedding_size, prefix_length, clip_length, num_layers)
         self.visual_project_ESH = CrossTransformerMapper(prefix_size, self.embedding_size, prefix_length, clip_length, num_layers)
-
-    def activateLoRa(self):
-        LORAconfig = LoraConfig(
-            task_type=TaskType.CAUSAL_LM,
-            target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
-            inference_mode=False,  # 训练模式
-            r=8,  # Lora 秩
-            lora_alpha=32,  # Lora alaph，具体作用参见 Lora 原理
-            lora_dropout=0.1  # Dropout 比例
-        )
-
-        def count_trainable_parameters(model):
-            model_parameters = filter(lambda p: p.requires_grad, model.parameters())
-            params = sum([np.prod(p.size()) for p in model_parameters])
-            return params
-
-        a = count_trainable_parameters(self.falcon)
-        self.falcon = get_peft_model(self.falcon, LORAconfig)
-        b = count_trainable_parameters(self.falcon)
-        # 留下小數點後兩位就好
-        percent = round((b / a) * 100, 3)
-        print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
+        #######################################################################################
+        ### 20250228_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8 ###
+        #######################################################################################
+        self.visual_project = nn.Linear(128, 64)
 
 class ClipCaptionPrefix(ClipCaptionModel):
 
@@ -1021,14 +1073,14 @@ class ClipCocoDataset(Dataset):
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-# trainData = '../Data/Oxford_HIC/parse/oxford_lower_800up_only800_all_ViT-B_32_train.pkl'
-# testData = '../Data/Oxford_HIC/parse/oxford_lower_800up_only800_rest_300up_top300_ViT-B_32_test.pkl'
-trainData = '../Data/Instagram/parse/300up_only300_all_sonicdrivein_ViT-B_32_train.pkl'
-testData = '../Data/Instagram/parse/100up_only100_rest_50up_top50_sonicdrivein_ViT-B_32_test.pkl'
+trainData = '../Data/Oxford_HIC/parse/oxford_lower_800up_only800_all_ViT-B_32_train.pkl'
+testData = '../Data/Oxford_HIC/parse/oxford_lower_800up_only800_rest_300up_top300_ViT-B_32_test.pkl'
+# trainData = '../Data/Instagram/parse/300up_only300_all_sonicdrivein_ViT-B_32_train.pkl'
+# testData = '../Data/Instagram/parse/100up_only100_rest_50up_top50_sonicdrivein_ViT-B_32_test.pkl'
 prefix_length = 64
 normalize_prefix = False
-train_dataform = "sonicdrivein"
-test_dataform = "sonicdrivein"
+train_dataform = "Oxford"
+test_dataform = "Oxford"
 trainDataset = OxfordDataset(trainData, prefix_length, normalize_prefix=normalize_prefix, dataFrom = train_dataform)
 testDataset = OxfordDataset(testData, prefix_length, normalize_prefix=normalize_prefix, dataFrom = test_dataform)
 
@@ -1120,9 +1172,6 @@ if train_dataform:
     ####################### default #######################
     train_image = []
     train_text = []
-    train_emotion_list = []
-    train_sentiment_list = []
-    train_humor_list = []
     for i in range(len(trainDataset)):
         caption = trainDataset.captions[i]
         image_id = trainDataset.image_ids[i]
@@ -1130,15 +1179,16 @@ if train_dataform:
             print(f"Image ID: {image_id}, Caption: {caption}")
             train_image.append(image_id)
             train_text.append(caption)
-            train_emotion_list.append(trainDataset.emotion[image_id])
-            train_sentiment_list.append(trainDataset.sentiment[image_id])
-            train_humor_list.append(trainDataset.humor[image_id])
+            print(f"Emotion: {trainDataset.emotion[image_id].shape}, Sentiment: {trainDataset.sentiment[image_id].shape}, Humor: {trainDataset.humor[image_id].shape}")
             if len(train_image) == 10:
                 break
     #######################################################
     tokens_list = []
     mask_list = []
     prefix_list = []
+    train_emotion_list = []
+    train_sentiment_list = []
+    train_humor_list = []
     train_gt = []
     train_caption = dict()
     train_image_id_list = []
@@ -1156,11 +1206,16 @@ if train_dataform:
             if image_id in train_image and image_id not in train_image_id_list:
                 train_caption[image_id] = []
                 train_caption[image_id].append(caption)
-                tokens, mask, prefix = trainDataset[i]
+                tokens, mask, prefix, item, emotion, sentiment, humor = trainDataset[i]
                 tokens_list.append(tokens)
                 mask_list.append(mask)
                 prefix_list.append(prefix)
+                emotion, sentiment, humor = trainDataset.pad_emotion(item)
+                train_emotion_list.append(emotion)
+                train_sentiment_list.append(sentiment)
+                train_humor_list.append(humor)
                 train_gt.append(caption)
+
                 train_image_id_list.append(image_id)
     else:
         for i in range(len(trainDataset)):
@@ -1173,11 +1228,15 @@ if train_dataform:
                     train_caption[image_id] = []
                     train_caption[image_id].append(caption)
                 if caption in train_text and image_id not in train_image_id_list:
-                    tokens, mask, prefix = trainDataset[i]
+                    tokens, mask, prefix, item, emotion, sentiment, humor = trainDataset[i]
                     tokens_list.append(tokens)
                     mask_list.append(mask)
                     prefix_list.append(prefix)
                     train_gt.append(caption)
+                    emotion, sentiment, humor = trainDataset.pad_emotion(item)
+                    train_emotion_list.append(emotion)
+                    train_sentiment_list.append(sentiment)
+                    train_humor_list.append(humor)
                     train_image_id_list.append(image_id)
     train_tokens = torch.stack(tokens_list).to(device)
     train_mask = torch.stack(mask_list).to(device)
@@ -1234,15 +1293,15 @@ if test_dataform:
             print(f"Image ID: {image_id}, Caption: {caption}")
             test_image.append(image_id)
             test_text.append(caption)
-            test_emotion_list.append(testDataset.emotion[image_id])
-            test_sentiment_list.append(testDataset.sentiment[image_id])
-            test_humor_list.append(testDataset.humor[image_id])
             if len(test_image) == 10:
                 break
     #######################################################
     tokens_list = []
     mask_list = []
     prefix_list = []
+    test_emotion_list = []
+    test_sentiment_list = []
+    test_humor_list = []
     test_gt = []
     test_caption = dict()
     test_image_id_list = []
@@ -1260,10 +1319,14 @@ if test_dataform:
             if image_id in test_image and image_id not in test_image_id_list:
                 test_caption[image_id] = []
                 test_caption[image_id].append(caption)
-                tokens, mask, prefix = testDataset[i]
+                tokens, mask, prefix, item, emotion, sentiment, humor = testDataset[i]
                 tokens_list.append(tokens)
                 mask_list.append(mask)
                 prefix_list.append(prefix)
+                emotion, sentiment, humor = testDataset.pad_emotion(item)
+                test_emotion_list.append(emotion)
+                test_sentiment_list.append(sentiment)
+                test_humor_list.append(humor)
                 test_gt.append(caption)
                 test_image_id_list.append(image_id)
     else:
@@ -1278,10 +1341,14 @@ if test_dataform:
                     test_caption[image_id].append(caption)
                 if caption in test_text and image_id not in test_image_id_list:
                     # print(f"Image ID: {image_id}, Caption: {caption}")
-                    tokens, mask, prefix = testDataset[i]
+                    tokens, mask, prefix, item, emotion, sentiment, humor = testDataset[i]
                     tokens_list.append(tokens)
                     mask_list.append(mask)
                     prefix_list.append(prefix)
+                    emotion, sentiment, humor = testDataset.pad_emotion(item)
+                    test_emotion_list.append(emotion)
+                    test_sentiment_list.append(sentiment)
+                    test_humor_list.append(humor)
                     test_gt.append(caption)
                     test_image_id_list.append(image_id)
 
@@ -1295,8 +1362,8 @@ if test_dataform:
     print(test_emotion.shape, test_sentiment.shape, test_humor.shape)
 
 model = ClipCaptionModel(prefix_length, clip_length=prefix_length, prefix_size=512, num_layers=8)
-adapter = True
-save_file = '20250218_300up_only300_rest_200up_top200_sonicdrivein_transformer_p64_falcon_swin_tf8_pcloss'
+adapter = False
+save_file = '20250224_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_swin_tf8'
 i = 1
 if adapter :
     model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i:03d}.pt'))
@@ -1324,8 +1391,8 @@ if adapter :
 
     model.activateLoRa()
 
-save_file = '202502018_oxford_lower_only800_base_sonicdrivein_only300_transformer_lora_p64_falcon_swin_tf8_pcloss'
-for i in range(10):
+save_file = '20250304_oxford_lower_800up_only800_rest_300up_top300_ESH_co_swin_tf8'
+for i in range(20):
     if os.path.exists(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'):
         model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'))
         model = model.eval()
@@ -1337,13 +1404,13 @@ for i in range(10):
         pred.predict("train", train_tokens, train_mask, train_prefix, train_gt, model, train_emotion, train_sentiment, train_humor)
 
 AllCaption = pd.DataFrame()
-for i in range(10):
+for i in range(20):
     if os.path.exists(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'):
         df = pd.read_csv(f'./Model/{save_file}/{save_file}_test_{i + 1:03d}.csv')
         textAndLoss = df[['text', 'loss', 'fitCount', 'gtNum', 'bleu1', 'bleu2', 'bleu3', 'bleu4']]
         if AllCaption.empty:
             AllCaption = df[['Name']]
         AllCaption = pd.concat([AllCaption, textAndLoss], axis=1)
-# AllCaption.to_csv(f'./Model/{save_file}/{save_file}_test_all.csv', float_format='%.15f', index=False)
-AllCaption.to_csv(f'./Model/{save_file}/test_all.csv', float_format='%.15f', index=False)
+AllCaption.to_csv(f'./Model/{save_file}/{save_file}_test_all.csv', float_format='%.15f', index=False)
+# AllCaption.to_csv(f'./Model/{save_file}/test_all.csv', float_format='%.15f', index=False)
 
