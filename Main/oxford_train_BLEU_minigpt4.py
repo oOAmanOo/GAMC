@@ -458,6 +458,10 @@ class TransformerMapper(nn.Module):
         # if x.shape[2] == 768:
         #     x = self.linear(x)
         ############
+        ### 768 ###
+        if x.shape[2] != 768:
+            x = self.linear(x)
+        ############
         prefix = self.prefix_const.unsqueeze(0).expand(x.shape[0], *self.prefix_const.shape)
         prefix = torch.cat((x, prefix), dim=1)
         out = self.transformer(prefix)[:, self.clip_length:]
@@ -472,6 +476,9 @@ class TransformerMapper(nn.Module):
         ### swin ###
         # self.linear = nn.Linear(768, dim_embedding)
         ############
+        ### 768 ###
+        self.linear = nn.Linear(2048, dim_embedding)
+        ############
         self.prefix_const = nn.Parameter(torch.randn(prefix_length, dim_embedding), requires_grad=True)
 
 class CrossTransformerMapper(nn.Module):
@@ -480,11 +487,18 @@ class CrossTransformerMapper(nn.Module):
         ### clip ###
         # x = self.linear(x).view(x.shape[0], self.clip_length, -1)
         ### swin ###
-        if x.shape[2] == 768:
+        # if x.shape[2] == 768:
+        #     x = self.linear(x)
+        # if y.shape[2] == 768:
+        #     y = self.linear(y)
+        ############
+        ### 768 ###
+        if x.shape[2] != 768:
             x = self.linear(x)
-        if y.shape[2] == 768:
+        if y.shape[2] != 768:
             y = self.linear(y)
         ############
+
         out = self.transformer(x, y)
         return out
 
@@ -495,7 +509,10 @@ class CrossTransformerMapper(nn.Module):
         ### clip ###
         # self.linear = lora.Linear(dim_clip, clip_length * dim_embedding)
         ### swin ###
-        self.linear = nn.Linear(768, dim_embedding)
+        # self.linear = nn.Linear(768, dim_embedding)
+        ############
+        ### 768 ###
+        self.linear = nn.Linear(2048, dim_embedding)
         ############
 
 class ClipCaptionModel(nn.Module):
@@ -513,14 +530,57 @@ class ClipCaptionModel(nn.Module):
         embedding_emotion = self.falcon.model.embed_tokens(emotion)
         embedding_sentiment = self.falcon.model.embed_tokens(sentiment)
         embedding_humor = self.falcon.model.embed_tokens(humor)
-        empty_EHS = torch.zeros(embedding_emotion.shape[0], 1, embedding_emotion.shape[2], dtype=torch.bfloat16,
+        empty_ESH = torch.zeros(embedding_emotion.shape[0], 1, embedding_emotion.shape[2], dtype=torch.bfloat16,
                                 device=embedding_text.device)
-        embedding_EHS = torch.cat((empty_EHS, embedding_emotion, embedding_sentiment, embedding_humor), dim=1)
-        visual_projections_swin = self.visual_project_swin(embedding_EHS, prefix)
-        visual_projections_ESH = self.visual_project_ESH(embedding_EHS, prefix)
+        embedding_ESH = torch.cat((empty_ESH, embedding_emotion, embedding_sentiment, embedding_humor), dim=1)
+        ############################################ 202502 ##############################################
+        visual_projections_swin = self.visual_project_swin(embedding_ESH, prefix)
+        visual_projections_ESH = self.visual_project_ESH(prefix, embedding_ESH)
+        ########################################################################################
+        ##### 20250226_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_swin_tf8 #####
+        ########################################################################################
         visual_projections = visual_projections_swin + visual_projections_ESH
+        ########################################################################################
+        ### 20250228_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8  ###
+        ########################################################################################
+        # visual_projections = torch.cat((visual_projections_swin, visual_projections_ESH), dim=1)
+        # visual_projections = self.visual_project(visual_projections.transpose(1, 2)).transpose(1, 2)
+        ########################################################################################
+        #######  20250304_oxford_lower_800up_only800_rest_300up_top300_ESH_co_swin_tf8   #######
+        ########################################################################################
+        # visual_projections = visual_projections_swin
+        ##################################################################################################
         prefix_projections = self.clip_project(visual_projections).view(-1, self.prefix_length, self.embedding_size)
+        #######################################################################################
+        # 20250306_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_768_swin_tf8    #
+        # 20250306_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_768_swin_tf8 #
+        #######################################################################################
+        prefix_projections = self.linear(prefix_projections)
+        ################################################################################
         embedding_cat = torch.cat((prefix_projections, embedding_text), dim=1)
+        ##################################################################################################
+
+        # ############################################ 202503 ##############################################
+        # clip_projections = self.clip_project(prefix).view(-1, self.prefix_length, self.embedding_size)
+        # visual_projections_swin = self.visual_project_swin(embedding_ESH, clip_projections)
+        # # visual_projections_ESH = self.visual_project_ESH(clip_projections, embedding_ESH)
+        # ########################################################################################
+        # ##### 20250301_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_swin_tf8 #####
+        # ########################################################################################
+        # # visual_projections = visual_projections_swin + visual_projections_ESH
+        # ########################################################################################
+        # ### 20250302_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8  ###
+        # ########################################################################################
+        # # visual_projections = torch.cat((visual_projections_swin, visual_projections_ESH), dim=1)
+        # # visual_projections = self.visual_project(visual_projections.transpose(1, 2)).transpose(1, 2)
+        # ########################################################################################
+        # #######  20250303_oxford_lower_800up_only800_rest_300up_top300_ESH_co_swin_tf8   #######
+        # ########################################################################################
+        # visual_projections = visual_projections_swin
+        # ########################################################################################
+        # embedding_cat = torch.cat((visual_projections, embedding_text), dim=1)
+        # ##################################################################################################
+
         if labels is not None:
             dummy_token = self.get_dummy_token(tokens.shape[0], tokens.device)
             labels = torch.cat((dummy_token, tokens), dim=1)
@@ -568,7 +628,8 @@ class ClipCaptionModel(nn.Module):
 
         self.falcon = AutoModelForCausalLM.from_pretrained("tiiuae/Falcon3-1B-Base")
         # self.falcon = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B")
-        self.embedding_size = self.falcon.model.embed_tokens.weight.shape[1]
+        # self.embedding_size = self.falcon.model.embed_tokens.weight.shape[1]
+        self.embedding_size = 768
         # self.falcon.eval()
         # for param in self.falcon.parameters():
         #     param.requires_grad = False
@@ -579,6 +640,11 @@ class ClipCaptionModel(nn.Module):
             self.clip_project = TransformerMapper(prefix_size, self.embedding_size, prefix_length, clip_length, num_layers)
         self.visual_project_swin = CrossTransformerMapper(prefix_size, self.embedding_size, prefix_length, clip_length, num_layers)
         self.visual_project_ESH = CrossTransformerMapper(prefix_size, self.embedding_size, prefix_length, clip_length, num_layers)
+        #######################################################################################
+        ### 20250228_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8 ###
+        #######################################################################################
+        self.visual_project = nn.Linear(128, 64)
+        self.linear = nn.Linear(self.embedding_size, 2048)
 
 class ClipCaptionPrefix(ClipCaptionModel):
 
@@ -737,13 +803,8 @@ def train(trainData, testData, model: ClipCaptionModel, args,
                 loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens.flatten(), ignore_index=0)
                 # loss = PCloss(logits, tokens)
                 testLoss += loss.item()
-
-                prefix_embeds = model.clip_project(prefix).view(-1, args.prefix_length, model.embedding_size)
-                outputs = model.falcon(inputs_embeds=prefix_embeds, attention_mask=mask)
-                logits = outputs.logits
                 generated_tokens = torch.argmax(logits, dim=-1)
-                bleu_score = sentence_bleu([tokens.flatten().tolist()], generated_tokens.flatten().tolist(),
-                                           weights=(1, 0, 0, 0))
+                bleu_score = sentence_bleu([tokens.flatten().tolist()], generated_tokens.flatten().tolist(), weights=(1, 0, 0, 0))
                 testBleu += bleu_score
 
                 progress.set_postfix({"loss": loss.item(), "bleu": bleu_score})
@@ -833,7 +894,7 @@ def main():
     # parser.add_argument('--trainData', default='../Data/Instagram/parse/300up_only300_all_sonicdrivein_ViT-B_32_train.pkl')
     # parser.add_argument('--testData', default='../Data/Instagram/parse/300up_only300_rest_200up_top200_sonicdrivein_ViT-B_32_test.pkl')
     parser.add_argument('--dataFrom', default='Oxford')
-    parser.add_argument('--out_dir', default='20250224_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_swin_tf8')
+    parser.add_argument('--out_dir', default='20250306_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_768_swin_tf8')
     parser.add_argument('--prefix', default='checkpoint', help='prefix for saved filenames')
     parser.add_argument('--epochs', type=int, default=50)
     parser.add_argument('--save_every', type=int, default=1)
@@ -849,7 +910,7 @@ def main():
     prefix_length = args.prefix_length
     if not os.path.exists('./Model/' + args.out_dir):
         os.makedirs('./Model/' + args.out_dir)
-        # os.makedirs('D:/MemeGAN/Model/' + args.out_dir)
+        os.makedirs('D:/MemeGAN/Model/' + args.out_dir)
     args.out_dir = './Model/' + args.out_dir
 
     prefix_dim = 640 if args.is_rn else 512
