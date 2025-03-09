@@ -155,45 +155,53 @@ class Predictor(object):
             empty_ESH = torch.zeros(embedding_emotion.shape[0], 1, embedding_emotion.shape[2], dtype=torch.bfloat16, device=embedding_emotion.device)
             embedding_ESH = torch.cat((empty_ESH, embedding_emotion, embedding_sentiment, embedding_humor), dim=1)
 
-            ############################################ 202502 ##############################################
-            visual_projections_swin = model.visual_project_swin(embedding_ESH, prefixs[i].unsqueeze(0))
-            visual_projections_ESH = model.visual_project_ESH(prefixs[i].unsqueeze(0), embedding_ESH)
-            ########################################################################################
-            ##### 20250226_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_swin_tf8 #####
-            ########################################################################################
-            # visual_projections = visual_projections_swin + visual_projections_ESH
-            ########################################################################################
-            ### 20250228_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8  ###
-            ########################################################################################
+            # ############################################ 202502 ##############################################
+            # visual_projections_swin = model.visual_project_swin(embedding_ESH, prefixs[i].unsqueeze(0))
+            # visual_projections_ESH = model.visual_project_ESH(prefixs[i].unsqueeze(0), embedding_ESH)
+            # ########################################################################################
+            # ##### 20250226_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_swin_tf8 #####
+            # ########################################################################################
+            # # visual_projections = visual_projections_swin + visual_projections_ESH
+            # ########################################################################################
+            # ### 20250228_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8  ###
+            # ########################################################################################
             # visual_projections = torch.cat((visual_projections_swin, visual_projections_ESH), dim=1)
             # visual_projections = model.visual_project(visual_projections.transpose(1, 2)).transpose(1, 2)
-            ########################################################################################
-            #######  20250304_oxford_lower_800up_only800_rest_300up_top300_ESH_co_swin_tf8   #######
-            ########################################################################################
-            visual_projections = visual_projections_swin
-            ##################################################################################################
-            prefix_embed = model.clip_project(visual_projections).view(-1, model.prefix_length, model.embedding_size)
-            ##################################################################################################
-
-            # ############################################ 202503 ##############################################
-            # clip_projections = model.clip_project(prefixs[i].unsqueeze(0)).view(-1, model.prefix_length, model.embedding_size)
-            # visual_projections_swin = model.visual_project_swin(embedding_ESH, clip_projections)
-            # visual_projections_ESH = model.visual_project_ESH(clip_projections, embedding_ESH)
             # ########################################################################################
-            # ##### 20250301_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_swin_tf8 #####
-            # ########################################################################################
-            # # prefix_embed = visual_projections_swin + visual_projections_ESH
-            # ########################################################################################
-            # ### 20250302_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8  ###
-            # ########################################################################################
-            # # prefix_embed = torch.cat((visual_projections_swin, visual_projections_ESH), dim=1)
-            # # prefix_embed = model.visual_project(prefix_embed.transpose(1, 2)).transpose(1, 2)
-            # ########################################################################################
-            # #### 20250303_oxford_lower_800up_only800_rest_300up_top300_ESH_co_concat_swin_tf8   ####
-            # ########################################################################################
-            # prefix_embed = visual_projections_swin
-            # ########################################################################################
+            # #######  20250304_oxford_lower_800up_only800_rest_300up_top300_ESH_co_swin_tf8   #######
             # ##################################################################################################
+            # visual_projections = model.clip_project(visual_projections).view(-1, self.prefix_length, self.embedding_size)
+            # #######################################################################################
+            # # 20250306_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_768_swin_tf8    #
+            # # 20250306_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_768_swin_tf8 #
+            # #######################################################################################
+            # prefix_embed = model.linear(visual_projections)
+            # ##################################################################################################
+
+            ############################################ 202503 ##############################################
+            clip_projections = model.clip_project(prefixs[i].unsqueeze(0)).view(-1, model.prefix_length, model.embedding_size)
+            visual_projections_swin = model.visual_project_swin(embedding_ESH, clip_projections)
+            visual_projections_ESH = model.visual_project_ESH(clip_projections, embedding_ESH)
+            ########################################################################################
+            ##### 20250301_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_swin_tf8 #####
+            ########################################################################################
+            # prefix_embed = visual_projections_swin + visual_projections_ESH
+            ########################################################################################
+            ### 20250302_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8  ###
+            ########################################################################################
+            prefix_embed = torch.cat((visual_projections_swin, visual_projections_ESH), dim=1)
+            prefix_embed = model.visual_project(prefix_embed.transpose(1, 2)).transpose(1, 2)
+            ########################################################################################
+            #### 20250303_oxford_lower_800up_only800_rest_300up_top300_ESH_co_concat_swin_tf8   ####
+            ########################################################################################
+            # prefix_embed = visual_projections_swin
+            ########################################################################################
+            #######################################################################################
+            # 20250307_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_768_swin_tf8    #
+            # 20250307_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_768_swin_tf8 #
+            #######################################################################################
+            prefix_embed = model.linear(prefix_embed)
+            ################################################################################
 
             caption = generate_beam(model, tokenizer, embed=prefix_embed)[0]
             caption_token = tokenizer(caption, return_tensors='pt', padding='max_length', truncation=True, max_length=74)
@@ -486,7 +494,11 @@ class TransformerMapper(nn.Module):
         ### clip ###
         # x = self.linear(x).view(x.shape[0], self.clip_length, -1)
         ### swin ###
-        if x.shape[2] == 768:
+        # if x.shape[2] == 768:
+        #     x = self.linear(x)
+        ############
+        ### 768 ###
+        if x.shape[2] != 768:
             x = self.linear(x)
         ############
         prefix = self.prefix_const.unsqueeze(0).expand(x.shape[0], *self.prefix_const.shape)
@@ -501,7 +513,10 @@ class TransformerMapper(nn.Module):
         ### clip ###
         # self.linear = nn.Linear(dim_clip, clip_length * dim_embedding)
         ### swin ###
-        self.linear = nn.Linear(768, dim_embedding)
+        # self.linear = nn.Linear(768, dim_embedding)
+        ############
+        ### 768 ###
+        self.linear = nn.Linear(2048, dim_embedding)
         ############
         self.prefix_const = nn.Parameter(torch.randn(prefix_length, dim_embedding), requires_grad=True)
 
@@ -511,11 +526,18 @@ class CrossTransformerMapper(nn.Module):
         ### clip ###
         # x = self.linear(x).view(x.shape[0], self.clip_length, -1)
         ### swin ###
-        if x.shape[2] == 768:
+        # if x.shape[2] == 768:
+        #     x = self.linear(x)
+        # if y.shape[2] == 768:
+        #     y = self.linear(y)
+        ############
+        ### 768 ###
+        if x.shape[2] != 768:
             x = self.linear(x)
-        if y.shape[2] == 768:
+        if y.shape[2] != 768:
             y = self.linear(y)
         ############
+
         out = self.transformer(x, y)
         return out
 
@@ -526,7 +548,10 @@ class CrossTransformerMapper(nn.Module):
         ### clip ###
         # self.linear = lora.Linear(dim_clip, clip_length * dim_embedding)
         ### swin ###
-        self.linear = nn.Linear(768, dim_embedding)
+        # self.linear = nn.Linear(768, dim_embedding)
+        ############
+        ### 768 ###
+        self.linear = nn.Linear(2048, dim_embedding)
         ############
 
 class ClipCaptionModel(nn.Module):
@@ -553,7 +578,7 @@ class ClipCaptionModel(nn.Module):
         ########################################################################################
         ##### 20250226_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_swin_tf8 #####
         ########################################################################################
-        # visual_projections = visual_projections_swin + visual_projections_ESH
+        visual_projections = visual_projections_swin + visual_projections_ESH
         ########################################################################################
         ### 20250228_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8  ###
         ########################################################################################
@@ -562,16 +587,22 @@ class ClipCaptionModel(nn.Module):
         ########################################################################################
         #######  20250304_oxford_lower_800up_only800_rest_300up_top300_ESH_co_swin_tf8   #######
         ########################################################################################
-        visual_projections = visual_projections_swin
-        ########################################################################################
+        # visual_projections = visual_projections_swin
+        ##################################################################################################
         prefix_projections = self.clip_project(visual_projections).view(-1, self.prefix_length, self.embedding_size)
+        #######################################################################################
+        # 20250306_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_768_swin_tf8    #
+        # 20250306_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_768_swin_tf8 #
+        #######################################################################################
+        prefix_projections = self.linear(prefix_projections)
+        ################################################################################
         embedding_cat = torch.cat((prefix_projections, embedding_text), dim=1)
         ##################################################################################################
 
         # ############################################ 202503 ##############################################
         # clip_projections = self.clip_project(prefix).view(-1, self.prefix_length, self.embedding_size)
         # visual_projections_swin = self.visual_project_swin(embedding_ESH, clip_projections)
-        # visual_projections_ESH = self.visual_project_ESH(clip_projections, embedding_ESH)
+        # # visual_projections_ESH = self.visual_project_ESH(clip_projections, embedding_ESH)
         # ########################################################################################
         # ##### 20250301_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_swin_tf8 #####
         # ########################################################################################
@@ -636,7 +667,8 @@ class ClipCaptionModel(nn.Module):
 
         self.falcon = AutoModelForCausalLM.from_pretrained("tiiuae/Falcon3-1B-Base")
         # self.falcon = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B")
-        self.embedding_size = self.falcon.model.embed_tokens.weight.shape[1]
+        # self.embedding_size = self.falcon.model.embed_tokens.weight.shape[1]
+        self.embedding_size = 768
         # self.falcon.eval()
         # for param in self.falcon.parameters():
         #     param.requires_grad = False
@@ -651,6 +683,7 @@ class ClipCaptionModel(nn.Module):
         ### 20250228_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8 ###
         #######################################################################################
         self.visual_project = nn.Linear(128, 64)
+        self.linear = nn.Linear(self.embedding_size, 2048)
 
 class ClipCaptionPrefix(ClipCaptionModel):
 
@@ -1391,8 +1424,8 @@ if adapter :
 
     model.activateLoRa()
 
-save_file = '20250304_oxford_lower_800up_only800_rest_300up_top300_ESH_co_swin_tf8'
-for i in range(20):
+save_file = '20250307_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_768_swin_tf8'
+for i in range(30):
     if os.path.exists(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'):
         model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'))
         model = model.eval()
@@ -1404,7 +1437,7 @@ for i in range(20):
         pred.predict("train", train_tokens, train_mask, train_prefix, train_gt, model, train_emotion, train_sentiment, train_humor)
 
 AllCaption = pd.DataFrame()
-for i in range(20):
+for i in range(30):
     if os.path.exists(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'):
         df = pd.read_csv(f'./Model/{save_file}/{save_file}_test_{i + 1:03d}.csv')
         textAndLoss = df[['text', 'loss', 'fitCount', 'gtNum', 'bleu1', 'bleu2', 'bleu3', 'bleu4']]
