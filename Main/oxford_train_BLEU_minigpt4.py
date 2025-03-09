@@ -533,53 +533,59 @@ class ClipCaptionModel(nn.Module):
         empty_ESH = torch.zeros(embedding_emotion.shape[0], 1, embedding_emotion.shape[2], dtype=torch.bfloat16,
                                 device=embedding_text.device)
         embedding_ESH = torch.cat((empty_ESH, embedding_emotion, embedding_sentiment, embedding_humor), dim=1)
-        ############################################ 202502 ##############################################
-        visual_projections_swin = self.visual_project_swin(embedding_ESH, prefix)
-        visual_projections_ESH = self.visual_project_ESH(prefix, embedding_ESH)
-        ########################################################################################
-        ##### 20250226_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_swin_tf8 #####
-        ########################################################################################
-        visual_projections = visual_projections_swin + visual_projections_ESH
-        ########################################################################################
-        ### 20250228_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8  ###
-        ########################################################################################
-        # visual_projections = torch.cat((visual_projections_swin, visual_projections_ESH), dim=1)
-        # visual_projections = self.visual_project(visual_projections.transpose(1, 2)).transpose(1, 2)
-        ########################################################################################
-        #######  20250304_oxford_lower_800up_only800_rest_300up_top300_ESH_co_swin_tf8   #######
-        ########################################################################################
-        # visual_projections = visual_projections_swin
-        ##################################################################################################
-        prefix_projections = self.clip_project(visual_projections).view(-1, self.prefix_length, self.embedding_size)
-        #######################################################################################
-        # 20250306_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_768_swin_tf8    #
-        # 20250306_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_768_swin_tf8 #
-        #######################################################################################
-        prefix_projections = self.linear(prefix_projections)
-        ################################################################################
-        embedding_cat = torch.cat((prefix_projections, embedding_text), dim=1)
-        ##################################################################################################
-
-        # ############################################ 202503 ##############################################
-        # clip_projections = self.clip_project(prefix).view(-1, self.prefix_length, self.embedding_size)
-        # visual_projections_swin = self.visual_project_swin(embedding_ESH, clip_projections)
-        # # visual_projections_ESH = self.visual_project_ESH(clip_projections, embedding_ESH)
+        # ############################################ 202502 ##############################################
+        # visual_projections_swin = self.visual_project_swin(embedding_ESH, prefix)
+        # visual_projections_ESH = self.visual_project_ESH(prefix, embedding_ESH)
         # ########################################################################################
-        # ##### 20250301_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_swin_tf8 #####
+        # ##### 20250226_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_swin_tf8 #####
         # ########################################################################################
         # # visual_projections = visual_projections_swin + visual_projections_ESH
         # ########################################################################################
-        # ### 20250302_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8  ###
+        # ### 20250228_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8  ###
         # ########################################################################################
-        # # visual_projections = torch.cat((visual_projections_swin, visual_projections_ESH), dim=1)
-        # # visual_projections = self.visual_project(visual_projections.transpose(1, 2)).transpose(1, 2)
+        # visual_projections = torch.cat((visual_projections_swin, visual_projections_ESH), dim=1)
+        # visual_projections = self.visual_project(visual_projections.transpose(1, 2)).transpose(1, 2)
         # ########################################################################################
-        # #######  20250303_oxford_lower_800up_only800_rest_300up_top300_ESH_co_swin_tf8   #######
+        # #######  20250304_oxford_lower_800up_only800_rest_300up_top300_ESH_co_swin_tf8   #######
         # ########################################################################################
-        # visual_projections = visual_projections_swin
-        # ########################################################################################
-        # embedding_cat = torch.cat((visual_projections, embedding_text), dim=1)
+        # # visual_projections = visual_projections_swin
         # ##################################################################################################
+        # prefix_projections = self.clip_project(visual_projections).view(-1, self.prefix_length, self.embedding_size)
+        # #######################################################################################
+        # # 20250306_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_768_swin_tf8    #
+        # # 20250306_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_768_swin_tf8 #
+        # #######################################################################################
+        # prefix_projections = self.linear(prefix_projections)
+        # ################################################################################
+        # embedding_cat = torch.cat((prefix_projections, embedding_text), dim=1)
+        # ##################################################################################################
+
+        ############################################ 202503 ##############################################
+        clip_projections = self.clip_project(prefix).view(-1, self.prefix_length, self.embedding_size)
+        visual_projections_swin = self.visual_project_swin(embedding_ESH, clip_projections)
+        visual_projections_ESH = self.visual_project_ESH(clip_projections, embedding_ESH)
+        ########################################################################################
+        ##### 20250301_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_swin_tf8 #####
+        ########################################################################################
+        # visual_projections = visual_projections_swin + visual_projections_ESH
+        ########################################################################################
+        ### 20250302_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8  ###
+        ########################################################################################
+        visual_projections = torch.cat((visual_projections_swin, visual_projections_ESH), dim=1)
+        visual_projections = self.visual_project(visual_projections.transpose(1, 2)).transpose(1, 2)
+        ########################################################################################
+        #######  20250303_oxford_lower_800up_only800_rest_300up_top300_ESH_co_swin_tf8   #######
+        ########################################################################################
+        # visual_projections = visual_projections_swin
+        ########################################################################################
+        #######################################################################################
+        # 20250307_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_768_swin_tf8    #
+        # 20250307_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_768_swin_tf8 #
+        #######################################################################################
+        visual_projections = self.linear(visual_projections)
+        ################################################################################
+        embedding_cat = torch.cat((visual_projections, embedding_text), dim=1)
+        ##################################################################################################
 
         if labels is not None:
             dummy_token = self.get_dummy_token(tokens.shape[0], tokens.device)
@@ -894,7 +900,7 @@ def main():
     # parser.add_argument('--trainData', default='../Data/Instagram/parse/300up_only300_all_sonicdrivein_ViT-B_32_train.pkl')
     # parser.add_argument('--testData', default='../Data/Instagram/parse/300up_only300_rest_200up_top200_sonicdrivein_ViT-B_32_test.pkl')
     parser.add_argument('--dataFrom', default='Oxford')
-    parser.add_argument('--out_dir', default='20250306_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_768_swin_tf8')
+    parser.add_argument('--out_dir', default='20250307_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_768_swin_tf8')
     parser.add_argument('--prefix', default='checkpoint', help='prefix for saved filenames')
     parser.add_argument('--epochs', type=int, default=50)
     parser.add_argument('--save_every', type=int, default=1)
