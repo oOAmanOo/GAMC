@@ -18,34 +18,50 @@ def main(clip_model_type: str):
     # with open('C:/Users/user/fiftyone/coco-2014/raw/captions_train2014.json', 'r') as f:
     #     data = json.load(f)
     # data = data['annotations']
+
     dirPath = './Generate_sonicdrivein.csv'
     data = pd.read_csv(dirPath)
     print("shape of data: ", data.shape)
     image_id_counts = data['image_id'].value_counts()
-    ######################################################################################################
-    valid_image_ids = image_id_counts[image_id_counts >= 0].index
-    print("shape of valid_image_ids: ", valid_image_ids.shape)
-    valid_image_ids = image_id_counts[image_id_counts >= 500].index
-    print("shape of valid_image_ids: ", valid_image_ids.shape)
-    filtered_data = data[data['image_id'].isin(valid_image_ids)]
-    print("shape of filtered_data: ", filtered_data.shape)
-    train = (
-        filtered_data.sort_values(by=['image_id', 'funny_score'], ascending=[True, False])
-        .groupby('image_id')
-        .head(500)
-    )
-    print("shape of train: ", train.shape)
 
-    valid_image_ids = image_id_counts[(image_id_counts >= 300) & (image_id_counts < 500)].index
-    print("shape of valid_image_ids: ", valid_image_ids.shape)
-    filtered_data = data[data['image_id'].isin(valid_image_ids)]
-    print("shape of filtered_data: ", filtered_data.shape)
-    test = (
-        filtered_data.sort_values(by=['image_id', 'funny_score'], ascending=[True, False])
-        .groupby('image_id')
-        .head(300)
-    )
-    print("shape of test: ", test.shape)
+
+    original = pd.read_csv('./Filter_sonicdrivein.csv')
+    original['caption'] = original['caption'].str.lower()
+    data['caption'] = data['caption'].str.lower()
+    original['text_len'] = original['caption'].apply(lambda x: len(x.split()))
+    original['gen_count'] = original['image_id'].apply(lambda x: image_id_counts[x] if x in image_id_counts else 0)
+    original = original[original['gen_count'] >= 100]
+    print('shape of 100up: ', original.shape, 'images:', len(original['image_id'].unique()))
+    original = original[original['text_len'] >= 11]
+    print('shape of len over 11: ', original.shape, 'images:', len(original['image_id'].unique()))
+    train = data.merge(original, on='image_id', how='inner', suffixes=('', '_'))
+    test = data[~data['image_id'].isin(train['image_id'])]
+    print("shape of train: ", train.shape, 'images:', len(train['image_id'].unique()))
+    print("shape of test: ", test.shape, 'images:', len(test['image_id'].unique()))
+
+
+    # ######################################################################################################
+    # valid_image_ids = image_id_counts[image_id_counts >= 100].index
+    # print("shape of valid_image_ids: ", valid_image_ids.shape)
+    # filtered_data = data[data['image_id'].isin(valid_image_ids)]
+    # print("shape of filtered_data: ", filtered_data.shape)
+    # data = (
+    #     filtered_data.sort_values(by=['image_id', 'funny_score'], ascending=[True, False])
+    #     .groupby('image_id')
+    #     .head(200)
+    # )
+    # print("shape of train: ", data.shape)
+
+    # valid_image_ids = image_id_counts[(image_id_counts >= 50) & (image_id_counts < 100)].index
+    # print("shape of valid_image_ids: ", valid_image_ids.shape)
+    # filtered_data = data[data['image_id'].isin(valid_image_ids)]
+    # print("shape of filtered_data: ", filtered_data.shape)
+    # test = (
+    #     filtered_data.sort_values(by=['image_id', 'funny_score'], ascending=[True, False])
+    #     .groupby('image_id')
+    #     .head(50)
+    # )
+    # print("shape of test: ", test.shape)
     ######################################################################################################
     # print("=============== Train ================")
     # image_id_counts = data['image_id'].value_counts()
@@ -90,12 +106,13 @@ def main(clip_model_type: str):
     # print("%0d captions loaded from json " % len(data))
     ######################################################################################################
     # unique_image_ids = data['image_id'].unique()
-    # # unique_image_ids = unique_image_ids[:30000]
-    # # unique_image_ids, rest = train_test_split(unique_image_ids, test_size=0.7, random_state=42)
-    # # print(unique_image_ids.shape)
     # train_ids, test_ids = train_test_split(unique_image_ids, test_size=0.2, random_state=42)
     # train = data[data['image_id'].isin(train_ids)]
+    # image_id_counts = train['image_id'].value_counts()
+    # print(f'train image_id_counts: ', len(image_id_counts))
     # test = data[data['image_id'].isin(test_ids)]
+    # image_id_counts = test['image_id'].value_counts()
+    # print(f'test image_id_counts: ', len(image_id_counts))
     # print(train.shape, test.shape)
     ######################################################################################################
 
@@ -122,8 +139,8 @@ def main(clip_model_type: str):
         print('Done')
         print("%0d embeddings saved " % len(all_embeddings))
         return 0
-    out_path_train = f"./parse/500up_only500_sonicdrivein_{clip_model_name}_train.pkl"
-    out_path_test = f"./parse/500up_only500_rest_300up_top300_sonicdrivein_{clip_model_name}_test.pkl"
+    out_path_train = f"./parse/100up_passlength11_sonicdrivein_{clip_model_name}_train.pkl"
+    out_path_test = f"./parse/100up_notpasslength11_sonicdrivein_{clip_model_name}_test.pkl"
     parse(out_path_train, train)
     parse(out_path_test, test)
     return 0
