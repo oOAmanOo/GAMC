@@ -349,22 +349,29 @@ class MLP(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.model(x)
 
-    def __init__(self, sizes: Tuple[int, ...], bias=True, act=nn.Tanh):
+    def __init__(self, mode: str, sizes: Tuple[int, ...], bias=True, act=nn.Tanh):
         super(MLP, self).__init__()
         layers = []
         for i in range(len(sizes) - 1):
-            layers.append(lora.Linear(sizes[i], sizes[i + 1], bias=bias))
+            if mode == 'lora':
+                layers.append(lora.Linear(sizes[i], sizes[i + 1], bias=bias, r=8))
+            else:
+                layers.append(nn.Linear(sizes[i], sizes[i + 1], bias=bias))
             if i < len(sizes) - 2:
                 layers.append(act())
         self.model = nn.Sequential(*layers)
 
 class MlpTransformer(nn.Module):
-    def __init__(self, in_dim, h_dim, out_d: Optional[int] = None, act=nnf.relu, dropout=0.):
+    def __init__(self, mode: str, in_dim, h_dim, out_d: Optional[int] = None, act=nnf.relu, dropout=0.):
         super().__init__()
         out_d = out_d if out_d is not None else in_dim
-        self.fc1 = lora.Linear(in_dim, h_dim)
+        if mode == 'lora':
+            self.fc1 = lora.Linear(in_dim, h_dim, r=8)
+            self.fc2 = lora.Linear(h_dim, out_d, r=8)
+        else:
+            self.fc1 = nn.Linear(in_dim, h_dim)
+            self.fc2 = nn.Linear(h_dim, out_d)
         self.act = act
-        self.fc2 = lora.Linear(h_dim, out_d)
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x):
@@ -377,14 +384,19 @@ class MlpTransformer(nn.Module):
 
 class MultiHeadAttention(nn.Module):
 
-    def __init__(self, dim_self, dim_ref, num_heads, bias=True, dropout=0.):
+    def __init__(self, mode: str, dim_self, dim_ref, num_heads, bias=True, dropout=0.):
         super().__init__()
         self.num_heads = num_heads
         head_dim = dim_self // num_heads
         self.scale = head_dim ** -0.5
-        self.to_queries = lora.Linear(dim_self, dim_self, bias=bias)
-        self.to_keys_values = lora.Linear(dim_ref, dim_self * 2, bias=bias)
-        self.project = lora.Linear(dim_self, dim_self)
+        if mode == 'lora':
+            self.to_queries = lora.Linear(dim_self, dim_self, bias=bias, r=8)
+            self.to_keys_values = lora.Linear(dim_ref, dim_self * 2, bias=bias, r=8)
+            self.project = lora.Linear(dim_self, dim_self, r=8)
+        else:
+            self.to_queries = nn.Linear(dim_self, dim_self, bias=bias)
+            self.to_keys_values = nn.Linear(dim_ref, dim_self * 2, bias=bias)
+            self.project = nn.Linear(dim_self, dim_self)
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x, y=None, mask=None):
@@ -419,13 +431,13 @@ class TransformerLayer(nn.Module):
         x = x + self.mlp(self.norm2(x))
         return x
 
-    def __init__(self, dim_self, dim_ref, num_heads, mlp_ratio=4., bias=True, dropout=0., act=nnf.relu,
+    def __init__(self, mode: str, dim_self, dim_ref, num_heads, mlp_ratio=4., bias=True, dropout=0., act=nnf.relu,
                  norm_layer: nn.Module = nn.LayerNorm):
         super().__init__()
         self.norm1 = norm_layer(dim_self)
-        self.attn = MultiHeadAttention(dim_self, dim_ref, num_heads, bias=bias, dropout=dropout)
+        self.attn = MultiHeadAttention(mode, dim_self, dim_ref, num_heads, bias=bias, dropout=dropout)
         self.norm2 = norm_layer(dim_self)
-        self.mlp = MlpTransformer(dim_self, int(dim_self * mlp_ratio), act=act, dropout=dropout)
+        self.mlp = MlpTransformer(mode, dim_self, int(dim_self * mlp_ratio), act=act, dropout=dropout)
 
 class Transformer(nn.Module):
 
@@ -438,7 +450,7 @@ class Transformer(nn.Module):
 
     def forward(self, x, y=None, mask=None):
         for i, layer in enumerate(self.layers):
-            if (i % 2 == 0 and self.enc_dec) or (self.cross==True):  # cross
+            if (i % 2 == 0 and self.enc_dec) or (self.cross == True):  # cross
                 x = layer(x, y)
             elif self.enc_dec:  # self
                 x = layer(x, x, mask)
@@ -446,8 +458,9 @@ class Transformer(nn.Module):
                 x = layer(x, y, mask)
         return x
 
-    def __init__(self, dim_self: int, num_heads: int, num_layers: int, dim_ref: Optional[int] = None,
-                 mlp_ratio: float = 2., act=nnf.relu, norm_layer: nn.Module = nn.LayerNorm, enc_dec: bool = False, cross=False):
+    def __init__(self, mode: str, dim_self: int, num_heads: int, num_layers: int, dim_ref: Optional[int] = None,
+                 mlp_ratio: float = 2., act=nnf.relu, norm_layer: nn.Module = nn.LayerNorm, enc_dec: bool = False,
+                 cross=False):
         super(Transformer, self).__init__()
         dim_ref = dim_ref if dim_ref is not None else dim_self
         self.enc_dec = enc_dec
@@ -456,13 +469,15 @@ class Transformer(nn.Module):
             num_layers = num_layers * 2
         layers = []
         for i in range(num_layers):
-            if (i % 2 == 0 and self.enc_dec) or (self.cross==True):
-                layers.append(TransformerLayer(dim_self, dim_ref, num_heads, mlp_ratio, act=act, norm_layer=norm_layer))
+            if (i % 2 == 0 and self.enc_dec) or (self.cross == True):
+                layers.append(
+                    TransformerLayer(mode, dim_self, dim_ref, num_heads, mlp_ratio, act=act, norm_layer=norm_layer))
             elif enc_dec:  # self
                 layers.append(
-                    TransformerLayer(dim_self, dim_self, num_heads, mlp_ratio, act=act, norm_layer=norm_layer))
+                    TransformerLayer(mode, dim_self, dim_self, num_heads, mlp_ratio, act=act, norm_layer=norm_layer))
             else:  # self or cross
-                layers.append(TransformerLayer(dim_self, dim_ref, num_heads, mlp_ratio, act=act, norm_layer=norm_layer))
+                layers.append(
+                    TransformerLayer(mode, dim_self, dim_ref, num_heads, mlp_ratio, act=act, norm_layer=norm_layer))
         self.layers = nn.ModuleList(layers)
 
 class TransformerMapper(nn.Module):
@@ -483,17 +498,18 @@ class TransformerMapper(nn.Module):
         out = self.transformer(prefix)[:, self.clip_length:]
         return out
 
-    def __init__(self, dim_clip: int, dim_embedding: int, prefix_length: int, clip_length: int, num_layers: int = 8):
+    def __init__(self, mode: str, dim_clip: int, dim_embedding: int, prefix_length: int, clip_length: int,
+                 num_layers: int = 8):
         super(TransformerMapper, self).__init__()
         self.clip_length = clip_length
-        self.transformer = Transformer(dim_embedding, 8, num_layers)
+        self.transformer = Transformer(mode, dim_embedding, 8, num_layers)
         ### clip ###
-        # self.linear = lora.Linear(dim_clip, clip_length * dim_embedding)
+        # self.linear = nn.Linear(dim_clip, clip_length * dim_embedding)
         ### swin ###
-        self.linear = lora.Linear(768, dim_embedding)
+        self.linear = nn.Linear(768, dim_embedding)
         ############
         ### 768 ###
-        # self.linear = lora.Linear(2048, dim_embedding)
+        # self.linear = nn.Linear(2048, dim_embedding)
         ############
         self.prefix_const = nn.Parameter(torch.randn(prefix_length, dim_embedding), requires_grad=True)
 
@@ -518,17 +534,18 @@ class CrossTransformerMapper(nn.Module):
         out = self.transformer(x, y)
         return out
 
-    def __init__(self, dim_clip: int, dim_embedding: int, prefix_length: int, clip_length: int, num_layers: int = 8):
+    def __init__(self, mode: str, dim_clip: int, dim_embedding: int, prefix_length: int, clip_length: int,
+                 num_layers: int = 8):
         super(CrossTransformerMapper, self).__init__()
         self.clip_length = clip_length
-        self.transformer = Transformer(dim_embedding, 8, num_layers, cross=True)
+        self.transformer = Transformer(mode, dim_embedding, 8, num_layers, cross=True)
         ### clip ###
-        # self.linear = lora.Linear(dim_clip, clip_length * dim_embedding)
+        # self.linear = nn.Linear(dim_clip, clip_length * dim_embedding)
         ### swin ###
-        self.linear = lora.Linear(768, dim_embedding)
+        self.linear = nn.Linear(768, dim_embedding)
         ############
         ### 768 ###
-        # self.linear = lora.Linear(2048, dim_embedding)
+        # self.linear = nn.Linear(2048, dim_embedding)
         ############
 
 class ClipCaptionModel(nn.Module):
@@ -552,7 +569,8 @@ class ClipCaptionModel(nn.Module):
             embedding_emotion = self.falcon.model.embed_tokens(emotion)
             embedding_sentiment = self.falcon.model.embed_tokens(sentiment)
             embedding_humor = self.falcon.model.embed_tokens(humor)
-        empty_ESH = torch.zeros(embedding_emotion.shape[0], 1, embedding_emotion.shape[2], dtype=torch.bfloat16,device=embedding_text.device)
+        empty_ESH = torch.zeros(embedding_emotion.shape[0], 1, embedding_emotion.shape[2], dtype=torch.bfloat16,
+                                device=embedding_text.device)
         embedding_ESH = torch.cat((empty_ESH, embedding_emotion, embedding_sentiment, embedding_humor), dim=1)
         # emotion_proj = self.emotion_linear(emotion).unsqueeze(1)
         # sentiment_proj = self.sentiment_linear(sentiment).unsqueeze(1)
@@ -589,7 +607,7 @@ class ClipCaptionModel(nn.Module):
         out = self.falcon(inputs_embeds=embedding_cat, labels=labels, attention_mask=mask)
         return out
 
-    def __init__(self, prefix_length: int, clip_length: Optional[int] = None, prefix_size: int = 512,
+    def __init__(self, mode: str, prefix_length: int, clip_length: Optional[int] = None, prefix_size: int = 512,
                  num_layers: int = 8):
         super(ClipCaptionModel, self).__init__()
         self.prefix_length = prefix_length
@@ -634,23 +652,22 @@ class ClipCaptionModel(nn.Module):
         # self.falcon.eval()
         # for param in self.falcon.parameters():
         #     param.requires_grad = False
-        # if mapping_type == MappingType.MLP:
-        #     self.clip_project = MLP(
-        #         (prefix_size, (self.embedding_size * prefix_length) // 2, self.embedding_size * prefix_length))
-        # else:
-        self.clip_project = TransformerMapper(prefix_size, self.embedding_size, prefix_length, clip_length, num_layers)
-        self.visual_project_swin = CrossTransformerMapper(prefix_size, self.embedding_size, prefix_length, clip_length, num_layers)
-        self.visual_project_ESH = CrossTransformerMapper(prefix_size, self.embedding_size, prefix_length, clip_length, num_layers)
+        self.clip_project = TransformerMapper(mode, prefix_size, self.embedding_size, prefix_length, clip_length,
+                                              num_layers)
+        self.visual_project_swin = CrossTransformerMapper(mode, prefix_size, self.embedding_size, prefix_length,
+                                                          clip_length, num_layers)
+        self.visual_project_ESH = CrossTransformerMapper(mode, prefix_size, self.embedding_size, prefix_length,
+                                                         clip_length, num_layers)
         #######################################################################################
         ### 20250228_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8 ###
         #######################################################################################
-        self.visual_project = lora.Linear(128, 64)
-        self.linear = lora.Linear(self.embedding_size, 2048)
+        self.visual_project = nn.Linear(128, 64)
+        self.linear = nn.Linear(self.embedding_size, 2048)
 
-        self.emotion_linear = lora.Linear(384, 768)
-        self.sentiment_linear = lora.Linear(384, 768)
-        self.humor_linear = lora.Linear(768, 768)
-        self.ESH_linear = lora.Linear(3, 64)
+        self.emotion_linear = nn.Linear(384, 768)
+        self.sentiment_linear = nn.Linear(384, 768)
+        self.humor_linear = nn.Linear(768, 768)
+        self.ESH_linear = nn.Linear(3, 64)
 
     def activateLoRa(self):
         self.LoRaActivated = True
@@ -1400,35 +1417,42 @@ if test_dataform:
     print(test_tokens.shape, test_mask.shape, test_prefix.shape)
     print(test_emotion.shape, test_sentiment.shape, test_humor.shape)
 
-model = ClipCaptionModel(prefix_length, clip_length=prefix_length, prefix_size=512, num_layers=8)
+model = ClipCaptionModel(mode='nn', clip_length=prefix_length, prefix_size=512, num_layers=8)
 adapter = True
 save_file = '20250316_oxford_800_8_300_2_ESH_filter_cross_concat'
 i = 13
 if adapter :
     model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i:03d}.pt'))
+    model_adapt = ClipCaptionModel(mode='lora', clip_length=prefix_length, prefix_size=512, num_layers=8)
 
     def count_trainable_parameters(model):
         model_parameters = filter(lambda p: p.requires_grad, model.parameters())
         params = sum([np.prod(p.size()) for p in model_parameters])
         return params
 
+    def weightToLora(fullModel, newModel):
+        for name, param in fullModel.named_parameters():
+            newModel.state_dict()[name].copy_(param.data)
+        for name, param in newModel.named_parameters():
+            if 'clip_project' in name:
+                if "lora_" not in name:  # 只讓 LoRA 參數訓練
+                    if 'bias' in name:
+                        param.requires_grad = True
+                    else:
+                        param.requires_grad = False
+        for name, param in newModel.named_parameters():
+            print(f"{name}: requires_grad={param.requires_grad}")
+        return newModel
+
     a = count_trainable_parameters(model)
-    re_grad_list = ['fc1', 'fc2', 'to_queries', 'to_keys_values', 'project', 'linear']
-    for name, param in model.named_parameters():
-        if 'clip_project' in name:
-            if 'bias' in name:
-                param.requires_grad = True
-            elif name in re_grad_list:
-                param.requires_grad = True
-            else:
-                param.requires_grad = False
+    model = weightToLora(model, model_adapt)
+    del model_adapt
+    gc.collect()
     b = count_trainable_parameters(model)
-    # 留下小數點後兩位就好
     percent = round((b / a) * 100, 3)
     print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
-    # Set requires_grad = True for LoRa and bias parameters only
 
-    model.activateLoRa()
+    # model.activateLoRa()
 
 save_file = '20250319_100up_passlength24_sonicdrivein_base_0316_oxford_800_8_300_2_ESH_filter_cross_concat'
 for i in range(20):
