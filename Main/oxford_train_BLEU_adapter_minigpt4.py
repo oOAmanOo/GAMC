@@ -84,6 +84,7 @@ class OxfordDataset(torch.utils.data.Dataset):
             prefix = torch.load('../../Instagram/ImageData/' + self.dataFrom + '/' + self.image_ids[item] + '.pt',
                                 weights_only=False)
         emotion, sentiment, humor = self.pad_emotion(item)
+        # emotion, sentiment, humor = self.emotion[self.image_ids[item]], self.sentiment[self.image_ids[item]], self.humor[self.image_ids[item]]
         if self.normalize_prefix:
             prefix = prefix.float()
             prefix = prefix / prefix.norm(2, -1)
@@ -103,6 +104,7 @@ class OxfordDataset(torch.utils.data.Dataset):
         # Temporary storage for filtered indices
         filtered_indices = []
         device = torch.device('cuda:0')
+
         progress = tqdm(total=len(dataloader), desc="Filtering train dataset")
         for batch in dataloader:
             tokens_batch, masks_batch, prefixes_batch, original_indices = batch
@@ -181,19 +183,22 @@ class OxfordDataset(torch.utils.data.Dataset):
             with open(f"{self.data_path[:-4]}_bleu_all.pkl", 'wb') as f:
                 pickle.dump([self.captions_tokens, self.caption2embedding, self.max_seq_len], f)
         if dataFrom == 'Oxford':
-            self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford.csv')
-            # self.emotion_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_emotion.csv')
-            # self.sentiment_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_sentiment.csv')
-            # self.humor_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_humor.csv')
+            # self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford.csv')
+            self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_filter.csv')
+            # self.emotion_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_emotion_filter.csv')
+            # self.sentiment_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_sentiment_filter.csv')
+            # self.humor_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_humor_filter.csv')
         else:
-            self.emotions_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{dataFrom}.csv')
-            # self.emotion_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{dataFrom}_emotion.csv')
-            # self.sentiment_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{dataFrom}_sentiment.csv')
-            # self.humor_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{dataFrom}_humor.csv')
+            # self.emotions_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{dataFrom}.csv')
+            self.emotions_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{dataFrom}_filter.csv')
+            # self.emotion_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{dataFrom}_emotion_filter.csv')
+            # self.sentiment_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{dataFrom}_sentiment_filter.csv')
+            # self.humor_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{dataFrom}_humor_filter.csv')
         # self.emotion will save the emotion data for each image
         self.emotion = dict()
         self.sentiment = dict()
         self.humor = dict()
+
         self.max_seq_len_emo = 21
         for i in range(self.emotions_data.shape[0]):
             image_id = self.emotions_data.iloc[i]['image_id']
@@ -204,6 +209,17 @@ class OxfordDataset(torch.utils.data.Dataset):
             self.sentiment[image_id] = torch.tensor(self.tokenizer.encode(sentiment, max_length=64, truncation=True), dtype=torch.int64)
             self.humor[image_id] = torch.tensor(self.tokenizer.encode(humor, max_length=64, truncation=True, padding=True), dtype=torch.int64)
 
+        # padding_emotion = 384 - (self.emotion_data.shape[1] - 1)
+        # padding_sentiment = 384 - (self.sentiment_data.shape[1] - 1)
+        # padding_humor = 768 - (self.humor_data.shape[1] - 1)
+        # for i in range(self.emotion_data.shape[0]):
+        #     image_id = self.emotion_data.iloc[i]['image_id']
+        #     emotion = torch.tensor(self.emotion_data.iloc[i][1:].tolist())
+        #     self.emotion[image_id] = torch.cat((emotion, torch.zeros(padding_emotion, dtype=torch.int64)))
+        #     sentiment = torch.tensor(self.sentiment_data.iloc[i][1:].tolist())
+        #     self.sentiment[image_id] = torch.cat((sentiment, torch.zeros(padding_sentiment, dtype=torch.int64)))
+        #     humor = torch.tensor(self.humor_data.iloc[i][1:].tolist())
+        #     self.humor[image_id] = torch.cat((humor, torch.zeros(padding_humor, dtype=torch.int64)))
         print(f"Train Data size: {len(self.captions_tokens)}")
         # self.filter_data_by_bleu(model, batch_size, bleu_threshold)
 
@@ -338,7 +354,7 @@ class MLP(nn.Module):
         super(MLP, self).__init__()
         layers = []
         for i in range(len(sizes) - 1):
-            layers.append(lora.Linear(sizes[i], sizes[i + 1], bias=bias))
+            layers.append(nn.Linear(sizes[i], sizes[i + 1], bias=bias))
             if i < len(sizes) - 2:
                 layers.append(act())
         self.model = nn.Sequential(*layers)
@@ -347,9 +363,9 @@ class MlpTransformer(nn.Module):
     def __init__(self, in_dim, h_dim, out_d: Optional[int] = None, act=nnf.relu, dropout=0.):
         super().__init__()
         out_d = out_d if out_d is not None else in_dim
-        self.fc1 = lora.Linear(in_dim, h_dim)
+        self.fc1 = nn.Linear(in_dim, h_dim)
         self.act = act
-        self.fc2 = lora.Linear(h_dim, out_d)
+        self.fc2 = nn.Linear(h_dim, out_d)
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x):
@@ -367,9 +383,9 @@ class MultiHeadAttention(nn.Module):
         self.num_heads = num_heads
         head_dim = dim_self // num_heads
         self.scale = head_dim ** -0.5
-        self.to_queries = lora.Linear(dim_self, dim_self, bias=bias)
-        self.to_keys_values = lora.Linear(dim_ref, dim_self * 2, bias=bias)
-        self.project = lora.Linear(dim_self, dim_self)
+        self.to_queries = nn.Linear(dim_self, dim_self, bias=bias)
+        self.to_keys_values = nn.Linear(dim_ref, dim_self * 2, bias=bias)
+        self.project = nn.Linear(dim_self, dim_self)
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x, y=None, mask=None):
@@ -459,6 +475,10 @@ class TransformerMapper(nn.Module):
         if x.shape[2] == 768:
             x = self.linear(x)
         ############
+        ### 768 ###
+        # if x.shape[2] != 768:
+        #     x = self.linear(x)
+        ############
         prefix = self.prefix_const.unsqueeze(0).expand(x.shape[0], *self.prefix_const.shape)
         prefix = torch.cat((x, prefix), dim=1)
         out = self.transformer(prefix)[:, self.clip_length:]
@@ -469,16 +489,18 @@ class TransformerMapper(nn.Module):
         self.clip_length = clip_length
         self.transformer = Transformer(dim_embedding, 8, num_layers)
         ### clip ###
-        # self.linear = lora.Linear(dim_clip, clip_length * dim_embedding)
+        # self.linear = nn.Linear(dim_clip, clip_length * dim_embedding)
         ### swin ###
-        # self.linear = lora.Linear(768, dim_embedding)
+        self.linear = nn.Linear(768, dim_embedding)
+        ############
+        ### 768 ###
+        # self.linear = nn.Linear(2048, dim_embedding)
         ############
         self.prefix_const = nn.Parameter(torch.randn(prefix_length, dim_embedding), requires_grad=True)
 
 class CrossTransformerMapper(nn.Module):
 
     def forward(self, x, y):
-        print(f"x: {x.shape}, y: {y.shape}")
         ### clip ###
         # x = self.linear(x).view(x.shape[0], self.clip_length, -1)
         ### swin ###
@@ -486,8 +508,14 @@ class CrossTransformerMapper(nn.Module):
             x = self.linear(x)
         if y.shape[2] == 768:
             y = self.linear(y)
-        print(f"x: {x.shape}, y: {y.shape}")
         ############
+        ### 768 ###
+        # if x.shape[2] != 768:
+        #     x = self.linear(x)
+        # if y.shape[2] != 768:
+        #     y = self.linear(y)
+        ############
+
         out = self.transformer(x, y)
         return out
 
@@ -498,7 +526,10 @@ class CrossTransformerMapper(nn.Module):
         ### clip ###
         # self.linear = lora.Linear(dim_clip, clip_length * dim_embedding)
         ### swin ###
-        self.linear = lora.Linear(768, dim_embedding)
+        self.linear = nn.Linear(768, dim_embedding)
+        ############
+        ### 768 ###
+        # self.linear = nn.Linear(2048, dim_embedding)
         ############
 
 class ClipCaptionModel(nn.Module):
@@ -507,22 +538,45 @@ class ClipCaptionModel(nn.Module):
         return torch.zeros(batch_size, self.prefix_length, dtype=torch.int64, device=device)
 
     def forward(self, tokens: torch.Tensor, prefix: torch.Tensor, mask: Optional[torch.Tensor] = None,
-                labels: Optional[torch.Tensor] = None, emotion: torch.Tensor = None, sentiment: torch.Tensor = None, humor: torch.Tensor = None) -> torch.Tensor:
+                labels: Optional[torch.Tensor] = None, emotion: torch.Tensor = None, sentiment: torch.Tensor = None,
+                humor: torch.Tensor = None) -> torch.Tensor:
         # embedding_text = self.gemma.model.embed_tokens(tokens)
         # embedding_text = self.gemma.base_model.model.model.embed_tokens(tokens)
         # embedding_text = self.gpt.transformer.wte(tokens)
-        # embedding_text = self.falcon.model.embed_tokens(tokens)
         embedding_text = self.falcon.base_model.model.model.embed_tokens(tokens)
         embedding_emotion = self.falcon.base_model.model.model.embed_tokens(emotion)
         embedding_sentiment = self.falcon.base_model.model.model.embed_tokens(sentiment)
         embedding_humor = self.falcon.base_model.model.model.embed_tokens(humor)
-        empty_EHS = torch.zeros(embedding_emotion.shape[0], 1, embedding_emotion.shape[2], dtype=torch.bfloat16, device=embedding_text.device)
-        embedding_EHS = torch.cat((empty_EHS, embedding_emotion, embedding_sentiment, embedding_humor), dim=1)
-        visual_projections_swin = self.visual_project_swin(embedding_EHS, prefix)
-        visual_projections_ESH = self.visual_project_ESH(embedding_EHS, prefix)
-        visual_projections = visual_projections_swin + visual_projections_ESH
-        prefix_projections = self.clip_project(visual_projections).view(-1, self.prefix_length, self.embedding_size)
-        embedding_cat = torch.cat((prefix_projections, embedding_text), dim=1)
+        empty_ESH = torch.zeros(embedding_emotion.shape[0], 1, embedding_emotion.shape[2], dtype=torch.bfloat16,
+                                device=embedding_text.device)
+        embedding_ESH = torch.cat((empty_ESH, embedding_emotion, embedding_sentiment, embedding_humor), dim=1)
+        # emotion_proj = self.emotion_linear(emotion).unsqueeze(1)
+        # sentiment_proj = self.sentiment_linear(sentiment).unsqueeze(1)
+        # humor_proj = self.humor_linear(humor).unsqueeze(1)
+        # embedding_ESH = torch.cat((emotion_proj, sentiment_proj, humor_proj), dim=1)
+        # embedding_ESH = self.ESH_linear(embedding_ESH.transpose(1, 2)).transpose(1, 2)
+        ############################################ 202503 ##############################################
+        clip_projections = self.clip_project(prefix).view(-1, self.prefix_length, self.embedding_size)
+        visual_projections_swin = self.visual_project_swin(embedding_ESH, clip_projections)
+        visual_projections_ESH = self.visual_project_ESH(clip_projections, embedding_ESH)
+        ########################################################################################
+        ### 20250302_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8  ###
+        ########################################################################################
+        visual_projections = torch.cat((visual_projections_swin, visual_projections_ESH), dim=1)
+        visual_projections = self.visual_project(visual_projections.transpose(1, 2)).transpose(1, 2)
+        ########################################################################################
+        #######  20250303_oxford_lower_800up_only800_rest_300up_top300_ESH_co_swin_tf8   #######
+        ########################################################################################
+        # visual_projections = visual_projections_swin
+        #######################################################################################
+        # 20250310_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_768_swin_tf8    #
+        # 20250307_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_768_swin_tf8 #
+        #######################################################################################
+        # visual_projections = self.linear(visual_projections)
+        #######################################################################################
+        embedding_cat = torch.cat((visual_projections, embedding_text), dim=1)
+        ##################################################################################################
+
         if labels is not None:
             dummy_token = self.get_dummy_token(tokens.shape[0], tokens.device)
             labels = torch.cat((dummy_token, tokens), dim=1)
@@ -571,8 +625,7 @@ class ClipCaptionModel(nn.Module):
         self.falcon = AutoModelForCausalLM.from_pretrained("tiiuae/Falcon3-1B-Base")
         # self.falcon = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B")
         self.embedding_size = self.falcon.model.embed_tokens.weight.shape[1]
-
-
+        # self.embedding_size = 768
         # self.falcon.eval()
         # for param in self.falcon.parameters():
         #     param.requires_grad = False
@@ -583,6 +636,16 @@ class ClipCaptionModel(nn.Module):
             self.clip_project = TransformerMapper(prefix_size, self.embedding_size, prefix_length, clip_length, num_layers)
         self.visual_project_swin = CrossTransformerMapper(prefix_size, self.embedding_size, prefix_length, clip_length, num_layers)
         self.visual_project_ESH = CrossTransformerMapper(prefix_size, self.embedding_size, prefix_length, clip_length, num_layers)
+        #######################################################################################
+        ### 20250228_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8 ###
+        #######################################################################################
+        self.visual_project = nn.Linear(128, 64)
+        self.linear = nn.Linear(self.embedding_size, 2048)
+
+        self.emotion_linear = nn.Linear(384, 768)
+        self.sentiment_linear = nn.Linear(384, 768)
+        self.humor_linear = nn.Linear(768, 768)
+        self.ESH_linear = nn.Linear(3, 64)
 
     def activateLoRa(self):
         LORAconfig = LoraConfig(
@@ -854,12 +917,12 @@ def train(trainData, testData, model: ClipCaptionModel, args,
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--trainData', default='../Data/Oxford_HIC/parse/oxford_lower_800up_only800_all_ViT-B_32_train.pkl')
-    parser.add_argument('--testData', default='../Data/Oxford_HIC/parse/oxford_lower_800up_only800_rest_300up_top300_ViT-B_32_test.pkl')
-    # parser.add_argument('--trainData', default='../Data/Instagram/parse/300up_only300_all_sonicdrivein_ViT-B_32_train.pkl')
-    # parser.add_argument('--testData', default='../Data/Instagram/parse/300up_only300_rest_200up_top200_sonicdrivein_ViT-B_32_test.pkl')
-    parser.add_argument('--dataFrom', default='Oxford')
-    parser.add_argument('--out_dir', default='test')
+    # parser.add_argument('--trainData', default='../Data/Oxford_HIC/parse/oxford_lower_800up_only800_all_ViT-B_32_train.pkl')
+    # parser.add_argument('--testData', default='../Data/Oxford_HIC/parse/oxford_lower_800up_only800_rest_300up_top300_ViT-B_32_test.pkl')
+    parser.add_argument('--trainData', default='../Data/Instagram/parse/100up_passlength11_sonicdrivein_ViT-B_32_train.pkl')
+    parser.add_argument('--testData', default='../Data/Instagram/parse/100up_notpasslength11_sonicdrivein_ViT-B_32_test.pkl')
+    parser.add_argument('--dataFrom', default='sonicdrivein')
+    parser.add_argument('--out_dir', default='20250317_100up_passlength11_sonicdrivein_base_0316_oxford_800_8_300_2_ESH_filter_cross_concat')
     parser.add_argument('--prefix', default='checkpoint', help='prefix for saved filenames')
     parser.add_argument('--epochs', type=int, default=50)
     parser.add_argument('--save_every', type=int, default=1)
@@ -875,27 +938,25 @@ def main():
     prefix_length = args.prefix_length
     if not os.path.exists('./Model/' + args.out_dir):
         os.makedirs('./Model/' + args.out_dir)
-        # os.makedirs('D:/MemeGAN/Model/' + args.out_dir)
+        os.makedirs('D:/MemeGAN/Model/' + args.out_dir)
     args.out_dir = './Model/' + args.out_dir
 
     prefix_dim = 640 if args.is_rn else 512
     args.mapping_type = {'mlp': MappingType.MLP, 'transformer': MappingType.Transformer}[args.mapping_type]
     print(args.mapping_type)
     if args.only_prefix:
-        model = ClipCaptionPrefix(prefix_length, clip_length=prefix_length, prefix_size=prefix_dim,
-                                  num_layers=args.num_layers, mapping_type=args.mapping_type)
+        model = ClipCaptionPrefix(prefix_length, clip_length=prefix_length, prefix_size=prefix_dim, num_layers=args.num_layers, mapping_type=args.mapping_type)
         print("Train only prefix")
     else:
-        model = ClipCaptionModel(prefix_length, clip_length=prefix_length, prefix_size=prefix_dim,
-                                 num_layers=args.num_layers, mapping_type=args.mapping_type)
+        model = ClipCaptionModel(prefix_length, clip_length=prefix_length, prefix_size=prefix_dim, num_layers=args.num_layers, mapping_type=args.mapping_type)
         print("Train both prefix and GPT")
         sys.stdout.flush()
     device = torch.device('cuda:0')
     model = model.to(device, dtype=torch.bfloat16)
     # 20250115_totalClip_oxford_only100_300k_transformer_p40_falcon_bleu1_0.05 == 32
-    # save_file = '20250218_300up_only300_rest_200up_top200_sonicdrivein_transformer_p64_falcon_swin_tf8_pcloss'
-    # i = 1
-    # model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i:03d}.pt'))
+    save_file = '20250316_oxford_800_8_300_2_ESH_filter_cross_concat'
+    i = 13
+    model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i:03d}.pt'))
 
     def count_trainable_parameters(model):
         model_parameters = filter(lambda p: p.requires_grad, model.parameters())

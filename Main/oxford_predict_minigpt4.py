@@ -129,6 +129,7 @@ class Predictor(object):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         tokens, masks, prefixs = tokens.to(device), masks.to(device), prefixs.to(device, dtype=torch.bfloat16)
         emotion, sentiment, humor = emotion.to(device), sentiment.to(device), humor.to(device)
+        # emotion, sentiment, humor = emotion.to(device, dtype=torch.bfloat16), sentiment.to(device, dtype=torch.bfloat16), humor.to(device, dtype=torch.bfloat16)
 
         # tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
         # tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
@@ -155,45 +156,30 @@ class Predictor(object):
             empty_ESH = torch.zeros(embedding_emotion.shape[0], 1, embedding_emotion.shape[2], dtype=torch.bfloat16, device=embedding_emotion.device)
             embedding_ESH = torch.cat((empty_ESH, embedding_emotion, embedding_sentiment, embedding_humor), dim=1)
 
-            ############################################ 202502 ##############################################
-            visual_projections_swin = model.visual_project_swin(embedding_ESH, prefixs[i].unsqueeze(0))
-            visual_projections_ESH = model.visual_project_ESH(prefixs[i].unsqueeze(0), embedding_ESH)
+            # emotion_proj = model.emotion_linear(emotion[i].unsqueeze(0)).unsqueeze(1)
+            # sentiment_proj = model.sentiment_linear(sentiment[i].unsqueeze(0)).unsqueeze(1)
+            # humor_proj = model.humor_linear(humor[i].unsqueeze(0)).unsqueeze(1)
+            # embedding_ESH = torch.cat((emotion_proj, sentiment_proj, humor_proj), dim=1)
+            # embedding_ESH = model.ESH_linear(embedding_ESH.transpose(1, 2)).transpose(1, 2)
+            ############################################ 202503 ##############################################
+            clip_projections = model.clip_project(prefixs[i].unsqueeze(0)).view(-1, model.prefix_length, model.embedding_size)
+            visual_projections_swin = model.visual_project_swin(embedding_ESH, clip_projections)
+            visual_projections_ESH = model.visual_project_ESH(clip_projections, embedding_ESH)
             ########################################################################################
-            ##### 20250226_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_swin_tf8 #####
+            ## 20250302_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8  ###
             ########################################################################################
-            # visual_projections = visual_projections_swin + visual_projections_ESH
+            prefix_embed = torch.cat((visual_projections_swin, visual_projections_ESH), dim=1)
+            prefix_embed = model.visual_project(prefix_embed.transpose(1, 2)).transpose(1, 2)
             ########################################################################################
-            ### 20250228_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8  ###
+            #### 20250303_oxford_lower_800up_only800_rest_300up_top300_ESH_co_concat_swin_tf8   ####
             ########################################################################################
-            # visual_projections = torch.cat((visual_projections_swin, visual_projections_ESH), dim=1)
-            # visual_projections = model.visual_project(visual_projections.transpose(1, 2)).transpose(1, 2)
-            ########################################################################################
-            #######  20250304_oxford_lower_800up_only800_rest_300up_top300_ESH_co_swin_tf8   #######
-            ########################################################################################
-            visual_projections = visual_projections_swin
-            ##################################################################################################
-            prefix_embed = model.clip_project(visual_projections).view(-1, model.prefix_length, model.embedding_size)
-            ##################################################################################################
-
-            # ############################################ 202503 ##############################################
-            # clip_projections = model.clip_project(prefixs[i].unsqueeze(0)).view(-1, model.prefix_length, model.embedding_size)
-            # visual_projections_swin = model.visual_project_swin(embedding_ESH, clip_projections)
-            # visual_projections_ESH = model.visual_project_ESH(clip_projections, embedding_ESH)
-            # ########################################################################################
-            # ##### 20250301_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_swin_tf8 #####
-            # ########################################################################################
-            # # prefix_embed = visual_projections_swin + visual_projections_ESH
-            # ########################################################################################
-            # ### 20250302_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8  ###
-            # ########################################################################################
-            # # prefix_embed = torch.cat((visual_projections_swin, visual_projections_ESH), dim=1)
-            # # prefix_embed = model.visual_project(prefix_embed.transpose(1, 2)).transpose(1, 2)
-            # ########################################################################################
-            # #### 20250303_oxford_lower_800up_only800_rest_300up_top300_ESH_co_concat_swin_tf8   ####
-            # ########################################################################################
             # prefix_embed = visual_projections_swin
-            # ########################################################################################
-            # ##################################################################################################
+            #######################################################################################
+            # 20250310_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_768_swin_tf8    #
+            # 20250307_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_768_swin_tf8 #
+            #######################################################################################
+            # prefix_embed = model.linear(prefix_embed)
+            ################################################################################
 
             caption = generate_beam(model, tokenizer, embed=prefix_embed)[0]
             caption_token = tokenizer(caption, return_tensors='pt', padding='max_length', truncation=True, max_length=74)
@@ -278,6 +264,7 @@ class Predictor(object):
             test['Name'] = ['test1', 'test2', 'test3', 'test4', 'test5', 'test6', 'test7', 'test8', 'test9','test10',
                             'train1', 'train2', 'train3', 'train4', 'train5', 'train6', 'train7',
                             'train8', 'train9', 'train10']
+            test['image_id'] = self.test_image_id_list[:10] + self.train_image_id_list[:10]
             generate_beam_df = pd.DataFrame(self.generate_beam_output.cpu().detach(),columns=[f"{i}" for i in range(0, 74)])
             generate_beam_df = pd.concat([test, generate_beam_df, dataframe_Name("-", 74, 16)], axis=1)
             generate_beam_df['text'] = self.generate_beam_text
@@ -489,6 +476,10 @@ class TransformerMapper(nn.Module):
         if x.shape[2] == 768:
             x = self.linear(x)
         ############
+        ### 768 ###
+        # if x.shape[2] != 768:
+        #     x = self.linear(x)
+        ############
         prefix = self.prefix_const.unsqueeze(0).expand(x.shape[0], *self.prefix_const.shape)
         prefix = torch.cat((x, prefix), dim=1)
         out = self.transformer(prefix)[:, self.clip_length:]
@@ -503,6 +494,9 @@ class TransformerMapper(nn.Module):
         ### swin ###
         self.linear = nn.Linear(768, dim_embedding)
         ############
+        ### 768 ###
+        # self.linear = nn.Linear(2048, dim_embedding)
+        ############
         self.prefix_const = nn.Parameter(torch.randn(prefix_length, dim_embedding), requires_grad=True)
 
 class CrossTransformerMapper(nn.Module):
@@ -516,6 +510,13 @@ class CrossTransformerMapper(nn.Module):
         if y.shape[2] == 768:
             y = self.linear(y)
         ############
+        ### 768 ###
+        # if x.shape[2] != 768:
+        #     x = self.linear(x)
+        # if y.shape[2] != 768:
+        #     y = self.linear(y)
+        ############
+
         out = self.transformer(x, y)
         return out
 
@@ -527,6 +528,9 @@ class CrossTransformerMapper(nn.Module):
         # self.linear = lora.Linear(dim_clip, clip_length * dim_embedding)
         ### swin ###
         self.linear = nn.Linear(768, dim_embedding)
+        ############
+        ### 768 ###
+        # self.linear = nn.Linear(2048, dim_embedding)
         ############
 
 class ClipCaptionModel(nn.Module):
@@ -547,47 +551,32 @@ class ClipCaptionModel(nn.Module):
         empty_ESH = torch.zeros(embedding_emotion.shape[0], 1, embedding_emotion.shape[2], dtype=torch.bfloat16,
                                 device=embedding_text.device)
         embedding_ESH = torch.cat((empty_ESH, embedding_emotion, embedding_sentiment, embedding_humor), dim=1)
-        ############################################ 202502 ##############################################
-        visual_projections_swin = self.visual_project_swin(embedding_ESH, prefix)
-        visual_projections_ESH = self.visual_project_ESH(prefix, embedding_ESH)
+        # emotion_proj = self.emotion_linear(emotion).unsqueeze(1)
+        # sentiment_proj = self.sentiment_linear(sentiment).unsqueeze(1)
+        # humor_proj = self.humor_linear(humor).unsqueeze(1)
+        # embedding_ESH = torch.cat((emotion_proj, sentiment_proj, humor_proj), dim=1)
+        # embedding_ESH = self.ESH_linear(embedding_ESH.transpose(1, 2)).transpose(1, 2)
+        ############################################ 202503 ##############################################
+        clip_projections = self.clip_project(prefix).view(-1, self.prefix_length, self.embedding_size)
+        visual_projections_swin = self.visual_project_swin(embedding_ESH, clip_projections)
+        visual_projections_ESH = self.visual_project_ESH(clip_projections, embedding_ESH)
         ########################################################################################
-        ##### 20250226_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_swin_tf8 #####
+        ### 20250302_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8  ###
         ########################################################################################
-        # visual_projections = visual_projections_swin + visual_projections_ESH
+        visual_projections = torch.cat((visual_projections_swin, visual_projections_ESH), dim=1)
+        visual_projections = self.visual_project(visual_projections.transpose(1, 2)).transpose(1, 2)
         ########################################################################################
-        ### 20250228_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8  ###
+        #######  20250303_oxford_lower_800up_only800_rest_300up_top300_ESH_co_swin_tf8   #######
         ########################################################################################
-        # visual_projections = torch.cat((visual_projections_swin, visual_projections_ESH), dim=1)
-        # visual_projections = self.visual_project(visual_projections.transpose(1, 2)).transpose(1, 2)
-        ########################################################################################
-        #######  20250304_oxford_lower_800up_only800_rest_300up_top300_ESH_co_swin_tf8   #######
-        ########################################################################################
-        visual_projections = visual_projections_swin
-        ########################################################################################
-        prefix_projections = self.clip_project(visual_projections).view(-1, self.prefix_length, self.embedding_size)
-        embedding_cat = torch.cat((prefix_projections, embedding_text), dim=1)
-        ##################################################################################################
-
-        # ############################################ 202503 ##############################################
-        # clip_projections = self.clip_project(prefix).view(-1, self.prefix_length, self.embedding_size)
-        # visual_projections_swin = self.visual_project_swin(embedding_ESH, clip_projections)
-        # visual_projections_ESH = self.visual_project_ESH(clip_projections, embedding_ESH)
-        # ########################################################################################
-        # ##### 20250301_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_swin_tf8 #####
-        # ########################################################################################
-        # # visual_projections = visual_projections_swin + visual_projections_ESH
-        # ########################################################################################
-        # ### 20250302_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8  ###
-        # ########################################################################################
-        # # visual_projections = torch.cat((visual_projections_swin, visual_projections_ESH), dim=1)
-        # # visual_projections = self.visual_project(visual_projections.transpose(1, 2)).transpose(1, 2)
-        # ########################################################################################
-        # #######  20250303_oxford_lower_800up_only800_rest_300up_top300_ESH_co_swin_tf8   #######
-        # ########################################################################################
         # visual_projections = visual_projections_swin
-        # ########################################################################################
-        # embedding_cat = torch.cat((visual_projections, embedding_text), dim=1)
-        # ##################################################################################################
+        #######################################################################################
+        # 20250310_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_768_swin_tf8    #
+        # 20250307_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_768_swin_tf8 #
+        #######################################################################################
+        # visual_projections = self.linear(visual_projections)
+        ########################################################################################
+        embedding_cat = torch.cat((visual_projections, embedding_text), dim=1)
+        ##################################################################################################
 
         if labels is not None:
             dummy_token = self.get_dummy_token(tokens.shape[0], tokens.device)
@@ -637,6 +626,7 @@ class ClipCaptionModel(nn.Module):
         self.falcon = AutoModelForCausalLM.from_pretrained("tiiuae/Falcon3-1B-Base")
         # self.falcon = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B")
         self.embedding_size = self.falcon.model.embed_tokens.weight.shape[1]
+        # self.embedding_size = 768
         # self.falcon.eval()
         # for param in self.falcon.parameters():
         #     param.requires_grad = False
@@ -651,6 +641,33 @@ class ClipCaptionModel(nn.Module):
         ### 20250228_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8 ###
         #######################################################################################
         self.visual_project = nn.Linear(128, 64)
+        self.linear = nn.Linear(self.embedding_size, 2048)
+
+        self.emotion_linear = nn.Linear(384, 768)
+        self.sentiment_linear = nn.Linear(384, 768)
+        self.humor_linear = nn.Linear(768, 768)
+        self.ESH_linear = nn.Linear(3,64)
+    def activateLoRa(self):
+        LORAconfig = LoraConfig(
+            task_type=TaskType.CAUSAL_LM,
+            target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+            inference_mode=False,  # 训练模式
+            r=8,  # Lora 秩
+            lora_alpha=32,  # Lora alaph，具体作用参见 Lora 原理
+            lora_dropout=0.1  # Dropout 比例
+        )
+
+        def count_trainable_parameters(model):
+            model_parameters = filter(lambda p: p.requires_grad, model.parameters())
+            params = sum([np.prod(p.size()) for p in model_parameters])
+            return params
+
+        a = count_trainable_parameters(self.falcon)
+        self.falcon = get_peft_model(self.falcon, LORAconfig)
+        b = count_trainable_parameters(self.falcon)
+        # 留下小數點後兩位就好
+        percent = round((b / a) * 100, 3)
+        print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
 
 class ClipCaptionPrefix(ClipCaptionModel):
 
@@ -888,6 +905,7 @@ class OxfordDataset(torch.utils.data.Dataset):
             prefix = torch.load('../../Instagram/ImageData/' + self.dataFrom + '/' + self.image_ids[item] + '.pt',
                                 weights_only=False)
         emotion, sentiment, humor = self.pad_emotion(item)
+        # emotion, sentiment, humor = self.emotion[self.image_ids[item]], self.sentiment[self.image_ids[item]], self.humor[self.image_ids[item]]
         if self.normalize_prefix:
             prefix = prefix.float()
             prefix = prefix / prefix.norm(2, -1)
@@ -907,6 +925,7 @@ class OxfordDataset(torch.utils.data.Dataset):
         # Temporary storage for filtered indices
         filtered_indices = []
         device = torch.device('cuda:0')
+
         progress = tqdm(total=len(dataloader), desc="Filtering train dataset")
         for batch in dataloader:
             tokens_batch, masks_batch, prefixes_batch, original_indices = batch
@@ -985,19 +1004,22 @@ class OxfordDataset(torch.utils.data.Dataset):
             with open(f"{self.data_path[:-4]}_bleu_all.pkl", 'wb') as f:
                 pickle.dump([self.captions_tokens, self.caption2embedding, self.max_seq_len], f)
         if dataFrom == 'Oxford':
-            self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford.csv')
-            # self.emotion_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_emotion.csv')
-            # self.sentiment_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_sentiment.csv')
-            # self.humor_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_humor.csv')
+            # self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford.csv')
+            self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_filter.csv')
+            # self.emotion_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_emotion_filter.csv')
+            # self.sentiment_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_sentiment_filter.csv')
+            # self.humor_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_humor_filter.csv')
         else:
-            self.emotions_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{dataFrom}.csv')
-            # self.emotion_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{dataFrom}_emotion.csv')
-            # self.sentiment_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{dataFrom}_sentiment.csv')
-            # self.humor_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{dataFrom}_humor.csv')
+            # self.emotions_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{dataFrom}.csv')
+            self.emotions_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{dataFrom}_filter.csv')
+            # self.emotion_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{dataFrom}_emotion_filter.csv')
+            # self.sentiment_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{dataFrom}_sentiment_filter.csv')
+            # self.humor_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{dataFrom}_humor_filter.csv')
         # self.emotion will save the emotion data for each image
         self.emotion = dict()
         self.sentiment = dict()
         self.humor = dict()
+
         self.max_seq_len_emo = 21
         for i in range(self.emotions_data.shape[0]):
             image_id = self.emotions_data.iloc[i]['image_id']
@@ -1008,6 +1030,17 @@ class OxfordDataset(torch.utils.data.Dataset):
             self.sentiment[image_id] = torch.tensor(self.tokenizer.encode(sentiment, max_length=64, truncation=True), dtype=torch.int64)
             self.humor[image_id] = torch.tensor(self.tokenizer.encode(humor, max_length=64, truncation=True, padding=True), dtype=torch.int64)
 
+        # padding_emotion = 384 - (self.emotion_data.shape[1] - 1)
+        # padding_sentiment = 384 - (self.sentiment_data.shape[1] - 1)
+        # padding_humor = 768 - (self.humor_data.shape[1] - 1)
+        # for i in range(self.emotion_data.shape[0]):
+        #     image_id = self.emotion_data.iloc[i]['image_id']
+        #     emotion = torch.tensor(self.emotion_data.iloc[i][1:].tolist())
+        #     self.emotion[image_id] = torch.cat((emotion, torch.zeros(padding_emotion, dtype=torch.int64)))
+        #     sentiment = torch.tensor(self.sentiment_data.iloc[i][1:].tolist())
+        #     self.sentiment[image_id] = torch.cat((sentiment, torch.zeros(padding_sentiment, dtype=torch.int64)))
+        #     humor = torch.tensor(self.humor_data.iloc[i][1:].tolist())
+        #     self.humor[image_id] = torch.cat((humor, torch.zeros(padding_humor, dtype=torch.int64)))
         print(f"Train Data size: {len(self.captions_tokens)}")
         # self.filter_data_by_bleu(model, batch_size, bleu_threshold)
 
@@ -1073,14 +1106,14 @@ class ClipCocoDataset(Dataset):
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-trainData = '../Data/Oxford_HIC/parse/oxford_lower_800up_only800_all_ViT-B_32_train.pkl'
-testData = '../Data/Oxford_HIC/parse/oxford_lower_800up_only800_rest_300up_top300_ViT-B_32_test.pkl'
-# trainData = '../Data/Instagram/parse/300up_only300_all_sonicdrivein_ViT-B_32_train.pkl'
-# testData = '../Data/Instagram/parse/100up_only100_rest_50up_top50_sonicdrivein_ViT-B_32_test.pkl'
+# trainData = '../Data/Oxford_HIC/parse/oxford_800_8_300_2_ViT-B_32_train.pkl'
+# testData = '../Data/Oxford_HIC/parse/oxford_800_8_300_2_ViT-B_32_test.pkl'
+trainData = '../Data/Instagram/parse/100up_8_sonicdrivein_ViT-B_32_train.pkl'
+testData = '../Data/Instagram/parse/100up_2_sonicdrivein_ViT-B_32_test.pkl'
 prefix_length = 64
 normalize_prefix = False
-train_dataform = "Oxford"
-test_dataform = "Oxford"
+train_dataform = "sonicdrivein"
+test_dataform = "sonicdrivein"
 trainDataset = OxfordDataset(trainData, prefix_length, normalize_prefix=normalize_prefix, dataFrom = train_dataform)
 testDataset = OxfordDataset(testData, prefix_length, normalize_prefix=normalize_prefix, dataFrom = test_dataform)
 
@@ -1210,7 +1243,7 @@ if train_dataform:
                 tokens_list.append(tokens)
                 mask_list.append(mask)
                 prefix_list.append(prefix)
-                emotion, sentiment, humor = trainDataset.pad_emotion(item)
+                # emotion, sentiment, humor = trainDataset.pad_emotion(item)
                 train_emotion_list.append(emotion)
                 train_sentiment_list.append(sentiment)
                 train_humor_list.append(humor)
@@ -1233,7 +1266,7 @@ if train_dataform:
                     mask_list.append(mask)
                     prefix_list.append(prefix)
                     train_gt.append(caption)
-                    emotion, sentiment, humor = trainDataset.pad_emotion(item)
+                    # emotion, sentiment, humor = trainDataset.pad_emotion(item)
                     train_emotion_list.append(emotion)
                     train_sentiment_list.append(sentiment)
                     train_humor_list.append(humor)
@@ -1323,7 +1356,7 @@ if test_dataform:
                 tokens_list.append(tokens)
                 mask_list.append(mask)
                 prefix_list.append(prefix)
-                emotion, sentiment, humor = testDataset.pad_emotion(item)
+                # emotion, sentiment, humor = testDataset.pad_emotion(item)
                 test_emotion_list.append(emotion)
                 test_sentiment_list.append(sentiment)
                 test_humor_list.append(humor)
@@ -1345,7 +1378,7 @@ if test_dataform:
                     tokens_list.append(tokens)
                     mask_list.append(mask)
                     prefix_list.append(prefix)
-                    emotion, sentiment, humor = testDataset.pad_emotion(item)
+                    # emotion, sentiment, humor = testDataset.pad_emotion(item)
                     test_emotion_list.append(emotion)
                     test_sentiment_list.append(sentiment)
                     test_humor_list.append(humor)
@@ -1362,9 +1395,9 @@ if test_dataform:
     print(test_emotion.shape, test_sentiment.shape, test_humor.shape)
 
 model = ClipCaptionModel(prefix_length, clip_length=prefix_length, prefix_size=512, num_layers=8)
-adapter = False
-save_file = '20250224_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_swin_tf8'
-i = 1
+adapter = True
+save_file = '20250316_oxford_800_8_300_2_ESH_filter_cross_concat'
+i = 13
 if adapter :
     model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i:03d}.pt'))
 
@@ -1391,8 +1424,8 @@ if adapter :
 
     model.activateLoRa()
 
-save_file = '20250304_oxford_lower_800up_only800_rest_300up_top300_ESH_co_swin_tf8'
-for i in range(20):
+save_file = '20250317_100up_2_sonicdrivein_base_0316_oxford_800_8_300_2_ESH_filter_cross_concat'
+for i in range(30):
     if os.path.exists(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'):
         model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'))
         model = model.eval()
@@ -1404,12 +1437,12 @@ for i in range(20):
         pred.predict("train", train_tokens, train_mask, train_prefix, train_gt, model, train_emotion, train_sentiment, train_humor)
 
 AllCaption = pd.DataFrame()
-for i in range(20):
+for i in range(10):
     if os.path.exists(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'):
         df = pd.read_csv(f'./Model/{save_file}/{save_file}_test_{i + 1:03d}.csv')
         textAndLoss = df[['text', 'loss', 'fitCount', 'gtNum', 'bleu1', 'bleu2', 'bleu3', 'bleu4']]
         if AllCaption.empty:
-            AllCaption = df[['Name']]
+            AllCaption = df[['Name', 'image_id']]
         AllCaption = pd.concat([AllCaption, textAndLoss], axis=1)
 AllCaption.to_csv(f'./Model/{save_file}/{save_file}_test_all.csv', float_format='%.15f', index=False)
 # AllCaption.to_csv(f'./Model/{save_file}/test_all.csv', float_format='%.15f', index=False)
