@@ -354,7 +354,7 @@ class MLP(nn.Module):
         super(MLP, self).__init__()
         layers = []
         for i in range(len(sizes) - 1):
-            layers.append(nn.Linear(sizes[i], sizes[i + 1], bias=bias))
+            layers.append(lora.Linear(sizes[i], sizes[i + 1], bias=bias))
             if i < len(sizes) - 2:
                 layers.append(act())
         self.model = nn.Sequential(*layers)
@@ -363,9 +363,9 @@ class MlpTransformer(nn.Module):
     def __init__(self, in_dim, h_dim, out_d: Optional[int] = None, act=nnf.relu, dropout=0.):
         super().__init__()
         out_d = out_d if out_d is not None else in_dim
-        self.fc1 = nn.Linear(in_dim, h_dim)
+        self.fc1 = lora.Linear(in_dim, h_dim)
         self.act = act
-        self.fc2 = nn.Linear(h_dim, out_d)
+        self.fc2 = lora.Linear(h_dim, out_d)
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x):
@@ -383,9 +383,9 @@ class MultiHeadAttention(nn.Module):
         self.num_heads = num_heads
         head_dim = dim_self // num_heads
         self.scale = head_dim ** -0.5
-        self.to_queries = nn.Linear(dim_self, dim_self, bias=bias)
-        self.to_keys_values = nn.Linear(dim_ref, dim_self * 2, bias=bias)
-        self.project = nn.Linear(dim_self, dim_self)
+        self.to_queries = lora.Linear(dim_self, dim_self, bias=bias)
+        self.to_keys_values = lora.Linear(dim_ref, dim_self * 2, bias=bias)
+        self.project = lora.Linear(dim_self, dim_self)
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x, y=None, mask=None):
@@ -489,12 +489,12 @@ class TransformerMapper(nn.Module):
         self.clip_length = clip_length
         self.transformer = Transformer(dim_embedding, 8, num_layers)
         ### clip ###
-        # self.linear = nn.Linear(dim_clip, clip_length * dim_embedding)
+        # self.linear = lora.Linear(dim_clip, clip_length * dim_embedding)
         ### swin ###
-        self.linear = nn.Linear(768, dim_embedding)
+        self.linear = lora.Linear(768, dim_embedding)
         ############
         ### 768 ###
-        # self.linear = nn.Linear(2048, dim_embedding)
+        # self.linear = lora.Linear(2048, dim_embedding)
         ############
         self.prefix_const = nn.Parameter(torch.randn(prefix_length, dim_embedding), requires_grad=True)
 
@@ -526,10 +526,10 @@ class CrossTransformerMapper(nn.Module):
         ### clip ###
         # self.linear = lora.Linear(dim_clip, clip_length * dim_embedding)
         ### swin ###
-        self.linear = nn.Linear(768, dim_embedding)
+        self.linear = lora.Linear(768, dim_embedding)
         ############
         ### 768 ###
-        # self.linear = nn.Linear(2048, dim_embedding)
+        # self.linear = lora.Linear(2048, dim_embedding)
         ############
 
 class ClipCaptionModel(nn.Module):
@@ -645,13 +645,13 @@ class ClipCaptionModel(nn.Module):
         #######################################################################################
         ### 20250228_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8 ###
         #######################################################################################
-        self.visual_project = nn.Linear(128, 64)
-        self.linear = nn.Linear(self.embedding_size, 2048)
+        self.visual_project = lora.Linear(128, 64)
+        self.linear = lora.Linear(self.embedding_size, 2048)
 
-        self.emotion_linear = nn.Linear(384, 768)
-        self.sentiment_linear = nn.Linear(384, 768)
-        self.humor_linear = nn.Linear(768, 768)
-        self.ESH_linear = nn.Linear(3, 64)
+        self.emotion_linear = lora.Linear(384, 768)
+        self.sentiment_linear = lora.Linear(384, 768)
+        self.humor_linear = lora.Linear(768, 768)
+        self.ESH_linear = lora.Linear(3, 64)
 
     def activateLoRa(self):
         self.LoRaActivated = True
