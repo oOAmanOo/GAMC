@@ -215,7 +215,7 @@ class Predictor(object):
             # embedding_text = model.gemma.model.embed_tokens(tokens[i].unsqueeze(0))
             # embedding_text = model.gemma.base_model.model.model.embed_tokens(tokens[i].unsqueeze(0))
             # embedding_text = model.gpt.transformer.wte(tokens[i].unsqueeze(0))
-            if adapter:
+            if model.LoRaActivated:
                 embedding_text = model.falcon.base_model.model.model.embed_tokens(tokens[i].unsqueeze(0))
             else:
                 embedding_text = model.falcon.model.embed_tokens(tokens[i].unsqueeze(0))
@@ -793,7 +793,7 @@ def generate_beam(model, tokenizer, beam_size: int = 5, prompt=None, embed=None,
             # next_token_embed = model.gpt.transformer.wte(next_tokens.squeeze()).view(generated.shape[0], 1, -1)
             # next_token_embed = model.gemma.model.embed_tokens(next_tokens.squeeze()).view(generated.shape[0], 1, -1)
             # next_token_embed = model.gemma.base_model.model.model.embed_tokens(next_tokens.squeeze()).view( generated.shape[0], 1, -1)
-            if adapter:
+            if model.LoRaActivated:
                 next_token_embed = model.falcon.base_model.model.model.embed_tokens(next_tokens.squeeze()).view(generated.shape[0], 1, -1)
             else:
                 next_token_embed = model.falcon.model.embed_tokens(next_tokens.squeeze()).view(generated.shape[0], 1, -1)
@@ -833,7 +833,7 @@ def generate2(model, tokenizer, tokens=None, prompt=None, embed=None, entry_coun
                 # generated = model.gpt.transformer.wte(tokens)
                 # generated = model.gemma.model.embed_tokens(tokens)
                 # generated = model.gemma.base_model.model.model.embed_tokens(tokens)
-                if adapter:
+                if model.LoRaActivated:
                     generated = model.falcon.base_model.model.model.embed_tokens(tokens)
                 else:
                     generated = model.falcon.model.embed_tokens(tokens)
@@ -859,7 +859,7 @@ def generate2(model, tokenizer, tokens=None, prompt=None, embed=None, entry_coun
                 # next_token_embed = model.gemma.model.embed_tokens(next_token)
                 # next_token_embed = model.gemma.base_model.model.model.embed_tokens(next_token)
                 # next_token_embed = model.gpt.transformer.wte(next_token)
-                if adapter:
+                if model.LoRaActivated:
                     next_token_embed = model.falcon.base_model.model.model.embed_tokens(next_token)
                 else:
                     next_token_embed = model.falcon.model.embed_tokens(next_token)
@@ -1131,8 +1131,8 @@ class ClipCocoDataset(Dataset):
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # trainData = '../Data/Oxford_HIC/parse/oxford_800_8_300_2_ViT-B_32_train.pkl'
 # testData = '../Data/Oxford_HIC/parse/oxford_800_8_300_2_ViT-B_32_test.pkl'
-trainData = '../Data/Instagram/parse/100up_passlength24_sonicdrivein_ViT-B_32_train.pkl'
-testData = '../Data/Instagram/parse/100up_notpasslength24_sonicdrivein_ViT-B_32_test.pkl'
+trainData = '../Data/Instagram/parse/100up_passlength16_sonicdrivein_ViT-B_32_train.pkl'
+testData = '../Data/Instagram/parse/100up_notpasslength16_sonicdrivein_ViT-B_32_test.pkl'
 prefix_length = 64
 normalize_prefix = False
 train_dataform = "sonicdrivein"
@@ -1417,13 +1417,13 @@ if test_dataform:
     print(test_tokens.shape, test_mask.shape, test_prefix.shape)
     print(test_emotion.shape, test_sentiment.shape, test_humor.shape)
 
-model = ClipCaptionModel(mode='nn', clip_length=prefix_length, prefix_size=512, num_layers=8)
+model = ClipCaptionModel(mode='nn', prefix_length=prefix_length, clip_length=prefix_length, prefix_size=512, num_layers=8)
 adapter = True
 save_file = '20250316_oxford_800_8_300_2_ESH_filter_cross_concat'
 i = 13
 if adapter :
     model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i:03d}.pt'))
-    model_adapt = ClipCaptionModel(mode='lora', clip_length=prefix_length, prefix_size=512, num_layers=8)
+    model_adapt = ClipCaptionModel(mode='lora', prefix_length=prefix_length, clip_length=prefix_length, prefix_size=512, num_layers=8)
 
     def count_trainable_parameters(model):
         model_parameters = filter(lambda p: p.requires_grad, model.parameters())
@@ -1454,7 +1454,7 @@ if adapter :
 
     # model.activateLoRa()
 
-save_file = '20250319_100up_passlength24_sonicdrivein_base_0316_oxford_800_8_300_2_ESH_filter_cross_concat'
+save_file = '20250319_100up_passlength16_sonicdrivein_base_0316_oxford_800_8_300_2_ESH_filter_cross_concat'
 for i in range(20):
     if os.path.exists(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'):
         model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'))
