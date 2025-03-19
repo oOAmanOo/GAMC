@@ -144,7 +144,7 @@ def main(clip_model_type: str):
             d["clip_embedding"] = i
             all_embeddings.append(prefix)
             all_captions.append(d)
-            all_funnyscore.append(funnyscore)
+            all_funnyscore.append(torch.tensor([funnyscore]))
             if (i + 1) % 10000 == 0:
                 with open(out_path, 'wb') as f:
                     pickle.dump({"clip_embedding": torch.cat(all_embeddings, dim=0), "captions": all_captions, "funnyscore": all_funnyscore}, f)
