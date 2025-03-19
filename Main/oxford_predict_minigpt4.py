@@ -1,10 +1,10 @@
 # Prediction interface for Cog ⚙️
 # Reference: https://github.com/replicate/cog/blob/main/docs/python.md
-from torch.utils.data import Dataset, DataLoader
-from torch import nn
 import torch
-import torch.nn.functional as nnf
-from typing import Tuple, List, Union, Optional
+import torch.nn as nn
+from torch import Tensor
+from torch.nn import functional as nnf
+from torch.utils.data import Dataset, DataLoader
 from transformers import (
     GPT2Tokenizer,
     GPT2LMHeadModel,
@@ -16,17 +16,15 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 from peft import LoraConfig, TaskType, get_peft_model
 import PIL.Image
 from typing import Tuple, Optional, Union, Any
+from tqdm import tqdm
 import os
 import pickle
 import sys
 from typing import Tuple, Optional, Union, Any
+from typing import Tuple, List, Union, Optional
 import numpy as np
 import pandas as pd
-# from peft import LoraConfig, TaskType, get_peft_model
-from nltk.translate.bleu_score import sentence_bleu
-import gc
-from tqdm import tqdm
-from torch import Tensor
+from peft import LoraConfig, TaskType, get_peft_model
 from nltk.translate.bleu_score import sentence_bleu
 import gc
 import loralib as lora
@@ -490,12 +488,12 @@ class TransformerMapper(nn.Module):
         self.clip_length = clip_length
         self.transformer = Transformer(dim_embedding, 8, num_layers)
         ### clip ###
-        # self.linear = nn.Linear(dim_clip, clip_length * dim_embedding)
+        # self.linear = lora.Linear(dim_clip, clip_length * dim_embedding)
         ### swin ###
-        self.linear = nn.Linear(768, dim_embedding)
+        self.linear = lora.Linear(768, dim_embedding)
         ############
         ### 768 ###
-        # self.linear = nn.Linear(2048, dim_embedding)
+        # self.linear = lora.Linear(2048, dim_embedding)
         ############
         self.prefix_const = nn.Parameter(torch.randn(prefix_length, dim_embedding), requires_grad=True)
 
@@ -527,10 +525,10 @@ class CrossTransformerMapper(nn.Module):
         ### clip ###
         # self.linear = lora.Linear(dim_clip, clip_length * dim_embedding)
         ### swin ###
-        self.linear = nn.Linear(768, dim_embedding)
+        self.linear = lora.Linear(768, dim_embedding)
         ############
         ### 768 ###
-        # self.linear = nn.Linear(2048, dim_embedding)
+        # self.linear = lora.Linear(2048, dim_embedding)
         ############
 
 class ClipCaptionModel(nn.Module):
@@ -554,8 +552,7 @@ class ClipCaptionModel(nn.Module):
             embedding_emotion = self.falcon.model.embed_tokens(emotion)
             embedding_sentiment = self.falcon.model.embed_tokens(sentiment)
             embedding_humor = self.falcon.model.embed_tokens(humor)
-        empty_ESH = torch.zeros(embedding_emotion.shape[0], 1, embedding_emotion.shape[2], dtype=torch.bfloat16,
-                                device=embedding_text.device)
+        empty_ESH = torch.zeros(embedding_emotion.shape[0], 1, embedding_emotion.shape[2], dtype=torch.bfloat16,device=embedding_text.device)
         embedding_ESH = torch.cat((empty_ESH, embedding_emotion, embedding_sentiment, embedding_humor), dim=1)
         # emotion_proj = self.emotion_linear(emotion).unsqueeze(1)
         # sentiment_proj = self.sentiment_linear(sentiment).unsqueeze(1)
@@ -580,7 +577,7 @@ class ClipCaptionModel(nn.Module):
         # 20250307_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_768_swin_tf8 #
         #######################################################################################
         # visual_projections = self.linear(visual_projections)
-        ########################################################################################
+        #######################################################################################
         embedding_cat = torch.cat((visual_projections, embedding_text), dim=1)
         ##################################################################################################
 
@@ -647,13 +644,13 @@ class ClipCaptionModel(nn.Module):
         #######################################################################################
         ### 20250228_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8 ###
         #######################################################################################
-        self.visual_project = nn.Linear(128, 64)
-        self.linear = nn.Linear(self.embedding_size, 2048)
+        self.visual_project = lora.Linear(128, 64)
+        self.linear = lora.Linear(self.embedding_size, 2048)
 
-        self.emotion_linear = nn.Linear(384, 768)
-        self.sentiment_linear = nn.Linear(384, 768)
-        self.humor_linear = nn.Linear(768, 768)
-        self.ESH_linear = nn.Linear(3,64)
+        self.emotion_linear = lora.Linear(384, 768)
+        self.sentiment_linear = lora.Linear(384, 768)
+        self.humor_linear = lora.Linear(768, 768)
+        self.ESH_linear = lora.Linear(3, 64)
 
     def activateLoRa(self):
         self.LoRaActivated = True
