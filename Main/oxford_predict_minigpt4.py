@@ -1108,8 +1108,8 @@ class ClipCocoDataset(Dataset):
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # trainData = '../Data/Oxford_HIC/parse/oxford_800_8_300_2_ViT-B_32_train.pkl'
 # testData = '../Data/Oxford_HIC/parse/oxford_800_8_300_2_ViT-B_32_test.pkl'
-trainData = '../Data/Instagram/parse/100up_8_sonicdrivein_ViT-B_32_train.pkl'
-testData = '../Data/Instagram/parse/100up_2_sonicdrivein_ViT-B_32_test.pkl'
+trainData = '../Data/Instagram/parse/100up_passlength24_sonicdrivein_ViT-B_32_train.pkl'
+testData = '../Data/Instagram/parse/100up_notpasslength24_sonicdrivein_ViT-B_32_test.pkl'
 prefix_length = 64
 normalize_prefix = False
 train_dataform = "sonicdrivein"
@@ -1424,7 +1424,7 @@ if adapter :
 
     model.activateLoRa()
 
-save_file = '20250304_oxford_lower_800up_only800_rest_300up_top300_ESH_co_swin_tf8'
+save_file = '20250319_100up_passlength24_sonicdrivein_base_0316_oxford_800_8_300_2_ESH_filter_cross_concat'
 for i in range(20):
     if os.path.exists(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'):
         model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'))
