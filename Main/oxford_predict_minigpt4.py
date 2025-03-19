@@ -1424,8 +1424,8 @@ if adapter :
 
     model.activateLoRa()
 
-save_file = '20250317_100up_2_sonicdrivein_base_0316_oxford_800_8_300_2_ESH_filter_cross_concat'
-for i in range(30):
+save_file = '20250304_oxford_lower_800up_only800_rest_300up_top300_ESH_co_swin_tf8'
+for i in range(20):
     if os.path.exists(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'):
         model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'))
         model = model.eval()
@@ -1437,7 +1437,7 @@ for i in range(30):
         pred.predict("train", train_tokens, train_mask, train_prefix, train_gt, model, train_emotion, train_sentiment, train_humor)
 
 AllCaption = pd.DataFrame()
-for i in range(10):
+for i in range(20):
     if os.path.exists(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'):
         df = pd.read_csv(f'./Model/{save_file}/{save_file}_test_{i + 1:03d}.csv')
         textAndLoss = df[['text', 'loss', 'fitCount', 'gtNum', 'bleu1', 'bleu2', 'bleu3', 'bleu4']]
