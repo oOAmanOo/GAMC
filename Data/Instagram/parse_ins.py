@@ -10,7 +10,6 @@ import argparse
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-
 def main(clip_model_type: str):
     device = torch.device('cuda:0')
     clip_model_name = clip_model_type.replace('/', '_')
@@ -32,13 +31,24 @@ def main(clip_model_type: str):
     original['gen_count'] = original['image_id'].apply(lambda x: image_id_counts[x] if x in image_id_counts else 0)
     original = original[original['gen_count'] >= 100]
     print('shape of 100up: ', original.shape, 'images:', len(original['image_id'].unique()))
-    original = original[original['text_len'] >= 11]
-    print('shape of len over 11: ', original.shape, 'images:', len(original['image_id'].unique()))
-    train = data.merge(original, on='image_id', how='inner', suffixes=('', '_'))
-    test = data[~data['image_id'].isin(train['image_id'])]
+    print('funny:', original[original['funny_score'] == 1].shape[0], 'else:', original[original['funny_score'] != 1].shape[0])
+    original_train = original[original['text_len'] >= 16]
+    print('train_funny:' , original_train[original_train['funny_score'] == 1].shape[0], 'train_else:', original_train[original_train['funny_score'] != 1].shape[0])
+    train = data.merge(original_train, on='image_id', how='inner', suffixes=('', '_'))
     print("shape of train: ", train.shape, 'images:', len(train['image_id'].unique()))
+    train = (
+        train.sort_values(by=['image_id', 'funny_score'], ascending=[True, False])
+        .groupby('image_id')
+        .head(200)
+    )
+    print("shape of train: ", train.shape, 'images:', len(train['image_id'].unique()))
+    original_test = original[original['text_len'] < 16]
+    print("shape of test: ", original_test.shape, 'images:', len(original_test['image_id'].unique()))
+    print('funny:', original_test[original_test['funny_score'] == 1].shape[0], 'else:', original_test[original_test['funny_score'] != 1].shape[0])
+    # get  top 200 datas on funnyscore
+    test = original_test.sort_values(by=['funny_score'], ascending=[False])[:(len(train['image_id'].unique())//4)]
     print("shape of test: ", test.shape, 'images:', len(test['image_id'].unique()))
-
+    print('funny:', test[test['funny_score'] == 1].shape[0], 'else:', test[test['funny_score'] != 1].shape[0])
 
     # ######################################################################################################
     # valid_image_ids = image_id_counts[image_id_counts >= 100].index
@@ -139,8 +149,8 @@ def main(clip_model_type: str):
         print('Done')
         print("%0d embeddings saved " % len(all_embeddings))
         return 0
-    out_path_train = f"./parse/100up_passlength11_sonicdrivein_{clip_model_name}_train.pkl"
-    out_path_test = f"./parse/100up_notpasslength11_sonicdrivein_{clip_model_name}_test.pkl"
+    out_path_train = f"./parse/100up_passlength16_sonicdrivein_{clip_model_name}_train.pkl"
+    out_path_test = f"./parse/100up_notpasslength16_sonicdrivein_{clip_model_name}_test.pkl"
     parse(out_path_train, train)
     parse(out_path_test, test)
     return 0
