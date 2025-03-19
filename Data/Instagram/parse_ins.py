@@ -22,7 +22,7 @@ def main(clip_model_type: str):
     data = pd.read_csv(dirPath)
     print("shape of data: ", data.shape)
     image_id_counts = data['image_id'].value_counts()
-
+    threshold = 24
 
     original = pd.read_csv('./Filter_sonicdrivein.csv')
     original['caption'] = original['caption'].str.lower()
@@ -32,7 +32,7 @@ def main(clip_model_type: str):
     original = original[original['gen_count'] >= 100]
     print('shape of 100up: ', original.shape, 'images:', len(original['image_id'].unique()))
     print('funny:', original[original['funny_score'] == 1].shape[0], 'else:', original[original['funny_score'] != 1].shape[0])
-    original_train = original[original['text_len'] >= 16]
+    original_train = original[original['text_len'] >= threshold]
     print('train_funny:' , original_train[original_train['funny_score'] == 1].shape[0], 'train_else:', original_train[original_train['funny_score'] != 1].shape[0])
     train = data.merge(original_train, on='image_id', how='inner', suffixes=('', '_'))
     print("shape of train: ", train.shape, 'images:', len(train['image_id'].unique()))
@@ -42,7 +42,7 @@ def main(clip_model_type: str):
         .head(200)
     )
     print("shape of train: ", train.shape, 'images:', len(train['image_id'].unique()))
-    original_test = original[original['text_len'] < 16]
+    original_test = original[original['text_len'] < threshold]
     print("shape of test: ", original_test.shape, 'images:', len(original_test['image_id'].unique()))
     print('funny:', original_test[original_test['funny_score'] == 1].shape[0], 'else:', original_test[original_test['funny_score'] != 1].shape[0])
     # get  top 200 datas on funnyscore
@@ -149,8 +149,8 @@ def main(clip_model_type: str):
         print('Done')
         print("%0d embeddings saved " % len(all_embeddings))
         return 0
-    out_path_train = f"./parse/100up_passlength16_sonicdrivein_{clip_model_name}_train.pkl"
-    out_path_test = f"./parse/100up_notpasslength16_sonicdrivein_{clip_model_name}_test.pkl"
+    out_path_train = f"./parse/100up_passlength{threshold}_sonicdrivein_{clip_model_name}_train.pkl"
+    out_path_test = f"./parse/100up_notpasslength{threshold}_sonicdrivein_{clip_model_name}_test.pkl"
     parse(out_path_train, train)
     parse(out_path_test, test)
     return 0
