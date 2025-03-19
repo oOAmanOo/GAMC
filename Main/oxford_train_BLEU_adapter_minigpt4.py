@@ -553,8 +553,7 @@ class ClipCaptionModel(nn.Module):
             embedding_emotion = self.falcon.model.embed_tokens(emotion)
             embedding_sentiment = self.falcon.model.embed_tokens(sentiment)
             embedding_humor = self.falcon.model.embed_tokens(humor)
-        empty_ESH = torch.zeros(embedding_emotion.shape[0], 1, embedding_emotion.shape[2], dtype=torch.bfloat16,
-                                device=embedding_text.device)
+        empty_ESH = torch.zeros(embedding_emotion.shape[0], 1, embedding_emotion.shape[2], dtype=torch.bfloat16,device=embedding_text.device)
         embedding_ESH = torch.cat((empty_ESH, embedding_emotion, embedding_sentiment, embedding_humor), dim=1)
         # emotion_proj = self.emotion_linear(emotion).unsqueeze(1)
         # sentiment_proj = self.sentiment_linear(sentiment).unsqueeze(1)
@@ -592,7 +591,7 @@ class ClipCaptionModel(nn.Module):
         return out
 
     def __init__(self, prefix_length: int, clip_length: Optional[int] = None, prefix_size: int = 512,
-                 num_layers: int = 8, mapping_type: MappingType = MappingType.MLP, ):
+                 num_layers: int = 8, mapping_type: MappingType = MappingType.MLP):
         super(ClipCaptionModel, self).__init__()
         self.prefix_length = prefix_length
         self.LoRaActivated = False
@@ -774,8 +773,9 @@ def train(trainData, testData, model: ClipCaptionModel, args,
     model.eval()
     trainDataset = OxfordDataset(trainData, prefix_length, normalize_prefix, model=model, batch_size=bleu_batch_size, bleu_threshold=bleu_threshold, dataFrom=args.dataFrom)
     testDataset = OxfordDataset(testData, prefix_length, normalize_prefix, model=model, batch_size=bleu_batch_size, bleu_threshold=bleu_threshold, dataFrom=args.dataFrom)
-    train_dataloader = DataLoader(trainDataset, batch_size=batch_size, shuffle=True, drop_last=True)
-    test_dataloader = DataLoader(testDataset, batch_size=batch_size, shuffle=True, drop_last=True)
+    print(len(trainDataset), len(testDataset))
+    train_dataloader = DataLoader(trainDataset, batch_size=batch_size, shuffle=True, num_workers=20, pin_memory=True, drop_last=True)
+    test_dataloader = DataLoader(testDataset, batch_size=batch_size, shuffle=True, num_workers=20, pin_memory=True, drop_last=True)
     epoch = 0
     while len(trainDataset) > batch_size and len(testDataset) > batch_size:
         model.train()
@@ -796,10 +796,11 @@ def train(trainData, testData, model: ClipCaptionModel, args,
             model.zero_grad()
             tokens, mask, prefix = tokens.to(device), mask.to(device), prefix.to(device, dtype=torch.bfloat16)
             emotion, sentiment, humor = emotion.to(device), sentiment.to(device), humor.to(device)
+            # emotion, sentiment, humor = emotion.to(device, dtype=torch.bfloat16), sentiment.to(device, dtype=torch.bfloat16), humor.to(device, dtype=torch.bfloat16)
             outputs = model(tokens, prefix, mask, emotion=emotion, sentiment=sentiment, humor=humor)
             logits = outputs.logits[:, trainDataset.prefix_length - 1: -1]
-            # loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens.flatten(), ignore_index=0)
-            loss = PCloss(logits, tokens)
+            loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens.flatten(), ignore_index=0)
+            # loss = PCloss(logits, tokens)
             trainLoss += loss.item()
             generated_tokens = torch.argmax(logits, dim=-1)
             bleu_score = sentence_bleu([tokens.flatten().tolist()], generated_tokens.flatten().tolist(),
@@ -828,19 +829,15 @@ def train(trainData, testData, model: ClipCaptionModel, args,
                 model.zero_grad()
                 tokens, mask, prefix = tokens.to(device), mask.to(device), prefix.to(device, dtype=torch.bfloat16)
                 emotion, sentiment, humor = emotion.to(device), sentiment.to(device), humor.to(device)
+                # emotion, sentiment, humor = emotion.to(device, dtype=torch.bfloat16), sentiment.to(device, dtype=torch.bfloat16), humor.to(device, dtype=torch.bfloat16)
 
                 outputs = model(tokens, prefix, mask, emotion=emotion, sentiment=sentiment, humor=humor)
                 logits = outputs.logits[:, testDataset.prefix_length - 1: -1]
-                # loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens.flatten(), ignore_index=0)
-                loss = PCloss(logits, tokens)
+                loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens.flatten(), ignore_index=0)
+                # loss = PCloss(logits, tokens)
                 testLoss += loss.item()
-
-                prefix_embeds = model.clip_project(prefix).view(-1, args.prefix_length, model.embedding_size)
-                outputs = model.falcon(inputs_embeds=prefix_embeds, attention_mask=mask)
-                logits = outputs.logits
                 generated_tokens = torch.argmax(logits, dim=-1)
-                bleu_score = sentence_bleu([tokens.flatten().tolist()], generated_tokens.flatten().tolist(),
-                                           weights=(1, 0, 0, 0))
+                bleu_score = sentence_bleu([tokens.flatten().tolist()], generated_tokens.flatten().tolist(), weights=(1, 0, 0, 0))
                 testBleu += bleu_score
 
                 progress.set_postfix({"loss": loss.item(), "bleu": bleu_score})
@@ -936,7 +933,7 @@ def main():
     parser.add_argument('--save_every', type=int, default=1)
     parser.add_argument('--prefix_length', type=int, default=64)
     parser.add_argument('--prefix_length_clip', type=int, default=64)
-    parser.add_argument('--bs', type=int, default=25)
+    parser.add_argument('--bs', type=int, default=20)
     parser.add_argument('--only_prefix', dest='only_prefix', action='store_true')
     parser.add_argument('--mapping_type', type=str, default='transformer', help='mlp/transformer')
     parser.add_argument('--num_layers', type=int, default=8)
@@ -953,10 +950,12 @@ def main():
     args.mapping_type = {'mlp': MappingType.MLP, 'transformer': MappingType.Transformer}[args.mapping_type]
     print(args.mapping_type)
     if args.only_prefix:
-        model = ClipCaptionPrefix(prefix_length, clip_length=prefix_length, prefix_size=prefix_dim, num_layers=args.num_layers, mapping_type=args.mapping_type)
+        model = ClipCaptionPrefix(prefix_length, clip_length=prefix_length, prefix_size=prefix_dim,
+                                  num_layers=args.num_layers, mapping_type=args.mapping_type)
         print("Train only prefix")
     else:
-        model = ClipCaptionModel(prefix_length, clip_length=prefix_length, prefix_size=prefix_dim, num_layers=args.num_layers, mapping_type=args.mapping_type)
+        model = ClipCaptionModel(prefix_length, clip_length=prefix_length, prefix_size=prefix_dim,
+                                 num_layers=args.num_layers, mapping_type=args.mapping_type)
         print("Train both prefix and GPT")
         sys.stdout.flush()
     device = torch.device('cuda:0')

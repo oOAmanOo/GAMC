@@ -643,7 +643,7 @@ class ClipCaptionModel(nn.Module):
         self.emotion_linear = nn.Linear(384, 768)
         self.sentiment_linear = nn.Linear(384, 768)
         self.humor_linear = nn.Linear(768, 768)
-        self.ESH_linear = nn.Linear(3,64)
+        self.ESH_linear = nn.Linear(3, 64)
 
 class ClipCaptionPrefix(ClipCaptionModel):
 
