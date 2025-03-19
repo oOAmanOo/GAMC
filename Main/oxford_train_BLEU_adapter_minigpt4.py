@@ -40,6 +40,7 @@ class OxfordDataset(torch.utils.data.Dataset):
         return len(self.captions_tokens)
 
     def pad_tokens(self, item: int):
+        print(self.max_seq_len)
         tokens = self.captions_tokens[item].cpu()
         padding = self.max_seq_len - tokens.shape[0]
         if padding > 0:
@@ -76,7 +77,7 @@ class OxfordDataset(torch.utils.data.Dataset):
 
         return emotion, sentiment, humor
 
-    def __getitem__(self, item: int) -> tuple[Tensor, Tensor, Any, int, Tensor, Tensor, Tensor]:
+    def __getitem__(self, item: int) -> tuple[Tensor, Tensor, Any, int, Tensor, Tensor, Tensor, Any]:
         tokens, mask = self.pad_tokens(item)
         if self.dataFrom == 'Oxford':
             prefix = torch.load('../../Oxford_HIC/ImageData/' + self.image_ids[item] + '.pt', weights_only=False)
@@ -89,6 +90,7 @@ class OxfordDataset(torch.utils.data.Dataset):
             prefix = prefix.float()
             prefix = prefix / prefix.norm(2, -1)
         funnyscore = self.funny_scores[item]
+        print(tokens.shape, mask.shape, prefix.shape, item, emotion.shape, sentiment.shape, humor.shape, funnyscore.shape)
         return tokens, mask, prefix, item, emotion, sentiment, humor, funnyscore
 
     def filter_data_by_bleu(self, model, batch_size=20, bleu_threshold=0.1, file_path=None):
@@ -168,19 +170,15 @@ class OxfordDataset(torch.utils.data.Dataset):
             torch.cuda.empty_cache()
             with open(f"{data_path[:-4]}_bleu_all.pkl", 'rb') as f:
                 self.captions_tokens, self.caption2embedding, self.max_seq_len = pickle.load(f)
-            all_len = torch.tensor([len(self.captions_tokens[i]) for i in range(len(self))]).float()
-            self.max_seq_len = min(int(all_len.mean() + all_len.std() * 10), int(all_len.max()))
         else:
             self.captions_tokens = []
             self.caption2embedding = []
-            max_seq_len = 0
+            max_seq_len = 64
             for caption in captions_raw:
                 self.captions_tokens.append(torch.tensor(self.tokenizer.encode(caption['caption'], max_length=64, truncation=True),dtype=torch.int64))
                 self.caption2embedding.append(caption["clip_embedding"])
                 max_seq_len = max(max_seq_len, self.captions_tokens[-1].shape[0])
             self.max_seq_len = max_seq_len
-            all_len = torch.tensor([len(self.captions_tokens[i]) for i in range(len(self))]).float()
-            self.max_seq_len = min(int(all_len.mean() + all_len.std() * 10), int(all_len.max()))
             with open(f"{self.data_path[:-4]}_bleu_all.pkl", 'wb') as f:
                 pickle.dump([self.captions_tokens, self.caption2embedding, self.max_seq_len], f)
         if dataFrom == 'Oxford':
@@ -817,8 +815,8 @@ def train(trainData, testData, model: ClipCaptionModel, args,
     trainDataset = OxfordDataset(trainData, prefix_length, normalize_prefix, model=model, batch_size=bleu_batch_size, bleu_threshold=bleu_threshold, dataFrom=args.dataFrom)
     testDataset = OxfordDataset(testData, prefix_length, normalize_prefix, model=model, batch_size=bleu_batch_size, bleu_threshold=bleu_threshold, dataFrom=args.dataFrom)
     print(len(trainDataset), len(testDataset))
-    train_dataloader = DataLoader(trainDataset, batch_size=batch_size, shuffle=True, num_workers=1, pin_memory=True, drop_last=True)
-    test_dataloader = DataLoader(testDataset, batch_size=batch_size, shuffle=True, num_workers=1, pin_memory=True, drop_last=True)
+    train_dataloader = DataLoader(trainDataset, batch_size=batch_size, shuffle=True, num_workers=20, pin_memory=True, drop_last=True)
+    test_dataloader = DataLoader(testDataset, batch_size=batch_size, shuffle=True, num_workers=20, pin_memory=True, drop_last=True)
     epoch = 0
     while len(trainDataset) > batch_size and len(testDataset) > batch_size:
         model.train()
@@ -969,10 +967,10 @@ def main():
     parser = argparse.ArgumentParser()
     # parser.add_argument('--trainData', default='../Data/Oxford_HIC/parse/oxford_lower_800up_only800_all_ViT-B_32_train.pkl')
     # parser.add_argument('--testData', default='../Data/Oxford_HIC/parse/oxford_lower_800up_only800_rest_300up_top300_ViT-B_32_test.pkl')
-    parser.add_argument('--trainData', default='../Data/Instagram/parse/100up_passlength_o_24_sonicdrivein_ViT-B_32_train.pkl')
-    parser.add_argument('--testData', default='../Data/Instagram/parse/100up_passlength_x_24_sonicdrivein_ViT-B_32_test.pkl')
+    parser.add_argument('--trainData', default='../Data/Instagram/parse/100up_passlength_o_16_sonicdrivein_ViT-B_32_train.pkl')
+    parser.add_argument('--testData', default='../Data/Instagram/parse/100up_passlength_x_16_sonicdrivein_ViT-B_32_test.pkl')
     parser.add_argument('--dataFrom', default='sonicdrivein')
-    parser.add_argument('--out_dir', default='20250320_100up_passlength24_sonicdrivein_base_0316_oxford_800_8_300_2_ESH_filter_cross_concat_combineLoss')
+    parser.add_argument('--out_dir', default='20250320_100up_passlength16_sonicdrivein_base_0316_oxford_800_8_300_2_ESH_filter_cross_concat_combineLoss')
     parser.add_argument('--prefix', default='checkpoint', help='prefix for saved filenames')
     parser.add_argument('--epochs', type=int, default=50)
     parser.add_argument('--save_every', type=int, default=1)
@@ -1011,7 +1009,7 @@ def main():
         for name, param in fullModel.named_parameters():
             newModel.state_dict()[name].copy_(param.data)
         for name, param in newModel.named_parameters():
-            if 'clip_project' in name:
+            if 'falcon' not in name:
                 if "lora_" not in name:  # 只讓 LoRA 參數訓練
                     if 'bias' in name or 'funnyscore' in name:
                         param.requires_grad = True
