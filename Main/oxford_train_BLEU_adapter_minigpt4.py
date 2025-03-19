@@ -543,10 +543,16 @@ class ClipCaptionModel(nn.Module):
         # embedding_text = self.gemma.model.embed_tokens(tokens)
         # embedding_text = self.gemma.base_model.model.model.embed_tokens(tokens)
         # embedding_text = self.gpt.transformer.wte(tokens)
-        embedding_text = self.falcon.base_model.model.model.embed_tokens(tokens)
-        embedding_emotion = self.falcon.base_model.model.model.embed_tokens(emotion)
-        embedding_sentiment = self.falcon.base_model.model.model.embed_tokens(sentiment)
-        embedding_humor = self.falcon.base_model.model.model.embed_tokens(humor)
+        if self.LoRaActivated:
+            embedding_text = self.falcon.base_model.model.model.embed_tokens(tokens)
+            embedding_emotion = self.falcon.base_model.model.model.embed_tokens(emotion)
+            embedding_sentiment = self.falcon.base_model.model.model.embed_tokens(sentiment)
+            embedding_humor = self.falcon.base_model.model.model.embed_tokens(humor)
+        else:
+            embedding_text = self.falcon.model.embed_tokens(tokens)
+            embedding_emotion = self.falcon.model.embed_tokens(emotion)
+            embedding_sentiment = self.falcon.model.embed_tokens(sentiment)
+            embedding_humor = self.falcon.model.embed_tokens(humor)
         empty_ESH = torch.zeros(embedding_emotion.shape[0], 1, embedding_emotion.shape[2], dtype=torch.bfloat16,
                                 device=embedding_text.device)
         embedding_ESH = torch.cat((empty_ESH, embedding_emotion, embedding_sentiment, embedding_humor), dim=1)
@@ -589,6 +595,7 @@ class ClipCaptionModel(nn.Module):
                  num_layers: int = 8, mapping_type: MappingType = MappingType.MLP, ):
         super(ClipCaptionModel, self).__init__()
         self.prefix_length = prefix_length
+        self.LoRaActivated = False
         # self.gemma = Gemma2ForCausalLM.from_pretrained("google/gemma-2-2b-it", device_map="auto", torch_dtype=torch.bfloat16)
         # self.embedding_size = 2304
         # LORAconfig = LoraConfig(
@@ -648,6 +655,7 @@ class ClipCaptionModel(nn.Module):
         self.ESH_linear = nn.Linear(3, 64)
 
     def activateLoRa(self):
+        self.LoRaActivated = True
         LORAconfig = LoraConfig(
             task_type=TaskType.CAUSAL_LM,
             target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
@@ -919,16 +927,16 @@ def main():
     parser = argparse.ArgumentParser()
     # parser.add_argument('--trainData', default='../Data/Oxford_HIC/parse/oxford_lower_800up_only800_all_ViT-B_32_train.pkl')
     # parser.add_argument('--testData', default='../Data/Oxford_HIC/parse/oxford_lower_800up_only800_rest_300up_top300_ViT-B_32_test.pkl')
-    parser.add_argument('--trainData', default='../Data/Instagram/parse/100up_passlength11_sonicdrivein_ViT-B_32_train.pkl')
-    parser.add_argument('--testData', default='../Data/Instagram/parse/100up_notpasslength11_sonicdrivein_ViT-B_32_test.pkl')
+    parser.add_argument('--trainData', default='../Data/Instagram/parse/100up_passlength24_sonicdrivein_ViT-B_32_train.pkl')
+    parser.add_argument('--testData', default='../Data/Instagram/parse/100up_notpasslength24_sonicdrivein_ViT-B_32_test.pkl')
     parser.add_argument('--dataFrom', default='sonicdrivein')
-    parser.add_argument('--out_dir', default='20250317_100up_passlength11_sonicdrivein_base_0316_oxford_800_8_300_2_ESH_filter_cross_concat')
+    parser.add_argument('--out_dir', default='20250319_100up_passlength24_sonicdrivein_base_0316_oxford_800_8_300_2_ESH_filter_cross_concat')
     parser.add_argument('--prefix', default='checkpoint', help='prefix for saved filenames')
     parser.add_argument('--epochs', type=int, default=50)
     parser.add_argument('--save_every', type=int, default=1)
     parser.add_argument('--prefix_length', type=int, default=64)
     parser.add_argument('--prefix_length_clip', type=int, default=64)
-    parser.add_argument('--bs', type=int, default=20)
+    parser.add_argument('--bs', type=int, default=25)
     parser.add_argument('--only_prefix', dest='only_prefix', action='store_true')
     parser.add_argument('--mapping_type', type=str, default='transformer', help='mlp/transformer')
     parser.add_argument('--num_layers', type=int, default=8)
@@ -979,7 +987,7 @@ def main():
     print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
     # Set requires_grad = True for LoRa and bias parameters only
 
-    model.activateLoRa()
+    # model.activateLoRa()
 
     model.eval()
     train(args.trainData, args.testData, model, args, output_dir=args.out_dir, output_prefix=args.prefix

@@ -144,7 +144,7 @@ class Predictor(object):
             print('--------- ground truth ---------')
             print(text)
             print('--------- generate_beam ---------')
-            if adapter:
+            if model.LoRaActivated:
                 embedding_emotion = model.falcon.base_model.model.model.embed_tokens(emotion[i].unsqueeze(0))
                 embedding_sentiment = model.falcon.base_model.model.model.embed_tokens(sentiment[i].unsqueeze(0))
                 embedding_humor = model.falcon.base_model.model.model.embed_tokens(humor[i].unsqueeze(0))
@@ -544,10 +544,16 @@ class ClipCaptionModel(nn.Module):
         # embedding_text = self.gemma.model.embed_tokens(tokens)
         # embedding_text = self.gemma.base_model.model.model.embed_tokens(tokens)
         # embedding_text = self.gpt.transformer.wte(tokens)
-        embedding_text = self.falcon.model.embed_tokens(tokens)
-        embedding_emotion = self.falcon.model.embed_tokens(emotion)
-        embedding_sentiment = self.falcon.model.embed_tokens(sentiment)
-        embedding_humor = self.falcon.model.embed_tokens(humor)
+        if self.LoRaActivated:
+            embedding_text = self.falcon.base_model.model.model.embed_tokens(tokens)
+            embedding_emotion = self.falcon.base_model.model.model.embed_tokens(emotion)
+            embedding_sentiment = self.falcon.base_model.model.model.embed_tokens(sentiment)
+            embedding_humor = self.falcon.base_model.model.model.embed_tokens(humor)
+        else:
+            embedding_text = self.falcon.model.embed_tokens(tokens)
+            embedding_emotion = self.falcon.model.embed_tokens(emotion)
+            embedding_sentiment = self.falcon.model.embed_tokens(sentiment)
+            embedding_humor = self.falcon.model.embed_tokens(humor)
         empty_ESH = torch.zeros(embedding_emotion.shape[0], 1, embedding_emotion.shape[2], dtype=torch.bfloat16,
                                 device=embedding_text.device)
         embedding_ESH = torch.cat((empty_ESH, embedding_emotion, embedding_sentiment, embedding_humor), dim=1)
@@ -590,6 +596,7 @@ class ClipCaptionModel(nn.Module):
                  num_layers: int = 8):
         super(ClipCaptionModel, self).__init__()
         self.prefix_length = prefix_length
+        self.LoRaActivated = False
         # self.gemma = Gemma2ForCausalLM.from_pretrained("google/gemma-2-2b-it", device_map="auto", torch_dtype=torch.bfloat16)
         # self.embedding_size = 2304
         # LORAconfig = LoraConfig(
@@ -647,7 +654,9 @@ class ClipCaptionModel(nn.Module):
         self.sentiment_linear = nn.Linear(384, 768)
         self.humor_linear = nn.Linear(768, 768)
         self.ESH_linear = nn.Linear(3,64)
+
     def activateLoRa(self):
+        self.LoRaActivated = True
         LORAconfig = LoraConfig(
             task_type=TaskType.CAUSAL_LM,
             target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
