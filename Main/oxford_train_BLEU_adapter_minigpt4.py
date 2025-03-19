@@ -24,12 +24,13 @@ from nltk.translate.bleu_score import sentence_bleu
 import gc
 import loralib as lora
 
+from Main.tools2 import funnyscore
+
 seed = 42
 random.seed(seed)
 np.random.seed(seed)
 torch.manual_seed(seed)
 torch.cuda.manual_seed_all(seed)
-
 
 class MappingType(Enum):
     MLP = 'mlp'
@@ -88,7 +89,8 @@ class OxfordDataset(torch.utils.data.Dataset):
         if self.normalize_prefix:
             prefix = prefix.float()
             prefix = prefix / prefix.norm(2, -1)
-        return tokens, mask, prefix, item, emotion, sentiment, humor
+        funnyscore = self.funny_scores[item]
+        return tokens, mask, prefix, item, emotion, sentiment, humor, funnyscore
 
     def filter_data_by_bleu(self, model, batch_size=20, bleu_threshold=0.1, file_path=None):
         """
@@ -158,6 +160,7 @@ class OxfordDataset(torch.utils.data.Dataset):
         sys.stdout.flush()
         self.prefixes = all_data["clip_embedding"]
         captions_raw = all_data["captions"]
+        self.funny_scores = all_data["funnyscore"]
         self.image_ids = [caption["image_id"] for caption in captions_raw]
         self.captions = [caption['caption'] for caption in captions_raw]
         if os.path.isfile(f"{data_path[:-4]}_bleu_all.pkl"):
@@ -173,9 +176,7 @@ class OxfordDataset(torch.utils.data.Dataset):
             self.caption2embedding = []
             max_seq_len = 0
             for caption in captions_raw:
-                self.captions_tokens.append(
-                    torch.tensor(self.tokenizer.encode(caption['caption'], max_length=64, truncation=True),
-                                 dtype=torch.int64))
+                self.captions_tokens.append(torch.tensor(self.tokenizer.encode(caption['caption'], max_length=64, truncation=True),dtype=torch.int64))
                 self.caption2embedding.append(caption["clip_embedding"])
                 max_seq_len = max(max_seq_len, self.captions_tokens[-1].shape[0])
             self.max_seq_len = max_seq_len
@@ -611,13 +612,21 @@ class ClipCaptionModel(nn.Module):
         # out = self.gpt(inputs_embeds=embedding_cat, labels=labels, attention_mask=mask)
         # out = self.gemma(inputs_embeds=embedding_cat, labels=labels, attention_mask=mask)
         out = self.falcon(inputs_embeds=embedding_cat, labels=labels, attention_mask=mask)
-        return out
+        if self.mode == 'lora':
+            fc = self.funnyscore_mlp1(embedding_cat).squeeze(-1)
+            fc = self.funnyscore_relu(fc)
+            fc = self.funnyscore_mlp2(fc).squeeze(-1)
+            fc = self.funnyscore_sigmoid(fc)
+            return out, fc
+        else:
+            return out
 
     def __init__(self, mode: str, prefix_length: int, clip_length: Optional[int] = None, prefix_size: int = 512,
                  num_layers: int = 8):
         super(ClipCaptionModel, self).__init__()
         self.prefix_length = prefix_length
         self.LoRaActivated = False
+        self.mode = mode
         # self.gemma = Gemma2ForCausalLM.from_pretrained("google/gemma-2-2b-it", device_map="auto", torch_dtype=torch.bfloat16)
         # self.embedding_size = 2304
         # LORAconfig = LoraConfig(
@@ -674,6 +683,11 @@ class ClipCaptionModel(nn.Module):
         self.sentiment_linear = nn.Linear(384, 768)
         self.humor_linear = nn.Linear(768, 768)
         self.ESH_linear = nn.Linear(3, 64)
+        if mode == 'lora':
+            self.funnyscore_mlp1 = nn.Linear(self.embedding_size, 1)
+            self.funnyscore_relu = nn.ReLU()
+            self.funnyscore_mlp2 = nn.Linear(128, 1)
+            self.funnyscore_sigmoid = nn.Sigmoid()
 
     def activateLoRa(self):
         self.LoRaActivated = True
@@ -770,6 +784,15 @@ def PCloss(logits: torch.Tensor, tokens: torch.Tensor, use_ce=True):
         loss = -torch.mean(bce_entropy+bce_inv_entropy)*loss_weight
         return loss
 
+def combine_loss(logits: torch.Tensor, tokens: torch.Tensor, funnyscore: torch.Tensor, output_fc: torch.Tensor):
+    output_loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens.flatten(), ignore_index=0)
+    # humor // 1 ==1 > 1 , else == 0> 0
+    funnyscore = funnyscore // 1
+    fc_loss = nnf.binary_cross_entropy(output_fc.flatten(), funnyscore.flatten())
+    loss = output_loss + fc_loss
+    print (f"output_loss: {output_loss}, fc_loss: {fc_loss}")
+    return loss
+
 def train(trainData, testData, model: ClipCaptionModel, args,
           lr: float = 2e-5, warmup_steps: int = 5000, output_dir: str = ".", output_prefix: str = "",
           bleu_batch_size=30, bleu_threshold=0.05):
@@ -796,8 +819,8 @@ def train(trainData, testData, model: ClipCaptionModel, args,
     trainDataset = OxfordDataset(trainData, prefix_length, normalize_prefix, model=model, batch_size=bleu_batch_size, bleu_threshold=bleu_threshold, dataFrom=args.dataFrom)
     testDataset = OxfordDataset(testData, prefix_length, normalize_prefix, model=model, batch_size=bleu_batch_size, bleu_threshold=bleu_threshold, dataFrom=args.dataFrom)
     print(len(trainDataset), len(testDataset))
-    train_dataloader = DataLoader(trainDataset, batch_size=batch_size, shuffle=True, num_workers=20, pin_memory=True, drop_last=True)
-    test_dataloader = DataLoader(testDataset, batch_size=batch_size, shuffle=True, num_workers=20, pin_memory=True, drop_last=True)
+    train_dataloader = DataLoader(trainDataset, batch_size=batch_size, shuffle=True, num_workers=1, pin_memory=True, drop_last=True)
+    test_dataloader = DataLoader(testDataset, batch_size=batch_size, shuffle=True, num_workers=1, pin_memory=True, drop_last=True)
     epoch = 0
     while len(trainDataset) > batch_size and len(testDataset) > batch_size:
         model.train()
@@ -814,14 +837,15 @@ def train(trainData, testData, model: ClipCaptionModel, args,
         testBleu = 0
         model.train()
         progress = tqdm(total=len(train_dataloader), desc=output_prefix)
-        for idx, (tokens, mask, prefix, original_indices, emotion, sentiment, humor) in enumerate(train_dataloader):
+        for idx, (tokens, mask, prefix, original_indices, emotion, sentiment, humor, funnyscore) in enumerate(train_dataloader):
             model.zero_grad()
             tokens, mask, prefix = tokens.to(device), mask.to(device), prefix.to(device, dtype=torch.bfloat16)
             emotion, sentiment, humor = emotion.to(device), sentiment.to(device), humor.to(device)
             # emotion, sentiment, humor = emotion.to(device, dtype=torch.bfloat16), sentiment.to(device, dtype=torch.bfloat16), humor.to(device, dtype=torch.bfloat16)
-            outputs = model(tokens, prefix, mask, emotion=emotion, sentiment=sentiment, humor=humor)
+            outputs, output_fc = model(tokens, prefix, mask, emotion=emotion, sentiment=sentiment, humor=humor)
             logits = outputs.logits[:, trainDataset.prefix_length - 1: -1]
-            loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens.flatten(), ignore_index=0)
+            loss = combine_loss(logits, tokens, funnyscore, output_fc)
+            # loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens.flatten(), ignore_index=0)
             # loss = PCloss(logits, tokens)
             trainLoss += loss.item()
             generated_tokens = torch.argmax(logits, dim=-1)
@@ -847,15 +871,16 @@ def train(trainData, testData, model: ClipCaptionModel, args,
         model.eval()
         with torch.no_grad():
             progress = tqdm(total=len(test_dataloader), desc=output_prefix)
-            for idx, (tokens, mask, prefix, original_indices, emotion, sentiment, humor) in enumerate(test_dataloader):
+            for idx, (tokens, mask, prefix, original_indices, emotion, sentiment, humor, funnyscore) in enumerate(test_dataloader):
                 model.zero_grad()
                 tokens, mask, prefix = tokens.to(device), mask.to(device), prefix.to(device, dtype=torch.bfloat16)
                 emotion, sentiment, humor = emotion.to(device), sentiment.to(device), humor.to(device)
                 # emotion, sentiment, humor = emotion.to(device, dtype=torch.bfloat16), sentiment.to(device, dtype=torch.bfloat16), humor.to(device, dtype=torch.bfloat16)
 
-                outputs = model(tokens, prefix, mask, emotion=emotion, sentiment=sentiment, humor=humor)
+                outputs, output_fc = model(tokens, prefix, mask, emotion=emotion, sentiment=sentiment, humor=humor)
                 logits = outputs.logits[:, testDataset.prefix_length - 1: -1]
-                loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens.flatten(), ignore_index=0)
+                loss = combine_loss(logits, tokens, funnyscore, output_fc)
+                # loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens.flatten(), ignore_index=0)
                 # loss = PCloss(logits, tokens)
                 testLoss += loss.item()
                 generated_tokens = torch.argmax(logits, dim=-1)
@@ -949,13 +974,13 @@ def main():
     parser.add_argument('--trainData', default='../Data/Instagram/parse/100up_passlength24_sonicdrivein_ViT-B_32_train.pkl')
     parser.add_argument('--testData', default='../Data/Instagram/parse/100up_notpasslength24_sonicdrivein_ViT-B_32_test.pkl')
     parser.add_argument('--dataFrom', default='sonicdrivein')
-    parser.add_argument('--out_dir', default='20250319_100up_passlength24_sonicdrivein_base_0316_oxford_800_8_300_2_ESH_filter_cross_concat')
+    parser.add_argument('--out_dir', default='20250320_100up_passlength24_sonicdrivein_base_0316_oxford_800_8_300_2_ESH_filter_cross_concat_combineLoss')
     parser.add_argument('--prefix', default='checkpoint', help='prefix for saved filenames')
     parser.add_argument('--epochs', type=int, default=50)
     parser.add_argument('--save_every', type=int, default=1)
     parser.add_argument('--prefix_length', type=int, default=64)
     parser.add_argument('--prefix_length_clip', type=int, default=64)
-    parser.add_argument('--bs', type=int, default=20)
+    parser.add_argument('--bs', type=int, default=10)
     parser.add_argument('--only_prefix', dest='only_prefix', action='store_true')
     parser.add_argument('--mapping_type', type=str, default='transformer', help='mlp/transformer')
     parser.add_argument('--num_layers', type=int, default=8)
@@ -990,7 +1015,7 @@ def main():
         for name, param in newModel.named_parameters():
             if 'clip_project' in name:
                 if "lora_" not in name:  # 只讓 LoRA 參數訓練
-                    if 'bias' in name:
+                    if 'bias' in name or 'funnyscore' in name:
                         param.requires_grad = True
                     else:
                         param.requires_grad = False

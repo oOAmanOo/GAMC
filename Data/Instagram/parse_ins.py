@@ -10,6 +10,7 @@ import argparse
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
+
 def main(clip_model_type: str):
     device = torch.device('cuda:0')
     clip_model_name = clip_model_type.replace('/', '_')
@@ -129,10 +130,12 @@ def main(clip_model_type: str):
     def parse(out_path, data):
         all_embeddings = []
         all_captions = []
+        all_funnyscore = []
         for i in tqdm(range(len(data))):
             d = data.iloc[i]
             d = d.to_dict()
             img_id = d["image_id"]
+            funnyscore = d["funny_score"]
             filename = f"./sonicdrivein_img/{img_id}.jpg"
             image = io.imread(filename)
             image = preprocess(Image.fromarray(image)).unsqueeze(0).to(device)
@@ -141,16 +144,17 @@ def main(clip_model_type: str):
             d["clip_embedding"] = i
             all_embeddings.append(prefix)
             all_captions.append(d)
+            all_funnyscore.append(funnyscore)
             if (i + 1) % 10000 == 0:
                 with open(out_path, 'wb') as f:
-                    pickle.dump({"clip_embedding": torch.cat(all_embeddings, dim=0), "captions": all_captions}, f)
+                    pickle.dump({"clip_embedding": torch.cat(all_embeddings, dim=0), "captions": all_captions, "funnyscore": all_funnyscore}, f)
         with open(out_path, 'wb') as f:
-            pickle.dump({"clip_embedding": torch.cat(all_embeddings, dim=0), "captions": all_captions}, f)
+            pickle.dump({"clip_embedding": torch.cat(all_embeddings, dim=0), "captions": all_captions, "funnyscore": all_funnyscore}, f)
         print('Done')
         print("%0d embeddings saved " % len(all_embeddings))
         return 0
-    out_path_train = f"./parse/100up_passlength{threshold}_sonicdrivein_{clip_model_name}_train.pkl"
-    out_path_test = f"./parse/100up_notpasslength{threshold}_sonicdrivein_{clip_model_name}_test.pkl"
+    out_path_train = f"./parse/100up_passlength_o_{threshold}_sonicdrivein_{clip_model_name}_train.pkl"
+    out_path_test = f"./parse/100up_passlength_x_{threshold}_sonicdrivein_{clip_model_name}_test.pkl"
     parse(out_path_train, train)
     parse(out_path_test, test)
     return 0
