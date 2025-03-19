@@ -24,7 +24,6 @@ from nltk.translate.bleu_score import sentence_bleu
 import gc
 import loralib as lora
 
-from Main.tools2 import funnyscore
 
 seed = 42
 random.seed(seed)
@@ -789,8 +788,7 @@ def combine_loss(logits: torch.Tensor, tokens: torch.Tensor, funnyscore: torch.T
     # humor // 1 ==1 > 1 , else == 0> 0
     funnyscore = funnyscore // 1
     fc_loss = nnf.binary_cross_entropy(output_fc.flatten(), funnyscore.flatten())
-    loss = output_loss + fc_loss
-    print (f"output_loss: {output_loss}, fc_loss: {fc_loss}")
+    loss = output_loss + fc_loss * 10
     return loss
 
 def train(trainData, testData, model: ClipCaptionModel, args,
@@ -844,7 +842,7 @@ def train(trainData, testData, model: ClipCaptionModel, args,
             # emotion, sentiment, humor = emotion.to(device, dtype=torch.bfloat16), sentiment.to(device, dtype=torch.bfloat16), humor.to(device, dtype=torch.bfloat16)
             outputs, output_fc = model(tokens, prefix, mask, emotion=emotion, sentiment=sentiment, humor=humor)
             logits = outputs.logits[:, trainDataset.prefix_length - 1: -1]
-            loss = combine_loss(logits, tokens, funnyscore, output_fc)
+            loss = combine_loss(logits, tokens, funnyscore.to(device, dtype=torch.bfloat16), output_fc)
             # loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens.flatten(), ignore_index=0)
             # loss = PCloss(logits, tokens)
             trainLoss += loss.item()
@@ -879,7 +877,7 @@ def train(trainData, testData, model: ClipCaptionModel, args,
 
                 outputs, output_fc = model(tokens, prefix, mask, emotion=emotion, sentiment=sentiment, humor=humor)
                 logits = outputs.logits[:, testDataset.prefix_length - 1: -1]
-                loss = combine_loss(logits, tokens, funnyscore, output_fc)
+                loss = combine_loss(logits, tokens, funnyscore.to(device, dtype=torch.bfloat16), output_fc)
                 # loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens.flatten(), ignore_index=0)
                 # loss = PCloss(logits, tokens)
                 testLoss += loss.item()
@@ -971,8 +969,8 @@ def main():
     parser = argparse.ArgumentParser()
     # parser.add_argument('--trainData', default='../Data/Oxford_HIC/parse/oxford_lower_800up_only800_all_ViT-B_32_train.pkl')
     # parser.add_argument('--testData', default='../Data/Oxford_HIC/parse/oxford_lower_800up_only800_rest_300up_top300_ViT-B_32_test.pkl')
-    parser.add_argument('--trainData', default='../Data/Instagram/parse/100up_passlength24_sonicdrivein_ViT-B_32_train.pkl')
-    parser.add_argument('--testData', default='../Data/Instagram/parse/100up_notpasslength24_sonicdrivein_ViT-B_32_test.pkl')
+    parser.add_argument('--trainData', default='../Data/Instagram/parse/100up_passlength_o_24_sonicdrivein_ViT-B_32_train.pkl')
+    parser.add_argument('--testData', default='../Data/Instagram/parse/100up_passlength_x_24_sonicdrivein_ViT-B_32_test.pkl')
     parser.add_argument('--dataFrom', default='sonicdrivein')
     parser.add_argument('--out_dir', default='20250320_100up_passlength24_sonicdrivein_base_0316_oxford_800_8_300_2_ESH_filter_cross_concat_combineLoss')
     parser.add_argument('--prefix', default='checkpoint', help='prefix for saved filenames')
