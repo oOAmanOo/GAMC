@@ -30,6 +30,7 @@ import gc
 import loralib as lora
 from parrot.filters import Fluency
 from scipy.special import softmax
+import clip
 
 N = type(None)
 V = np.array
@@ -92,6 +93,9 @@ class Predictor(object):
         self.test_image_id_list = test_image_id_list
         self.fluency_score  = Fluency()
         self.fluency_score.fluency_model = self.fluency_score.fluency_model.to(self.device)
+        self.clip, self.clip_preprocess = clip.load("ViT-B/32")
+        self.clip.to(device)
+        self.clip.eval()
 
     def fitCounter(self, data_mode, caption, dataIndex):
         bleu1_sum = 0
@@ -140,6 +144,23 @@ class Predictor(object):
         scores = softmax(scores)
         fluency_score = scores[1]  # LABEL_0 = Bad Fluency, LABEL_1 = Good Fluency
         return fluency_score
+
+    def diversity_score(self, captionList):
+        # tokenize  and extract text features
+        text_tokens = clip.tokenize(captionList).to(device)
+        with torch.no_grad():
+            text_features = model.encode_text(text_tokens).float()
+        text_features /= text_features.norm(dim=-1, keepdim=True)
+        text_features = text_features.cpu().numpy()
+        # 計算所有 pair 的 cosine similarity
+        cosine_sim = np.dot(text_features, text_features.T)  # p_m^T * p_n
+        norms = np.linalg.norm(text_features, axis=1, keepdims=True)
+        cosine_sim /= (norms @ norms.T)  # 除以 |pm||pn|
+        # 找出每個向量最相似的另一個向量（n ≠ m）
+        max_similarities = np.array([max(row[np.arange(len(row)) != i]) for i, row in enumerate(cosine_sim)])
+        # 計算 diversity score
+        diversity = np.sqrt(1 - np.mean(max_similarities) ** 2)
+        return diversity
 
     def predict(self, data_mode,tokens, masks, prefixs, text_gt, model, emotion, sentiment, humor, funnyscore):
         self.embedding_size = model.embedding_size
@@ -302,6 +323,7 @@ class Predictor(object):
             generate_beam_df['fitCount'] = self.generate_beam_fitCount
             generate_beam_df['gtNum'] = self.generate_beam_gtNum
             generate_beam_df['fluency'] = self.generate_beam_fluency
+            generate_beam_df['diversity'] = self.diversity_score(self.generate_beam_text)
             generate_beam_df['bleu1'] = self.generate_beam_bleu1
             generate_beam_df['bleu2'] = self.generate_beam_bleu2
             generate_beam_df['bleu3'] = self.generate_beam_bleu3
@@ -326,6 +348,7 @@ class Predictor(object):
             generate2_df['fitCount'] = self.generate2_fitCount
             generate2_df['gtNum'] = self.generate2_gtNum
             generate2_df['fluency'] = self.generate2_fluency
+            generate2_df['diversity'] = self.diversity_score(self.generate2_text)
             generate2_df['bleu1'] = self.generate2_bleu1
             generate2_df['bleu2'] = self.generate2_bleu2
             generate2_df['bleu3'] = self.generate2_bleu3
@@ -353,6 +376,7 @@ class Predictor(object):
             train_df['fitCount'] = self.train_fitCount
             train_df['gtNum'] = self.train_gtNum
             train_df['fluency'] = self.train_fluency
+            train_df['diversity'] = self.diversity_score(self.train_text)
             train_df['bleu1'] = self.train_bleu1
             train_df['bleu2'] = self.train_bleu2
             train_df['bleu3'] = self.train_bleu3
