@@ -28,7 +28,10 @@ from peft import LoraConfig, TaskType, get_peft_model
 from nltk.translate.bleu_score import sentence_bleu
 import gc
 import loralib as lora
-from parrot.filters import Fluency
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from Citations.Parrot_Paraphraser.parrot.filters import Fluency
 from scipy.special import softmax
 import clip
 
@@ -91,11 +94,14 @@ class Predictor(object):
         self.test_caption = test_caption
         self.train_image_id_list = train_image_id_list
         self.test_image_id_list = test_image_id_list
+        print("parrot model loading")
         self.fluency_score  = Fluency()
         self.fluency_score.fluency_model = self.fluency_score.fluency_model.to(self.device)
+        print("parrot model loaded")
         self.clip, self.clip_preprocess = clip.load("ViT-B/32")
         self.clip.to(device)
         self.clip.eval()
+        print("clip model loaded")
 
     def fitCounter(self, data_mode, caption, dataIndex):
         bleu1_sum = 0
@@ -149,7 +155,7 @@ class Predictor(object):
         # tokenize  and extract text features
         text_tokens = clip.tokenize(captionList).to(device)
         with torch.no_grad():
-            text_features = model.encode_text(text_tokens).float()
+            text_features = self.clip.encode_text(text_tokens).float()
         text_features /= text_features.norm(dim=-1, keepdim=True)
         text_features = text_features.cpu().numpy()
         # 計算所有 pair 的 cosine similarity
@@ -228,8 +234,7 @@ class Predictor(object):
             else:
                 self.generate_beam_output = caption_token['input_ids']
             self.generate_beam_text.append(caption)
-            fluency = self.parrot_fluency(caption)
-            self.generate_beam_fluency.append(fluency)
+            self.generate_beam_fluency.append(self.parrot_fluency(caption))
             fitCount, gtNum, bleu1, bleu2, bleu3, bleu4 = self.fitCounter(data_mode, caption, i)
             self.generate_beam_fitCount.append(fitCount)
             self.generate_beam_gtNum.append(gtNum)
@@ -246,8 +251,7 @@ class Predictor(object):
             else:
                 self.generate2_output = caption_token['input_ids']
             self.generate2_text.append(caption)
-            fluency = self.parrot_fluency(caption)
-            self.generate2_fluency.append(fluency)
+            self.generate2_fluency.append(self.parrot_fluency(caption))
             fitCount, gtNum, bleu1, bleu2, bleu3, bleu4 = self.fitCounter(data_mode, caption, i)
             self.generate2_fitCount.append(fitCount)
             self.generate2_gtNum.append(gtNum)
@@ -275,6 +279,8 @@ class Predictor(object):
                 output_fc = model.funnyscore_mlp2(output_fc).squeeze(-1)
                 output_fc = model.funnyscore_sigmoid(output_fc)
                 capLoss, fcLoss, loss = combine_loss(logits, tokens[i], funnyscore[i].unsqueeze(0).to(device, dtype=torch.bfloat16), output_fc)
+                self.train_caption_loss.append(capLoss.item())
+                self.train_fc_loss.append(fcLoss.item())
             else:
                 loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens[i].flatten(), ignore_index=0)
                 # loss = PCloss(logits, tokens[i].unsqueeze(0))
@@ -289,10 +295,7 @@ class Predictor(object):
                 self.train_output = caption_token
             self.train_text.append(caption)
             self.train_loss.append(loss.item())
-            self.train_caption_loss.append(capLoss.item())
-            self.train_fc_loss.append(fcLoss.item())
-            fluency = self.parrot_fluency(caption)
-            self.generate2_fluency.append(fluency)
+            self.train_fluency.append(self.parrot_fluency(caption))
             fitCount, gtNum, bleu1, bleu2, bleu3, bleu4 = self.fitCounter(data_mode, caption, i)
             self.train_fitCount.append(fitCount)
             self.train_gtNum.append(gtNum)
@@ -370,8 +373,9 @@ class Predictor(object):
             train_df = pd.DataFrame(self.train_output.cpu().detach(), columns=[f"{i}" for i in range(0, 489)])
             train_df = pd.concat([test, train_df], axis=1)
             train_df['loss'] = self.train_loss
-            train_df['caption_loss'] = self.train_caption_loss
-            train_df['fc_loss'] = self.train_fc_loss
+            if model.mode == 'lora' or model.LoRaActivated:
+                train_df['caption_loss'] = self.train_caption_loss
+                train_df['fc_loss'] = self.train_fc_loss
             train_df['text'] = self.train_text
             train_df['fitCount'] = self.train_fitCount
             train_df['gtNum'] = self.train_gtNum
@@ -1219,8 +1223,8 @@ class ClipCocoDataset(Dataset):
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # trainData = '../Data/Oxford_HIC/parse/oxford_800_8_300_2_ViT-B_32_train.pkl'
 # testData = '../Data/Oxford_HIC/parse/oxford_800_8_300_2_ViT-B_32_test.pkl'
-trainData = '../Data/Instagram/parse/100up_passlength_o_16_sonicdrivein_ViT-B_32_train.pkl'
-testData = '../Data/Instagram/parse/100up_passlength_x_16_sonicdrivein_ViT-B_32_test.pkl'
+trainData = '../Data/Instagram/parse/100up_passlength_o_10_sonicdrivein_ViT-B_32_train.pkl'
+testData = '../Data/Instagram/parse/100up_passlength_x_10_sonicdrivein_ViT-B_32_test.pkl'
 prefix_length = 64
 normalize_prefix = False
 train_dataform = "sonicdrivein"
@@ -1514,7 +1518,7 @@ if test_dataform:
     print(test_emotion.shape, test_sentiment.shape, test_humor.shape, test_funnyscore.shape)
 
 model = ClipCaptionModel(mode='nn', prefix_length=prefix_length, clip_length=prefix_length, prefix_size=512, num_layers=8)
-adapter = True
+adapter = False
 save_file = '20250316_oxford_800_8_300_2_ESH_filter_cross_concat'
 i = 13
 if adapter :
@@ -1552,7 +1556,7 @@ if adapter :
 
     # model.activateLoRa()
 
-save_file = '20250320_100up_passlength16_sonicdrivein_base_0316_oxford_800_8_300_2_ESH_filter_cross_concat_combineLoss'
+save_file = '20250320_100up_passlength10_sonicdrivein_ESH_filter_cross_concat'
 for i in range(20):
     if os.path.exists(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'):
         model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'))
@@ -1569,7 +1573,10 @@ for i in range(20):
     if os.path.exists(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'):
         # df = pd.read_csv(f'./Model/{save_file}/{save_file}_test_{i + 1:03d}.csv')
         df = pd.read_csv(f'./Model/{save_file}/test_{i + 1:03d}.csv')
-        textAndLoss = df[['text', 'loss', 'caption_loss', 'fc_loss', 'fitCount', 'gtNum', 'fluency', 'bleu1', 'bleu2', 'bleu3', 'bleu4']]
+        if adapter:
+            textAndLoss = df[['text', 'loss', 'caption_loss', 'fc_loss', 'fitCount', 'gtNum', 'fluency', 'diversity', 'bleu1', 'bleu2', 'bleu3', 'bleu4']]
+        else:
+            textAndLoss = df[['text', 'loss', 'fitCount', 'gtNum', 'fluency', 'diversity', 'bleu1', 'bleu2', 'bleu3', 'bleu4']]
         if AllCaption.empty:
             AllCaption = df[['Name', 'image_id']]
         AllCaption = pd.concat([AllCaption, textAndLoss], axis=1)
