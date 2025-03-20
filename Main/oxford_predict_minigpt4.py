@@ -28,6 +28,8 @@ from peft import LoraConfig, TaskType, get_peft_model
 from nltk.translate.bleu_score import sentence_bleu
 import gc
 import loralib as lora
+from parrot.filters import Fluency
+from scipy.special import softmax
 
 N = type(None)
 V = np.array
@@ -51,6 +53,7 @@ CPU = torch.device("cpu")
 
 class Predictor(object):
     def __init__(self, prefix_length, cp_num, train_caption, test_caption, train_image_id_list, test_image_id_list):
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.generate_beam_output = None
         self.generate2_output = None
         self.train_output = None
@@ -67,21 +70,28 @@ class Predictor(object):
         self.generate_beam_bleu2 = []
         self.generate_beam_bleu3 = []
         self.generate_beam_bleu4 = []
+        self.generate_beam_fluency = []
         self.generate2_bleu1 = []
         self.generate2_bleu2 = []
         self.generate2_bleu3 = []
         self.generate2_bleu4 = []
+        self.generate2_fluency = []
         self.train_bleu1 = []
         self.train_bleu2 = []
         self.train_bleu3 = []
         self.train_bleu4 = []
+        self.train_fluency = []
         self.train_loss = []
+        self.train_caption_loss = []
+        self.train_fc_loss = []
         self.prefix_length = prefix_length
         self.cp_num = cp_num
         self.train_caption = train_caption
         self.test_caption = test_caption
         self.train_image_id_list = train_image_id_list
         self.test_image_id_list = test_image_id_list
+        self.fluency_score  = Fluency()
+        self.fluency_score.fluency_model = self.fluency_score.fluency_model.to(self.device)
 
     def fitCounter(self, data_mode, caption, dataIndex):
         bleu1_sum = 0
@@ -122,7 +132,16 @@ class Predictor(object):
         bleu4_sum /= gtNum
         return fitCount, gtNum, bleu1_sum, bleu2_sum, bleu3_sum, bleu4_sum
 
-    def predict(self, data_mode,tokens, masks, prefixs, text_gt, model, emotion, sentiment, humor):
+    def parrot_fluency(self, caption):
+        input_ids = self.fluency_score.fluency_tokenizer("Sentence: " + caption, return_tensors='pt', truncation=True)
+        input_ids = input_ids.to(device)
+        prediction = self.fluency_score.fluency_model(**input_ids)
+        scores = prediction[0][0].detach().cpu().numpy()
+        scores = softmax(scores)
+        fluency_score = scores[1]  # LABEL_0 = Bad Fluency, LABEL_1 = Good Fluency
+        return fluency_score
+
+    def predict(self, data_mode,tokens, masks, prefixs, text_gt, model, emotion, sentiment, humor, funnyscore):
         self.embedding_size = model.embedding_size
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         tokens, masks, prefixs = tokens.to(device), masks.to(device), prefixs.to(device, dtype=torch.bfloat16)
@@ -188,6 +207,8 @@ class Predictor(object):
             else:
                 self.generate_beam_output = caption_token['input_ids']
             self.generate_beam_text.append(caption)
+            fluency = self.parrot_fluency(caption)
+            self.generate_beam_fluency.append(fluency)
             fitCount, gtNum, bleu1, bleu2, bleu3, bleu4 = self.fitCounter(data_mode, caption, i)
             self.generate_beam_fitCount.append(fitCount)
             self.generate_beam_gtNum.append(gtNum)
@@ -204,6 +225,8 @@ class Predictor(object):
             else:
                 self.generate2_output = caption_token['input_ids']
             self.generate2_text.append(caption)
+            fluency = self.parrot_fluency(caption)
+            self.generate2_fluency.append(fluency)
             fitCount, gtNum, bleu1, bleu2, bleu3, bleu4 = self.fitCounter(data_mode, caption, i)
             self.generate2_fitCount.append(fitCount)
             self.generate2_gtNum.append(gtNum)
@@ -224,10 +247,16 @@ class Predictor(object):
             # out = model.gemma(inputs_embeds=embedding_cat, attention_mask=masks[i].unsqueeze(0))
             # out = model.gpt(inputs_embeds=embedding_cat, attention_mask=masks[i].unsqueeze(0))
             out = model.falcon(inputs_embeds=embedding_cat, attention_mask=masks[i].unsqueeze(0))
-
             logits = out.logits[:, self.prefix_length-1: -1]
-            loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens[i].flatten(), ignore_index=0)
-            # loss = PCloss(logits, tokens[i].unsqueeze(0))
+            if model.mode == 'lora' or model.LoRaActivated:
+                output_fc = model.funnyscore_mlp1(embedding_cat).squeeze(-1)
+                output_fc = model.funnyscore_relu(output_fc)
+                output_fc = model.funnyscore_mlp2(output_fc).squeeze(-1)
+                output_fc = model.funnyscore_sigmoid(output_fc)
+                capLoss, fcLoss, loss = combine_loss(logits, tokens[i], funnyscore[i].unsqueeze(0).to(device, dtype=torch.bfloat16), output_fc)
+            else:
+                loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens[i].flatten(), ignore_index=0)
+                # loss = PCloss(logits, tokens[i].unsqueeze(0))
             print(loss)
             caption_token = logits.argmax(-1)[0].cpu()
             caption = tokenizer.decode(caption_token, skip_special_tokens=True)
@@ -239,6 +268,10 @@ class Predictor(object):
                 self.train_output = caption_token
             self.train_text.append(caption)
             self.train_loss.append(loss.item())
+            self.train_caption_loss.append(capLoss.item())
+            self.train_fc_loss.append(fcLoss.item())
+            fluency = self.parrot_fluency(caption)
+            self.generate2_fluency.append(fluency)
             fitCount, gtNum, bleu1, bleu2, bleu3, bleu4 = self.fitCounter(data_mode, caption, i)
             self.train_fitCount.append(fitCount)
             self.train_gtNum.append(gtNum)
@@ -268,6 +301,7 @@ class Predictor(object):
             generate_beam_df['text'] = self.generate_beam_text
             generate_beam_df['fitCount'] = self.generate_beam_fitCount
             generate_beam_df['gtNum'] = self.generate_beam_gtNum
+            generate_beam_df['fluency'] = self.generate_beam_fluency
             generate_beam_df['bleu1'] = self.generate_beam_bleu1
             generate_beam_df['bleu2'] = self.generate_beam_bleu2
             generate_beam_df['bleu3'] = self.generate_beam_bleu3
@@ -291,6 +325,7 @@ class Predictor(object):
             generate2_df['text'] = self.generate2_text
             generate2_df['fitCount'] = self.generate2_fitCount
             generate2_df['gtNum'] = self.generate2_gtNum
+            generate2_df['fluency'] = self.generate2_fluency
             generate2_df['bleu1'] = self.generate2_bleu1
             generate2_df['bleu2'] = self.generate2_bleu2
             generate2_df['bleu3'] = self.generate2_bleu3
@@ -312,9 +347,12 @@ class Predictor(object):
             train_df = pd.DataFrame(self.train_output.cpu().detach(), columns=[f"{i}" for i in range(0, 489)])
             train_df = pd.concat([test, train_df], axis=1)
             train_df['loss'] = self.train_loss
+            train_df['caption_loss'] = self.train_caption_loss
+            train_df['fc_loss'] = self.train_fc_loss
             train_df['text'] = self.train_text
             train_df['fitCount'] = self.train_fitCount
             train_df['gtNum'] = self.train_gtNum
+            train_df['fluency'] = self.train_fluency
             train_df['bleu1'] = self.train_bleu1
             train_df['bleu2'] = self.train_bleu2
             train_df['bleu3'] = self.train_bleu3
@@ -341,7 +379,8 @@ class Predictor(object):
             print(final.columns)
             # final.to_csv(f'./Model/{save_file}/test_{self.cp_num:03d}.csv', float_format='%.15f', index=False)
 
-            final.to_csv(f'./Model/{save_file}/{save_file}_test_{self.cp_num:03d}.csv', float_format='%.15f', index=False)
+            # final.to_csv(f'./Model/{save_file}/{save_file}_test_{self.cp_num:03d}.csv', float_format='%.15f', index=False)
+            final.to_csv(f'./Model/{save_file}/test_{self.cp_num:03d}.csv', float_format='%.15f', index=False)
             # final.to_csv(f'./Model/{save_file}/Generate_mcdonalds_all.csv', index=False)
 
 class MLP(nn.Module):
@@ -605,13 +644,21 @@ class ClipCaptionModel(nn.Module):
         # out = self.gpt(inputs_embeds=embedding_cat, labels=labels, attention_mask=mask)
         # out = self.gemma(inputs_embeds=embedding_cat, labels=labels, attention_mask=mask)
         out = self.falcon(inputs_embeds=embedding_cat, labels=labels, attention_mask=mask)
-        return out
+        if self.mode == 'lora':
+            fc = self.funnyscore_mlp1(embedding_cat).squeeze(-1)
+            fc = self.funnyscore_relu(fc)
+            fc = self.funnyscore_mlp2(fc).squeeze(-1)
+            fc = self.funnyscore_sigmoid(fc)
+            return out, fc
+        else:
+            return out
 
     def __init__(self, mode: str, prefix_length: int, clip_length: Optional[int] = None, prefix_size: int = 512,
                  num_layers: int = 8):
         super(ClipCaptionModel, self).__init__()
         self.prefix_length = prefix_length
         self.LoRaActivated = False
+        self.mode = mode
         # self.gemma = Gemma2ForCausalLM.from_pretrained("google/gemma-2-2b-it", device_map="auto", torch_dtype=torch.bfloat16)
         # self.embedding_size = 2304
         # LORAconfig = LoraConfig(
@@ -668,9 +715,19 @@ class ClipCaptionModel(nn.Module):
         self.sentiment_linear = nn.Linear(384, 768)
         self.humor_linear = nn.Linear(768, 768)
         self.ESH_linear = nn.Linear(3, 64)
+        if mode == 'lora':
+            self.funnyscore_mlp1 = nn.Linear(self.embedding_size, 1)
+            self.funnyscore_relu = nn.ReLU()
+            self.funnyscore_mlp2 = nn.Linear(128, 1)
+            self.funnyscore_sigmoid = nn.Sigmoid()
 
     def activateLoRa(self):
         self.LoRaActivated = True
+        self.funnyscore_mlp1 = nn.Linear(self.embedding_size, 1)
+        self.funnyscore_relu = nn.ReLU()
+        self.funnyscore_mlp2 = nn.Linear(128, 1)
+        self.funnyscore_sigmoid = nn.Sigmoid()
+
         LORAconfig = LoraConfig(
             task_type=TaskType.CAUSAL_LM,
             target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
@@ -735,6 +792,14 @@ def PCloss(logits: torch.Tensor, tokens: torch.Tensor, use_ce=True):
         bce_inv_entropy = (1 - label) * torch.log(1 - prob + EPSILON) * fp_weights
         loss = -torch.mean(bce_entropy+bce_inv_entropy)*loss_weight
         return loss
+
+def combine_loss(logits: torch.Tensor, tokens: torch.Tensor, funnyscore: torch.Tensor, output_fc: torch.Tensor):
+    output_loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens.flatten(), ignore_index=0)
+    # humor // 1 ==1 > 1 , else == 0> 0
+    funnyscore = funnyscore // 1
+    fc_loss = nnf.binary_cross_entropy(output_fc.flatten(), funnyscore.flatten())
+    loss = output_loss + fc_loss * 10
+    return output_loss, fc_loss, loss
 
 def generate_beam(model, tokenizer, beam_size: int = 5, prompt=None, embed=None, entry_length=74, temperature=1.0,
                   stop_token: str = ".", ):
@@ -920,7 +985,7 @@ class OxfordDataset(torch.utils.data.Dataset):
 
         return emotion, sentiment, humor
 
-    def __getitem__(self, item: int) -> tuple[Tensor, Tensor, Any, int, Tensor, Tensor, Tensor]:
+    def __getitem__(self, item: int) -> tuple[Tensor, Tensor, Any, int, Tensor, Tensor, Tensor, Any]:
         tokens, mask = self.pad_tokens(item)
         if self.dataFrom == 'Oxford':
             prefix = torch.load('../../Oxford_HIC/ImageData/' + self.image_ids[item] + '.pt', weights_only=False)
@@ -932,7 +997,8 @@ class OxfordDataset(torch.utils.data.Dataset):
         if self.normalize_prefix:
             prefix = prefix.float()
             prefix = prefix / prefix.norm(2, -1)
-        return tokens, mask, prefix, item, emotion, sentiment, humor
+        funnyscore = self.funny_scores[item]
+        return tokens, mask, prefix, item, emotion, sentiment, humor, funnyscore
 
     def filter_data_by_bleu(self, model, batch_size=20, bleu_threshold=0.1, file_path=None):
         """
@@ -1001,6 +1067,7 @@ class OxfordDataset(torch.utils.data.Dataset):
         sys.stdout.flush()
         self.prefixes = all_data["clip_embedding"]
         captions_raw = all_data["captions"]
+        self.funny_scores = all_data["funnyscore"]
         self.image_ids = [caption["image_id"] for caption in captions_raw]
         self.captions = [caption['caption'] for caption in captions_raw]
         if os.path.isfile(f"{data_path[:-4]}_bleu_all.pkl"):
@@ -1009,21 +1076,15 @@ class OxfordDataset(torch.utils.data.Dataset):
             torch.cuda.empty_cache()
             with open(f"{data_path[:-4]}_bleu_all.pkl", 'rb') as f:
                 self.captions_tokens, self.caption2embedding, self.max_seq_len = pickle.load(f)
-            all_len = torch.tensor([len(self.captions_tokens[i]) for i in range(len(self))]).float()
-            self.max_seq_len = min(int(all_len.mean() + all_len.std() * 10), int(all_len.max()))
         else:
             self.captions_tokens = []
             self.caption2embedding = []
-            max_seq_len = 0
+            max_seq_len = 64
             for caption in captions_raw:
-                self.captions_tokens.append(
-                    torch.tensor(self.tokenizer.encode(caption['caption'], max_length=64, truncation=True),
-                                 dtype=torch.int64))
+                self.captions_tokens.append(torch.tensor(self.tokenizer.encode(caption['caption'], max_length=64, truncation=True),dtype=torch.int64))
                 self.caption2embedding.append(caption["clip_embedding"])
                 max_seq_len = max(max_seq_len, self.captions_tokens[-1].shape[0])
             self.max_seq_len = max_seq_len
-            all_len = torch.tensor([len(self.captions_tokens[i]) for i in range(len(self))]).float()
-            self.max_seq_len = min(int(all_len.mean() + all_len.std() * 10), int(all_len.max()))
             with open(f"{self.data_path[:-4]}_bleu_all.pkl", 'wb') as f:
                 pickle.dump([self.captions_tokens, self.caption2embedding, self.max_seq_len], f)
         if dataFrom == 'Oxford':
@@ -1049,9 +1110,12 @@ class OxfordDataset(torch.utils.data.Dataset):
             emotion = str(self.emotions_data.iloc[i]['emotion']).replace(';', ' ')
             sentiment = str(self.emotions_data.iloc[i]['sentiment']).replace(';', ' ')
             humor = str(self.emotions_data.iloc[i]['humor']).replace(';', ' ')
-            self.emotion[image_id] = torch.tensor(self.tokenizer.encode(emotion, max_length=64, truncation=True), dtype=torch.int64)
-            self.sentiment[image_id] = torch.tensor(self.tokenizer.encode(sentiment, max_length=64, truncation=True), dtype=torch.int64)
-            self.humor[image_id] = torch.tensor(self.tokenizer.encode(humor, max_length=64, truncation=True, padding=True), dtype=torch.int64)
+            self.emotion[image_id] = torch.tensor(self.tokenizer.encode(emotion, max_length=64, truncation=True),
+                                                  dtype=torch.int64)
+            self.sentiment[image_id] = torch.tensor(self.tokenizer.encode(sentiment, max_length=64, truncation=True),
+                                                    dtype=torch.int64)
+            self.humor[image_id] = torch.tensor(
+                self.tokenizer.encode(humor, max_length=64, truncation=True, padding=True), dtype=torch.int64)
 
         # padding_emotion = 384 - (self.emotion_data.shape[1] - 1)
         # padding_sentiment = 384 - (self.sentiment_data.shape[1] - 1)
@@ -1131,8 +1195,8 @@ class ClipCocoDataset(Dataset):
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # trainData = '../Data/Oxford_HIC/parse/oxford_800_8_300_2_ViT-B_32_train.pkl'
 # testData = '../Data/Oxford_HIC/parse/oxford_800_8_300_2_ViT-B_32_test.pkl'
-trainData = '../Data/Instagram/parse/100up_passlength16_sonicdrivein_ViT-B_32_train.pkl'
-testData = '../Data/Instagram/parse/100up_notpasslength16_sonicdrivein_ViT-B_32_test.pkl'
+trainData = '../Data/Instagram/parse/100up_passlength_o_16_sonicdrivein_ViT-B_32_train.pkl'
+testData = '../Data/Instagram/parse/100up_passlength_x_16_sonicdrivein_ViT-B_32_test.pkl'
 prefix_length = 64
 normalize_prefix = False
 train_dataform = "sonicdrivein"
@@ -1245,6 +1309,7 @@ if train_dataform:
     train_emotion_list = []
     train_sentiment_list = []
     train_humor_list = []
+    train_funnyscore = []
     train_gt = []
     train_caption = dict()
     train_image_id_list = []
@@ -1262,7 +1327,7 @@ if train_dataform:
             if image_id in train_image and image_id not in train_image_id_list:
                 train_caption[image_id] = []
                 train_caption[image_id].append(caption)
-                tokens, mask, prefix, item, emotion, sentiment, humor = trainDataset[i]
+                tokens, mask, prefix, item, emotion, sentiment, humor, funnyscore = trainDataset[i]
                 tokens_list.append(tokens)
                 mask_list.append(mask)
                 prefix_list.append(prefix)
@@ -1270,6 +1335,7 @@ if train_dataform:
                 train_emotion_list.append(emotion)
                 train_sentiment_list.append(sentiment)
                 train_humor_list.append(humor)
+                train_funnyscore.append(funnyscore)
                 train_gt.append(caption)
 
                 train_image_id_list.append(image_id)
@@ -1284,7 +1350,7 @@ if train_dataform:
                     train_caption[image_id] = []
                     train_caption[image_id].append(caption)
                 if caption in train_text and image_id not in train_image_id_list:
-                    tokens, mask, prefix, item, emotion, sentiment, humor = trainDataset[i]
+                    tokens, mask, prefix, item, emotion, sentiment, humor, funnyscore = trainDataset[i]
                     tokens_list.append(tokens)
                     mask_list.append(mask)
                     prefix_list.append(prefix)
@@ -1293,6 +1359,7 @@ if train_dataform:
                     train_emotion_list.append(emotion)
                     train_sentiment_list.append(sentiment)
                     train_humor_list.append(humor)
+                    train_funnyscore.append(funnyscore)
                     train_image_id_list.append(image_id)
     train_tokens = torch.stack(tokens_list).to(device)
     train_mask = torch.stack(mask_list).to(device)
@@ -1300,8 +1367,9 @@ if train_dataform:
     train_emotion = torch.stack(train_emotion_list).to(device)
     train_sentiment = torch.stack(train_sentiment_list).to(device)
     train_humor = torch.stack(train_humor_list).to(device)
+    train_funnyscore = torch.tensor(train_funnyscore).to(device)
     print(train_tokens.shape, train_mask.shape, train_prefix.shape, len(train_image_id_list))
-    print(train_emotion.shape, train_sentiment.shape, train_humor.shape)
+    print(train_emotion.shape, train_sentiment.shape, train_humor.shape, train_funnyscore.shape)
 
 if test_dataform:
     ##################### oxford_300k #####################
@@ -1358,6 +1426,7 @@ if test_dataform:
     test_emotion_list = []
     test_sentiment_list = []
     test_humor_list = []
+    test_funnyscore_list = []
     test_gt = []
     test_caption = dict()
     test_image_id_list = []
@@ -1375,7 +1444,7 @@ if test_dataform:
             if image_id in test_image and image_id not in test_image_id_list:
                 test_caption[image_id] = []
                 test_caption[image_id].append(caption)
-                tokens, mask, prefix, item, emotion, sentiment, humor = testDataset[i]
+                tokens, mask, prefix, item, emotion, sentiment, humor, funnyscore = testDataset[i]
                 tokens_list.append(tokens)
                 mask_list.append(mask)
                 prefix_list.append(prefix)
@@ -1383,6 +1452,7 @@ if test_dataform:
                 test_emotion_list.append(emotion)
                 test_sentiment_list.append(sentiment)
                 test_humor_list.append(humor)
+                test_funnyscore_list.append(funnyscore)
                 test_gt.append(caption)
                 test_image_id_list.append(image_id)
     else:
@@ -1397,7 +1467,7 @@ if test_dataform:
                     test_caption[image_id].append(caption)
                 if caption in test_text and image_id not in test_image_id_list:
                     # print(f"Image ID: {image_id}, Caption: {caption}")
-                    tokens, mask, prefix, item, emotion, sentiment, humor = testDataset[i]
+                    tokens, mask, prefix, item, emotion, sentiment, humor, funnyscore = testDataset[i]
                     tokens_list.append(tokens)
                     mask_list.append(mask)
                     prefix_list.append(prefix)
@@ -1405,6 +1475,7 @@ if test_dataform:
                     test_emotion_list.append(emotion)
                     test_sentiment_list.append(sentiment)
                     test_humor_list.append(humor)
+                    test_funnyscore_list.append(funnyscore)
                     test_gt.append(caption)
                     test_image_id_list.append(image_id)
 
@@ -1414,8 +1485,9 @@ if test_dataform:
     test_emotion = torch.stack(test_emotion_list).to(device)
     test_sentiment = torch.stack(test_sentiment_list).to(device)
     test_humor = torch.stack(test_humor_list).to(device)
+    test_funnyscore = torch.tensor(test_funnyscore_list).to(device)
     print(test_tokens.shape, test_mask.shape, test_prefix.shape)
-    print(test_emotion.shape, test_sentiment.shape, test_humor.shape)
+    print(test_emotion.shape, test_sentiment.shape, test_humor.shape, test_funnyscore.shape)
 
 model = ClipCaptionModel(mode='nn', prefix_length=prefix_length, clip_length=prefix_length, prefix_size=512, num_layers=8)
 adapter = True
@@ -1430,13 +1502,14 @@ if adapter :
         params = sum([np.prod(p.size()) for p in model_parameters])
         return params
 
+
     def weightToLora(fullModel, newModel):
         for name, param in fullModel.named_parameters():
             newModel.state_dict()[name].copy_(param.data)
         for name, param in newModel.named_parameters():
-            if 'clip_project' in name:
+            if 'falcon' not in name:
                 if "lora_" not in name:  # 只讓 LoRA 參數訓練
-                    if 'bias' in name:
+                    if 'bias' in name or 'funnyscore' in name:
                         param.requires_grad = True
                     else:
                         param.requires_grad = False
@@ -1445,6 +1518,7 @@ if adapter :
         return newModel
 
     a = count_trainable_parameters(model)
+    # model = model.to(device, dtype=torch.bfloat16)
     model = weightToLora(model, model_adapt)
     del model_adapt
     gc.collect()
@@ -1454,7 +1528,7 @@ if adapter :
 
     # model.activateLoRa()
 
-save_file = '20250319_100up_passlength16_sonicdrivein_base_0316_oxford_800_8_300_2_ESH_filter_cross_concat'
+save_file = '20250320_100up_passlength16_sonicdrivein_base_0316_oxford_800_8_300_2_ESH_filter_cross_concat_combineLoss'
 for i in range(20):
     if os.path.exists(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'):
         model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'))
@@ -1463,17 +1537,18 @@ for i in range(20):
         pred = Predictor(prefix_length, cp_num=i + 1, train_caption=train_caption, test_caption=test_caption,
                          train_image_id_list=train_image_id_list, test_image_id_list=test_image_id_list)
         print(f"Model {i + 1:03d} loaded.")
-        pred.predict("test", test_tokens, test_mask, test_prefix, test_gt, model, test_emotion, test_sentiment, test_humor)
-        pred.predict("train", train_tokens, train_mask, train_prefix, train_gt, model, train_emotion, train_sentiment, train_humor)
+        pred.predict("test", test_tokens, test_mask, test_prefix, test_gt, model, test_emotion, test_sentiment, test_humor, test_funnyscore)
+        pred.predict("train", train_tokens, train_mask, train_prefix, train_gt, model, train_emotion, train_sentiment, train_humor, train_funnyscore)
 
 AllCaption = pd.DataFrame()
 for i in range(20):
     if os.path.exists(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'):
-        df = pd.read_csv(f'./Model/{save_file}/{save_file}_test_{i + 1:03d}.csv')
-        textAndLoss = df[['text', 'loss', 'fitCount', 'gtNum', 'bleu1', 'bleu2', 'bleu3', 'bleu4']]
+        # df = pd.read_csv(f'./Model/{save_file}/{save_file}_test_{i + 1:03d}.csv')
+        df = pd.read_csv(f'./Model/{save_file}/test_{i + 1:03d}.csv')
+        textAndLoss = df[['text', 'loss', 'caption_loss', 'fc_loss', 'fitCount', 'gtNum', 'fluency', 'bleu1', 'bleu2', 'bleu3', 'bleu4']]
         if AllCaption.empty:
             AllCaption = df[['Name', 'image_id']]
         AllCaption = pd.concat([AllCaption, textAndLoss], axis=1)
-AllCaption.to_csv(f'./Model/{save_file}/{save_file}_test_all.csv', float_format='%.15f', index=False)
-# AllCaption.to_csv(f'./Model/{save_file}/test_all.csv', float_format='%.15f', index=False)
+# AllCaption.to_csv(f'./Model/{save_file}/{save_file}_test_all.csv', float_format='%.15f', index=False)
+AllCaption.to_csv(f'./Model/{save_file}/test_all.csv', float_format='%.15f', index=False)
 
