@@ -1556,7 +1556,7 @@ if adapter :
 
     # model.activateLoRa()
 
-save_file = '20250320_100up_passlength10_sonicdrivein_ESH_filter_cross_concat'
+save_file = '20250316_oxford_800_8_300_2_ESH_filter_cross_concat'
 for i in range(20):
     if os.path.exists(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'):
         model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'))
