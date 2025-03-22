@@ -1,5 +1,7 @@
 # Prediction interface for Cog ⚙️
 # Reference: https://github.com/replicate/cog/blob/main/docs/python.md
+import os
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 import torch
 import torch.nn as nn
 from torch import Tensor
@@ -28,12 +30,12 @@ from peft import LoraConfig, TaskType, get_peft_model
 from nltk.translate.bleu_score import sentence_bleu
 import gc
 import loralib as lora
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from Citations.Parrot_Paraphraser.parrot.filters import Fluency
 from scipy.special import softmax
 import clip
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 
 N = type(None)
 V = np.array
@@ -153,7 +155,7 @@ class Predictor(object):
 
     def diversity_score(self, captionList):
         # tokenize  and extract text features
-        text_tokens = clip.tokenize(captionList).to(device)
+        text_tokens = clip.tokenize(captionList, context_length=77, truncate=True).to(device)
         with torch.no_grad():
             text_features = self.clip.encode_text(text_tokens).float()
         text_features /= text_features.norm(dim=-1, keepdim=True)
@@ -373,9 +375,9 @@ class Predictor(object):
             train_df = pd.DataFrame(self.train_output.cpu().detach(), columns=[f"{i}" for i in range(0, 489)])
             train_df = pd.concat([test, train_df], axis=1)
             train_df['loss'] = self.train_loss
-            if model.mode == 'lora' or model.LoRaActivated:
-                train_df['caption_loss'] = self.train_caption_loss
-                train_df['fc_loss'] = self.train_fc_loss
+            # if model.mode == 'lora' or model.LoRaActivated:
+            #     train_df['caption_loss'] = self.train_caption_loss
+            #     train_df['fc_loss'] = self.train_fc_loss
             train_df['text'] = self.train_text
             train_df['fitCount'] = self.train_fitCount
             train_df['gtNum'] = self.train_gtNum
@@ -672,7 +674,7 @@ class ClipCaptionModel(nn.Module):
         # out = self.gpt(inputs_embeds=embedding_cat, labels=labels, attention_mask=mask)
         # out = self.gemma(inputs_embeds=embedding_cat, labels=labels, attention_mask=mask)
         out = self.falcon(inputs_embeds=embedding_cat, labels=labels, attention_mask=mask)
-        if self.mode == 'lora':
+        if self.mode == 'lora' or self.LoRaActivated == True:
             fc = self.funnyscore_mlp1(embedding_cat).squeeze(-1)
             fc = self.funnyscore_relu(fc)
             fc = self.funnyscore_mlp2(fc).squeeze(-1)
@@ -727,12 +729,9 @@ class ClipCaptionModel(nn.Module):
         # self.falcon.eval()
         # for param in self.falcon.parameters():
         #     param.requires_grad = False
-        self.clip_project = TransformerMapper(mode, prefix_size, self.embedding_size, prefix_length, clip_length,
-                                              num_layers)
-        self.visual_project_swin = CrossTransformerMapper(mode, prefix_size, self.embedding_size, prefix_length,
-                                                          clip_length, num_layers)
-        self.visual_project_ESH = CrossTransformerMapper(mode, prefix_size, self.embedding_size, prefix_length,
-                                                         clip_length, num_layers)
+        self.clip_project = TransformerMapper(mode, prefix_size, self.embedding_size, prefix_length, clip_length, num_layers)
+        self.visual_project_swin = CrossTransformerMapper(mode, prefix_size, self.embedding_size, prefix_length, clip_length, num_layers)
+        self.visual_project_ESH = CrossTransformerMapper(mode, prefix_size, self.embedding_size, prefix_length, clip_length, num_layers)
         #######################################################################################
         ### 20250228_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8 ###
         #######################################################################################
@@ -826,7 +825,8 @@ def combine_loss(logits: torch.Tensor, tokens: torch.Tensor, funnyscore: torch.T
     # humor // 1 ==1 > 1 , else == 0> 0
     funnyscore = funnyscore // 1
     fc_loss = nnf.binary_cross_entropy(output_fc.flatten(), funnyscore.flatten())
-    loss = output_loss + fc_loss * 10
+    reward = funnyscore.mean()
+    loss = output_loss + fc_loss * 10 #- reward * 50
     return output_loss, fc_loss, loss
 
 def generate_beam(model, tokenizer, beam_size: int = 5, prompt=None, embed=None, entry_length=74, temperature=1.0,
@@ -1221,14 +1221,14 @@ class ClipCocoDataset(Dataset):
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-# trainData = '../Data/Oxford_HIC/parse/oxford_800_8_300_2_ViT-B_32_train.pkl'
-# testData = '../Data/Oxford_HIC/parse/oxford_800_8_300_2_ViT-B_32_test.pkl'
-trainData = '../Data/Instagram/parse/100up_passlength_o_10_sonicdrivein_ViT-B_32_train.pkl'
-testData = '../Data/Instagram/parse/100up_passlength_x_10_sonicdrivein_ViT-B_32_test.pkl'
+trainData = '../Data/Oxford_HIC/parse/oxford_800_8_300_2_ViT-B_32_train.pkl'
+testData = '../Data/Oxford_HIC/parse/oxford_800_8_300_2_ViT-B_32_test.pkl'
+# trainData = '../Data/Instagram/parse/100up_only100_passlength_o_10_sonicdrivein_ViT-B_32_train.pkl'
+# testData = '../Data/Instagram/parse/100up_only100_passlength_x_10_sonicdrivein_ViT-B_32_test.pkl'
 prefix_length = 64
 normalize_prefix = False
-train_dataform = "sonicdrivein"
-test_dataform = "sonicdrivein"
+train_dataform = "Oxford"
+test_dataform = "Oxford"
 trainDataset = OxfordDataset(trainData, prefix_length, normalize_prefix=normalize_prefix, dataFrom = train_dataform)
 testDataset = OxfordDataset(testData, prefix_length, normalize_prefix=normalize_prefix, dataFrom = test_dataform)
 
@@ -1327,7 +1327,6 @@ if train_dataform:
             print(f"Image ID: {image_id}, Caption: {caption}")
             train_image.append(image_id)
             train_text.append(caption)
-            print(f"Emotion: {trainDataset.emotion[image_id].shape}, Sentiment: {trainDataset.sentiment[image_id].shape}, Humor: {trainDataset.humor[image_id].shape}")
             if len(train_image) == 10:
                 break
     #######################################################
@@ -1359,7 +1358,7 @@ if train_dataform:
                 tokens_list.append(tokens)
                 mask_list.append(mask)
                 prefix_list.append(prefix)
-                # emotion, sentiment, humor = trainDataset.pad_emotion(item)
+                emotion, sentiment, humor = trainDataset.pad_emotion(item)
                 train_emotion_list.append(emotion)
                 train_sentiment_list.append(sentiment)
                 train_humor_list.append(humor)
@@ -1383,7 +1382,7 @@ if train_dataform:
                     mask_list.append(mask)
                     prefix_list.append(prefix)
                     train_gt.append(caption)
-                    # emotion, sentiment, humor = trainDataset.pad_emotion(item)
+                    emotion, sentiment, humor = trainDataset.pad_emotion(item)
                     train_emotion_list.append(emotion)
                     train_sentiment_list.append(sentiment)
                     train_humor_list.append(humor)
@@ -1476,7 +1475,7 @@ if test_dataform:
                 tokens_list.append(tokens)
                 mask_list.append(mask)
                 prefix_list.append(prefix)
-                # emotion, sentiment, humor = testDataset.pad_emotion(item)
+                emotion, sentiment, humor = testDataset.pad_emotion(item)
                 test_emotion_list.append(emotion)
                 test_sentiment_list.append(sentiment)
                 test_humor_list.append(humor)
@@ -1499,7 +1498,7 @@ if test_dataform:
                     tokens_list.append(tokens)
                     mask_list.append(mask)
                     prefix_list.append(prefix)
-                    # emotion, sentiment, humor = testDataset.pad_emotion(item)
+                    emotion, sentiment, humor = testDataset.pad_emotion(item)
                     test_emotion_list.append(emotion)
                     test_sentiment_list.append(sentiment)
                     test_humor_list.append(humor)
@@ -1518,7 +1517,7 @@ if test_dataform:
     print(test_emotion.shape, test_sentiment.shape, test_humor.shape, test_funnyscore.shape)
 
 model = ClipCaptionModel(mode='nn', prefix_length=prefix_length, clip_length=prefix_length, prefix_size=512, num_layers=8)
-adapter = False
+adapter = True
 save_file = '20250316_oxford_800_8_300_2_ESH_filter_cross_concat'
 i = 13
 if adapter :
@@ -1537,16 +1536,19 @@ if adapter :
         for name, param in newModel.named_parameters():
             if 'falcon' not in name:
                 if "lora_" not in name:  # 只讓 LoRA 參數訓練
-                    if 'bias' in name or 'funnyscore' in name:
+                    if 'bias' in name:
                         param.requires_grad = True
                     else:
                         param.requires_grad = False
+                    if 'funnyscore' in name:
+                        param.requires_grad = True
+                else:
+                    param.requires_grad = True
         for name, param in newModel.named_parameters():
             print(f"{name}: requires_grad={param.requires_grad}")
         return newModel
 
     a = count_trainable_parameters(model)
-    # model = model.to(device, dtype=torch.bfloat16)
     model = weightToLora(model, model_adapt)
     del model_adapt
     gc.collect()
@@ -1555,8 +1557,12 @@ if adapter :
     print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
 
     # model.activateLoRa()
+    #
+    # b = count_trainable_parameters(model)
+    # percent = round((b / a) * 100, 3)
+    # print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
 
-save_file = '20250316_oxford_800_8_300_2_ESH_filter_cross_concat'
+save_file = '20250322_100up_only100_passlength_10_base_0316_oxford_800_8_300_2_ESH_filter_cross_concat_combineLoss_falconLoRa'
 for i in range(20):
     if os.path.exists(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'):
         model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'))
@@ -1573,10 +1579,10 @@ for i in range(20):
     if os.path.exists(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'):
         # df = pd.read_csv(f'./Model/{save_file}/{save_file}_test_{i + 1:03d}.csv')
         df = pd.read_csv(f'./Model/{save_file}/test_{i + 1:03d}.csv')
-        if adapter:
-            textAndLoss = df[['text', 'loss', 'caption_loss', 'fc_loss', 'fitCount', 'gtNum', 'fluency', 'diversity', 'bleu1', 'bleu2', 'bleu3', 'bleu4']]
-        else:
-            textAndLoss = df[['text', 'loss', 'fitCount', 'gtNum', 'fluency', 'diversity', 'bleu1', 'bleu2', 'bleu3', 'bleu4']]
+        # if adapter:
+        #     textAndLoss = df[['text', 'loss', 'caption_loss', 'fc_loss', 'fitCount', 'gtNum', 'fluency', 'diversity', 'bleu1', 'bleu2', 'bleu3', 'bleu4']]
+        # else:
+        textAndLoss = df[['text', 'loss', 'fitCount', 'gtNum', 'fluency', 'diversity', 'bleu1', 'bleu2', 'bleu3', 'bleu4']]
         if AllCaption.empty:
             AllCaption = df[['Name', 'image_id']]
         AllCaption = pd.concat([AllCaption, textAndLoss], axis=1)
