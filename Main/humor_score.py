@@ -27,7 +27,8 @@ import os
 from tqdm import tqdm
 import argparse
 from sklearn.model_selection import train_test_split
-
+from typing import Tuple, Optional, Union, Any
+from torch import Tensor
 
 class ImageTextModel(nn.Module):
     def __init__(self, gpt2_model_name="gpt2", feature_dim=512, output_dim=1):
@@ -36,13 +37,14 @@ class ImageTextModel(nn.Module):
         # Image Encoder (ResNet-50)
         self.resnet = models.resnet50(pretrained=True)
         self.resnet.fc = nn.Linear(self.resnet.fc.in_features, feature_dim)  # Modify FC layer
+        self.fusion = nn.Linear(feature_dim, 128)
 
         # Text Encoder (GPT-2)
         self.gpt2 = GPT2Model.from_pretrained(gpt2_model_name)
         self.text_proj = nn.Linear(self.gpt2.config.hidden_size, feature_dim)
 
         # Fusion Layer
-        self.fusion = nn.Linear(feature_dim * 2, 128)
+        # self.fusion = nn.Linear(feature_dim * 2, 128)
         self.classifier = nn.Linear(128, output_dim)
 
         self.sigmoid = nn.Sigmoid()  # Sigmoid for binary classification
@@ -52,12 +54,13 @@ class ImageTextModel(nn.Module):
         img_features = self.resnet(image)
 
         # Encode text (Get last hidden state, take CLS token representation)
-        text_outputs = self.gpt2(input_ids=input_ids, attention_mask=attention_mask)
-        text_features = text_outputs.last_hidden_state[:, 0, :]  # CLS token
-        text_features = self.text_proj(text_features)
+        # text_outputs = self.gpt2(input_ids=input_ids, attention_mask=attention_mask)
+        # text_features = text_outputs.last_hidden_state[:, 0, :]  # CLS token
+        # text_features = self.text_proj(text_features)
 
         # Fusion (Concatenation + Projection)
-        fused = torch.cat((img_features, text_features), dim=1)
+        # fused = torch.cat((img_features, text_features), dim=1)
+        fused = img_features
         fused = self.fusion(fused)
         fused = torch.relu(fused)
 
@@ -69,41 +72,53 @@ class ImageTextModel(nn.Module):
 
 class Dataset(torch.utils.data.Dataset):
     def get_image_features(self, img_id, humor):
-        if humor == 0:
-            file = f"../Data/humorscore_image_{self.traintest}_data/COCO_{int(img_id):012d}.pt"
+        if self.traintest != 'test'and self.traintest != 'train':
+            file = f"../../humorscore_image_{self.traintest}_data/{img_id}.pt"
+            if os.path.exists(file):
+                return torch.load(file)
+            else:
+                filename = f"../Data/Instagram/{self.traintest}_img/{img_id}.jpg"
+                image = Image.open(filename).convert('RGB')
+                image = self.image_transform(image)
+                torch.save(image, f"../../humorscore_image_{self.traintest}_data/{img_id}.pt")
+                return image
+        elif humor == 0:
+            file = f"../../humorscore_image_{self.traintest}_data/COCO_{int(img_id):012d}.pt"
             if os.path.exists(file):
                 return torch.load(file)
             else:
                 filename = f"{self.coco_image_dir}{int(img_id):012d}.jpg"
                 image = Image.open(filename).convert('RGB')
                 image = self.image_transform(image)
-                torch.save(image, f'../Data/humorscore_image_{self.traintest}_data/COCO_{int(img_id):012d}.pt')
-            return image
+                torch.save(image, f'../../humorscore_image_{self.traintest}_data/COCO_{int(img_id):012d}.pt')
+                return image
         else:
-            file = f"../Data/humorscore_image_{self.traintest}_data/oxford_{img_id}.pt"
+            file = f"../../humorscore_image_{self.traintest}_data/oxford_{img_id}.pt"
             if os.path.exists(file):
                 return torch.load(file)
             else:
                 filename = f"../Data/Oxford_HIC/oxford_img/{img_id}.jpg"
                 image = Image.open(filename).convert('RGB')
                 image = self.image_transform(image)
-                torch.save(image, f'../Data/humorscore_image_{self.traintest}_data/oxford_{img_id}.pt')
+                torch.save(image, f'../../humorscore_image_{self.traintest}_data/oxford_{img_id}.pt')
                 return image
 
-    def get_caption_embedding(self, caption):
-        inputs = self.tokenizer([caption], truncation=True, max_length=64, return_tensors="pt")
+    def get_caption_embedding(self, item):
+        inputs = self.tokenizer([str(self.caption_list[item])], truncation=True, max_length=64, return_tensors="pt")
         input_ids = inputs["input_ids"]
         attention_mask = inputs["attention_mask"]
         padding = torch.zeros(1, 64 - input_ids.shape[1], dtype=torch.int64)
-        input_ids = torch.cat((input_ids, padding), dim=1)
-        attention_mask = torch.cat((attention_mask, padding), dim=1)
-        return input_ids.squeeze(0), attention_mask.squeeze(0)
+        input_ids = torch.cat((input_ids, padding), dim=1).squeeze(0)
+        attention_mask = torch.cat((attention_mask, padding), dim=1).squeeze(0)
+        return input_ids, attention_mask
 
     def __getitem__(self, item: int):
         image = self.get_image_features(self.image_list[item], self.humor[item])
-        caption_id, caption_attmask = self.get_caption_embedding(self.caption_list[item])
+        caption_id, caption_attmask = self.get_caption_embedding(item)
         humor = self.humor[item]
-        return image, caption_id, caption_attmask, humor
+        rank = self.rank[item]
+        return image, caption_id, caption_attmask, rank
+        # return image, caption_id, caption_attmask, humor, rank, str(self.image_list[item]), str(self.caption_list[item])
 
     def __len__(self):
         return len(self.image_list)
@@ -124,14 +139,18 @@ class Dataset(torch.utils.data.Dataset):
         self.image_list = []
         self.caption_list = []
         self.humor = []
-        if traintest == 'train':
+        self.rank = []
+        if self.traintest == 'train':
             out_path = f"../Data/{dataPath}_train.pkl"
             self.coco_dir = 'C:/Users/user/fiftyone/coco-2014/raw/captions_train2014.json'
             self.coco_image_dir = 'C:/Users/user/fiftyone/coco-2014/train/data/COCO_train2014_'
-        else:
+        elif self.traintest == 'test':
             out_path = f"../Data/{dataPath}_test.pkl"
             self.coco_dir = 'C:/Users/user/fiftyone/coco-2014/raw/captions_val2014.json'
             self.coco_image_dir = 'C:/Users/user/fiftyone/coco-2014/validation/data/COCO_val2014_'
+        else:
+            out_path = f"../Data/{dataPath}_{self.traintest}.pkl"
+
 
         if os.path.exists(out_path):
             with open(out_path, 'rb') as f:
@@ -139,55 +158,84 @@ class Dataset(torch.utils.data.Dataset):
             self.image_list = alldata['image_list']
             self.caption_list = alldata['caption_list']
             self.humor = alldata['humor']
+            self.rank = alldata['rank']
             print('Data Loaded')
             print("%0d embeddings saved " % len(self.image_list))
         else:
-            with open(self.coco_dir, 'r') as f:
-                data = json.load(f)
-            data = data['annotations']
-            print("%0d captions loaded from json " % len(data))
+            if self.traintest == 'train' or self.traintest == 'test':
+                with open(self.coco_dir, 'r') as f:
+                    data = json.load(f)
+                data = data['annotations']
+                print("%0d captions loaded from json " % len(data))
 
-            with tqdm(total=len(data)) as pbar:
-                for i in range(len(data)):
-                    if traintest == 'test' and i > 414113/4:
-                        break
-                    d = data[i]
-                    self.image_list.append(d["image_id"])
-                    self.caption_list.append(d['caption'])
-                    self.humor.append(torch.tensor([0]))
-                    if (i + 1) % 10000 == 0:
-                        with open(out_path, 'wb') as f:
-                            pickle.dump({"image_list": self.image_list,
-                                         "caption_list": self.caption_list,
-                                         "humor": torch.cat(self.humor, dim=0)}, f, pickle.HIGHEST_PROTOCOL)
-                        pbar.set_postfix({"present": i})
-                    pbar.update(1)
-            with open(out_path, 'wb') as f:
-                pickle.dump({"image_list": self.image_list,
-                             "caption_list": self.caption_list,
-                             "humor": torch.cat(self.humor, dim=0)}, f, pickle.HIGHEST_PROTOCOL)
-            print('COCO Done')
-            print("%0d embeddings saved " % len(self.image_list))
-            pbar.close()
-
+                with tqdm(total=len(data)) as pbar:
+                    for i in range(len(data)):
+                        if traintest == 'test' and i > 414113/4:
+                            break
+                        d = data[i]
+                        self.image_list.append(d["image_id"])
+                        self.caption_list.append(d['caption'])
+                        self.humor.append(torch.tensor([0]))
+                        self.rank.append(torch.tensor([0]))
+                        if (i + 1) % 10000 == 0:
+                            with open(out_path, 'wb') as f:
+                                pickle.dump({"image_list": self.image_list,
+                                             "caption_list": self.caption_list,
+                                             "humor": torch.cat(self.humor, dim=0),
+                                             "rank": torch.cat(self.rank, dim=0)}, f, pickle.HIGHEST_PROTOCOL)
+                            pbar.set_postfix({"present": i})
+                        pbar.update(1)
+                with open(out_path, 'wb') as f:
+                    pickle.dump({"image_list": self.image_list,
+                                 "caption_list": self.caption_list,
+                                 "humor": torch.cat(self.humor, dim=0),
+                                 "rank": torch.cat(self.rank, dim=0)}, f, pickle.HIGHEST_PROTOCOL)
+                print('COCO Done')
+                print("%0d embeddings saved " % len(self.image_list))
+                pbar.close()
+            if self.traintest == 'train' or self.traintest == 'test':
+                std = oxford_data['funny_score_y'].std().item()
+                mean = oxford_data['funny_score_y'].mean().item()
+            else:
+                std = oxford_data['funny_score'].std().item()
+                mean = oxford_data['funny_score'].mean().item()
             with tqdm(total=len(oxford_data)) as pbar:
                 for i in range(len(oxford_data)):
                     d = oxford_data.iloc[i]
                     d = d.to_dict()
                     self.image_list.append(d["image_id"])
                     self.caption_list.append(d['caption'])
-                    self.humor.append(torch.tensor([1]))
+
+                    if self.traintest == 'train' or self.traintest == 'test':
+                        self.humor.append(torch.tensor([1]))
+                        columnName = 'funny_score_y'
+                        if d[columnName] > (mean + 2 * std):
+                            self.rank.append(torch.tensor([1.0]))
+                        elif d[columnName] > (mean + 1 * std):
+                            self.rank.append(torch.tensor([0.75]))
+                        elif d[columnName] > (mean):
+                            self.rank.append(torch.tensor([0.5]))
+                        elif d[columnName] > (mean - 1 * std):
+                            self.rank.append(torch.tensor([0.25]))
+                        else:
+                            self.rank.append(torch.tensor([0.0]))
+                    else:
+                        self.humor.append(torch.tensor([0]))
+                        self.rank.append(torch.tensor([d['funny_score']]))
+
                     if (i + 1) % 10000 == 0:
                         with open(out_path, 'wb') as f:
                             pickle.dump({"image_list": self.image_list,
                                          "caption_list": self.caption_list,
-                                         "humor": torch.cat(self.humor, dim=0)}, f, pickle.HIGHEST_PROTOCOL)
+                                         "humor": torch.cat(self.humor, dim=0),
+                                         "rank": torch.cat(self.rank, dim=0)}, f, pickle.HIGHEST_PROTOCOL)
                         pbar.set_postfix({"present": i})
                     pbar.update(1)
             with open(out_path, 'wb') as f:
                 pickle.dump({"image_list": self.image_list,
                              "caption_list": self.caption_list,
-                             "humor": torch.cat(self.humor, dim=0)}, f, pickle.HIGHEST_PROTOCOL)
+                             "humor": torch.cat(self.humor, dim=0),
+                             "rank": torch.cat(self.rank, dim=0)}, f, pickle.HIGHEST_PROTOCOL)
             print('Oxford Done')
             print("%0d embeddings saved " % len(self.image_list))
             pbar.close()
@@ -199,12 +247,18 @@ def train(model, args, output_dir: str = ".", output_prefix: str = ""):
     best_test_loss = 9999999999
     save = []
 
+    # former = pd.read_csv(f"'./Model/'{output_dir}/{output_prefix}-loss.csv")
+    # train_losses = list(former['train_loss'])
+    # test_losses = list(former['test_loss'])
+    # save = list(former['save'])
+    # best_train_loss = min(train_losses)
+    # best_test_loss = min(test_losses)
+
     device = torch.device('cuda:0')
     batch_size = args.bs
-
     model = model.to(device)
-
     dataPath = args.dataPath
+
     if os.path.exists(f"../Data/{dataPath}_train.pkl") and os.path.exists(f"../Data/{dataPath}_test.pkl"):
         if os.path.exists(f"../Data/{dataPath}_train.pkl"):
             trainDataset = Dataset(pd.DataFrame(), 'train', dataPath)
@@ -213,8 +267,8 @@ def train(model, args, output_dir: str = ".", output_prefix: str = ""):
     else:
         dirPath = '../Data/Oxford_HIC/CaptionID_oxford_hic_data.csv'
         data = pd.read_csv(dirPath)
-        threshold = data['funny_score'].quantile(0.75)
-        data = data[data['funny_score'] >= threshold]
+        threshold = data['funny_score_y'].quantile(0.75)
+        data = data[data['funny_score_y'] >= threshold]
         unique_image_ids = data['image_id'].unique()
         train_ids, test_ids = train_test_split(unique_image_ids, test_size=0.2, random_state=42)
         train = data[data['image_id'].isin(train_ids)]
@@ -224,12 +278,14 @@ def train(model, args, output_dir: str = ".", output_prefix: str = ""):
         testDataset = Dataset(test, 'test', dataPath)
     # get data size
     print(len(trainDataset), len(testDataset))
-    train_dataloader = DataLoader(trainDataset, batch_size=batch_size, shuffle=True, drop_last=True)
-    test_dataloader = DataLoader(testDataset, batch_size=batch_size, shuffle=True, drop_last=True)
+    train_dataloader = DataLoader(trainDataset, batch_size=batch_size, shuffle=True, num_workers=20, pin_memory=True, drop_last=True)
+    test_dataloader = DataLoader(testDataset, batch_size=batch_size, shuffle=True, num_workers=20, pin_memory=True, drop_last=True)
+
     epoch = 0
     while len(trainDataset) > batch_size and len(testDataset) > batch_size:
         optimizer = optim.Adam(model.parameters(), lr=1e-4, weight_decay=1e-5)
-        criterion = nn.BCELoss()
+        # criterion = nn.BCELoss()
+        criterion = nn.MSELoss()
         print(f">>> Training epoch {epoch + 1}")
         sys.stdout.flush()
         trainLoss = 0
@@ -277,7 +333,7 @@ def train(model, args, output_dir: str = ".", output_prefix: str = ""):
             best_test_loss = testLoss
             torch.save(
                 model.state_dict(),
-                os.path.join(output_dir, f"{output_prefix}-{epoch + 1:03d}.pt"),
+                f"./Model/{output_dir}/checkpoint-{epoch + 1:03d}.pt"
             )
             save.append('V')
         else:
@@ -287,38 +343,712 @@ def train(model, args, output_dir: str = ".", output_prefix: str = ""):
         loss_data['train_loss'] = train_losses
         loss_data['test_loss'] = test_losses
         loss_data['save'] = save
-        loss_data.to_csv(f"{output_dir}/{output_prefix}-loss.csv", index=False)
+        loss_data.to_csv(f"./Model/{output_dir}/{output_prefix}-loss.csv", index=False)
 
         plt.plot(train_losses, label='train')
         plt.plot(test_losses, label='test')
         plt.legend()
-        plt.savefig(f"{output_dir}/{output_prefix}-loss.png")
+        plt.savefig(f"./Model/{output_dir}/{output_prefix}-loss.png")
         plt.show()
 
         epoch += 1
     return model
+
+def test(model, args, output_dir: str = ".", output_prefix: str = ""):
+    indomain_losses = []
+    mcdonald_losses = []
+    sonic_losses = []
+    indomain_accuracy = []
+    mcdonald_accuracy = []
+    sonic_accuracy = []
+    indomain_accuracy_rank = []
+    mcdonald_accuracy_rank = []
+    sonic_accuracy_rank = []
+    indomain_mae = []
+    mcdonald_mae = []
+    sonic_mae = []
+    device = torch.device('cuda:0')
+    batch_size = args.bs
+
+    model = model.to(device)
+
+    dataPath = args.dataPath
+    if os.path.exists(f"../Data/{dataPath}_test.pkl"):
+        testDataset = Dataset(pd.DataFrame(), 'test', dataPath)
+    else:
+        dirPath = '../Data/Oxford_HIC/CaptionID_oxford_hic_data.csv'
+        data = pd.read_csv(dirPath)
+        threshold = data['funny_score_y'].quantile(0.75)
+        data = data[data['funny_score_y'] >= threshold]
+        unique_image_ids = data['image_id'].unique()
+        train_ids, test_ids = train_test_split(unique_image_ids, test_size=0.2, random_state=42)
+        train = data[data['image_id'].isin(train_ids)]
+        test = data[data['image_id'].isin(test_ids)]
+        print(train.shape, test.shape)
+        testDataset = Dataset(test, 'test', dataPath)
+    if os.path.exists(f"../Data/{dataPath}_mcdonalds_switzerland.pkl"):
+        mcdonaldDataset = Dataset(pd.DataFrame(), 'mcdonalds_switzerland', dataPath)
+    else:
+        data = pd.read_csv('../Data/Instagram/CaptionID_mcdonalds_switzerland.csv')
+        mcdonaldDataset = Dataset(data, 'mcdonalds_switzerland', dataPath)
+    if os.path.exists(f"../Data/{dataPath}_sonicdrivein.pkl"):
+        sonicDataset = Dataset(pd.DataFrame(), 'sonicdrivein', dataPath)
+    else:
+        data = pd.read_csv('../Data/Instagram/CaptionID_sonicdrivein.csv')
+        sonicDataset = Dataset(data, 'sonicdrivein', dataPath)
+
+    # get data size
+    test_dataloader = DataLoader(testDataset, batch_size=batch_size, shuffle=True, num_workers=20, drop_last=True)
+    mcdonald_dataloader = DataLoader(mcdonaldDataset, batch_size=1125, shuffle=True, num_workers=20, drop_last=True)
+    sonic_dataloader = DataLoader(sonicDataset, batch_size=1104, shuffle=True, num_workers=20, drop_last=True)
+    print(len(test_dataloader), len(mcdonald_dataloader), len(sonic_dataloader))
+
+    for i in range(10):
+        if os.path.exists(f'./Model/{output_dir}/checkpoint-{i + 1:03d}.pt'):
+            model.load_state_dict(torch.load(f'./Model/{output_dir}/checkpoint-{i + 1:03d}.pt'))
+            model = model.eval()
+            model = model.to(device)
+            # criterion = nn.BCELoss()
+            criterion = nn.MSELoss()
+            mae = nn.L1Loss()
+            print(f">>> epoch {i + 1}")
+            sys.stdout.flush()
+            model.eval()
+            with torch.no_grad():
+                progress = tqdm(total=len(test_dataloader), desc=output_prefix)
+                epoch_loss = 0
+                epoch_accuracy = 0
+                epoch_accuracy_rank = 0
+                mae_loss = 0
+                output_df = pd.DataFrame(columns=['image_id', 'caption', 'groundtruth', 'humor_score'])
+                for idx, (images, caption_ids, caption_masks, humor, rank, img_id, caption) in enumerate(test_dataloader):
+                    model.zero_grad()
+                    images, caption_ids, caption_masks = images.to(device), caption_ids.to(device), caption_masks.to(device)
+                    humor = humor.unsqueeze(1).to(device, dtype=torch.float)
+                    rank = rank.unsqueeze(1).to(device, dtype=torch.float)
+                    outputs = model(images, caption_ids, caption_masks)
+                    # loss = criterion(outputs, humor)
+                    # mae_loss += mae(outputs, humor).item()
+                    loss = criterion(outputs, rank)
+                    mae_loss += mae(outputs, rank).item()
+                    epoch_accuracy += (outputs > 0.5).eq(humor > 0.5).sum().item()
+                    epoch_accuracy_rank += ((outputs <=0.33) & (rank <= 0.33)).eq(torch.ones_like(rank)).sum().item()
+                    epoch_accuracy_rank += ((outputs > 0.33) & (outputs <= 0.66) & (rank > 0.33) & (rank <= 0.66)).eq(torch.ones_like(rank)).sum().item()
+                    epoch_accuracy_rank += ((outputs > 0.66) & (rank > 0.66)).eq(torch.ones_like(rank)).sum().item()
+                    output_df = pd.concat([output_df, pd.DataFrame({'image_id': img_id, 'caption': caption, 'groundtruth': humor.cpu().numpy().flatten(), 'rank': rank.cpu().numpy().flatten(), 'humor_score': outputs.cpu().numpy().flatten()})], axis=0)
+                    epoch_loss += loss.item()
+                    progress.update()
+                epoch_loss /= len(test_dataloader)
+                epoch_accuracy /= len(testDataset)
+                epoch_accuracy_rank /= len(testDataset)
+                mae_loss /= len(test_dataloader)
+                indomain_losses.append(epoch_loss)
+                indomain_accuracy.append(epoch_accuracy)
+                indomain_accuracy_rank.append(epoch_accuracy_rank)
+                indomain_mae.append(mae_loss)
+                progress.set_postfix({"loss": epoch_loss, "accuracy": epoch_accuracy, "mae": mae_loss})
+                # indomain_accuracy.append(mae_loss)
+                # progress.set_postfix({"loss": epoch_loss, "mae": mae_loss})
+                progress.close()
+                output_df = output_df.reset_index(drop=True)
+                output_df.to_csv(f"./Model/{output_dir}/oxford_test_{i + 1:03d}.csv", index=False)
+
+                output_df = pd.DataFrame(columns=['image_id', 'caption', 'groundtruth', 'humor_score'])
+                progress = tqdm(total=len(mcdonald_dataloader), desc=output_prefix)
+                epoch_loss = 0
+                epoch_accuracy = 0
+                epoch_accuracy_rank = 0
+                mae_loss = 0
+                for idx, (images, caption_ids, caption_masks, humor, rank, img_id, caption) in enumerate(mcdonald_dataloader):
+                    model.zero_grad()
+                    images, caption_ids, caption_masks = images.to(device), caption_ids.to(device), caption_masks.to(device)
+                    humor = humor.unsqueeze(1).to(device, dtype=torch.float)
+                    rank = rank.unsqueeze(1).to(device, dtype=torch.float)
+                    outputs = model(images, caption_ids, caption_masks)
+                    # loss = criterion(outputs, humor)
+                    # mae_loss += mae(outputs, humor).item()
+                    loss = criterion(outputs, rank)
+                    mae_loss += mae(outputs, rank).item()
+                    epoch_accuracy += (outputs > 0.5).eq(humor > 0.5).sum().item()
+                    epoch_accuracy_rank += ((outputs <= 0.33) & (rank <= 0.33)).eq(torch.ones_like(rank)).sum().item()
+                    epoch_accuracy_rank += ((outputs > 0.33) & (outputs <= 0.66) & (rank > 0.33) & (rank <= 0.66)).eq(torch.ones_like(rank)).sum().item()
+                    epoch_accuracy_rank += ((outputs > 0.66) & (rank > 0.66)).eq(torch.ones_like(rank)).sum().item()
+                    output_df = pd.concat([output_df, pd.DataFrame({'image_id': img_id, 'caption': caption, 'groundtruth': humor.cpu().numpy().flatten(),'rank': rank.cpu().numpy().flatten(), 'humor_score': outputs.cpu().numpy().flatten()})], axis=0)
+                    epoch_loss += loss.item()
+                    progress.update()
+                epoch_loss /= len(mcdonald_dataloader)
+                epoch_accuracy /= len(mcdonaldDataset)
+                epoch_accuracy_rank /= len(mcdonaldDataset)
+                mae_loss /= len(mcdonald_dataloader)
+                mcdonald_losses.append(epoch_loss)
+                mcdonald_accuracy.append(epoch_accuracy)
+                mcdonald_accuracy_rank.append(epoch_accuracy_rank)
+                mcdonald_mae.append(mae_loss)
+                progress.set_postfix({"loss": epoch_loss, "accuracy": epoch_accuracy})
+                # mcdonald_accuracy.append(mae_loss)
+                # progress.set_postfix({"loss": epoch_loss, "mae": mae_loss})
+                output_df = output_df.reset_index(drop=True)
+                output_df.to_csv(f"./Model/{output_dir}/mcdonald_test_{i + 1:03d}.csv", index=False)
+
+                output_df = pd.DataFrame(columns=['image_id', 'caption', 'groundtruth', 'humor_score'])
+                progress = tqdm(total=len(sonic_dataloader), desc=output_prefix)
+                epoch_loss = 0
+                epoch_accuracy = 0
+                epoch_accuracy_rank = 0
+                mae_loss = 0
+                for idx, (images, caption_ids, caption_masks, humor, rank, img_id, caption) in enumerate(sonic_dataloader):
+                    model.zero_grad()
+                    images, caption_ids, caption_masks = images.to(device), caption_ids.to(device), caption_masks.to(device)
+                    humor = humor.unsqueeze(1).to(device, dtype=torch.float)
+                    rank = rank.unsqueeze(1).to(device, dtype=torch.float)
+                    outputs = model(images, caption_ids, caption_masks)
+                    # loss = criterion(outputs, humor)
+                    # mae_loss += mae(outputs, humor).item()
+                    loss = criterion(outputs, rank)
+                    mae_loss += mae(outputs, rank).item()
+                    epoch_accuracy += (outputs > 0.5).eq(humor > 0.5).sum().item()
+                    epoch_accuracy_rank += ((outputs <= 0.33) & (rank <= 0.33)).eq(torch.ones_like(rank)).sum().item()
+                    epoch_accuracy_rank += ((outputs > 0.33) & (outputs <= 0.66) & (rank > 0.33) & (rank <= 0.66)).eq(torch.ones_like(rank)).sum().item()
+                    epoch_accuracy_rank += ((outputs > 0.66) & (rank > 0.66)).eq(torch.ones_like(rank)).sum().item()
+                    output_df = pd.concat([output_df, pd.DataFrame({'image_id': img_id, 'caption': caption, 'groundtruth': humor.cpu().numpy().flatten(), 'rank': rank.cpu().numpy().flatten(), 'humor_score': outputs.cpu().numpy().flatten()})], axis=0)
+                    epoch_loss += loss.item()
+                    progress.update()
+                epoch_loss /= len(sonic_dataloader)
+                epoch_accuracy /= len(sonicDataset)
+                epoch_accuracy_rank /= len(sonicDataset)
+                mae_loss /= len(sonic_dataloader)
+                sonic_losses.append(epoch_loss)
+                sonic_accuracy.append(epoch_accuracy)
+                sonic_accuracy_rank.append(epoch_accuracy_rank)
+                sonic_mae.append(mae_loss)
+                progress.set_postfix({"loss": epoch_loss, "accuracy": epoch_accuracy})
+                # sonic_accuracy.append(mae_loss)
+                # progress.set_postfix({"loss": epoch_loss, "ame": mae_loss})
+                output_df = output_df.reset_index(drop=True)
+                output_df.to_csv(f"./Model/{output_dir}/sonic_test_{i + 1:03d}.csv", index=False)
+
+
+            loss_data = pd.DataFrame()
+            loss_data['indomain_loss'] = indomain_losses
+            loss_data['mcdonald_loss'] = mcdonald_losses
+            loss_data['sonic_loss'] = sonic_losses
+            loss_data['indomain_mae'] = indomain_accuracy
+            loss_data['mcdonald_mae'] = mcdonald_accuracy
+            loss_data['sonic_mae'] = sonic_accuracy
+            loss_data['indomain_accuracy'] = indomain_accuracy
+            loss_data['mcdonald_accuracy'] = mcdonald_accuracy
+            loss_data['sonic_accuracy'] = sonic_accuracy
+            loss_data['indomain_accuracy_rank'] = indomain_accuracy_rank
+            loss_data['mcdonald_accuracy_rank'] = mcdonald_accuracy_rank
+            loss_data['sonic_accuracy_rank'] = sonic_accuracy_rank
+
+            loss_data.to_csv(f"./Model/{output_dir}/{output_prefix}_test.csv", index=False)
+
+            plt.plot(indomain_losses, label='indomain_mse')
+            plt.plot(mcdonald_losses, label='mcdonald_mse')
+            plt.plot(sonic_losses, label='sonic_mse')
+            plt.plot(sonic_mae, label='sonic_mae')
+            plt.plot(mcdonald_mae, label='mcdonald_mae')
+            plt.plot(indomain_mae, label='indomain_mae')
+            plt.legend()
+            plt.savefig(f"./Model/{output_dir}/{output_prefix}_test_loss.png")
+            plt.show()
+
+            # plt.plot(indomain_losses, label='indomain')
+            # plt.plot(mcdonald_losses, label='mcdonald')
+            # plt.plot(sonic_losses, label='sonic')
+            # plt.legend()
+            # plt.savefig(f"./Model/{output_dir}/{output_prefix}_test_loss.png")
+            # plt.show()
+
+            plt.plot(indomain_accuracy, label='indomain')
+            plt.plot(mcdonald_accuracy, label='mcdonald')
+            plt.plot(sonic_accuracy, label='sonic')
+            plt.plot(sonic_accuracy_rank, label='sonic rank')
+            plt.plot(mcdonald_accuracy_rank, label='mcdonald rank')
+            plt.plot(indomain_accuracy_rank, label='indomain rank')
+            plt.legend()
+            plt.savefig(f"./Model/{output_dir}/{output_prefix}_test_accuracy.png")
+            plt.show()
+
+def test_mine(model, args, dataform: str = 'Oxford', input_num: int = 5):
+
+    device = torch.device('cuda:0')
+
+    model = model.to(device)
+    model.eval()
+    # Load tokenizer
+    tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+    tokenizer.pad_token = tokenizer.eos_token  # GPT-2 doesn’t have a pad token by default
+    # Define image transform
+    image_transform = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    ])
+
+    df = pd.DataFrame()
+    with torch.no_grad():
+        for n in range(input_num):
+            # dataPath = f'./Model/{args.out_dir}/{args.out_dir}_test_{n + 1:03d}.csv'
+            if os.path.exists(f'./Model/{args.out_dir}/{args.out_dir}_test_{n + 1:03d}.csv'):
+                dataPath = f'./Model/{args.out_dir}/{args.out_dir}_test_{n + 1:03d}.csv'
+                save_path = f'./Model/{args.out_dir}/'
+            elif os.path.exists(f'./Model/{args.out_dir}/test_{n + 1:03d}.csv'):
+                dataPath = f'./Model/{args.out_dir}/test_{n + 1:03d}.csv'
+                save_path = f'./Model/{args.out_dir}/'
+            elif dataform == 'Oxford':
+                save_path = f'./Model/{args.out_dir}/oxford/'
+                if os.path.exists(f'{save_path}{args.out_dir}_test_{n + 1:03d}.csv'):
+                    dataPath = f'{save_path}{args.out_dir}_test_{n + 1:03d}.csv'
+                elif os.path.exists(f'{save_path}test_{n + 1:03d}.csv'):
+                    dataPath = f'{save_path}test_{n + 1:03d}.csv'
+                else:
+                    dataPath = "none"
+            elif dataform != 'Oxford':
+                save_path = f'./Model/{args.out_dir}/ins/'
+                if os.path.exists(f'{save_path}{args.out_dir}_test_{n + 1:03d}.csv'):
+                    dataPath = f'{save_path}{args.out_dir}_test_{n + 1:03d}.csv'
+                elif os.path.exists(f'{save_path}test_{n + 1:03d}.csv'):
+                    dataPath = f'{save_path}test_{n + 1:03d}.csv'
+                else:
+                    dataPath = "none"
+            else:
+                dataPath = "none"
+
+            if dataPath != "none":
+                data = pd.read_csv(dataPath)
+                # image_list = data['image_id'].tolist()
+                image_list = []
+                image_list.append('')
+                image_list += args.test_image_id_list[:10] + args.train_image_id_list[:10]
+                image_list.append('-')
+                image_list.append('-')
+                image_list = image_list * 3
+                data['image_id'] = image_list
+                caption_list = data['text'].tolist()
+                data['humor_score'] = ''
+                print(len(image_list), len(caption_list))
+                if dataform == 'Oxford':
+                    image_path = '../Data/Oxford_HIC/oxford_img/'
+                else:
+                    image_path = f'../Data/Instagram/{dataform}_img/'
+
+
+                for i in range(len(image_list)):
+                    if str(image_list[i]) != 'nan' and str(image_list[i]) != '-' and str(image_list[i]) != '':
+                        filename = f"{image_path}{image_list[i]}.jpg"
+                        image = Image.open(filename).convert('RGB')
+                        image = image_transform(image)
+                        inputs = tokenizer([caption_list[i]], truncation=True, max_length=64, return_tensors="pt")
+                        input_ids = inputs["input_ids"]
+                        attention_mask = inputs["attention_mask"]
+                        padding = torch.zeros(1, 64 - input_ids.shape[1], dtype=torch.int64)
+                        input_ids = torch.cat((input_ids, padding), dim=1).squeeze(0)
+                        attention_mask = torch.cat((attention_mask, padding), dim=1).squeeze(0)
+
+                        images, caption_ids, caption_masks = image.unsqueeze(0).to(device), input_ids.unsqueeze(0).to(device), attention_mask.unsqueeze(0).to(device)
+                        outputs = model(images, caption_ids, caption_masks)
+                        data.loc[i, 'humor_score'] = outputs.item()
+                    else:
+                        if str(image_list[i]) == 'nan':
+                            data.loc[i, 'humor_score'] = ''
+                        else:
+                            data.loc[i, 'humor_score'] = image_list[i]
+
+                if df.empty:
+                    df = data[['image_id', 'text', 'humor_score']]
+                else:
+                    df = pd.concat([df, data[['image_id', 'text', 'humor_score']]], axis=1)
+        df.to_csv(f'{save_path}{args.prefix}_test_humorscore.csv', index=False)
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataPath', default='humorScore_oxford_with_coco', help='data path')
-    parser.add_argument('--out_dir', default='humorScore_20250310_oxford_with_coco', help='output directory')
+    parser.add_argument('--out_dir', default='humorScore_20250318_oxford_with_coco_rank_onlyimage', help='output directory')
+    ### test_mine
+    # parser.add_argument('--out_dir', default='20250307_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_768_swin_tf8', help='output directory')
+    # parser.add_argument('--out_dir', default='20250217_sonicdrivein_only300_base_oxford_lower_only800_transformer_onlyLLMlora_p64_falcon_swin_tf8', help='output directory')
     parser.add_argument('--prefix', default='checkpoint', help='prefix for saved filenames')
-    parser.add_argument('--bs', type=int, default=128)
+    # parser.add_argument('--prefix', default='humorScore_20250314_oxford_with_coco_funnyscore_rank_MSE', help='prefix for saved filenames')
+
+    parser.add_argument('--bs', type=int, default=100)
+    # parser.add_argument('--bs', type=int, default=1500)
     args = parser.parse_args()
     if not os.path.exists('./Model/' + args.out_dir):
         os.makedirs('./Model/' + args.out_dir)
         os.makedirs('D:/MemeGAN/Model/' + args.out_dir)
-    args.out_dir = './Model/' + args.out_dir
 
     model = ImageTextModel()
     device = torch.device('cuda:0')
     model = model.to(device)
-    # 20250115_totalClip_oxford_only100_300k_transformer_p40_falcon_bleu1_0.05 == 32
-    # save_file = '20250204_totalClip_oxford_1000up_only1000_rest_300up_top300_transformer_p64_falcon_swin_tf8_ins'
-    # i = 27
+    # save_file = 'humorScore_20250314_oxford_with_coco_funnyscore_rank_MSE'
+    # i = 3
     # model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i:03d}.pt'))
     model.eval()
     train(model, args, output_dir=args.out_dir, output_prefix=args.prefix)
+    # test(model, args, output_dir=args.out_dir, output_prefix=args.prefix)
 
+    old_test = -1
+    # trainData = '../Data/Oxford_HIC/parse/oxford_lower_800up_only800_all_ViT-B_32_train.pkl'
+    # testData = '../Data/Oxford_HIC/parse/oxford_lower_800up_only800_rest_300up_top300_ViT-B_32_test.pkl'
+    trainData = '../Data/Instagram/parse/300up_only300_all_sonicdrivein_ViT-B_32_train.pkl'
+    testData = '../Data/Instagram/parse/100up_only100_rest_50up_top50_sonicdrivein_ViT-B_32_test.pkl'
+    train_dataform = "sonicdrivein"
+    test_dataform = "sonicdrivein"
+    if old_test > 0:
+        class OxfordDataset(torch.utils.data.Dataset):
+            def __len__(self) -> int:
+                return len(self.captions_tokens)
+
+            def pad_tokens(self, item: int):
+                tokens = self.captions_tokens[item].cpu()
+                padding = self.max_seq_len - tokens.shape[0]
+                if padding > 0:
+                    tokens = torch.cat((tokens, torch.zeros(padding, dtype=torch.int64) - 1))
+                    self.captions_tokens[item] = tokens
+                elif padding < 0:
+                    tokens = tokens[:self.max_seq_len]
+                    self.captions_tokens[item] = tokens
+                mask = tokens.ge(0)  # mask is zero where we out of sequence
+                tokens[~mask] = 0
+                mask = mask.float()
+                mask = torch.cat((torch.ones(self.prefix_length), mask), dim=0)  # adding prefix mask
+                return tokens, mask
+
+            def pad_emotion(self, item: int):
+                emotion = self.emotion[self.image_ids[item]]
+                sentiment = self.sentiment[self.image_ids[item]]
+                humor = self.humor[self.image_ids[item]]
+                padding_emotion = self.max_seq_len_emo - emotion.shape[0]
+                padding_sentiment = self.max_seq_len_emo - sentiment.shape[0]
+                padding_humor = self.max_seq_len_emo - humor.shape[0]
+                if padding_emotion > 0:
+                    emotion = torch.cat((emotion, torch.zeros(padding_emotion, dtype=torch.int64)))
+                elif padding_emotion < 0:
+                    emotion = emotion[:self.max_seq_len_emo]
+                if padding_sentiment > 0:
+                    sentiment = torch.cat((sentiment, torch.zeros(padding_sentiment, dtype=torch.int64)))
+                elif padding_sentiment < 0:
+                    sentiment = sentiment[:self.max_seq_len_emo]
+                if padding_humor > 0:
+                    humor = torch.cat((humor, torch.zeros(padding_humor, dtype=torch.int64)))
+                elif padding_humor < 0:
+                    humor = humor[:self.max_seq_len_emo]
+
+                return emotion, sentiment, humor
+
+            def __getitem__(self, item: int) -> tuple[Tensor, Tensor, Any, int]:
+                tokens, mask = self.pad_tokens(item)
+                if self.dataFrom == 'Oxford':
+                    prefix = torch.load('../../Oxford_HIC/ImageData/' + self.image_ids[item] + '.pt',
+                                        weights_only=False)
+                else:
+                    prefix = torch.load(
+                        '../../Instagram/ImageData/' + self.dataFrom + '/' + self.image_ids[item] + '.pt',
+                        weights_only=False)
+                # emotion, sentiment, humor = self.pad_emotion(item)
+                if self.normalize_prefix:
+                    prefix = prefix.float()
+                    prefix = prefix / prefix.norm(2, -1)
+                return tokens, mask, prefix, item  # , emotion, sentiment, humor
+
+            def filter_data_by_bleu(self, model, batch_size=20, bleu_threshold=0.1, file_path=None):
+                """
+                Filter dataset based on BLEU scores using batch processing.
+
+                Args:
+                    model: The model used for generating sentences.
+                    batch_size: Number of samples per batch.
+                    bleu_threshold: Minimum BLEU score to keep a sample.
+                """
+                dataloader = DataLoader(self, batch_size=batch_size, shuffle=False, drop_last=True)
+
+                # Temporary storage for filtered indices
+                filtered_indices = []
+                device = torch.device('cuda:0')
+                progress = tqdm(total=len(dataloader), desc="Filtering train dataset")
+                for batch in dataloader:
+                    tokens_batch, masks_batch, prefixes_batch, original_indices = batch
+                    tokens_batch, masks_batch, prefixes_batch = tokens_batch.to(device), masks_batch.to(
+                        device), prefixes_batch.to(device, dtype=torch.bfloat16)
+
+                    # Forward pass
+                    prefix_embeds = model.clip_project(prefixes_batch).view(-1, self.prefix_length,
+                                                                            model.embedding_size)
+                    text_embeds = model.falcon.model.embed_tokens(tokens_batch)
+                    embedding_cat = torch.cat((prefix_embeds, text_embeds), dim=1)
+                    outputs = model.falcon(inputs_embeds=embedding_cat, attention_mask=masks_batch)
+                    logits = outputs.logits[:, self.prefix_length - 1:-1]
+                    generated_tokens_batch = torch.argmax(logits, dim=-1)
+
+                    # BLEU calculation and filtering
+                    for i, original_idx in enumerate(original_indices):
+                        reference = self.captions_tokens[original_idx].tolist()
+                        candidate = generated_tokens_batch[i].tolist()
+                        bleu_score = sentence_bleu([reference], candidate, weights=(1, 0, 0, 0))
+
+                        if bleu_score <= bleu_threshold:
+                            filtered_indices.append(original_idx)
+                    progress.update()
+
+                # Update dataset based on filtered indices
+                print(
+                    f"Before Filtered: {len(self.captions_tokens)}, After Filtered: {len(filtered_indices)}, BLEU <= {bleu_threshold}")
+                self.captions = [self.captions[i] for i in filtered_indices]
+                self.image_ids = [self.image_ids[i] for i in filtered_indices]
+                self.captions_tokens = [self.captions_tokens[i] for i in filtered_indices]
+                self.caption2embedding = [self.caption2embedding[i] for i in filtered_indices]
+                del tokens_batch, masks_batch, prefixes_batch, original_indices, prefix_embeds, text_embeds, embedding_cat, outputs, logits, generated_tokens_batch, reference, candidate, bleu_score
+                gc.collect()
+                torch.cuda.empty_cache()
+
+            def __init__(self, data_path: str, prefix_length: int, gpt2_type: str = "gpt2", normalize_prefix=False,
+                         model=None,
+                         batch_size=30, bleu_threshold=0.4, dataFrom='Oxford'):
+                self.data_path = data_path
+                self.dataFrom = dataFrom
+                self.bleu = False
+                # self.tokenizer = GPT2Tokenizer.from_pretrained(gpt2_type)
+                # self.tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
+                self.tokenizer = AutoTokenizer.from_pretrained("tiiuae/Falcon3-1B-Base")
+                # self.tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B")
+                # self.tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neo-1.3B")
+                # self.tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neo-2.7B")
+                self.prefix_length = prefix_length
+                self.normalize_prefix = normalize_prefix
+                with open(data_path, 'rb') as f:
+                    all_data = pickle.load(f)
+                sys.stdout.flush()
+                self.prefixes = all_data["clip_embedding"]
+                captions_raw = all_data["captions"]
+                self.image_ids = [caption["image_id"] for caption in captions_raw]
+                self.captions = [caption['caption'] for caption in captions_raw]
+                if os.path.isfile(f"{data_path[:-4]}_bleu_all.pkl"):
+                    del all_data
+                    gc.collect()
+                    torch.cuda.empty_cache()
+                    with open(f"{data_path[:-4]}_bleu_all.pkl", 'rb') as f:
+                        self.captions_tokens, self.caption2embedding, self.max_seq_len = pickle.load(f)
+                    all_len = torch.tensor([len(self.captions_tokens[i]) for i in range(len(self))]).float()
+                    self.max_seq_len = min(int(all_len.mean() + all_len.std() * 10), int(all_len.max()))
+                else:
+                    self.captions_tokens = []
+                    self.caption2embedding = []
+                    max_seq_len = 0
+                    for caption in captions_raw:
+                        self.captions_tokens.append(
+                            torch.tensor(self.tokenizer.encode(caption['caption'], max_length=64, truncation=True),
+                                         dtype=torch.int64))
+                        self.caption2embedding.append(caption["clip_embedding"])
+                        max_seq_len = max(max_seq_len, self.captions_tokens[-1].shape[0])
+                    self.max_seq_len = max_seq_len
+                    all_len = torch.tensor([len(self.captions_tokens[i]) for i in range(len(self))]).float()
+                    self.max_seq_len = min(int(all_len.mean() + all_len.std() * 10), int(all_len.max()))
+                    with open(f"{self.data_path[:-4]}_bleu_all.pkl", 'wb') as f:
+                        pickle.dump([self.captions_tokens, self.caption2embedding, self.max_seq_len], f)
+                if dataFrom == 'Oxford':
+                    self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford.csv')
+                    # self.emotion_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_emotion.csv')
+                    # self.sentiment_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_sentiment.csv')
+                    # self.humor_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_humor.csv')
+                else:
+                    self.emotions_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{dataFrom}.csv')
+                    # self.emotion_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{dataFrom}_emotion.csv')
+                    # self.sentiment_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{dataFrom}_sentiment.csv')
+                    # self.humor_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{dataFrom}_humor.csv')
+                # self.emotion will save the emotion data for each image
+                self.emotion = dict()
+                self.sentiment = dict()
+                self.humor = dict()
+                self.max_seq_len_emo = 21
+                for i in range(self.emotions_data.shape[0]):
+                    image_id = self.emotions_data.iloc[i]['image_id']
+                    emotion = str(self.emotions_data.iloc[i]['emotion']).replace(';', ' ')
+                    sentiment = str(self.emotions_data.iloc[i]['sentiment']).replace(';', ' ')
+                    humor = str(self.emotions_data.iloc[i]['humor']).replace(';', ' ')
+                    self.emotion[image_id] = torch.tensor(
+                        self.tokenizer.encode(emotion, max_length=64, truncation=True),
+                        dtype=torch.int64)
+                    self.sentiment[image_id] = torch.tensor(
+                        self.tokenizer.encode(sentiment, max_length=64, truncation=True), dtype=torch.int64)
+                    self.humor[image_id] = torch.tensor(
+                        self.tokenizer.encode(humor, max_length=64, truncation=True, padding=True), dtype=torch.int64)
+
+                print(f"Train Data size: {len(self.captions_tokens)}")
+                # self.filter_data_by_bleu(model, batch_size, bleu_threshold)
+
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        prefix_length = 64
+        normalize_prefix = False
+        trainDataset = OxfordDataset(trainData, prefix_length, normalize_prefix=normalize_prefix, dataFrom=train_dataform)
+        testDataset = OxfordDataset(testData, prefix_length, normalize_prefix=normalize_prefix, dataFrom=test_dataform)
+
+        if train_dataform:
+            ####################### default #######################
+            train_image = []
+            train_text = []
+            for i in range(len(trainDataset)):
+                caption = trainDataset.captions[i]
+                image_id = trainDataset.image_ids[i]
+                if image_id not in train_image:
+                    print(f"Image ID: {image_id}, Caption: {caption}")
+                    train_image.append(image_id)
+                    train_text.append(caption)
+                    print(
+                        f"Emotion: {trainDataset.emotion[image_id].shape}, Sentiment: {trainDataset.sentiment[image_id].shape}, Humor: {trainDataset.humor[image_id].shape}")
+                    if len(train_image) == 10:
+                        break
+            #######################################################
+            tokens_list = []
+            mask_list = []
+            prefix_list = []
+            # train_emotion_list = []
+            # train_sentiment_list = []
+            # train_humor_list = []
+            train_gt = []
+            train_caption = dict()
+            train_image_id_list = []
+            if train_dataform != "Oxford":
+                load = pd.read_csv(f'../Data/Instagram/CaptionID_{train_dataform}.csv')
+                load['caption'] = load['caption'].str.lower()
+                train_text = []
+                for i in range(len(train_image)):
+                    caption = load[load['image_id'] == train_image[i]]['caption'].values[0]
+                    train_text.append(caption)
+                inside = []
+                for i in range(len(trainDataset)):
+                    caption = trainDataset.captions[i]
+                    image_id = trainDataset.image_ids[i]
+                    if image_id in train_image and image_id not in train_image_id_list:
+                        train_caption[image_id] = []
+                        train_caption[image_id].append(caption)
+                        tokens, mask, prefix, item = trainDataset[i]
+                        tokens_list.append(tokens)
+                        mask_list.append(mask)
+                        prefix_list.append(prefix)
+                        emotion, sentiment, humor = trainDataset.pad_emotion(item)
+                        # train_emotion_list.append(emotion)
+                        # train_sentiment_list.append(sentiment)
+                        # train_humor_list.append(humor)
+                        train_gt.append(caption)
+
+                        train_image_id_list.append(image_id)
+            else:
+                for i in range(len(trainDataset)):
+                    caption = trainDataset.captions[i]
+                    image_id = trainDataset.image_ids[i]
+                    if image_id in train_image:
+                        if train_caption.get(image_id) is not None:
+                            train_caption[image_id].append(caption)
+                        else:
+                            train_caption[image_id] = []
+                            train_caption[image_id].append(caption)
+                        if caption in train_text and image_id not in train_image_id_list:
+                            # tokens, mask, prefix, item, emotion, sentiment, humor = trainDataset[i]
+                            tokens, mask, prefix, item = trainDataset[i]
+                            tokens_list.append(tokens)
+                            mask_list.append(mask)
+                            prefix_list.append(prefix)
+                            train_gt.append(caption)
+                            # emotion, sentiment, humor = trainDataset.pad_emotion(item)
+                            # train_emotion_list.append(emotion)
+                            # train_sentiment_list.append(sentiment)
+                            # train_humor_list.append(humor)
+                            train_image_id_list.append(image_id)
+            train_tokens = torch.stack(tokens_list).to(device)
+            train_mask = torch.stack(mask_list).to(device)
+            train_prefix = torch.stack(prefix_list).to(device)
+            # train_emotion = torch.stack(train_emotion_list).to(device)
+            # train_sentiment = torch.stack(train_sentiment_list).to(device)
+            # train_humor = torch.stack(train_humor_list).to(device)
+            print(train_tokens.shape, train_mask.shape, train_prefix.shape, len(train_image_id_list))
+            # print(train_emotion.shape, train_sentiment.shape, train_humor.shape)
+        if test_dataform:
+            ####################### default #######################
+            test_image = []
+            test_text = []
+            # test_emotion_list = []
+            # test_sentiment_list = []
+            # test_humor_list = []
+            for i in range(len(testDataset)):
+                caption = testDataset.captions[i]
+                image_id = testDataset.image_ids[i]
+                if image_id not in test_image:
+                    print(f"Image ID: {image_id}, Caption: {caption}")
+                    test_image.append(image_id)
+                    test_text.append(caption)
+                    if len(test_image) == 10:
+                        break
+            #######################################################
+            tokens_list = []
+            mask_list = []
+            prefix_list = []
+            # test_emotion_list = []
+            # test_sentiment_list = []
+            # test_humor_list = []
+            test_gt = []
+            test_caption = dict()
+            test_image_id_list = []
+
+            if test_dataform != "Oxford":
+                load = pd.read_csv(f'../Data/Instagram/CaptionID_{test_dataform}.csv')
+                load['caption'] = load['caption'].str.lower()
+                test_text = []
+                for i in range(len(test_image)):
+                    caption = load[load['image_id'] == test_image[i]]['caption'].values[0]
+                    test_text.append(caption)
+                for i in range(len(testDataset)):
+                    caption = testDataset.captions[i]
+                    image_id = testDataset.image_ids[i]
+                    if image_id in test_image and image_id not in test_image_id_list:
+                        test_caption[image_id] = []
+                        test_caption[image_id].append(caption)
+                        tokens, mask, prefix, item = testDataset[i]
+                        tokens_list.append(tokens)
+                        mask_list.append(mask)
+                        prefix_list.append(prefix)
+                        # emotion, sentiment, humor = testDataset.pad_emotion(item)
+                        # test_emotion_list.append(emotion)
+                        # test_sentiment_list.append(sentiment)
+                        # test_humor_list.append(humor)
+                        test_gt.append(caption)
+                        test_image_id_list.append(image_id)
+            else:
+                for i in range(len(testDataset)):
+                    caption = testDataset.captions[i]
+                    image_id = testDataset.image_ids[i]
+                    if image_id in test_image:
+                        if test_caption.get(image_id) is not None:
+                            test_caption[image_id].append(caption)
+                        else:
+                            test_caption[image_id] = []
+                            test_caption[image_id].append(caption)
+                        if caption in test_text and image_id not in test_image_id_list:
+                            # print(f"Image ID: {image_id}, Caption: {caption}")
+                            tokens, mask, prefix, item = testDataset[i]
+                            tokens_list.append(tokens)
+                            mask_list.append(mask)
+                            prefix_list.append(prefix)
+                            # emotion, sentiment, humor = testDataset.pad_emotion(item)
+                            # test_emotion_list.append(emotion)
+                            # test_sentiment_list.append(sentiment)
+                            # test_humor_list.append(humor)
+                            test_gt.append(caption)
+                            test_image_id_list.append(image_id)
+
+            test_tokens = torch.stack(tokens_list).to(device)
+            test_mask = torch.stack(mask_list).to(device)
+            test_prefix = torch.stack(prefix_list).to(device)
+            # test_emotion = torch.stack(test_emotion_list).to(device)
+            # test_sentiment = torch.stack(test_sentiment_list).to(device)
+            # test_humor = torch.stack(test_humor_list).to(device)
+            print(test_tokens.shape, test_mask.shape, test_prefix.shape)
+            # print(test_emotion.shape, test_sentiment.shape, test_humor.shape)
+
+        args.test_image_id_list = test_image_id_list
+        args.train_image_id_list = train_image_id_list
+        test_mine(model, args, dataform=train_dataform, input_num=old_test)
 
 if __name__ == '__main__':
     main()
