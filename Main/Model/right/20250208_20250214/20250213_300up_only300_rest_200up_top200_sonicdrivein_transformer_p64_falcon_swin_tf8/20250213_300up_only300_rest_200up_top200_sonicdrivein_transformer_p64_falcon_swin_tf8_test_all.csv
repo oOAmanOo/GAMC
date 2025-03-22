@@ -1,0 +1,137 @@
+Name,text,loss,fitCount,gtNum,bleu1,bleu2,bleu3,bleu4
+generate_beam,,,,,,,,
+test1,"no matter what you do, we 'll see you at our 50¢ entry booth this week.",,0.000000000000000,1.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000
+test2,"# loveit or hateit, we like it or hate it.",,0.000000000000000,1.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000
+test3,tag your friends and enjoy some refreshing watermelon!**??????????????????????????????? ,,0.000000000000000,1.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000
+test4,"what will you do first? snap a pic of yourself with us after drop off your t rex!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+",,0.000000000000000,1.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000
+test5,"so hand in your we’ ve got word on what’ s in the scoop! drop us a tweet or snap us a photo of the treat you’ d love to have or the one we’ ve got for you, and we’ ll share it with all our friends on sonic, tweet us or join us at sonic cups on may 21, 2",,2.000000000000000,1.000000000000000,0.016129032258065,0.000000000000000,0.000000000000000,0.000000000000000
+test6,putting those on sale first and getting first to try the company's new limited offer limited to first 100 people at each location.,,0.000000000000000,1.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000
+test7,"so you, we know you’ re excited for this, but we’ re not going to give you all the time in the day.",,1.000000000000000,1.000000000000000,0.043478260869565,0.000000000000000,0.000000000000000,0.000000000000000
+test8,🚨 press the button for the world’ s most famous fried cheese sandwich.,,0.000000000000000,1.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000
+test9,"when it comes to seafood, some people just can’ t get enough.",,0.000000000000000,1.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000
+test10,"reader's tip of the week: if you haven’t noticed, we’ve been reading lots of great books lately! if you’ve got a favorite, we’d love to hear about it.",,1.000000000000000,1.000000000000000,0.035714285714286,0.000000000000000,0.000000000000000,0.000000000000000
+train1,"we got cheesecake blasts, with actual cheesecake pieces in it! 💞 choose between our classic cheesecake and strawberry cheesecake blasts, only at sonic.",,23.000000000000000,1.000000000000000,0.337241320023524,0.337241320023524,0.337241320023524,0.337241320023524
+train2,"we got a wacky deal headed your way! 🤪 buy a wacky pack kids meal online or in the sonic app, from may 24- 30, and get a free small blast reward for your next visit! treats for the whole family! 👪* see app for details.",,42.000000000000000,1.000000000000000,0.893408899580179,0.848029399918963,0.800587195727693,0.773694085793687
+train3,"warm chili and cheese goodness, crispy fried onion crunch, and allllll of the southwest flavor we could pack on top of our 100% all beef patty.",,26.000000000000000,1.000000000000000,0.412872940029652,0.412872940029652,0.412872940029652,0.412872940029652
+train4,"we asked our fans what they would put on their sonic shrines, and we picked the most heavenly comments! 😇 😇 😇 😇 😇 😇 😇 😇 😇 😇 😇 😇 😇 😇 😇 😇 😇 😇 😇 😇 😇 😇 😇 😇 😇 😇 �",,44.000000000000000,1.000000000000000,0.413043478260870,0.377777777777778,0.363636363636364,0.348837209302326
+train5,"we know@ reba and rex’ s valentine’ s day plans💕 🤭now you can enjoy reba’ s sweetheart meal too- a sonic cheeseburger, tots( ofc),& our new chocolate covered strawberry shake.",,19.000000000000000,1.000000000000000,0.554276435393867,0.392319074053735,0.281305709692376,0.194482959787322
+train6,"‼️sonic is bringing hot wheels™ monster truck™ toys back to the wacky pack‼️ enjoy a made-for-you mealtime favorite with a surprise, collectible monster truck toy inside today.",,27.000000000000000,1.000000000000000,0.494749500696453,0.494749500696453,0.494749500696453,0.494749500696453
+train7,teachers go above and beyond every day to make dreams a reality.,,11.000000000000000,1.000000000000000,0.069228357466376,0.068656222280703,0.067969660057896,0.067130528452243
+train8,# teacherappreciationmonth is coming up and celebrations are in order! 🥳 head to limeadesforlearning.,,11.000000000000000,1.000000000000000,0.188297242918538,0.184346951109058,0.179738277331332,0.174291662866746
+train9,meet jenna& zack- former coworkers at sonic.,,5.000000000000000,1.000000000000000,0.083799404353036,0.058659583047125,0.046927666437700,0.029329791523563
+train10,one more big scoop for the spring.,,7.000000000000000,1.000000000000000,0.057432619267617,0.057432619267617,0.057432619267617,0.057432619267617
+test_avg,-,,0.400000000000000,1.000000000000000,0.009532157884192,0.000000000000000,0.000000000000000,0.000000000000000
+train_avg,-,,21.500000000000000,1.000000000000000,0.350435019799011,0.323208538820461,0.304246125290061,0.289006261774313
+generate2,,,,,,,,
+test1,"no matter the season, we 'll keep you and your summer sea to win 50¢ on our 50th anniversary.",,1.000000000000000,1.000000000000000,0.052631578947368,0.000000000000000,0.000000000000000,0.000000000000000
+test2,"# loveit or hateit, we’ re not eating half-price drinks when we see it.",,0.000000000000000,1.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000
+test3,"this for-free snack, it’ s your chance to see your favorite blogger.",,0.000000000000000,1.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000
+test4,tell your favorite teacher about the secret secret to a try out.,,1.000000000000000,1.000000000000000,0.083333333333333,0.000000000000000,0.000000000000000,0.000000000000000
+test5,now ’ s coat! thanks to sonic for sponsoring our scoop day.,,0.000000000000000,1.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000
+test6,putting those on sale first and getting first to try the company classic chips and coconut cream soda.,,0.000000000000000,1.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000
+test7,"so you, we know you’ re excited for this, but we’ re not going to give you the whole bubble thing.",,1.000000000000000,1.000000000000000,0.047619047619048,0.000000000000000,0.000000000000000,0.000000000000000
+test8,🚨 the sonic is the only burger.,,1.000000000000000,1.000000000000000,0.107353899010755,0.000000000000000,0.000000000000000,0.000000000000000
+test9,we know it can be hard to resist your favorite sonic cream.,,1.000000000000000,1.000000000000000,0.076670367885777,0.000000000000000,0.000000000000000,0.000000000000000
+test10,"while we' re still in the early stages of 2018, some things are just plain crazy.",,0.000000000000000,1.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000
+train1,"we got cheesecake blasts, with actual cheesecake pieces in it! 💞 choose between our classic cheesecake and strawberry cheesecake blasts, only at sonic.",,23.000000000000000,1.000000000000000,0.337241320023524,0.337241320023524,0.337241320023524,0.337241320023524
+train2,"we got a wacky deal headed your way! 🤪 buy a wacky pack kids meal online or in the sonic app, from may 24- 30, and get a free small blast reward for your next visit! treats for the whole family! 👪* see app for details.",,42.000000000000000,1.000000000000000,0.893408899580179,0.848029399918963,0.800587195727693,0.773694085793687
+train3,"warm chili and cheese goodness, crispy fried onion crunch, and allllll of the southwest flavor we could pack on top of our 100% all beef patty.",,26.000000000000000,1.000000000000000,0.412872940029652,0.412872940029652,0.412872940029652,0.412872940029652
+train4,"we asked our fans what they would put on their sonic shrines, and we picked the most heavenly comments.",,19.000000000000000,1.000000000000000,0.948729480016437,0.948729480016437,0.948729480016437,0.948729480016437
+train5,"we know@ reba and rex’ s valentine’ s day plans💕 🤭now you can enjoy reba’ s sweetheart meal too- a sonic cheeseburger, tots( ofc),& our new chocolate covered strawberry shake.",,19.000000000000000,1.000000000000000,0.554276435393867,0.392319074053735,0.281305709692376,0.194482959787322
+train6,"‼️sonic is bringing hot wheels™ monster truck™ toys back to the wacky pack‼️ enjoy a made-for-you mealtime favorite with a surprise, collectible monster truck toy inside today.",,27.000000000000000,1.000000000000000,0.494749500696453,0.494749500696453,0.494749500696453,0.494749500696453
+train7,teachers go above and beyond every day to make dreams a reality.,,11.000000000000000,1.000000000000000,0.069228357466376,0.068656222280703,0.067969660057896,0.067130528452243
+train8,# teacherappreciationmonth is coming up and celebrations are in order! 🥳 head to limeadesforlearning.,,11.000000000000000,1.000000000000000,0.188297242918538,0.184346951109058,0.179738277331332,0.174291662866746
+train9,meet jenna& zack- former coworkers at sonic.,,5.000000000000000,1.000000000000000,0.083799404353036,0.058659583047125,0.046927666437700,0.029329791523563
+train10,one more big scoop for the spring.,,7.000000000000000,1.000000000000000,0.057432619267617,0.057432619267617,0.057432619267617,0.057432619267617
+test_avg,-,,0.500000000000000,1.000000000000000,0.036760822679628,0.000000000000000,0.000000000000000,0.000000000000000
+train_avg,-,,19.000000000000000,1.000000000000000,0.404003619974568,0.380303709044327,0.362755436928068,0.348995488845725
+train,,,,,,,,
+test1,noinks allin for them us sonic it  us--------It----,6.718750000000000,1.000000000000000,1.000000000000000,0.125000000000000,0.000000000000000,0.000000000000000,0.000000000000000
+test2,"# the the newman coming( tagadd-## happyar##letared”#,,,,,,,,,, and###",6.937500000000000,2.000000000000000,1.000000000000000,0.125000000000000,0.000000000000000,0.000000000000000,0.000000000000000
+test3,"thisny s out, but’s in? but�?###########################################################################,###############",5.406250000000000,1.000000000000000,1.000000000000000,0.166666666666667,0.000000000000000,0.000000000000000,0.000000000000000
+test4,"tell star at it, trust like’ will the sonic  will�� will the the the the the, the is is the is is up up up up is to to to is the, the the",6.093750000000000,9.000000000000000,1.000000000000000,0.029411764705882,0.000000000000000,0.000000000000000,0.000000000000000
+test5,"so  sonic than treatbe than melt to! sonic�️#, the upty and, and the, the our ,, guys and,,   the,,, guys",6.406250000000000,0.000000000000000,1.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000
+test6,putting first is a its and: get Hyd get� get� get and####---##----------------------###--,7.906250000000000,0.000000000000000,1.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000
+test7,"so it withgood moment truck the like. get� get#################-#########################,,,... guys our,.",7.031250000000000,0.000000000000000,1.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000
+test8,"� would good work. all and cheese. you��‍,,     sign sign sign                                   ",6.750000000000000,1.000000000000000,1.000000000000000,0.090909090909091,0.000000000000000,0.000000000000000,0.000000000000000
+test9,we before. nichric' s day is use� is is�️ are’re give offering with your feathered’ unique by eat your of images images images work pictures pictures of pictures day images images images of images work images images images of work work images images the of of of work,6.562500000000000,7.000000000000000,1.000000000000000,0.020833333333333,0.000000000000000,0.000000000000000,0.000000000000000
+test10,while does! it couple be be be? ��.@� Add##########################TheTheTheThe########The############TheTheThe######TheThe###########The#,7.062500000000000,1.000000000000000,1.000000000000000,0.111111111111111,0.000000000000000,0.000000000000000,0.000000000000000
+train1,"we got cheesecake blasts, with actual cheesecake pieces in it! 💞 choose between our classic cheesecake and strawberry cheesecake blasts, only at sonic. at
+
+
+ participating sonic® drive-ins for a limited time. mobile ordering available at select locations; hours may vary. not&& rt2021 america",0.539062500000000,40.000000000000000,1.000000000000000,0.828117910005437,0.826639128023285,0.825088210334686,0.823459746761657
+train2,"we got a wacky deal headed your way! 🤪 buy a wacky pack kids meal online or in the sonic app, from may 24-1 70, and get a free small blast reward for your next visit! treats for the whole family! 👪*
+More
+k excludes sonic for details",0.707031250000000,42.000000000000000,1.000000000000000,0.854166666666667,0.808510638297872,0.760869565217391,0.733333333333333
+train3,"warm chili and cheese goodness, crispy fried onion crunch, and allllll of the southwest flavor we could pack on top of our 100% all beef patty. try a twisted texan cheeseburger or footlong coney today. try
+
+
+ one of the1/2 price when you order online or",0.531250000000000,44.000000000000000,1.000000000000000,0.874282907453141,0.852564463134802,0.829835858615610,0.806024939595504
+train4,"we asked our fans what they would put on their sonic shrines, and we picked the most heavenly comments. 😇 �ItItItIt----HereHereHereHere---It--#HereItHereIt--It-----It------",0.158203125000000,20.000000000000000,1.000000000000000,0.952380952380952,0.950000000000000,0.947368421052632,0.944444444444444
+train5,"we know@! reese the rex’ s re’s day plans.� 🤭now you can enjoy reba’s sweetheart meal too-- sonic sonic cheeseburger, tots(,included your),&& a new chocolate covered strawberry shake. available now through march 3rd. �    ",1.046875000000000,23.000000000000000,1.000000000000000,0.647058823529412,0.484848484848485,0.406250000000000,0.354838709677419
+train6,"‼️sonic is bringing hot wheels™ monster truck™ toys back to the wacky pack‼️ enjoy a made-for-you mealtime favorite with a surprise, collectible monster truck toy inside today. it  s a combo that experts are calling a truckload of fun and flavor. available may 30 ",0.439453125000000,41.000000000000000,1.000000000000000,0.890411011068174,0.866673451499142,0.841805531950631,0.815724543155852
+train7,"teachers go above and beyond every day to make dreams a reality.🌟 let’ s show them how much they mean to us! this may, to celebrate#, teacherappreciationmonth, you can help us donate to teachers all across the country+, enjoy a special sonic offer! to",0.632812500000000,39.000000000000000,1.000000000000000,0.863636363636364,0.790697674418605,0.714285714285714,0.634146341463415
+train8,# teacherappreciationmonth is coming up and celebrations are in order! 🥳 head to limeadesforlearning.com to check out how you can help amazing teachers across the country and access a special sonic offer in their honor.🍒�######### up up ,0.373046875000000,34.000000000000000,1.000000000000000,0.864864864864865,0.861111111111111,0.857142857142857,0.852941176470588
+train9,meet jenna&& zack-- they coworkers at sonic. these two fell in love with their jobs  and each other. they ve been working                                ,0.773437500000000,15.000000000000000,1.000000000000000,0.681818181818182,0.523809523809524,0.450000000000000,0.368421052631579
+train10,"one more big scoop for the summer. 🌼 all
+
+-time spring bull slush for the summer. 🌴 try
+take
+
+ both at your local sonic before the seasons change. the. of limited limited of size size size size size size size size limited limited limited limited limited limited limited limited size  ",1.718750000000000,24.000000000000000,1.000000000000000,0.460000000000000,0.387755102040816,0.333333333333333,0.276595744680851
+test_avg,-,6.687500000000000,2.200000000000000,1.000000000000000,0.066893196672608,0.000000000000000,0.000000000000000,0.000000000000000
+train_avg,-,0.691992187500000,32.200000000000003,1.000000000000000,0.791673768142319,0.735260957718364,0.696597949193285,0.660993003221464

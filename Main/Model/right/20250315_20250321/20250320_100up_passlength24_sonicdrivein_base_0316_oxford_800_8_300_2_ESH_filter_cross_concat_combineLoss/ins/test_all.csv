@@ -1,0 +1,85 @@
+Name,image_id,text,loss,fitCount,gtNum,bleu1,bleu2,bleu3,bleu4
+generate_beam,,,,,,,,,
+test1,sonicdrivein_635,we’ re giving you a sweet deal on 50¢🍪&amp;🍜baguettes.,,0.000000000000000,1.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000
+test2,sonicdrivein_403,"when you finally call it a day and bring home the bacon, you’ ll want to share that sweet feeling with your special someone.",,3.000000000000000,1.000000000000000,0.125000000000000,0.000000000000000,0.000000000000000,0.000000000000000
+test3,sonicdrivein_574,"the sonic scoop is coming! take a trip to sonic and enjoy a free ride with every ½ price meal! 10/15 and 1/2 price deals available today! 500,000 units sold so far! 500,000 units sold so far! 500,000 units",,1.000000000000000,1.000000000000000,0.025641025641026,0.000000000000000,0.000000000000000,0.000000000000000
+test4,sonicdrivein_691,"soba ramen for your dreams! this week, your favorite one-bite ramen is 100% sakura (pink) for your taste.",,0.000000000000000,1.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000
+test5,sonicdrivein_408,"dolls or dinosaur? you have to choose at half price! if you choose the former, we'll give you part of the day; if you choose the latter, you'll get part of the day.",,5.000000000000000,1.000000000000000,0.060606060606061,0.000000000000000,0.000000000000000,0.000000000000000
+test6,sonicdrivein_1181,"wow, you’ re giving them a sweet deal! build your own sweet 5¢ corn dogs with your friends after 8pm!# sonic# tamagotchi# # mobilefun # buildingyourown# # # # # # # # # # # # # # ",,1.000000000000000,1.000000000000000,0.025641025641026,0.000000000000000,0.000000000000000,0.000000000000000
+test7,sonicdrivein_585,"hot & cool! $ 10 & $ 15 meal, plus $ 10, $ 15, $ 20, $ 25, $ 30, $ 35, $ 40, $ 4",,0.000000000000000,1.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000
+test8,sonicdrivein_412,we have a sonic cart full of social distancing treats.,,1.000000000000000,1.000000000000000,0.081873075307798,0.000000000000000,0.000000000000000,0.000000000000000
+test9,sonicdrivein_832,"tomorrow is a new day, and it’ s bursting with possibilities.",,1.000000000000000,1.000000000000000,0.090909090909091,0.000000000000000,0.000000000000000,0.000000000000000
+test10,sonicdrivein_414,"minding you, we’ ve got a schedule-breaking the-hitchh-to-hell-with-food-and-social-distancing reality trend for you and your friends on march 19th., 2020! tag your the-hitchh-to-hell-with-food-and-social-distancing",,3.000000000000000,1.000000000000000,0.090909090909091,0.000000000000000,0.000000000000000,0.000000000000000
+train1,sonicdrivein_1006,🐦 we’ ve got a cheesecake & sonic cheesecake in 1/2 price at sonic...  only for limited time! (they’ ll be gone in about a month) omg: we’ re so happy these cheesecake have been added to the sonic drive-in menu? only for limited time! (they’ ll be gone in about,,18.000000000000000,1.000000000000000,0.235294117647059,0.000000000000000,0.000000000000000,0.000000000000000
+train2,sonicdrivein_1009,"we’ ve got a giveaway on the way! buy 3 small treats and get the whole package for$ 5! 50¢ corn dogs, 100¢ hot dogs, and$ 1.",,11.000000000000000,1.000000000000000,0.194235811679951,0.055010841769497,0.000000000000000,0.000000000000000
+train3,sonicdrivein_1012,"corn on the cob or sweet potato fries, we back it up with a chili con queso twist, all you need is a chili con cheese sauce and tortilla chips.",,12.000000000000000,1.000000000000000,0.176939816854005,0.000000000000000,0.000000000000000,0.000000000000000
+train4,sonicdrivein_102,we know@ reba and rex’ s valentine’ s day plans💕 🤭now you can enjoy reba’ s favorite treats too.,,8.000000000000000,1.000000000000000,0.191193146877685,0.126134367731806,0.106843229137530,0.085140698218969
+train5,sonicdrivein_1021,‼️sonic is bringing hot wheels to ½ price ️ all you need to do is fill out the form to reserve a place on the back of a truckload of hot wheels today.,,18.000000000000000,1.000000000000000,0.265670728984328,0.105374207409649,0.065264025234363,0.022479830914058
+train6,sonicdrivein_1024,"teachers go above and beyond every day, so let’ s show them how much we appreciate them! this may, to celebrate# teacherappreciationmonth, you can help us donate to teachers all across the country.",,23.000000000000000,1.000000000000000,0.514765589185829,0.438529924483036,0.357375829799418,0.270811462136893
+train7,sonicdrivein_1026,# teacherappreciationmonth is coming up and sonic’ s amazing offer is a treat.,,8.000000000000000,1.000000000000000,0.107053793935886,0.049703547184519,0.036148034316013,0.019881418873807
+train8,sonicdrivein_1030,boomerush your summer treat at the sonic before they’ re all over the place.,,6.000000000000000,1.000000000000000,0.169336183425809,0.030393673948222,0.000000000000000,0.000000000000000
+train9,sonicdrivein_1050,every day is an opportunity.,,5.000000000000000,1.000000000000000,0.004516580942613,0.004516580942613,0.004516580942613,0.004516580942613
+train10,sonicdrivein_1056,"the drive-in just got a whole lot cuter! 🥺 our delicious wacky packs now include our new tokidoki car! available through may 2, 2016.",,20.000000000000000,1.000000000000000,0.676613621792196,0.564825284278703,0.516686765732222,0.463963626371791
+test_avg,-,-,,1.500000000000000,1.000000000000000,0.050057936901409,0.000000000000000,0.000000000000000,0.000000000000000
+train_avg,-,-,,12.900000000000000,1.000000000000000,0.253561939132536,0.137448842774804,0.108683446516216,0.086679361745813
+generate2,,,,,,,,,
+test1,sonicdrivein_635,"scooping swag from 50¢ sandwiches, 🥪🍞🍞, all for same price! 50¢ made easy with 2//3 size bags, it’ s r& r’ s.# satchmo# r&r# 50cent# festivitiestuff# # rrr# # 5",,0.000000000000000,1.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000
+test2,sonicdrivein_403,when you finally call it a day and you sound like a total rock.,,2.000000000000000,1.000000000000000,0.142857142857143,0.000000000000000,0.000000000000000,0.000000000000000
+test3,sonicdrivein_574,we have a sonic sweet treat coming your way.,,1.000000000000000,1.000000000000000,0.079614590063754,0.000000000000000,0.000000000000000,0.000000000000000
+test4,sonicdrivein_691,melty-ness tomorrow! our future thea# one-way trip to the future with sonic the car and his friends.,,0.000000000000000,1.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000
+test5,sonicdrivein_408,dolls or phones? you can have neither.,,0.000000000000000,1.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000
+test6,sonicdrivein_1181,"wow your friends, build a summer day with 1/2 price sweet cream sodas.",,1.000000000000000,1.000000000000000,0.076923076923077,0.000000000000000,0.000000000000000,0.000000000000000
+test7,sonicdrivein_585,hot and cold! 5 cents all day today.,,0.000000000000000,1.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000
+test8,sonicdrivein_412,we have a sonic batch tomorrow.,,0.000000000000000,1.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000
+test9,sonicdrivein_832,national wireless team shall salute their sonic bros.,,0.000000000000000,1.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000
+test10,sonicdrivein_414,the perfect timeline for this mom’ s day of the food is a group hug with a little bit of steam coming your way.,,3.000000000000000,1.000000000000000,0.083333333333333,0.000000000000000,0.000000000000000,0.000000000000000
+train1,sonicdrivein_1006,we ❤ this cheesecake with sonic's cheesecake in it! 💞 choose between our classic and strawberry cheesecake at 1/2 price at sonic's drive-in for the rest of the month.,,18.000000000000000,1.000000000000000,0.322356731170902,0.148386431808828,0.115411669184644,0.079900386358600
+train2,sonicdrivein_1009,we got a wacky deal headed your way! 🤪 buy a wacky pack# 50 and get 1 of our favorite popsicles in your choice of 2 flavors for$ 2.,,16.000000000000000,1.000000000000000,0.296592314113723,0.230388672570482,0.199101321974490,0.186083158614620
+train3,sonicdrivein_1012,"warm chili and cheese goodness, crispy fried onion, and all day alonzo freese make this 5 ½ second chili ass a recipe.",,11.000000000000000,1.000000000000000,0.133223103310798,0.083740236366787,0.073272706820939,0.061703332059738
+train4,sonicdrivein_102,we know@ reba and her family’ s summer plans ✅ now you can enjoy reba’ s famous watermeloncorn on our new¢ summercartoon.,,7.000000000000000,1.000000000000000,0.184411270522439,0.055197931312839,0.028978913939240,0.000000000000000
+train5,sonicdrivein_1021,‼️sonic is coming! enjoy a made-for-you mealtime favorite snack in a coloring book.,,8.000000000000000,1.000000000000000,0.048607892981125,0.032911594205970,0.021542134389362,0.015797565218866
+train6,sonicdrivein_1024,teachers go above and beyond every day to make dreams a reality.,,11.000000000000000,1.000000000000000,0.069228357466376,0.068656222280703,0.067969660057896,0.067130528452243
+train7,sonicdrivein_1026,# teacherappreciationmonth is coming up and sonic is giving a special deal on mobile and in-store.,,9.000000000000000,1.000000000000000,0.162326233679175,0.086573991295560,0.046378923908336,0.024973266719873
+train8,sonicdrivein_1030,boomerush in the slush for the spring slushes.,,4.000000000000000,1.000000000000000,0.046507244605332,0.026575568345904,0.015502414868444,0.000000000000000
+train9,sonicdrivein_1050,every day is an opportunity.,,5.000000000000000,1.000000000000000,0.004516580942613,0.004516580942613,0.004516580942613,0.004516580942613
+train10,sonicdrivein_1056,we’ re going with the family! 🎲 our go-to-and-beyond toys& games will be available in our in-store tokus now.,,4.000000000000000,1.000000000000000,0.124374213452891,0.000000000000000,0.000000000000000,0.000000000000000
+test_avg,-,-,,0.700000000000000,1.000000000000000,0.038272814317731,0.000000000000000,0.000000000000000,0.000000000000000
+train_avg,-,-,,9.300000000000001,1.000000000000000,0.139214394224537,0.073694722912969,0.057267432608596,0.044010481836655
+train,,,,,,,,,
+test1,sonicdrivein_635,"sc deal to choose date  you’ re offering s our of:�##,# the thea the the",38.750000000000000,1.000000000000000,1.000000000000000,0.066666666666667,0.000000000000000,0.000000000000000,0.000000000000000
+test2,sonicdrivein_403,"when matter where hot you take, you’ have up here a best result...###.##..#
+
+..#a-##aa
+
+##aa#.",33.750000000000000,4.000000000000000,1.000000000000000,0.266666666666667,0.071428571428571,0.000000000000000,0.000000000000000
+test3,sonicdrivein_574,"we are, things we taste support system will stay the same.� �55 anksenold9 and  is-#########--###-- the,----,,, is",39.000000000000000,4.000000000000000,1.000000000000000,0.235294117647059,0.062500000000000,0.000000000000000,0.000000000000000
+test4,sonicdrivein_691,so you get your to faster fun? our� ♀️ your----------------------------------------------aaa-,40.250000000000000,0.000000000000000,1.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000
+test5,sonicdrivein_408,d early accurate day will the replies see and ifaaaa,38.000000000000000,1.000000000000000,1.000000000000000,0.100000000000000,0.000000000000000,0.000000000000000,0.000000000000000
+test6,sonicdrivein_1181,wow of are your awesome little more fun! give#####################.######..###############.,39.750000000000000,2.000000000000000,1.000000000000000,0.222222222222222,0.000000000000000,0.000000000000000,0.000000000000000
+test7,sonicdrivein_585,hot ’ t tell try! price this.� /.-----.----------,40.750000000000000,0.000000000000000,1.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000,0.000000000000000
+test8,sonicdrivein_412,we  be great if now time of the week but heading'' funbreakcontest all#somyissiet#  funfestistfestfest__loungezztytytytytytytytytytytytytyty__tydondontyty_____dondon  of,38.000000000000000,4.000000000000000,1.000000000000000,0.200000000000000,0.071428571428571,0.000000000000000,0.000000000000000
+test9,sonicdrivein_832,"national word  package kind for all you through the
+� � folks company..ty with with with thai is is than; thai thai= the price the thetyty thetyty thai thaitytyty thai thai the is = with with is to: with with with with to to-- than with",38.750000000000000,2.000000000000000,1.000000000000000,0.043478260869565,0.000000000000000,0.000000000000000,0.000000000000000
+test10,sonicdrivein_414,the the  know in and your mom homes home and the design designity is is is is our our is is is is our our our our the	 to to to our our our our our theory our our our sciencetyizationization ladieslyly our ourty our our our our our our strainize location our science,35.250000000000000,1.000000000000000,1.000000000000000,0.018518518518519,0.000000000000000,0.000000000000000,0.000000000000000
+train1,sonicdrivein_1006,"we ❤ a and, with sonic cheesecake pieces in it! 💞 choose between our classic and and strawberry cheesecake blasts, only at sonic. 
+te
+mel participating sonic® drive-ins. this limited time. for ordering available at select locations; hours may vary. tm&& covid2020 america",1.507812500000000,33.000000000000000,1.000000000000000,0.662494328004350,0.487505126782963,0.390831257526956,0.333835032470942
+train2,sonicdrivein_1009,"we got a wacky deal headed your way! � buy a wacky pack# meal online or in the sonic app, and may 24-- call get0, and get a free small blast reward for your next visit! treats for the whole family! 👪*
+
+tags deal our for details",1.382812500000000,39.000000000000000,1.000000000000000,0.787234042553192,0.673913043478261,0.577777777777778,0.500000000000000
+train3,sonicdrivein_1012,"warm chili and cheese goodness, crispy fried onion,, and allllll of the world flavor we could pack on top of our 100% all beef patty. try a twisted texan cheeseburger or footlong coney today. try
+
+
+all the at the102 price when you order online.",1.453125000000000,40.000000000000000,1.000000000000000,0.791152645920287,0.685005153176062,0.616306945173557,0.544257605073368
+train4,sonicdrivein_102,"we know@, rebeland her’ s summer’ s day plans💕 🌭now you can enjoy reba’s favorite care too ⭐-� chocolate cheeseburger, french,,and your),&& our new chocolate& strawberries ice. available now through march 3rd. limit....",1.960937500000000,17.000000000000000,1.000000000000000,0.499775017055840,0.272855110414677,0.156476048983327,0.097015150369663
+train5,sonicdrivein_1021,"‼️sonic is bringing hot wheels™ monster truck to to to to the wacky pack‼️ enjoy a made-for-you mealtime favorite with a surprise, collectible monster truck toy inside.. it s a combo you’ are calling a truckload of fun and flavor. available  11 ",1.273437500000000,37.000000000000000,1.000000000000000,0.735983787090672,0.643061874229870,0.568222776797946,0.512857480597120
+train6,sonicdrivein_1024,"teachers go above and beyond every day to make dreams a reality.🌟 let’ s show them how much they mean to us! this may, to celebrate,, teacherappreciationmonth, you can help us donate to teachers all across the country.& enjoy a special sonic offer!#.&",1.296875000000000,37.000000000000000,1.000000000000000,0.860465116279070,0.785714285714286,0.707317073170732,0.625000000000000
+train7,sonicdrivein_1026,# teacherappreciationmonth is coming up and sonic are in order! 😳 head to sonicades to#.com to check out sonic you can help amazing teachers like the country and access a special sonic offer for their honor. �#..-----.--. ,1.468750000000000,28.000000000000000,1.000000000000000,0.702702702702703,0.527777777777778,0.371428571428571,0.235294117647059
+train8,sonicdrivein_1030,"so more big scoop for the spring. 🌼 all
+over thesenew red bull slush for the summer. 🌴#
+sour
+# both at your local sonic before the seasons change. � for...#.#####..##.....##.",2.406250000000000,22.000000000000000,1.000000000000000,0.709677419354839,0.633333333333333,0.551724137931034,0.464285714285714
+train9,sonicdrivein_1050,"every day is an opportunity. every sundae is an opportunity for rich hot fudge and oreo® cookies. treat yourself to an ice cream adventure with an oreo® big scoop cookie dough sundae. try, the the,,, the,- is the, is",0.628906250000000,34.000000000000000,1.000000000000000,0.820512820512820,0.815789473684211,0.810810810810811,0.805555555555556
+train10,sonicdrivein_1056,"we drive-in just got a whole lot more! 🥺our delicious wacky packs now include our tokidoki toys, like our sonic changing sonicju&& sonicicoot, available through may 2. available?tyty.-----.---&-----ty",1.406250000000000,21.000000000000000,1.000000000000000,0.723686958279277,0.536064413540206,0.408233668772926,0.270176464424264
+test_avg,-,-,38.225000000000001,1.900000000000000,1.000000000000000,0.115284645259070,0.020535714285714,0.000000000000000,0.000000000000000
+train_avg,-,-,1.478515625000000,30.800000000000001,1.000000000000000,0.729368483775305,0.606101959213165,0.515912906837364,0.438827712042369
