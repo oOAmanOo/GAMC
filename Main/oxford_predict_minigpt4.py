@@ -554,11 +554,11 @@ class Predictor(object):
                     output_fc = model.funnyscore_relu(output_fc)
                     output_fc = model.funnyscore_mlp2(output_fc).squeeze(-1)
                     output_fc = model.funnyscore_sigmoid(output_fc)
-                    capLoss, fcLoss, loss = combine_loss(logits, tokens[i], funnyscore.to(device, dtype=torch.bfloat16),output_fc)
+                    capLoss, fcLoss, loss = combine_loss(logits, tokens, funnyscore.to(device, dtype=torch.bfloat16),output_fc)
                     self.train_caption_loss.append(capLoss.item())
                     self.train_fc_loss.append(fcLoss.item())
                 else:
-                    loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens[i].flatten(),
+                    loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens.flatten(),
                                              ignore_index=0)
                     # loss = PCloss(logits, tokens)
                 # print(loss)
@@ -1450,16 +1450,16 @@ class ClipCocoDataset(Dataset):
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-# trainData = '../Data/Oxford_HIC/parse/oxford_800_8_300_2_ViT-B_32_train.pkl'
-# testData = '../Data/Oxford_HIC/parse/oxford_800_8_300_2_ViT-B_32_test.pkl'
+trainData = '../Data/Oxford_HIC/parse/oxford_800_8_300_2_ViT-B_32_train.pkl'
+testData = '../Data/Oxford_HIC/parse/oxford_800_8_300_2_ViT-B_32_test.pkl'
 # trainData = '../Data/Instagram/parse/100up_only200_passlength_12_o_mcdonalds_switzerland_ViT-B_32_train.pkl'
-testData = '../Data/Instagram/parse/100up_only200_passlength_12_x_mcdonalds_switzerland_ViT-B_32_test.pkl'
-
+# testData = '../Data/Instagram/parse/100up_only200_passlength_12_x_mcdonalds_switzerland_ViT-B_32_test.pkl'
+# testData = '../Data/Instagram/parse/100up_only100_passlength_x_10_sonicdrivein_ViT-B_32_test.pkl'
 prefix_length = 64
 normalize_prefix = False
-# train_dataform = "mcdonalds_switzerland"
-# trainDataset = OxfordDataset(trainData, prefix_length, normalize_prefix=normalize_prefix, dataFrom = train_dataform)
-test_dataform = "mcdonalds_switzerland"
+train_dataform = "Oxford"
+trainDataset = OxfordDataset(trainData, prefix_length, normalize_prefix=normalize_prefix, dataFrom = train_dataform)
+test_dataform = "Oxford"
 testDataset = OxfordDataset(testData, prefix_length, normalize_prefix=normalize_prefix, dataFrom = test_dataform)
 train_dataform = None
 test_dataform = None
@@ -1749,7 +1749,7 @@ if test_dataform:
     print(test_emotion.shape, test_sentiment.shape, test_humor.shape, test_funnyscore.shape)
 
 model = ClipCaptionModel(mode='nn', prefix_length=prefix_length, clip_length=prefix_length, prefix_size=512, num_layers=8)
-adapter = True
+adapter = False
 save_file = '20250316_oxford_800_8_300_2_ESH_filter_cross_concat'
 i = 13
 if adapter :
@@ -1794,7 +1794,7 @@ if adapter :
     # percent = round((b / a) * 100, 3)
     # print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
 
-save_file = '20250327_100up_only200_passlength_12_MC_base_0316_oxford_800_8_300_2_ESH_filter_cross_concat_combineLoss_o'
+save_file = '20250316_oxford_800_8_300_2_ESH_filter_cross_concat'
 for i in range(20):
     if os.path.exists(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'):
         model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'))
