@@ -25,11 +25,10 @@ class HMTorchDataset(Dataset):
         self.splits = splits.split(",")
 
         # Loading datasets to data
+        pre = ''
         self.raw_data = []
         for split in self.splits:
             path = os.path.join("data/", f"{split}.jsonl")
-            print(path)
-            pre = ''
             with open(path, 'r', encoding='utf-8') as f:
                 for line in f:
                     if '\u007d' not in line:
@@ -40,9 +39,6 @@ class HMTorchDataset(Dataset):
                         pre = ''
                     datum = json.loads(line)
                     self.raw_data.append(datum)
-            # self.raw_data.extend(
-            #         [json.loads(jline) for jline in open(path, "r", encoding="utf-8").read().split('\n')]
-            # )
         print("Load %d data from split(s) %s." % (len(self.raw_data), self.name))
 
         # List to dict (for evaluation and others)
@@ -51,7 +47,7 @@ class HMTorchDataset(Dataset):
         # Loading detection features to img_data
         img_data = []
 
-        path = f'data/{args.imgdir}.tsv'
+        path = f"data/{args.imgdir}.tsv"
         img_data.extend(load_obj_tsv(path, self.id2datum.keys()))
 
         # Convert img list to dict
@@ -136,7 +132,7 @@ class HMEvaluator:
 
         for img_id, ans in id2ans.items():
 
-            datum = self.dataset.id2datum[int(img_id)]
+            datum = self.dataset.id2datum[(img_id)]
             label = datum["label"]
 
             if ans == label:
@@ -182,6 +178,7 @@ import time
 
 # csv.field_size_limit(sys.maxsize)
 csv.field_size_limit(10**6)
+
 FIELDNAMES = ["img_id", "img_h", "img_w", "objects_id", "objects_conf",
               "attrs_id", "attrs_conf", "num_boxes", "boxes", "features"]
 

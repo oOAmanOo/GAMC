@@ -469,7 +469,7 @@ def train(train_dataset: ClipCocoDataset,test_dataset: ClipCocoDataset, model: C
         model.eval()
         with torch.no_grad():
             progress = tqdm(total=len(test_data_loader))
-            for idx, (tokens, mask, prefix, image_id, caption, image_id, caption) in enumerate(test_data_loader):
+            for idx, (tokens, mask, prefix, image_id, caption) in enumerate(test_data_loader):
                 tokens, mask, prefix = tokens.to(device), mask.to(device), prefix.to(device, dtype=torch.float32)
                 outputs = model(tokens, prefix, mask)
                 logits = outputs.logits[:, test_dataset.prefix_length - 1: -1]
@@ -737,13 +737,13 @@ class Predictor(object):
 
 def main():
     parser = argparse.ArgumentParser()
-    # parser.add_argument('--trainData', default='../../Data/Oxford_HIC/parse/oxford_100k_ViT-B_32_train.pkl')
-    # parser.add_argument('--testData', default='../../Data/Oxford_HIC/parse/oxford_100k_ViT-B_32_test.pkl')
-    parser.add_argument('--trainData', default='../../Data/Instagram/parse/100up_only100_passlength_o_10_sonicdrivein_ViT-B_32_train.pkl')
-    parser.add_argument('--testData', default='../../Data/Instagram/parse/100up_only100_passlength_x_10_sonicdrivein_ViT-B_32_test.pkl')
+    parser.add_argument('--trainData', default='../../Data/Oxford_HIC/parse/oxford_lower_800up_only800_all_ViT-B_32_train.pkl')
+    parser.add_argument('--testData', default='../../Data/Oxford_HIC/parse/oxford_lower_800up_only800_rest_300up_top300_ViT-B_32_test.pkl')
+    # parser.add_argument('--trainData', default='../../Data/Instagram/parse/100up_only100_passlength_o_10_sonicdrivein_ViT-B_32_train.pkl')
+    # parser.add_argument('--testData', default='../../Data/Instagram/parse/100up_only100_passlength_x_10_sonicdrivein_ViT-B_32_test.pkl')
     # parser.add_argument('--trainData', default='../../Data/Instagram/parse/100up_only200_passlength_12_o_mcdonalds_switzerland_ViT-B_32_train.pkl')
     # parser.add_argument('--testData', default='../../Data/Instagram/parse/100up_only200_passlength_12_x_mcdonalds_switzerland_ViT-B_32_test.pkl')
-    parser.add_argument('--out_dir', default='./Model/clip_100up_only100_passlength_10_SD_base_oxford_800_8_300_82')
+    parser.add_argument('--out_dir', default='./Model/clip_100up_only200_passlength_12_MC_base_oxford_800_8_300_82')
     parser.add_argument('--prefix', default='coco_prefix', help='prefix for saved filenames')
     parser.add_argument('--epochs', type=int, default=10)
     parser.add_argument('--save_every', type=int, default=1)
@@ -805,15 +805,15 @@ def main():
     # percent = round((b / a) * 100, 3)
     # print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
 
-    train(train_dataset, test_dataset, model, args, output_dir=args.out_dir, output_prefix=args.prefix)
+    # train(train_dataset, test_dataset, model, args, output_dir=args.out_dir, output_prefix=args.prefix)
 
-    # for i in range(20):
-    #     if os.path.exists(f'{args.out_dir}/{args.prefix}-{i + 1:03d}.pt'):
-    #         model.load_state_dict(torch.load(f'{args.out_dir}/{args.prefix}-{i + 1:03d}.pt'))
-    #         model = model.eval()
-    #         pred = Predictor()
-    #         print(f"Model {i + 1:03d} loaded.")
-    #         pred.predict(test_dataset, model, args, i + 1)
+    for i in range(20):
+        if os.path.exists(f'{args.out_dir}/{args.prefix}-{i + 1:03d}.pt'):
+            model.load_state_dict(torch.load(f'{args.out_dir}/{args.prefix}-{i + 1:03d}.pt'))
+            model = model.eval()
+            pred = Predictor()
+            print(f"Model {i + 1:03d} loaded.")
+            pred.predict(test_dataset, model, args, i + 1)
 
 
 if __name__ == '__main__':
