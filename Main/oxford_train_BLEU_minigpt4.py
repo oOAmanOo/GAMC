@@ -1,3 +1,5 @@
+import os
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 import torch
 import torch.nn as nn
 from torch import Tensor
@@ -5,7 +7,7 @@ from torch.nn import functional as nnf
 from torch.utils.data import Dataset, DataLoader
 from enum import Enum
 from transformers import GPT2Tokenizer, GPT2LMHeadModel
-from transformers import AdamW, get_linear_schedule_with_warmup
+from transformers import get_linear_schedule_with_warmup
 from transformers import AutoTokenizer, AutoModelForCausalLM
 # from transformers import AutoConfig, AutoTokenizer, Gemma2ForCausalLM
 from tqdm import tqdm
@@ -22,6 +24,10 @@ import pandas as pd
 # from peft import LoraConfig, TaskType, get_peft_model
 from nltk.translate.bleu_score import sentence_bleu
 import gc
+import torch.nn.functional as F
+from transformers import BertTokenizer, BertModel
+import ast
+from torch.optim import AdamW
 
 seed = 42
 random.seed(seed)
@@ -75,15 +81,33 @@ class OxfordDataset(torch.utils.data.Dataset):
 
         return emotion, sentiment, humor
 
+    def bertTokenize(self, text):
+        tokens = self.bert_tokenizer(text, return_tensors='pt', truncation=False)
+        seq_len = tokens['input_ids'].shape[1]
+        max_len = max(seq_len, 64)
+
+        inputs = self.bert_tokenizer(text, return_tensors='pt', truncation=False, padding='max_length', max_length=max_len)
+        input_ids = inputs['input_ids']
+        attention_mask = inputs['attention_mask']
+
+        # 使用BERT模型获取文本的向量表示
+        with torch.no_grad():
+            outputs = self.bert_model(input_ids, attention_mask=attention_mask)
+            # 获取最后一层的隐藏状态
+            last_hidden_state = outputs.last_hidden_state
+            pooled_embedding = F.adaptive_max_pool1d(last_hidden_state.permute(0, 2, 1), 64).permute(0, 2, 1)
+        return pooled_embedding.squeeze(0)
+
     def __getitem__(self, item: int) -> tuple[Tensor, Tensor, Any, int, Tensor, Tensor, Tensor]:
         tokens, mask = self.pad_tokens(item)
-        if self.dataFrom == 'Oxford':
+        if self.datafrom == 'Oxford':
             prefix = torch.load('../../Oxford_HIC/ImageData/' + self.image_ids[item] + '.pt', weights_only=False)
         else:
-            prefix = torch.load('../../Instagram/ImageData/' + self.dataFrom + '/' + self.image_ids[item] + '.pt',
+            prefix = torch.load('../../Instagram/ImageData/' + self.datafrom + '/' + self.image_ids[item] + '.pt',
                                 weights_only=False)
-        emotion, sentiment, humor = self.pad_emotion(item)
-        # emotion, sentiment, humor = self.emotion[self.image_ids[item]], self.sentiment[self.image_ids[item]], self.humor[self.image_ids[item]]
+        # emotion, sentiment, humor = self.pad_emotion(item)
+        emotion, sentiment, humor = self.emotion[self.image_ids[item]], self.sentiment[self.image_ids[item]], self.humor[self.image_ids[item]]
+        # emotion, sentiment, humor = self.bertTokenize(self.emotion[self.image_ids[item]]), self.bertTokenize(self.sentiment[self.image_ids[item]]), self.bertTokenize(self.humor[self.image_ids[item]])
         if self.normalize_prefix:
             prefix = prefix.float()
             prefix = prefix / prefix.norm(2, -1)
@@ -139,9 +163,9 @@ class OxfordDataset(torch.utils.data.Dataset):
         torch.cuda.empty_cache()
 
     def __init__(self, data_path: str, prefix_length: int, gpt2_type: str = "gpt2", normalize_prefix=False, model=None,
-                 batch_size=30, bleu_threshold=0.4, dataFrom='Oxford'):
+                 batch_size=30, bleu_threshold=0.4, datafrom='Oxford'):
         self.data_path = data_path
-        self.dataFrom = dataFrom
+        self.datafrom = datafrom
         self.bleu = False
         # self.tokenizer = GPT2Tokenizer.from_pretrained(gpt2_type)
         # self.tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
@@ -149,6 +173,9 @@ class OxfordDataset(torch.utils.data.Dataset):
         # self.tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B")
         # self.tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neo-1.3B")
         # self.tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neo-2.7B")
+        # 加载预训练的BERT模型和分词器
+        self.bert_tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+        self.bert_model = BertModel.from_pretrained('bert-base-uncased')
         self.prefix_length = prefix_length
         self.normalize_prefix = normalize_prefix
         with open(data_path, 'rb') as f:
@@ -181,32 +208,35 @@ class OxfordDataset(torch.utils.data.Dataset):
             self.max_seq_len = min(int(all_len.mean() + all_len.std() * 10), int(all_len.max()))
             with open(f"{self.data_path[:-4]}_bleu_all.pkl", 'wb') as f:
                 pickle.dump([self.captions_tokens, self.caption2embedding, self.max_seq_len], f)
-        if dataFrom == 'Oxford':
+        if datafrom == 'Oxford':
             # self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford.csv')
-            self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_filter.csv')
+            # self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_filter.csv')
+            # self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_sentence_generate_Oxford.csv')
+            # self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_sentence_generate_Oxford_bert.csv')
+            self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_sentence_generate_Oxford_bert_6844.csv')
             # self.emotion_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_emotion_filter.csv')
             # self.sentiment_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_sentiment_filter.csv')
             # self.humor_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_humor_filter.csv')
         else:
-            # self.emotions_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{dataFrom}.csv')
-            self.emotions_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{dataFrom}_filter.csv')
-            # self.emotion_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{dataFrom}_emotion_filter.csv')
-            # self.sentiment_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{dataFrom}_sentiment_filter.csv')
-            # self.humor_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{dataFrom}_humor_filter.csv')
+            # self.emotions_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{datafrom}.csv')
+            self.emotions_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{datafrom}_filter.csv')
+            # self.emotion_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{datafrom}_emotion_filter.csv')
+            # self.sentiment_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{datafrom}_sentiment_filter.csv')
+            # self.humor_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{datafrom}_humor_filter.csv')
         # self.emotion will save the emotion data for each image
         self.emotion = dict()
         self.sentiment = dict()
         self.humor = dict()
 
-        self.max_seq_len_emo = 21
-        for i in range(self.emotions_data.shape[0]):
-            image_id = self.emotions_data.iloc[i]['image_id']
-            emotion = str(self.emotions_data.iloc[i]['emotion']).replace(';', ' ')
-            sentiment = str(self.emotions_data.iloc[i]['sentiment']).replace(';', ' ')
-            humor = str(self.emotions_data.iloc[i]['humor']).replace(';', ' ')
-            self.emotion[image_id] = torch.tensor(self.tokenizer.encode(emotion, max_length=64, truncation=True), dtype=torch.int64)
-            self.sentiment[image_id] = torch.tensor(self.tokenizer.encode(sentiment, max_length=64, truncation=True), dtype=torch.int64)
-            self.humor[image_id] = torch.tensor(self.tokenizer.encode(humor, max_length=64, truncation=True, padding=True), dtype=torch.int64)
+        # self.max_seq_len_emo = 21
+        # for i in range(self.emotions_data.shape[0]):
+        #     image_id = self.emotions_data.iloc[i]['image_id']
+        #     emotion = str(self.emotions_data.iloc[i]['emotion']).replace(';', ' ')
+        #     sentiment = str(self.emotions_data.iloc[i]['sentiment']).replace(';', ' ')
+        #     humor = str(self.emotions_data.iloc[i]['humor']).replace(';', ' ')
+        #     self.emotion[image_id] = torch.tensor(self.tokenizer.encode(emotion, max_length=64, truncation=True), dtype=torch.int64)
+        #     self.sentiment[image_id] = torch.tensor(self.tokenizer.encode(sentiment, max_length=64, truncation=True), dtype=torch.int64)
+        #     self.humor[image_id] = torch.tensor(self.tokenizer.encode(humor, max_length=64, truncation=True, padding=True), dtype=torch.int64)
 
         # padding_emotion = 384 - (self.emotion_data.shape[1] - 1)
         # padding_sentiment = 384 - (self.sentiment_data.shape[1] - 1)
@@ -219,6 +249,17 @@ class OxfordDataset(torch.utils.data.Dataset):
         #     self.sentiment[image_id] = torch.cat((sentiment, torch.zeros(padding_sentiment, dtype=torch.int64)))
         #     humor = torch.tensor(self.humor_data.iloc[i][1:].tolist())
         #     self.humor[image_id] = torch.cat((humor, torch.zeros(padding_humor, dtype=torch.int64)))
+        with tqdm(total=self.emotions_data.shape[0]) as pbar:
+            for i in range(self.emotions_data.shape[0]):
+                image_id = self.emotions_data.iloc[i]['image_id']
+                if image_id in self.image_ids:
+                    self.emotion[image_id] = torch.tensor(ast.literal_eval(self.emotions_data.iloc[i]['emotion']))
+                    self.sentiment[image_id] = torch.tensor(ast.literal_eval(self.emotions_data.iloc[i]['sentiment']))
+                    self.humor[image_id] = torch.tensor(ast.literal_eval(self.emotions_data.iloc[i]['humor']))
+                pbar.update(1)
+            pbar.close()
+        del self.emotions_data
+        gc.collect()
         print(f"Train Data size: {len(self.captions_tokens)}")
         # self.filter_data_by_bleu(model, batch_size, bleu_threshold)
 
@@ -543,16 +584,18 @@ class ClipCaptionModel(nn.Module):
         # embedding_text = self.gemma.base_model.model.model.embed_tokens(tokens)
         # embedding_text = self.gpt.transformer.wte(tokens)
         embedding_text = self.falcon.model.embed_tokens(tokens)
-        embedding_emotion = self.falcon.model.embed_tokens(emotion)
-        embedding_sentiment = self.falcon.model.embed_tokens(sentiment)
-        embedding_humor = self.falcon.model.embed_tokens(humor)
-        empty_ESH = torch.zeros(embedding_emotion.shape[0], 1, embedding_emotion.shape[2], dtype=torch.bfloat16, device=embedding_text.device)
-        embedding_ESH = torch.cat((empty_ESH, embedding_emotion, embedding_sentiment, embedding_humor), dim=1)
+        # embedding_emotion = self.falcon.model.embed_tokens(emotion)
+        # embedding_sentiment = self.falcon.model.embed_tokens(sentiment)
+        # embedding_humor = self.falcon.model.embed_tokens(humor)
+        # empty_ESH = torch.zeros(embedding_emotion.shape[0], 1, embedding_emotion.shape[2], dtype=torch.bfloat16, device=embedding_text.device)
+        # embedding_ESH = torch.cat((empty_ESH, embedding_emotion, embedding_sentiment, embedding_humor), dim=1)
         # emotion_proj = self.emotion_linear(emotion).unsqueeze(1)
         # sentiment_proj = self.sentiment_linear(sentiment).unsqueeze(1)
         # humor_proj = self.humor_linear(humor).unsqueeze(1)
         # embedding_ESH = torch.cat((emotion_proj, sentiment_proj, humor_proj), dim=1)
         # embedding_ESH = self.ESH_linear(embedding_ESH.transpose(1, 2)).transpose(1, 2)
+        embedding_ESH = torch.cat((emotion, sentiment, humor), dim=1)
+        embedding_ESH = self.ESH_linear(embedding_ESH.transpose(1, 2)).transpose(1, 2)
         ############################################ 202503 ##############################################
         clip_projections = self.clip_project(prefix).view(-1, self.prefix_length, self.embedding_size)
         visual_projections_swin = self.visual_project_swin(embedding_ESH, clip_projections)
@@ -638,50 +681,12 @@ class ClipCaptionModel(nn.Module):
         ### 20250228_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8 ###
         #######################################################################################
         self.visual_project = nn.Linear(128, 64)
-        self.linear = nn.Linear(self.embedding_size, 2048)
+        # self.linear = nn.Linear(self.embedding_size, 2048)
 
-        self.emotion_linear = nn.Linear(384, 768)
-        self.sentiment_linear = nn.Linear(384, 768)
-        self.humor_linear = nn.Linear(768, 768)
-        self.ESH_linear = nn.Linear(3, 64)
-
-class ClipCaptionPrefix(ClipCaptionModel):
-
-    def parameters(self, recurse: bool = True):
-        return self.clip_project.parameters()
-
-    def train(self, mode: bool = True):
-        super(ClipCaptionPrefix, self).train(mode)
-        # self.gpt.eval()
-        return self
-
-def save_config(args: argparse.Namespace):
-    config = {}
-    for key, item in args._get_kwargs():
-        config[key] = item
-    out_path = os.path.join(args.out_dir, f"{args.prefix}.json")
-    with open(out_path, 'w') as outfile:
-        json.dump(config, outfile)
-
-def load_model(config_path: str, epoch_or_latest: Union[str, int] = '_latest'):
-    with open(config_path) as f:
-        config = json.load(f)
-    parser = argparse.ArgumentParser()
-    parser.set_defaults(**config)
-    args = parser.parse_args()
-    if type(epoch_or_latest) is int:
-        epoch_or_latest = f"-{epoch_or_latest:03d}"
-    model_path = os.path.join(args.out_dir, f"{args.prefix}{epoch_or_latest}.pt")
-    if args.only_prefix:
-        model = ClipCaptionPrefix(args.prefix_length)
-    else:
-        model = ClipCaptionModel(args.prefix_length)
-    if os.path.isfile(model_path):
-        print(f"loading model from {model_path}")
-        model.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
-    else:
-        print(f"{model_path} is not exist")
-    return model, parser
+        # self.emotion_linear = nn.Linear(384, 768)
+        # self.sentiment_linear = nn.Linear(384, 768)
+        # self.humor_linear = nn.Linear(768, 768)
+        self.ESH_linear = nn.Linear(64*3, 64)
 
 def PCloss(logits: torch.Tensor, tokens: torch.Tensor, use_ce=True):
     """
@@ -740,11 +745,11 @@ def train(trainData, testData, model: ClipCaptionModel, args,
         os.makedirs(output_dir)
     model = model.to(device, dtype=torch.bfloat16)
     model.eval()
-    trainDataset = OxfordDataset(trainData, prefix_length, normalize_prefix, model=model, batch_size=bleu_batch_size, bleu_threshold=bleu_threshold, dataFrom=args.dataFrom)
-    testDataset = OxfordDataset(testData, prefix_length, normalize_prefix, model=model, batch_size=bleu_batch_size, bleu_threshold=bleu_threshold, dataFrom=args.dataFrom)
+    trainDataset = OxfordDataset(trainData, prefix_length, normalize_prefix, model=model, batch_size=bleu_batch_size, bleu_threshold=bleu_threshold, datafrom=args.datafrom)
+    testDataset = OxfordDataset(testData, prefix_length, normalize_prefix, model=model, batch_size=bleu_batch_size, bleu_threshold=bleu_threshold, datafrom=args.datafrom)
     print(len(trainDataset), len(testDataset))
-    train_dataloader = DataLoader(trainDataset, batch_size=batch_size, shuffle=True, num_workers=20, pin_memory=True, drop_last=True)
-    test_dataloader = DataLoader(testDataset, batch_size=batch_size, shuffle=True, num_workers=20, pin_memory=True, drop_last=True)
+    train_dataloader = DataLoader(trainDataset, batch_size=batch_size, shuffle=True, num_workers=1, pin_memory=True, drop_last=True)
+    test_dataloader = DataLoader(testDataset, batch_size=batch_size, shuffle=True, num_workers=1, pin_memory=True, drop_last=True)
     epoch = 0
     while len(trainDataset) > batch_size and len(testDataset) > batch_size:
         model.train()
@@ -764,8 +769,8 @@ def train(trainData, testData, model: ClipCaptionModel, args,
         for idx, (tokens, mask, prefix, original_indices, emotion, sentiment, humor) in enumerate(train_dataloader):
             model.zero_grad()
             tokens, mask, prefix = tokens.to(device), mask.to(device), prefix.to(device, dtype=torch.bfloat16)
-            emotion, sentiment, humor = emotion.to(device), sentiment.to(device), humor.to(device)
-            # emotion, sentiment, humor = emotion.to(device, dtype=torch.bfloat16), sentiment.to(device, dtype=torch.bfloat16), humor.to(device, dtype=torch.bfloat16)
+            # emotion, sentiment, humor = emotion.to(device), sentiment.to(device), humor.to(device)
+            emotion, sentiment, humor = emotion.to(device, dtype=torch.bfloat16), sentiment.to(device, dtype=torch.bfloat16), humor.to(device, dtype=torch.bfloat16)
             outputs = model(tokens, prefix, mask, emotion=emotion, sentiment=sentiment, humor=humor)
             logits = outputs.logits[:, trainDataset.prefix_length - 1: -1]
             loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens.flatten(), ignore_index=0)
@@ -797,8 +802,8 @@ def train(trainData, testData, model: ClipCaptionModel, args,
             for idx, (tokens, mask, prefix, original_indices, emotion, sentiment, humor) in enumerate(test_dataloader):
                 model.zero_grad()
                 tokens, mask, prefix = tokens.to(device), mask.to(device), prefix.to(device, dtype=torch.bfloat16)
-                emotion, sentiment, humor = emotion.to(device), sentiment.to(device), humor.to(device)
-                # emotion, sentiment, humor = emotion.to(device, dtype=torch.bfloat16), sentiment.to(device, dtype=torch.bfloat16), humor.to(device, dtype=torch.bfloat16)
+                # emotion, sentiment, humor = emotion.to(device), sentiment.to(device), humor.to(device)
+                emotion, sentiment, humor = emotion.to(device, dtype=torch.bfloat16), sentiment.to(device, dtype=torch.bfloat16), humor.to(device, dtype=torch.bfloat16)
 
                 outputs = model(tokens, prefix, mask, emotion=emotion, sentiment=sentiment, humor=humor)
                 logits = outputs.logits[:, testDataset.prefix_length - 1: -1]
@@ -891,24 +896,25 @@ def train(trainData, testData, model: ClipCaptionModel, args,
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--trainData', default='../Data/Oxford_HIC/parse/oxford_800_8_300_2_ViT-B_32_train.pkl')
-    parser.add_argument('--testData', default='../Data/Oxford_HIC/parse/oxford_800_8_300_2_ViT-B_32_test.pkl')
+    parser.add_argument('--trainData', default='../Data/Oxford_HIC/parse/oxford_5384_only1_300_8_ViT-B_32_train.pkl')
+    parser.add_argument('--testData', default='../Data/Oxford_HIC/parse/oxford_5384_only1_300_2_ViT-B_32_test.pkl')
     # parser.add_argument('--trainData', default='../Data/Instagram/parse/300up_only300_all_sonicdrivein_ViT-B_32_train.pkl')
     # parser.add_argument('--testData', default='../Data/Instagram/parse/300up_only300_rest_200up_top200_sonicdrivein_ViT-B_32_test.pkl')
-    parser.add_argument('--dataFrom', default='Oxford')
-    parser.add_argument('--out_dir', default='20250316_oxford_800_8_300_2_ESH_filter_cross_concat')
+    parser.add_argument('--datafrom', default='Oxford')
+    parser.add_argument('--out_dir', default='20250419_oxford_5384_only1_300_82_ESH_bert_cross_concat')
     parser.add_argument('--prefix', default='checkpoint', help='prefix for saved filenames')
     parser.add_argument('--epochs', type=int, default=50)
     parser.add_argument('--save_every', type=int, default=1)
     parser.add_argument('--prefix_length', type=int, default=64)
     parser.add_argument('--prefix_length_clip', type=int, default=64)
-    parser.add_argument('--bs', type=int, default=15)
+    parser.add_argument('--bs', type=int, default=10)
     parser.add_argument('--only_prefix', dest='only_prefix', action='store_true')
     parser.add_argument('--mapping_type', type=str, default='transformer', help='mlp/transformer')
     parser.add_argument('--num_layers', type=int, default=8)
     parser.add_argument('--is_rn', dest='is_rn', action='store_true')
     parser.add_argument('--normalize_prefix', dest='normalize_prefix', action='store_true')
     args = parser.parse_args()
+
     prefix_length = args.prefix_length
     if not os.path.exists('./Model/' + args.out_dir):
         os.makedirs('./Model/' + args.out_dir)
@@ -917,16 +923,8 @@ def main():
 
     prefix_dim = 640 if args.is_rn else 512
     args.mapping_type = {'mlp': MappingType.MLP, 'transformer': MappingType.Transformer}[args.mapping_type]
-    print(args.mapping_type)
-    if args.only_prefix:
-        model = ClipCaptionPrefix(prefix_length, clip_length=prefix_length, prefix_size=prefix_dim,
-                                  num_layers=args.num_layers, mapping_type=args.mapping_type)
-        print("Train only prefix")
-    else:
-        model = ClipCaptionModel(prefix_length, clip_length=prefix_length, prefix_size=prefix_dim,
-                                 num_layers=args.num_layers, mapping_type=args.mapping_type)
-        print("Train both prefix and GPT")
-        sys.stdout.flush()
+    model = ClipCaptionModel(prefix_length, clip_length=prefix_length, prefix_size=prefix_dim, num_layers=args.num_layers, mapping_type=args.mapping_type)
+    sys.stdout.flush()
     device = torch.device('cuda:0')
     model = model.to(device, dtype=torch.bfloat16)
     # 20250115_totalClip_oxford_only100_300k_transformer_p40_falcon_bleu1_0.05 == 32
@@ -934,8 +932,7 @@ def main():
     # i = 27
     # model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i:03d}.pt'))
     model.eval()
-    train(args.trainData, args.testData, model, args, output_dir=args.out_dir, output_prefix=args.prefix
-          , bleu_batch_size=20, bleu_threshold=0.05)
+    train(args.trainData, args.testData, model, args, output_dir=args.out_dir, output_prefix=args.prefix, bleu_batch_size=20, bleu_threshold=0.05)
 
 if __name__ == '__main__':
     main()
