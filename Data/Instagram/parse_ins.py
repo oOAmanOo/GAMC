@@ -19,28 +19,33 @@ def main(clip_model_type: str):
     #     data = json.load(f)
     # data = data['annotations']
 
-    dirPath = './Generate_sonicdrivein.csv'
+    dirPath = './Generate_mcdonalds_switzerland.csv'
     data = pd.read_csv(dirPath)
     print("shape of data: ", data.shape)
     image_id_counts = data['image_id'].value_counts()
-    threshold = 24
-
-    original = pd.read_csv('./Filter_sonicdrivein.csv')
+    threshold = 12
+    #
+    original = pd.read_csv('./Filter_mcdonalds_switzerland.csv')
     original['caption'] = original['caption'].str.lower()
     data['caption'] = data['caption'].str.lower()
     original['text_len'] = original['caption'].apply(lambda x: len(x.split()))
     original['gen_count'] = original['image_id'].apply(lambda x: image_id_counts[x] if x in image_id_counts else 0)
     original = original[original['gen_count'] >= 100]
     print('shape of 100up: ', original.shape, 'images:', len(original['image_id'].unique()))
-    print('funny:', original[original['funny_score'] == 1].shape[0], 'else:', original[original['funny_score'] != 1].shape[0])
     original_train = original[original['text_len'] >= threshold]
+    original_train_funny = original_train[original_train['funny_score'] == 1]
+    original_train_others = original_train[original_train['funny_score'] != 1]
+    print('funny:', len(original_train_funny['image_id'].unique()), 'else:', len(original_train_others['image_id'].unique()))
+
+    original_train = pd.concat([original_train_funny, original_train_others[:395]])
+    print("shape of original_train: ", original_train.shape, 'images:', len(original_train['image_id'].unique()))
     print('train_funny:' , original_train[original_train['funny_score'] == 1].shape[0], 'train_else:', original_train[original_train['funny_score'] != 1].shape[0])
     train = data.merge(original_train, on='image_id', how='inner', suffixes=('', '_'))
     print("shape of train: ", train.shape, 'images:', len(train['image_id'].unique()))
     train = (
         train.sort_values(by=['image_id', 'funny_score'], ascending=[True, False])
         .groupby('image_id')
-        .head(200)
+        .head(100)
     )
     print("shape of train: ", train.shape, 'images:', len(train['image_id'].unique()))
     original_test = original[original['text_len'] < threshold]
@@ -78,8 +83,12 @@ def main(clip_model_type: str):
     # image_id_counts = data['image_id'].value_counts()
     # print(f'Number of unique image_id: {len(image_id_counts)}')
     # valid_image_ids = image_id_counts[image_id_counts >= 300].index
+    # train_img_count = len(valid_image_ids)
     # print(f'Number of image_id with 300 captions: {len(valid_image_ids)}')
+    # temp = original[original['image_id'].isin(valid_image_ids)]
+    # print('funny:', temp[temp['funny_score'] == 1].shape[0], 'else:', temp[temp['funny_score'] != 1].shape[0])
     # filtered_data = data[data['image_id'].isin(valid_image_ids)]
+    #
     # print(f'Number of data all: {filtered_data.shape[0]}')
     # train = (
     #     filtered_data.sort_values(by=['image_id', 'funny_score'], ascending=[True, False])
@@ -92,13 +101,19 @@ def main(clip_model_type: str):
     # valid_image_ids = image_id_counts[(image_id_counts >= 200) & (image_id_counts < 300)].index
     # print(f'Number of image_id with 200 captions: {len(valid_image_ids)}')
     # # 篩選原始資料
-    # filtered_data = data[data['image_id'].isin(valid_image_ids)]
+    # filtered_data = original[original['image_id'].isin(valid_image_ids)]
+    # humorscore_avg = filtered_data.groupby('image_id')['funny_score'].mean()
+    # top_humor_image_image_id = humorscore_avg.nlargest(train_img_count // 4).index
+    # print("len of top_humor_image_image_id: ", len(top_humor_image_image_id))
+    # filtered_data = filtered_data[filtered_data['image_id'].isin(top_humor_image_image_id)]
     # print(f'Number of data all: {filtered_data.shape[0]}')
-    # test = (
-    #     filtered_data.sort_values(by=['image_id', 'funny_score'], ascending=[True, False])
-    #     .groupby('image_id')
-    #     .head(200)
-    # )
+    # print('funny:', filtered_data[filtered_data['funny_score'] == 1].shape[0], 'else:', filtered_data[filtered_data['funny_score'] != 1].shape[0])
+    # # test = (
+    # #     filtered_data.sort_values(by=['image_id', 'funny_score'], ascending=[True, False])
+    # #     .groupby('image_id')
+    # #     .head(200)
+    # # )
+    # test = original.merge(filtered_data, on=['image_id', 'caption'], how='inner', suffixes=('', '_'))
     # print(f'Number of data 200: {test.shape[0]}')
     ######################################################################################################
     # train = pd.DataFrame()
@@ -136,7 +151,7 @@ def main(clip_model_type: str):
             d = d.to_dict()
             img_id = d["image_id"]
             funnyscore = d["funny_score"]
-            filename = f"./sonicdrivein_img/{img_id}.jpg"
+            filename = f"./mcdonalds_switzerland_img/{img_id}.jpg"
             image = io.imread(filename)
             image = preprocess(Image.fromarray(image)).unsqueeze(0).to(device)
             with torch.no_grad():
@@ -153,8 +168,8 @@ def main(clip_model_type: str):
         print('Done')
         print("%0d embeddings saved " % len(all_embeddings))
         return 0
-    out_path_train = f"./parse/100up_passlength_o_{threshold}_sonicdrivein_{clip_model_name}_train.pkl"
-    out_path_test = f"./parse/100up_passlength_x_{threshold}_sonicdrivein_{clip_model_name}_test.pkl"
+    out_path_train = f"./parse/100up_only100_lessNotFunImg_53_395_passlength_{threshold}_o_mcdonalds_switzerland_{clip_model_name}_train.pkl"
+    out_path_test = f"./parse/100up_only100_lessNotFunImg_53_395_passlength_{threshold}_x_mcdonalds_switzerland_{clip_model_name}_test.pkl"
     parse(out_path_train, train)
     parse(out_path_test, test)
     return 0
