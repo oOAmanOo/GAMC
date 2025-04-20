@@ -111,6 +111,10 @@ def main(clip_model_type: str):
     # print("%0d captions loaded from json " % len(data))
     ######################################################################################################
     unique_image_ids = data['image_id'].unique()
+    print("all of image: ", len(unique_image_ids))
+    sample = pd.Series(unique_image_ids).sample(n=4000, random_state=42, replace=False).reset_index(drop=True)
+    unique_image_ids = sample.unique()
+    print("sample of image: ", len(unique_image_ids))
     # unique_image_ids = unique_image_ids[:30000]
     # unique_image_ids, rest = train_test_split(unique_image_ids, test_size=0.7, random_state=42)
     # print(unique_image_ids.shape)
@@ -152,8 +156,8 @@ def main(clip_model_type: str):
         print('Done')
         print("%0d embeddings saved| " % len(all_embeddings))
         return remove_counter
-    out_path_train = f"./parse/oxford_5384_only1_300_8_{clip_model_name}_train.pkl"
-    out_path_test = f"./parse/oxford_5384_only1_300_2_{clip_model_name}_test.pkl"
+    out_path_train = f"./parse/oxford_4000_only1_300_8_{clip_model_name}_train.pkl"
+    out_path_test = f"./parse/oxford_4000_only1_300_2_{clip_model_name}_test.pkl"
     print(f'train remove captions: {parse(out_path_train, train)}')
     print(f'test remove captions: {parse(out_path_test, test)}')
     return 0
