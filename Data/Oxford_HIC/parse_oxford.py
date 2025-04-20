@@ -18,36 +18,82 @@ def main(clip_model_type: str):
     # with open('C:/Users/user/fiftyone/coco-2014/raw/captions_train2014.json', 'r') as f:
     #     data = json.load(f)
     # data = data['annotations']
-    dirPath = './CaptionID_oxford_hic_data.csv'
+    # dirPath = './CaptionID_oxford_hic_data.csv'
+    dirPath = './Generate_bert_top5000_oxford_mix_only1.csv'
     data = pd.read_csv(dirPath)
     image_id_counts = data['image_id'].value_counts()
     data['caption'] = data['caption'].str.lower()
+    data['funny_score'] = data['funny_score_y']
+    data['funny_score'] = (data['funny_score'] - data['funny_score'].min()) / (data['funny_score'].max() - data['funny_score'].min())
 
-    valid_image_ids = image_id_counts[image_id_counts >= 800].index
-    print("shape of valid_image_ids: ", valid_image_ids.shape)
-    filtered_data = data[data['image_id'].isin(valid_image_ids)]
-    print("shape of filtered_data: ", data.shape)
-    train = (
-        filtered_data.sort_values(by=['image_id', 'funny_score'], ascending=[True, False])
-        .groupby('image_id')
-        .head(800)
-    )
-    print("shape of train: ", train.shape)
+    # valid_image_ids = image_id_counts[image_id_counts >= 800].index
+    # filtered_data = data[data['image_id'].isin(valid_image_ids)]
+    # print(f'Number of image_id with 800 captions: {len(valid_image_ids)}')
+    # split = filtered_data.groupby('image_id').head(1)
+    # train_img = set(split.sort_values(by=['fc_mean'], ascending=[False])[:1120].image_id.tolist())
     #
-    valid_image_ids = image_id_counts[(image_id_counts >= 300) & (image_id_counts < 800)].index
-    print("shape of valid_image_ids: ", valid_image_ids.shape)
-    filtered_data = data[data['image_id'].isin(valid_image_ids)]
-    humorscore_avg = filtered_data.groupby('image_id')['funny_score'].mean()
-    top_humor_image_image_id = humorscore_avg.nlargest(56).index
-    print("len of top_humor_image_image_id: ", len(top_humor_image_image_id))
-    filtered_data = filtered_data[filtered_data['image_id'].isin(top_humor_image_image_id)]
-    print("shape of filtered_data: ", filtered_data.shape)
-    test = (
-        filtered_data.sort_values(by=['image_id', 'funny_score'], ascending=[True, False])
-        .groupby('image_id')
-        .head(300)
-    )
-    print("shape of test: ", test.shape)
+    # valid_image_ids = image_id_counts[image_id_counts >= 300].index
+    # filtered_data = data[data['image_id'].isin(valid_image_ids)]
+    # print(f'Number of image_id with 300 captions: {len(valid_image_ids)}')
+    # test_img = set(filtered_data.image_id.tolist()).difference(train_img)
+    # # test_img = set(split.sort_values(by=['fc_mean'], ascending=[False])[600:750].image_id.tolist())
+    # print(f'train_img: {len(train_img)}, test_img: {len(test_img)}')
+    #
+    # train_data = filtered_data[filtered_data['image_id'].isin(train_img)]
+    # test_data = filtered_data[filtered_data['image_id'].isin(test_img)]
+    # print(f'train_data: {train_data.shape}, test_data: {test_data.shape}')
+    #
+    # def getData(data, total):
+    #     origin_data = data[data['generated'] == 0]
+    #     generate_data = data[data['generated'] == 1].sort_values(by=['image_id', 'funny_score_y'],
+    #                                                              ascending=[True, False])
+    #     counter = origin_data.groupby('image_id').count()
+    #     output = (
+    #         origin_data.sort_values(by=['image_id', 'funny_score_y'], ascending=[True, False])
+    #         .groupby('image_id')
+    #         .head(total)
+    #     )
+    #     for img in counter.index:
+    #         if total - counter['caption'][img] > 0:
+    #             temp = generate_data[generate_data['image_id'] == img][:(total - counter['caption'][img])]
+    #             output = pd.concat([output, temp], ignore_index=True)
+    #     image_id_counts = output['image_id'].value_counts()
+    #     print(f'Number of unique image_id: {len(image_id_counts)}')
+    #     valid_image_ids = image_id_counts[image_id_counts == total].index
+    #     print(f'Number of image_id with {total} captions: {len(valid_image_ids)}')
+    #     return output
+    #
+    # train = getData(train_data, 800)
+    # test = getData(test_data, 300)
+    # print(f'train: {train.shape}, test: {test.shape}')
+
+    ######################################################################################################
+
+    # valid_image_ids = image_id_counts[image_id_counts >= 800].index
+    # print("shape of valid_image_ids: ", valid_image_ids.shape)
+    # filtered_data = data[data['image_id'].isin(valid_image_ids)]
+    # print("shape of filtered_data: ", data.shape)
+    # train = (
+    #     filtered_data.sort_values(by=['image_id', 'funny_score'], ascending=[True, False])
+    #     .groupby('image_id')
+    #     .head(800)
+    # )
+    # print("shape of train: ", train.shape)
+    # #
+    # valid_image_ids = image_id_counts[(image_id_counts >= 300) & (image_id_counts < 800)].index
+    # print("shape of valid_image_ids: ", valid_image_ids.shape)
+    # filtered_data = data[data['image_id'].isin(valid_image_ids)]
+    # humorscore_avg = filtered_data.groupby('image_id')['funny_score'].mean()
+    # top_humor_image_image_id = humorscore_avg.nlargest(56).index
+    # print("len of top_humor_image_image_id: ", len(top_humor_image_image_id))
+    # filtered_data = filtered_data[filtered_data['image_id'].isin(top_humor_image_image_id)]
+    # print("shape of filtered_data: ", filtered_data.shape)
+    # test = (
+    #     filtered_data.sort_values(by=['image_id', 'funny_score'], ascending=[True, False])
+    #     .groupby('image_id')
+    #     .head(300)
+    # )
+    # print("shape of test: ", test.shape)
     ######################################################################################################
     # train = pd.DataFrame()
     # test = pd.DataFrame()
@@ -64,14 +110,15 @@ def main(clip_model_type: str):
     # print(data.shape)
     # print("%0d captions loaded from json " % len(data))
     ######################################################################################################
-    # unique_image_ids = data['image_id'].unique()
-    # # unique_image_ids = unique_image_ids[:30000]
-    # # unique_image_ids, rest = train_test_split(unique_image_ids, test_size=0.7, random_state=42)
-    # # print(unique_image_ids.shape)
-    # train_ids, test_ids = train_test_split(unique_image_ids, test_size=0.2, random_state=42)
-    # train = data[data['image_id'].isin(train_ids)]
-    # test = data[data['image_id'].isin(test_ids)]
-    # print(train.shape, test.shape)
+    unique_image_ids = data['image_id'].unique()
+    # unique_image_ids = unique_image_ids[:30000]
+    # unique_image_ids, rest = train_test_split(unique_image_ids, test_size=0.7, random_state=42)
+    # print(unique_image_ids.shape)
+    train_ids, test_ids = train_test_split(unique_image_ids, test_size=0.2, random_state=42)
+    train = data[data['image_id'].isin(train_ids)]
+    test = data[data['image_id'].isin(test_ids)]
+    print(len(train_ids), len(test_ids))
+    print(train.shape, test.shape)
     ######################################################################################################
 
     def parse(out_path, data):
@@ -79,30 +126,34 @@ def main(clip_model_type: str):
         all_embeddings = []
         all_captions = []
         all_funnyscore = []
+        temp = dict()
         for i in tqdm(range(len(data))):
             d = data.iloc[i]
             d = d.to_dict()
             img_id = d["image_id"]
             funnyscore = d["funny_score"]
             filename = f"./oxford_img/{img_id}.jpg"
-            image = io.imread(filename)
-            image = preprocess(Image.fromarray(image)).unsqueeze(0).to(device)
-            with torch.no_grad():
-                prefix = clip_model.encode_image(image).cpu()
+            if temp.get(img_id) is None:
+                image = io.imread(filename)
+                image = preprocess(Image.fromarray(image)).unsqueeze(0).to(device)
+                with torch.no_grad():
+                    prefix = clip_model.encode_image(image).cpu()
+            else:
+                prefix = temp[img_id]
             d["clip_embedding"] = i
             all_embeddings.append(prefix)
             all_captions.append(d)
             all_funnyscore.append(torch.tensor([funnyscore]).unsqueeze(0))
             if (i + 1) % 10000 == 0:
                 with open(out_path, 'wb') as f:
-                    pickle.dump({"clip_embedding": torch.cat(all_embeddings, dim=0), "captions": all_captions, "funnyscore": torch.cat(all_funnyscore, dim=0)}, f)
+                    pickle.dump({"clip_embedding": all_embeddings, "captions": all_captions, "funnyscore": torch.cat(all_funnyscore, dim=0)}, f)
         with open(out_path, 'wb') as f:
-            pickle.dump({"clip_embedding": torch.cat(all_embeddings, dim=0), "captions": all_captions, "funnyscore": torch.cat(all_funnyscore, dim=0)}, f)
+            pickle.dump({"clip_embedding": all_embeddings, "captions": all_captions, "funnyscore": torch.cat(all_funnyscore, dim=0)}, f)
         print('Done')
         print("%0d embeddings saved| " % len(all_embeddings))
         return remove_counter
-    out_path_train = f"./parse/oxford_800_8_300_2_{clip_model_name}_train.pkl"
-    out_path_test = f"./parse/oxford_800_8_300_2_{clip_model_name}_test.pkl"
+    out_path_train = f"./parse/oxford_5384_only1_300_8_{clip_model_name}_train.pkl"
+    out_path_test = f"./parse/oxford_5384_only1_300_2_{clip_model_name}_test.pkl"
     print(f'train remove captions: {parse(out_path_train, train)}')
     print(f'test remove captions: {parse(out_path_test, test)}')
     return 0
