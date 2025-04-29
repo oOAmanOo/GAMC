@@ -5,6 +5,7 @@ import gc
 import sys
 import clip
 import json
+import time
 import pickle
 import argparse
 import numpy as np
@@ -242,7 +243,7 @@ class ImageTextModel(nn.Module):
         # Fusion Layer
         self.transformer = Transformer(768, 8, 8)
         # contrastive learning
-        self.temp = nn.Parameter(0.4 * torch.ones(1), requires_grad=True)
+        self.temp = nn.Parameter(0.5 * torch.ones(1), requires_grad=True)
         # self.fusion = nn.Linear(feature_dim * 2, 128)
 
         ######## mlp ########
@@ -373,36 +374,36 @@ class Dataset(torch.utils.data.Dataset):
             print("%0d embeddings saved " % len(self.image_list))
         else:
             # if self.traintest == 'train' or self.traintest == 'test':
-                # with open(self.coco_dir, 'r') as f:
-                #     data = json.load(f)
-                # data = data['annotations']
-                # print("%0d captions loaded from json " % len(data))
-                #
-                # with tqdm(total=len(data)) as pbar:
-                #     for i in range(len(data)):
-                #         if traintest == 'test' and i > 414113/4:
-                #             break
-                #         d = data[i]
-                #         self.image_list.append(d["image_id"])
-                #         self.caption_list.append(d['caption'])
-                #         self.humor.append(torch.tensor([0]))
-                #         self.rank.append(torch.tensor([0]))
-                #         if (i + 1) % 10000 == 0:
-                #             with open(out_path, 'wb') as f:
-                #                 pickle.dump({"image_list": self.image_list,
-                #                              "caption_list": self.caption_list,
-                #                              "humor": torch.cat(self.humor, dim=0),
-                #                              "rank": torch.cat(self.rank, dim=0)}, f, pickle.HIGHEST_PROTOCOL)
-                #             pbar.set_postfix({"present": i})
-                #         pbar.update(1)
-                # with open(out_path, 'wb') as f:
-                #     pickle.dump({"image_list": self.image_list,
-                #                  "caption_list": self.caption_list,
-                #                  "humor": torch.cat(self.humor, dim=0),
-                #                  "rank": torch.cat(self.rank, dim=0)}, f, pickle.HIGHEST_PROTOCOL)
-                # print('COCO Done')
-                # print("%0d embeddings saved " % len(self.image_list))
-                # pbar.close()
+            # with open(self.coco_dir, 'r') as f:
+            #     data = json.load(f)
+            # data = data['annotations']
+            # print("%0d captions loaded from json " % len(data))
+            #
+            # with tqdm(total=len(data)) as pbar:
+            #     for i in range(len(data)):
+            #         if traintest == 'test' and i > 414113/4:
+            #             break
+            #         d = data[i]
+            #         self.image_list.append(d["image_id"])
+            #         self.caption_list.append(d['caption'])
+            #         self.humor.append(torch.tensor([0]))
+            #         self.rank.append(torch.tensor([0]))
+            #         if (i + 1) % 10000 == 0:
+            #             with open(out_path, 'wb') as f:
+            #                 pickle.dump({"image_list": self.image_list,
+            #                              "caption_list": self.caption_list,
+            #                              "humor": torch.cat(self.humor, dim=0),
+            #                              "rank": torch.cat(self.rank, dim=0)}, f, pickle.HIGHEST_PROTOCOL)
+            #             pbar.set_postfix({"present": i})
+            #         pbar.update(1)
+            # with open(out_path, 'wb') as f:
+            #     pickle.dump({"image_list": self.image_list,
+            #                  "caption_list": self.caption_list,
+            #                  "humor": torch.cat(self.humor, dim=0),
+            #                  "rank": torch.cat(self.rank, dim=0)}, f, pickle.HIGHEST_PROTOCOL)
+            # print('COCO Done')
+            # print("%0d embeddings saved " % len(self.image_list))
+            # pbar.close()
             if self.traintest == 'train' or self.traintest == 'test':
                 std = oxford_data['funny_score_y'].std().item()
                 mean = oxford_data['funny_score_y'].mean().item()
@@ -579,47 +580,47 @@ class MixDataset(torch.utils.data.Dataset):
             # print('COCO Done')
             # print("%0d embeddings saved " % len(self.image_list))
             # pbar.close()
+            if oxford_data is not None:
+                std = oxford_data['funny_score_y'].std().item()
+                mean = oxford_data['funny_score_y'].mean().item()
+                with tqdm(total=len(oxford_data)) as pbar:
+                    for i in range(len(oxford_data)):
+                        d = oxford_data.iloc[i]
+                        d = d.to_dict()
+                        self.image_list.append(d["image_id"])
+                        self.caption_list.append(d['caption'])
+                        self.humor.append(torch.tensor([1]))
+                        if d['funny_score_y'] > 0.5:
+                            self.rank.append(torch.tensor([1.0]))
+                        else:
+                            self.rank.append(torch.tensor([0.0]))
+                        # if d['funny_score_y'] > (mean + 2 * std):
+                        #     self.rank.append(torch.tensor([1.0]))
+                        # elif d['funny_score_y'] > (mean + 1 * std):
+                        #     self.rank.append(torch.tensor([0.75]))
+                        # elif d['funny_score_y'] > (mean):
+                        #     self.rank.append(torch.tensor([0.5]))
+                        # elif d['funny_score_y'] > (mean - 1 * std):
+                        #     self.rank.append(torch.tensor([0.25]))
+                        # else:
+                        #     self.rank.append(torch.tensor([0.0]))
 
-            std = oxford_data['funny_score_y'].std().item()
-            mean = oxford_data['funny_score_y'].mean().item()
-            with tqdm(total=len(oxford_data)) as pbar:
-                for i in range(len(oxford_data)):
-                    d = oxford_data.iloc[i]
-                    d = d.to_dict()
-                    self.image_list.append(d["image_id"])
-                    self.caption_list.append(d['caption'])
-                    self.humor.append(torch.tensor([1]))
-                    if d['funny_score_y'] > 0.5:
-                        self.rank.append(torch.tensor([1.0]))
-                    else:
-                        self.rank.append(torch.tensor([0.0]))
-                    # if d['funny_score_y'] > (mean + 2 * std):
-                    #     self.rank.append(torch.tensor([1.0]))
-                    # elif d['funny_score_y'] > (mean + 1 * std):
-                    #     self.rank.append(torch.tensor([0.75]))
-                    # elif d['funny_score_y'] > (mean):
-                    #     self.rank.append(torch.tensor([0.5]))
-                    # elif d['funny_score_y'] > (mean - 1 * std):
-                    #     self.rank.append(torch.tensor([0.25]))
-                    # else:
-                    #     self.rank.append(torch.tensor([0.0]))
-
-                    if (i + 1) % 10000 == 0:
-                        with open(out_path, 'wb') as f:
-                            pickle.dump({"image_list": self.image_list,
-                                         "caption_list": self.caption_list,
-                                         "humor": torch.cat(self.humor, dim=0),
-                                         "rank": torch.cat(self.rank, dim=0)}, f, pickle.HIGHEST_PROTOCOL)
-                        pbar.set_postfix({"present": i})
-                    pbar.update(1)
-            with open(out_path, 'wb') as f:
-                pickle.dump({"image_list": self.image_list,
-                             "caption_list": self.caption_list,
-                             "humor": torch.cat(self.humor, dim=0),
-                             "rank": torch.cat(self.rank, dim=0)}, f, pickle.HIGHEST_PROTOCOL)
-            print('Oxford Done')
-            print("%0d embeddings saved " % len(self.image_list))
-            pbar.close()
+                        if (i + 1) % 10000 == 0:
+                            with open(out_path, 'wb') as f:
+                                pickle.dump({"image_list": self.image_list,
+                                             "caption_list": self.caption_list,
+                                             "humor": torch.cat(self.humor, dim=0),
+                                             "rank": torch.cat(self.rank, dim=0)}, f, pickle.HIGHEST_PROTOCOL)
+                            pbar.set_postfix({"present": i})
+                        pbar.update(1)
+                with open(out_path, 'wb') as f:
+                    pickle.dump({"image_list": self.image_list,
+                                 "caption_list": self.caption_list,
+                                 "humor": torch.cat(self.humor, dim=0),
+                                 "rank": torch.cat(self.rank, dim=0)}, f, pickle.HIGHEST_PROTOCOL)
+                print('Oxford Done')
+                print("%0d embeddings saved " % len(self.image_list))
+                pbar.close()
 
             with tqdm(total=len(ins_data)) as pbar:
                 for i in range(len(ins_data)):
@@ -760,13 +761,24 @@ class FocalContrastiveLoss(nn.Module):
         super(FocalContrastiveLoss, self).__init__()
         self.traintest = taintest
         self.output_dir = output_dir
-        self.loss_df = pd.DataFrame(columns=["focalLoss", "contrastive_loss", "loss"])
+        if os.path.exists(f"./Model/{self.output_dir}/{self.traintest}_separateLoss.csv"):
+            self.loss_df = pd.read_csv(f"./Model/{self.output_dir}/{self.traintest}_separateLoss.csv")
+            print("load loss")
+        else:
+            self.loss_df = pd.DataFrame(columns=["focalLoss", "contrastive_loss", "loss"])
 
     def computeLoss(self, pred, target, sim):
-        alpha = 0.9
-        gamma = 1.6
+        alpha = 0.8
+        gamma = 1.3
+
+        margin = 0.1
         # Focal Loss
-        focalLoss = sigmoid_focal_loss(pred, target, alpha=alpha, gamma=gamma, reduction='mean')
+        focalLoss = sigmoid_focal_loss(pred, target, alpha=alpha, gamma=gamma, reduction='none')
+        mask_pos = ~((target == 1) & (pred > (1 - margin)))  # keep if NOT confident positive
+        mask_neg = ~((target == 0) & (pred < margin))  # keep if NOT confident negative
+        mask = mask_pos & mask_neg
+        focalLoss = focalLoss * mask.float()
+        focalLoss = focalLoss.sum() / (mask.float().sum() + 1e-6)
 
         # Contrastive Loss
         contrast_target = (target.unsqueeze(0) == target.unsqueeze(1)).float()
@@ -784,20 +796,22 @@ class FocalContrastiveLoss(nn.Module):
         return loss
 
 def train(model, args, output_dir: str = ".", output_prefix: str = ""):
-    train_losses = []
-    test_losses = []
-    best_train_loss = 9999999999
-    best_test_loss = 9999999999
-    save = []
-
-    # former = pd.read_csv(f"'./Model/'{output_dir}/{output_prefix}-loss.csv")
-    # train_losses = list(former['train_loss'])
-    # test_losses = list(former['test_loss'])
-    # save = list(former['save'])
-    # best_train_loss = min(train_losses)
-    # best_test_loss = min(test_losses)
+    if os.path.exists(f"./Model/{output_dir}/{output_prefix}-loss.csv"):
+        former = pd.read_csv(f"./Model/{output_dir}/{output_prefix}-loss.csv")
+        train_losses = list(former['train_loss'])
+        test_losses = list(former['test_loss'])
+        save = list(former['save'])
+        best_train_loss = min(train_losses)
+        best_test_loss = min(test_losses)
+    else:
+        train_losses = []
+        test_losses = []
+        best_train_loss = 9999999999
+        best_test_loss = 9999999999
+        save = []
 
     device = torch.device('cuda:0')
+    # device = torch.device('cpu')
     batch_size = args.bs
     model = model.to(device)
     dataPath = args.dataPath
@@ -829,16 +843,19 @@ def train(model, args, output_dir: str = ".", output_prefix: str = ""):
             .groupby('image_id')
             .head(1)
         )
-        data = data[:2100]
+        data = data[:1680]
         data['funny_score_y'] = data['funny_score_y'].apply(lambda x: 1 if x > fcmean else 0)
-        oxford_train, oxford_test = train_test_split(data, test_size=0.2, random_state=42)
-        print(f'oxford: {oxford_train.shape}, {oxford_test.shape}')
+        oxford_train = data
+        print(f'oxford: {oxford_train.shape}')
+        # oxford_train, oxford_test = train_test_split(data, test_size=0.2, random_state=42)
+        # print(f'oxford: {oxford_train.shape}, {oxford_test.shape}')
         #################   instagram   #################
         data = pd.read_csv('../Data/Instagram/Generate_sonicdrivein.csv')
         # print("shape of data: ", data.shape)
         image_id_counts = data['image_id'].value_counts()
         threshold = 10
-
+        fn_data = pd.read_csv('./Model/humorScore/humorScore_20250423_SD_pass10_MC_pass12_noAug_wOxford_only01_focal08_13_contrast_temp050/test/sonic_test_006.csv')
+        fn_data = fn_data[(fn_data['rank'] == 1.0) & (fn_data['humor_score_result'] == 0)]
         original = pd.read_csv('../Data/Instagram/Filter_sonicdrivein.csv')
         original['caption'] = original['caption'].str.lower()
         data['caption'] = data['caption'].str.lower()
@@ -846,16 +863,25 @@ def train(model, args, output_dir: str = ".", output_prefix: str = ""):
         original['gen_count'] = original['image_id'].apply(lambda x: image_id_counts[x] if x in image_id_counts else 0)
         original = original[original['gen_count'] >= 100]
         original_train = original[original['text_len'] >= threshold]
-        ins_train = original_train
+        ######################
+        # ins_train = original_train
+        ######################
         # original_train = original[:1136]
+        ######################
         # train = data.merge(original_train, on='image_id', how='inner', suffixes=('', '_'))
         # ins_train = (
         #     train.sort_values(by=['image_id', 'funny_score'], ascending=[True, False])
         #     .groupby('image_id')
         #     .head(200)
         # )
-        original_test = original[original['text_len'] < threshold]
-        # original_test = original[~original['image_id'].isin(ins_train['image_id'])]
+        ######################
+        fn_data = original.merge(fn_data, on='image_id', how='inner', suffixes=('', '_'))
+        ins_train = original_train[:(-1 * fn_data.shape[0])]
+        ins_train = pd.concat([ins_train, fn_data], ignore_index=True)
+        print(fn_data.shape, ins_train.shape)
+        ######################
+        # original_test = original[original['text_len'] < threshold]
+        original_test = original[~original['image_id'].isin(ins_train['image_id'])]
         ins_test = original_test.sort_values(by=['funny_score'], ascending=[False])[:(len(ins_train['image_id'].unique()) // 4)]
         print(f'sonic_train: {ins_train.shape}, sonic_test: {ins_test.shape}')
         data = pd.read_csv('../Data/Instagram/Generate_mcdonalds_switzerland.csv')
@@ -863,6 +889,8 @@ def train(model, args, output_dir: str = ".", output_prefix: str = ""):
         image_id_counts = data['image_id'].value_counts()
         threshold = 12
 
+        fn_data = pd.read_csv('./Model/humorScore/humorScore_20250423_SD_pass10_MC_pass12_noAug_wOxford_only01_focal08_13_contrast_temp050/test/mcdonald_test_006.csv')
+        fn_data = fn_data[(fn_data['rank'] == 1.0) & (fn_data['humor_score_result'] == 0)]
         original = pd.read_csv('../Data/Instagram/Filter_mcdonalds_switzerland.csv')
         original['caption'] = original['caption'].str.lower()
         data['caption'] = data['caption'].str.lower()
@@ -870,17 +898,26 @@ def train(model, args, output_dir: str = ".", output_prefix: str = ""):
         original['gen_count'] = original['image_id'].apply(lambda x: image_id_counts[x] if x in image_id_counts else 0)
         original = original[original['gen_count'] >= 100]
         original_train = original[original['text_len'] >= threshold]
-        temp_train = original_train
+        ######################
+        # temp_train = original_train
+        ######################
         # original_train = original[:621]
+        ######################
         # train = data.merge(original_train, on='image_id', how='inner', suffixes=('', '_'))
         # temp_train = (
         #     train.sort_values(by=['image_id', 'funny_score'], ascending=[True, False])
         #     .groupby('image_id')
         #     .head(200)
         # )
+        ######################
+        fn_data = original.merge(fn_data, on='image_id', how='inner', suffixes=('', '_'))
+        temp_train = original_train[:(-1 * fn_data.shape[0])]
+        temp_train = pd.concat([temp_train, fn_data], ignore_index=True)
+        print(fn_data.shape, temp_train.shape)
+        ######################
         ins_train = pd.concat([ins_train, temp_train], ignore_index=True)
-        original_test = original[original['text_len'] < threshold]
-        # original_test = original[~original['image_id'].isin(ins_train['image_id'])]
+        # original_test = original[original['text_len'] < threshold]
+        original_test = original[~original['image_id'].isin(ins_train['image_id'])]
         temp_test = original_test.sort_values(by=['funny_score'], ascending=[False])[:(len(temp_train['image_id'].unique()) // 4)]
         ins_test = pd.concat([ins_test, temp_test], ignore_index=True)
         print(f'mcd_train: {temp_train.shape}, mcd_test: {temp_test.shape}')
@@ -894,14 +931,15 @@ def train(model, args, output_dir: str = ".", output_prefix: str = ""):
         # trainDataset = InsDataset(ins_train, 'train', dataPath)
         # testDataset = InsDataset(ins_test, 'test', dataPath)
         trainDataset = MixDataset(oxford_train, ins_train, 'train', dataPath)
-        testDataset = MixDataset(oxford_test, ins_test, 'test', dataPath)
+        testDataset = MixDataset(None, ins_test, 'test', dataPath)
+        # testDataset = MixDataset(oxford_test, ins_test, 'test', dataPath)
     # get data size
     print(len(trainDataset), len(testDataset))
     train_dataloader = DataLoader(trainDataset, batch_size=batch_size, shuffle=True, num_workers=1, pin_memory=True, drop_last=True)
     test_dataloader = DataLoader(testDataset, batch_size=batch_size, shuffle=True, num_workers=1, pin_memory=True, drop_last=True)
     trainLoss_class = FocalContrastiveLoss(output_dir, output_prefix, 'train')
     testLoss_class = FocalContrastiveLoss(output_dir, output_prefix, 'test')
-    epoch = 0
+    epoch = len(save)
     while len(trainDataset) > batch_size and len(testDataset) > batch_size:
         optimizer = optim.Adam(model.parameters(), lr=1e-6, weight_decay=1e-5)
         # criterion = nn.BCELoss()
@@ -914,14 +952,18 @@ def train(model, args, output_dir: str = ".", output_prefix: str = ""):
         progress = tqdm(total=len(train_dataloader), desc=output_prefix)
         for idx, (images, caption_ids, caption_masks, humor, rank, img_id, caption) in enumerate(train_dataloader):
             model.zero_grad()
+            if images is None or caption_ids is None or caption_masks is None or rank is None:
+                raise ValueError("One of the tensors is None.")
             images, caption_ids, caption_masks, rank = images.to(device), caption_ids.to(device), caption_masks.to(device), rank.to(device)
             outputs, sim = model(images, caption_ids, caption_masks)
             loss = trainLoss_class.computeLoss(outputs, rank, sim)
             trainLoss += loss.item()
+            progress.set_postfix({"loss": loss.item()})
             loss.backward()
             optimizer.step()
             optimizer.zero_grad()
-            progress.set_postfix({"loss": loss.item()})
+            torch.cuda.empty_cache()
+            time.sleep(1)
             progress.update()
             # if idx % 101 == 100:
             #     break
@@ -941,6 +983,8 @@ def train(model, args, output_dir: str = ".", output_prefix: str = ""):
                 testLoss += loss.item()
                 progress.set_postfix({"loss": loss.item()})
                 progress.update()
+                torch.cuda.empty_cache()
+                time.sleep(1)
         testLoss /= len(test_dataloader)
         test_losses.append(testLoss)
         progress.set_postfix({"loss": testLoss})
@@ -1036,6 +1080,8 @@ def test(model, args, output_dir: str = ".", output_prefix: str = ""):
         print("shape of data: ", data.shape)
         image_id_counts = data['image_id'].value_counts()
         threshold = 12
+        fn_data = pd.read_csv('./Model/humorScore/humorScore_20250423_SD_pass10_MC_pass12_noAug_wOxford_only01_focal08_13_contrast_temp050/test/mcdonald_test_006.csv')
+        fn_data = fn_data[(fn_data['rank'] == 1.0) & (fn_data['humor_score_result'] == 0)]
         original = pd.read_csv('../Data/Instagram/Filter_mcdonalds_switzerland.csv')
         original['caption'] = original['caption'].str.lower()
         data['caption'] = data['caption'].str.lower()
@@ -1046,21 +1092,27 @@ def test(model, args, output_dir: str = ".", output_prefix: str = ""):
         #################   train   #################
         #############################################
         original_train = original[original['text_len'] >= threshold]
+        ######################
+        fn_data = original.merge(fn_data, on='image_id', how='inner', suffixes=('', '_'))
+        ins_train = original_train[:(-1 * fn_data.shape[0])]
+        ins_train = pd.concat([ins_train, fn_data], ignore_index=True)
+        print(fn_data.shape, ins_train.shape)
+        ######################
         # original_train = original[:621]
-        original_train['funny_score'] = original_train['funny_score'].apply(lambda x: 1 if x > 0.5 else 0)
+        ins_train['funny_score'] = ins_train['funny_score'].apply(lambda x: 1 if x > 0.5 else 0)
         ################################################
-        print(f'MCD: {original_train.shape}')
-        mcdonaldDataset = InsDataset(original_train, 'mcdonalds_switzerland', dataPath)
+        # print(f'MCD: {ins_train.shape}')
+        # mcdonaldDataset = InsDataset(ins_train, 'mcdonalds_switzerland', dataPath)
         #############################################
         #################    test   #################
         #############################################
         # original_test = original[original['text_len'] < threshold]
-        # # original_test = original[~original['image_id'].isin(original_train['image_id'])]
-        # ins_test = original_test.sort_values(by=['funny_score'], ascending=[False])[:(len(original_train['image_id'].unique()) // 4)]
-        # ins_test['funny_score'] = ins_test['funny_score'].apply(lambda x: 1 if x > 0.5 else 0)
-        # ################################################
-        # print(f'MCD: {ins_test.shape}')
-        # mcdonaldDataset = InsDataset(ins_test, 'mcdonalds_switzerland', dataPath)
+        original_test = original[~original['image_id'].isin(ins_train['image_id'])]
+        ins_test = original_test.sort_values(by=['funny_score'], ascending=[False])[:(len(original_train['image_id'].unique()) // 4)]
+        ins_test['funny_score'] = ins_test['funny_score'].apply(lambda x: 1 if x > 0.5 else 0)
+        ################################################
+        print(f'MCD: {ins_test.shape}')
+        mcdonaldDataset = InsDataset(ins_test, 'mcdonalds_switzerland', dataPath)
         ################################################
     if os.path.exists(f"../Data/{dataPath}_sonicdrivein.pkl"):
         sonicDataset = InsDataset(pd.DataFrame(), 'sonicdrivein', dataPath)
@@ -1069,6 +1121,8 @@ def test(model, args, output_dir: str = ".", output_prefix: str = ""):
         print("shape of data: ", data.shape)
         image_id_counts = data['image_id'].value_counts()
         threshold = 10
+        fn_data = pd.read_csv('./Model/humorScore/humorScore_20250423_SD_pass10_MC_pass12_noAug_wOxford_only01_focal08_13_contrast_temp050/test/sonic_test_006.csv')
+        fn_data = fn_data[(fn_data['rank'] == 1.0) & (fn_data['humor_score_result'] == 0)]
         original = pd.read_csv('../Data/Instagram/Filter_sonicdrivein.csv')
         original['caption'] = original['caption'].str.lower()
         data['caption'] = data['caption'].str.lower()
@@ -1079,21 +1133,27 @@ def test(model, args, output_dir: str = ".", output_prefix: str = ""):
         #################   train   #################
         #############################################
         original_train = original[original['text_len'] >= threshold]
+        ######################
+        fn_data = original.merge(fn_data, on='image_id', how='inner', suffixes=('', '_'))
+        ins_train = original_train[:(-1 * fn_data.shape[0])]
+        ins_train = pd.concat([ins_train, fn_data], ignore_index=True)
+        print(fn_data.shape, ins_train.shape)
+        ######################
         # original_train = original[:1136]
-        original_train['funny_score'] = original_train['funny_score'].apply(lambda x: 1 if x > 0.5 else 0)
+        ins_train['funny_score'] = ins_train['funny_score'].apply(lambda x: 1 if x > 0.5 else 0)
         ################################################
-        print(f'SD: {original_train.shape}')
-        sonicDataset = InsDataset(original_train, 'sonicdrivein', dataPath)
+        # print(f'SD: {ins_train.shape}')
+        # sonicDataset = InsDataset(ins_train, 'sonicdrivein', dataPath)
         #############################################
         #################    test   #################
         #############################################
         # original_test = original[original['text_len'] < threshold]
-        # # original_test = original[~original['image_id'].isin(original_train['image_id'])]
-        # ins_test = original_test.sort_values(by=['funny_score'], ascending=[False])#[:186]#[ :(len(original_train['image_id'].unique()) // 4)]
-        # ins_test['funny_score'] = ins_test['funny_score'].apply(lambda x: 1 if x > 0.5 else 0)
-        # ################################################
-        # print(f'SD: {ins_test.shape}')
-        # sonicDataset = InsDataset(ins_test, 'sonicdrivein', dataPath)
+        original_test = original[~original['image_id'].isin(ins_train['image_id'])]
+        ins_test = original_test.sort_values(by=['funny_score'], ascending=[False])[ :(len(original_train['image_id'].unique()) // 4)]
+        ins_test['funny_score'] = ins_test['funny_score'].apply(lambda x: 1 if x > 0.5 else 0)
+        ################################################
+        print(f'SD: {ins_test.shape}')
+        sonicDataset = InsDataset(ins_test, 'sonicdrivein', dataPath)
         ################################################
     # get data size
     # test_dataloader = DataLoader(testDataset, batch_size=batch_size, shuffle=True, num_workers=20, drop_last=True)
@@ -1106,7 +1166,7 @@ def test(model, args, output_dir: str = ".", output_prefix: str = ""):
     precision_ = torchmetrics.Precision(task='multiclass', num_classes=2, average='weighted')
     recall_ = torchmetrics.Recall(task='multiclass', num_classes=2, average='weighted')
     loss_class = FocalContrastiveLoss(output_dir, output_prefix, 'TestOnTest')
-    for i in range(20):
+    for i in range(100):
         if os.path.exists(f'./Model/{output_dir}/checkpoint-{i + 1:03d}.pt'):
             model.load_state_dict(torch.load(f'./Model/{output_dir}/checkpoint-{i + 1:03d}.pt'))
             model = model.eval()
@@ -1213,13 +1273,6 @@ def test(model, args, output_dir: str = ".", output_prefix: str = ""):
                 output_df = pd.DataFrame(columns=['image_id', 'caption', 'groundtruth', 'humor_score'])
                 progress = tqdm(total=len(sonic_dataloader), desc=output_prefix)
                 epoch_loss = 0
-                epoch_accuracy = 0
-                epoch_tp = 0
-                epoch_fp = 0
-                epoch_fn = 0
-                epoch_tn = 0
-                epoch_accuracy_rank = 0
-                # mae_loss = 0
                 for idx, (images, caption_ids, caption_masks, humor, rank, img_id, caption) in enumerate(
                         sonic_dataloader):
                     model.zero_grad()
@@ -1316,33 +1369,40 @@ def test_mine(model, args, dataform: str = 'Oxford', input_num: int = 5, model_p
     df = pd.DataFrame()
     with torch.no_grad():
         for n in range(input_num):
-            # dataPath = f'./Model/{args.out_dir}/{args.out_dir}_test_{n + 1:03d}.csv'
-            if os.path.exists(f'./Model/{args.out_dir}/{args.out_dir}_test_{n + 1:03d}.csv'):
-                dataPath = f'./Model/{args.out_dir}/{args.out_dir}_test_{n + 1:03d}.csv'
-                save_path = f'./Model/{args.out_dir}/'
-            elif os.path.exists(f'./Model/{args.out_dir}/test_{n + 1:03d}.csv'):
-                dataPath = f'./Model/{args.out_dir}/test_{n + 1:03d}.csv'
-                save_path = f'./Model/{args.out_dir}/'
-            elif dataform == 'Oxford':
-                save_path = f'./Model/{args.out_dir}/oxford/'
-                if os.path.exists(f'{save_path}{args.out_dir}_test_{n + 1:03d}.csv'):
-                    dataPath = f'{save_path}{args.out_dir}_test_{n + 1:03d}.csv'
-                elif os.path.exists(f'{save_path}test_{n + 1:03d}.csv'):
-                    dataPath = f'{save_path}test_{n + 1:03d}.csv'
-                else:
-                    dataPath = "none"
+            # # dataPath = f'./Model/{args.out_dir}/{args.out_dir}_test_{n + 1:03d}.csv'
+            # if os.path.exists(f'./Model/{args.out_dir}/{args.out_dir}_test_{n + 1:03d}.csv'):
+            #     dataPath = f'./Model/{args.out_dir}/{args.out_dir}_test_{n + 1:03d}.csv'
+            #     save_path = f'./Model/{args.out_dir}/'
+            # elif os.path.exists(f'./Model/{args.out_dir}/test_{n + 1:03d}.csv'):
+            #     dataPath = f'./Model/{args.out_dir}/test_{n + 1:03d}.csv'
+            #     save_path = f'./Model/{args.out_dir}/'
+            # elif dataform == 'Oxford':
+            #     save_path = f'./Model/{args.out_dir}/oxford/'
+            #     if os.path.exists(f'{save_path}{args.out_dir}_test_{n + 1:03d}.csv'):
+            #         dataPath = f'{save_path}{args.out_dir}_test_{n + 1:03d}.csv'
+            #     elif os.path.exists(f'{save_path}test_{n + 1:03d}.csv'):
+            #         dataPath = f'{save_path}test_{n + 1:03d}.csv'
+            #     else:
+            #         dataPath = "none"
             if dataform != 'Oxford':
-                save_path = f'./Model/{args.out_dir}/test/'
+                save_path = f'./Model/{args.out_dir}/'
+                print(save_path)
                 # save_path = f'../Citations/CLIP_prefix_caption/Model/{args.out_dir}/'#ins/'
-                if os.path.exists(f'{save_path}{args.which}_{n + 1}.csv'):
-                    dataPath = f'{save_path}{args.which}_{n + 1}.csv'
-
-                # if os.path.exists(f'{save_path}{args.out_dir}_test_{n + 1:03d}.csv'):
-                #     dataPath = f'{save_path}{args.out_dir}_test_{n + 1:03d}.csv'
-                # elif os.path.exists(f'{save_path}test_{n + 1:03d}.csv'):
-                #     dataPath = f'{save_path}test_{n + 1:03d}.csv'
+                if args.which == 'ground_truth':
+                    if os.path.exists(f'{save_path}{args.which}.csv'):
+                        dataPath = f'{save_path}{args.which}.csv'
+                    else:
+                        dataPath = "none"
                 else:
-                    dataPath = "none"
+                    if os.path.exists(f'{save_path}{args.which}_{n + 1}.csv'):
+                        dataPath = f'{save_path}{args.which}_{n + 1}.csv'
+
+                    # if os.path.exists(f'{save_path}{args.out_dir}_test_{n + 1:03d}.csv'):
+                    #     dataPath = f'{save_path}{args.out_dir}_test_{n + 1:03d}.csv'
+                    # elif os.path.exists(f'{save_path}test_{n + 1:03d}.csv'):
+                    #     dataPath = f'{save_path}test_{n + 1:03d}.csv'
+                    else:
+                        dataPath = "none"
             else:
                 dataPath = "none"
 
@@ -1384,7 +1444,7 @@ def test_mine(model, args, dataform: str = 'Oxford', input_num: int = 5, model_p
                         attention_mask = torch.cat((attention_mask, padding), dim=1).squeeze(0)
 
                         images, caption_ids, caption_masks = image.unsqueeze(0).to(device), input_ids.unsqueeze(0).to(device), attention_mask.unsqueeze(0).to(device)
-                        outputs, humor_sim, non_humor_sim = model(images, caption_ids, caption_masks)
+                        outputs, sim = model(images, caption_ids, caption_masks)
                         data.loc[i, 'humor_score'] = outputs.item()
                     else:
                         if str(image_list[i]) == 'nan':
@@ -1394,29 +1454,34 @@ def test_mine(model, args, dataform: str = 'Oxford', input_num: int = 5, model_p
                 data['humor'] = data['humor_score'].apply(lambda x: x if type(x) != float else (1 if x > 0.5 else 0))
                 if df.empty:
                     df = data[['image_id', 'caption', 'humor_score','humor']]
+                    if args.which == 'ground_truth':
+                        break
                 else:
                     df = pd.concat([df, data[['image_id', 'caption', 'humor_score','humor']]], axis=1)
         # df.to_csv(f'{save_path}{args.prefix}_{model_path}_test_humorscore.csv', float_format='%.15f', index=False)
-        df.to_csv(f'{save_path}0409_SD_MC_focalLoss_09{model_path}_{args.which}_humorscore.csv', float_format='%.15f', index=False)
+        df.to_csv(f'{save_path}0425_exchange_05_08_13_focals_08_17_temp050_{model_path}_{args.which}_humorscore.csv', float_format='%.15f', index=False)
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataPath', default='humorScore/humorScore_SD_pass10_MC_pass12_noAug_wOxford_only01_train', help='data path')
+    parser.add_argument('--dataPath', default='humorScore/humorScore_SD_pass10_MC_pass12_noAug_exchange_05_08_13_wOxford_only01', help='data path')
+    # parser.add_argument('--dataPath', default='humorScore/humorScore_SD_pass10_MC_pass12_noAug_wOxford_only01_test', help='data path')
+    # parser.add_argument('--dataPath', default='humorScore/humorScore_SD_pass10_MC_pass12_noAug_wOxford_only01_train', help='data path')
     # parser.add_argument('--dataPath', default='humorScore_oxford_with_coco_only01',help='data path')
-    parser.add_argument('--out_dir', default='humorScore/humorScore_20250418_SD_pass10_MC_pass12_noAug_wOxford_only01_focal09_16_contrast_temp040')
+    parser.add_argument('--out_dir', default='humorScore/humorScore_20250429_SD_pass10_MC_pass12_noAug_exchange_05_08_13_wOxford_only01_focal08_17_contrast_temp050_margin01')
     ### test_mine
     # parser.add_argument('--out_dir', default='20250217_sonicdrivein_only300_base_oxford_lower_only800_transformer_onlyLLMlora_p64_falcon_swin_tf8')
-    # parser.add_argument('--out_dir', default='20250408_100up_only200_lessNotFunImg_169_279_passlength_10_SD_base_0316_oxford_800_8_300_2_ESH_filter_cross_concat_combineLoss')
+    # parser.add_argument('--out_dir', default='20250428_100up_only200_passlength_10_SD_base_0421_oxford_3000_only1_300_82_ESH_filter_cross_concat_combineLoss')
     # parser.add_argument('--out_dir', default='20250409_100up_only200_lessNotFunImg_53_171_passlength_12_MC_base_0316_oxford_800_8_300_2_ESH_filter_cross_concat_combineLoss')
     # parser.add_argument('--out_dir',default='clip_100up_only200_lessNotFunImg_53_171_passlength_12_MC_base_oxford_800_8_300_82')
     # parser.add_argument('--out_dir',default='clip_100up_only200_lessNotFunImg_169_279_passlength_10_base_oxford_800_8_300_82')
     # parser.add_argument('--out_dir', default='humorScore_20250409_SD_only100_pass10_MC_only200_pass12_funnyscore_only01_focalLoss_09')
     parser.add_argument('--prefix', default='checkpoint', help='prefix for saved filenames')
-    # parser.add_argument('--prefix', default='humorScore_20250409_SD_only100_pass10_MC_only200_pass12_funnyscore_only01_focalLoss_09', help='prefix for saved filenames')
-    parser.add_argument('--which', default='generate_beam')
+    # parser.add_argument('--prefix', default='humorScore_20250425_SD_pass10_MC_pass12_noAug_exchange_05_08_13_wOxford_only01_focal08_17_contrast_temp050_2', help='prefix for saved filenames')
+    # parser.add_argument('--which', default='generate_beam')
     # parser.add_argument('--which', default='generate2')
+    parser.add_argument('--which', default='ground_truth')
 
-    parser.add_argument('--bs', type=int, default=90)
+    parser.add_argument('--bs', type=int, default=16)
     # parser.add_argument('--bs', type=int, default=1500)
     args = parser.parse_args()
     if not os.path.exists('./Model/' + args.out_dir):
@@ -1425,18 +1490,20 @@ def main():
 
     model = ImageTextModel()
     device = torch.device('cuda:0')
+    # device = torch.device('cpu')
     model = model.to(device)
     # save_file = 'humorScore_20250314_oxford_with_coco_funnyscore_rank_MSE'
-    # i = 3
+    # i = 8
+    # model.load_state_dict(torch.load(f'./Model/{args.out_dir}/checkpoint-{i:03d}.pt'))
     model.eval()
-    # train(model, args, output_dir=args.out_dir, output_prefix=args.prefix)
-    test(model, args, output_dir=args.out_dir, output_prefix=args.prefix)
+    train(model, args, output_dir=args.out_dir, output_prefix=args.prefix)
+    # test(model, args, output_dir=args.out_dir, output_prefix=args.prefix)
     # for i in range(20):
-    #     i = i + 5
-    #     if os.path.exists(f'./Model/{args.prefix}/checkpoint-{i:03d}.pt'):
-    #         model.load_state_dict(torch.load(f'./Model/{args.prefix}/checkpoint-{i:03d}.pt'))
+    #     i = i + 47
+    #     if os.path.exists(f'./Model/humorScore/{args.prefix}/checkpoint-{i:03d}.pt'):
+    #         model.load_state_dict(torch.load(f'./Model/humorScore/{args.prefix}/checkpoint-{i:03d}.pt'))
     #         # test_mine(model, args, dataform="Oxford", input_num=10, model_path = i)
-    #         test_mine(model, args, dataform="sonicdrivein", input_num=10, model_path=i)
+    #         test_mine(model, args, dataform="sonicdrivein", input_num=20, model_path=i)
 
     old_test = -1
     trainData = '../Data/Oxford_HIC/parse/oxford_lower_800up_only800_all_ViT-B_32_train.pkl'
