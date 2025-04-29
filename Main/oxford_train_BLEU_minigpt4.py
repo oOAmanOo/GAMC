@@ -102,12 +102,15 @@ class OxfordDataset(torch.utils.data.Dataset):
         tokens, mask = self.pad_tokens(item)
         if self.datafrom == 'Oxford':
             prefix = torch.load('../../Oxford_HIC/ImageData/' + self.image_ids[item] + '.pt', weights_only=False)
+            emotion = torch.load('../../Oxford_HIC/ESH/bert_5384/emotion/' + self.image_ids[item] + '.pt', weights_only=False)
+            sentiment = torch.load('../../Oxford_HIC/ESH/bert_5384/sentiment/' + self.image_ids[item] + '.pt', weights_only=False)
+            humor = torch.load('../../Oxford_HIC/ESH/bert_5384/humor/' + self.image_ids[item] + '.pt', weights_only=False)
         else:
-            prefix = torch.load('../../Instagram/ImageData/' + self.datafrom + '/' + self.image_ids[item] + '.pt',
-                                weights_only=False)
-        # emotion, sentiment, humor = self.pad_emotion(item)
-        emotion, sentiment, humor = self.emotion[self.image_ids[item]], self.sentiment[self.image_ids[item]], self.humor[self.image_ids[item]]
-        # emotion, sentiment, humor = self.bertTokenize(self.emotion[self.image_ids[item]]), self.bertTokenize(self.sentiment[self.image_ids[item]]), self.bertTokenize(self.humor[self.image_ids[item]])
+            prefix = torch.load('../../Instagram/ImageData/' + self.datafrom + '/' + self.image_ids[item] + '.pt', weights_only=False)
+            emotion, sentiment, humor = self.emotion[self.image_ids[item]], self.sentiment[self.image_ids[item]], self.humor[self.image_ids[item]]
+            # emotion, sentiment, humor = self.pad_emotion(item)
+            # emotion, sentiment, humor = self.bertTokenize(self.emotion[self.image_ids[item]]), self.bertTokenize(self.sentiment[self.image_ids[item]]), self.bertTokenize(self.humor[self.image_ids[item]])
+
         if self.normalize_prefix:
             prefix = prefix.float()
             prefix = prefix / prefix.norm(2, -1)
@@ -208,58 +211,58 @@ class OxfordDataset(torch.utils.data.Dataset):
             self.max_seq_len = min(int(all_len.mean() + all_len.std() * 10), int(all_len.max()))
             with open(f"{self.data_path[:-4]}_bleu_all.pkl", 'wb') as f:
                 pickle.dump([self.captions_tokens, self.caption2embedding, self.max_seq_len], f)
-        if datafrom == 'Oxford':
-            # self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford.csv')
-            # self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_filter.csv')
-            # self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_sentence_generate_Oxford.csv')
-            # self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_sentence_generate_Oxford_bert.csv')
-            self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_sentence_generate_Oxford_bert_6844.csv')
-            # self.emotion_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_emotion_filter.csv')
-            # self.sentiment_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_sentiment_filter.csv')
-            # self.humor_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_humor_filter.csv')
-        else:
-            # self.emotions_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{datafrom}.csv')
-            self.emotions_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{datafrom}_filter.csv')
-            # self.emotion_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{datafrom}_emotion_filter.csv')
-            # self.sentiment_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{datafrom}_sentiment_filter.csv')
-            # self.humor_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{datafrom}_humor_filter.csv')
-        # self.emotion will save the emotion data for each image
-        self.emotion = dict()
-        self.sentiment = dict()
-        self.humor = dict()
-
-        # self.max_seq_len_emo = 21
-        # for i in range(self.emotions_data.shape[0]):
-        #     image_id = self.emotions_data.iloc[i]['image_id']
-        #     emotion = str(self.emotions_data.iloc[i]['emotion']).replace(';', ' ')
-        #     sentiment = str(self.emotions_data.iloc[i]['sentiment']).replace(';', ' ')
-        #     humor = str(self.emotions_data.iloc[i]['humor']).replace(';', ' ')
-        #     self.emotion[image_id] = torch.tensor(self.tokenizer.encode(emotion, max_length=64, truncation=True), dtype=torch.int64)
-        #     self.sentiment[image_id] = torch.tensor(self.tokenizer.encode(sentiment, max_length=64, truncation=True), dtype=torch.int64)
-        #     self.humor[image_id] = torch.tensor(self.tokenizer.encode(humor, max_length=64, truncation=True, padding=True), dtype=torch.int64)
-
-        # padding_emotion = 384 - (self.emotion_data.shape[1] - 1)
-        # padding_sentiment = 384 - (self.sentiment_data.shape[1] - 1)
-        # padding_humor = 768 - (self.humor_data.shape[1] - 1)
-        # for i in range(self.emotion_data.shape[0]):
-        #     image_id = self.emotion_data.iloc[i]['image_id']
-        #     emotion = torch.tensor(self.emotion_data.iloc[i][1:].tolist())
-        #     self.emotion[image_id] = torch.cat((emotion, torch.zeros(padding_emotion, dtype=torch.int64)))
-        #     sentiment = torch.tensor(self.sentiment_data.iloc[i][1:].tolist())
-        #     self.sentiment[image_id] = torch.cat((sentiment, torch.zeros(padding_sentiment, dtype=torch.int64)))
-        #     humor = torch.tensor(self.humor_data.iloc[i][1:].tolist())
-        #     self.humor[image_id] = torch.cat((humor, torch.zeros(padding_humor, dtype=torch.int64)))
-        with tqdm(total=self.emotions_data.shape[0]) as pbar:
-            for i in range(self.emotions_data.shape[0]):
-                image_id = self.emotions_data.iloc[i]['image_id']
-                if image_id in self.image_ids:
-                    self.emotion[image_id] = torch.tensor(ast.literal_eval(self.emotions_data.iloc[i]['emotion']))
-                    self.sentiment[image_id] = torch.tensor(ast.literal_eval(self.emotions_data.iloc[i]['sentiment']))
-                    self.humor[image_id] = torch.tensor(ast.literal_eval(self.emotions_data.iloc[i]['humor']))
-                pbar.update(1)
-            pbar.close()
-        del self.emotions_data
-        gc.collect()
+        # if datafrom == 'Oxford':
+        #     # self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford.csv')
+        #     # self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_filter.csv')
+        #     # self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_sentence_generate_Oxford.csv')
+        #     # self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_sentence_generate_Oxford_bert.csv')
+        #     self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_sentence_generate_Oxford_bert_5384.csv')
+        #     # self.emotion_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_emotion_filter.csv')
+        #     # self.sentiment_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_sentiment_filter.csv')
+        #     # self.humor_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_humor_filter.csv')
+        # else:
+        #     # self.emotions_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{datafrom}.csv')
+        #     self.emotions_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{datafrom}_filter.csv')
+        #     # self.emotion_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{datafrom}_emotion_filter.csv')
+        #     # self.sentiment_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{datafrom}_sentiment_filter.csv')
+        #     # self.humor_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{datafrom}_humor_filter.csv')
+        # # self.emotion will save the emotion data for each image
+        # self.emotion = dict()
+        # self.sentiment = dict()
+        # self.humor = dict()
+        #
+        # # self.max_seq_len_emo = 21
+        # # for i in range(self.emotions_data.shape[0]):
+        # #     image_id = self.emotions_data.iloc[i]['image_id']
+        # #     emotion = str(self.emotions_data.iloc[i]['emotion']).replace(';', ' ')
+        # #     sentiment = str(self.emotions_data.iloc[i]['sentiment']).replace(';', ' ')
+        # #     humor = str(self.emotions_data.iloc[i]['humor']).replace(';', ' ')
+        # #     self.emotion[image_id] = torch.tensor(self.tokenizer.encode(emotion, max_length=64, truncation=True), dtype=torch.int64)
+        # #     self.sentiment[image_id] = torch.tensor(self.tokenizer.encode(sentiment, max_length=64, truncation=True), dtype=torch.int64)
+        # #     self.humor[image_id] = torch.tensor(self.tokenizer.encode(humor, max_length=64, truncation=True, padding=True), dtype=torch.int64)
+        #
+        # # padding_emotion = 384 - (self.emotion_data.shape[1] - 1)
+        # # padding_sentiment = 384 - (self.sentiment_data.shape[1] - 1)
+        # # padding_humor = 768 - (self.humor_data.shape[1] - 1)
+        # # for i in range(self.emotion_data.shape[0]):
+        # #     image_id = self.emotion_data.iloc[i]['image_id']
+        # #     emotion = torch.tensor(self.emotion_data.iloc[i][1:].tolist())
+        # #     self.emotion[image_id] = torch.cat((emotion, torch.zeros(padding_emotion, dtype=torch.int64)))
+        # #     sentiment = torch.tensor(self.sentiment_data.iloc[i][1:].tolist())
+        # #     self.sentiment[image_id] = torch.cat((sentiment, torch.zeros(padding_sentiment, dtype=torch.int64)))
+        # #     humor = torch.tensor(self.humor_data.iloc[i][1:].tolist())
+        # #     self.humor[image_id] = torch.cat((humor, torch.zeros(padding_humor, dtype=torch.int64)))
+        # with tqdm(total=self.emotions_data.shape[0]) as pbar:
+        #     for i in range(self.emotions_data.shape[0]):
+        #         image_id = self.emotions_data.iloc[i]['image_id']
+        #         if image_id in self.image_ids:
+        #             self.emotion[image_id] = torch.tensor(ast.literal_eval(self.emotions_data.iloc[i]['emotion']))
+        #             self.sentiment[image_id] = torch.tensor(ast.literal_eval(self.emotions_data.iloc[i]['sentiment']))
+        #             self.humor[image_id] = torch.tensor(ast.literal_eval(self.emotions_data.iloc[i]['humor']))
+        #         pbar.update(1)
+        #     pbar.close()
+        # del self.emotions_data
+        # gc.collect()
         print(f"Train Data size: {len(self.captions_tokens)}")
         # self.filter_data_by_bleu(model, batch_size, bleu_threshold)
 
@@ -901,7 +904,7 @@ def main():
     # parser.add_argument('--trainData', default='../Data/Instagram/parse/300up_only300_all_sonicdrivein_ViT-B_32_train.pkl')
     # parser.add_argument('--testData', default='../Data/Instagram/parse/300up_only300_rest_200up_top200_sonicdrivein_ViT-B_32_test.pkl')
     parser.add_argument('--datafrom', default='Oxford')
-    parser.add_argument('--out_dir', default='20250419_oxford_5384_only1_300_82_ESH_bert_cross_concat')
+    parser.add_argument('--out_dir', default='20250420_oxford_5384_only1_300_82_ESH_bert_cross_concat')
     parser.add_argument('--prefix', default='checkpoint', help='prefix for saved filenames')
     parser.add_argument('--epochs', type=int, default=50)
     parser.add_argument('--save_every', type=int, default=1)
