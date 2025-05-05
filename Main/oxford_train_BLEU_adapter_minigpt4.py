@@ -81,12 +81,19 @@ class OxfordDataset(torch.utils.data.Dataset):
     def __getitem__(self, item: int) -> tuple[Tensor, Tensor, Any, int, Tensor, Tensor, Tensor, Any]:
         tokens, mask = self.pad_tokens(item)
         if self.datafrom == 'Oxford':
-            prefix = torch.load('../../Oxford_HIC/ImageData/' + self.image_ids[item] + '.pt', weights_only=False)
+            prefix = torch.load('../../Oxford_HIC/ImageData/' + self.image_ids[item] + '.pt', weights_only=False).cpu()
+            emotion = torch.load('../../Oxford_HIC/ESH/bert_5384/emotion/' + self.image_ids[item] + '.pt', weights_only=False).cpu()
+            sentiment = torch.load('../../Oxford_HIC/ESH/bert_5384/sentiment/' + self.image_ids[item] + '.pt', weights_only=False).cpu()
+            humor = torch.load('../../Oxford_HIC/ESH/bert_5384/humor/' + self.image_ids[item] + '.pt', weights_only=False).cpu()
         else:
-            prefix = torch.load('../../Instagram/ImageData/' + self.datafrom + '/' + self.image_ids[item] + '.pt',
-                                weights_only=False)
-        # emotion, sentiment, humor = self.pad_emotion(item)
-        emotion, sentiment, humor = self.emotion[self.image_ids[item]], self.sentiment[self.image_ids[item]], self.humor[self.image_ids[item]]
+            prefix = torch.load('../../Instagram/ImageData/' + self.datafrom + '/' + self.image_ids[item] + '.pt', weights_only=False)
+            emotion = torch.load('../../Instagram/ESH/emotion/' + self.image_ids[item] + '.pt', weights_only=False).cpu()
+            sentiment = torch.load('../../Instagram/ESH/sentiment/' + self.image_ids[item] + '.pt', weights_only=False).cpu()
+            humor = torch.load('../../Instagram/ESH/humor/' + self.image_ids[item] + '.pt', weights_only=False).cpu()
+            # emotion, sentiment, humor = self.emotion[self.image_ids[item]], self.sentiment[self.image_ids[item]], self.humor[self.image_ids[item]]
+            # emotion, sentiment, humor = self.pad_emotion(item)
+            # emotion, sentiment, humor = self.bertTokenize(self.emotion[self.image_ids[item]]), self.bertTokenize(self.sentiment[self.image_ids[item]]), self.bertTokenize(self.humor[self.image_ids[item]])
+
         if self.normalize_prefix:
             prefix = prefix.float()
             prefix = prefix / prefix.norm(2, -1)
@@ -185,7 +192,8 @@ class OxfordDataset(torch.utils.data.Dataset):
             # self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_filter.csv')
             # self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_sentence_generate_Oxford.csv')
             # self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_sentence_generate_Oxford_bert.csv')
-            self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_sentence_generate_Oxford_bert_6844.csv')
+            self.emotions_data = pd.read_csv(
+                '../Data/Oxford_HIC/Generate_original/Minigpt4_sentence_generate_Oxford/Minigpt4_sentence_generate_Oxford_bert_6844.csv')
             # self.emotion_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_emotion_filter.csv')
             # self.sentiment_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_sentiment_filter.csv')
             # self.humor_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_humor_filter.csv')
@@ -224,18 +232,24 @@ class OxfordDataset(torch.utils.data.Dataset):
         #     humor = torch.tensor(self.humor_data.iloc[i][1:].tolist())
         #     self.humor[image_id] = torch.cat((humor, torch.zeros(padding_humor, dtype=torch.int64)))
 
-        with tqdm(total=self.emotions_data.shape[0]) as pbar:
-            for i in range(self.emotions_data.shape[0]):
-                image_id = self.emotions_data.iloc[i]['image_id']
-                if image_id in self.image_ids:
-                    self.emotion[image_id] = torch.tensor(ast.literal_eval(self.emotions_data.iloc[i]['emotion']))
-                    self.sentiment[image_id] = torch.tensor(ast.literal_eval(self.emotions_data.iloc[i]['sentiment']))
-                    self.humor[image_id] = torch.tensor(ast.literal_eval(self.emotions_data.iloc[i]['humor']))
-                pbar.update(1)
-            pbar.close()
-        del self.emotions_data
-        gc.collect()
-        print(f"Train Data size: {len(self.captions_tokens)}")
+        # with tqdm(total=self.emotions_data.shape[0]) as pbar:
+        #     for i in range(self.emotions_data.shape[0]):
+        #         image_id = self.emotions_data.iloc[i]['image_id']
+        #         # if image_id in self.image_ids:
+        #         token = torch.tensor(ast.literal_eval(self.emotions_data.iloc[i]['emotion']))
+        #         self.emotion[image_id] = token
+        #         torch.save(token, f"../../Instagram/ESH/emotion/{image_id}.pt")
+        #         token = torch.tensor(ast.literal_eval(self.emotions_data.iloc[i]['sentiment']))
+        #         self.sentiment[image_id] = token
+        #         torch.save(token, f"../../Instagram/ESH/sentiment/{image_id}.pt")
+        #         token = torch.tensor(ast.literal_eval(self.emotions_data.iloc[i]['humor']))
+        #         self.humor[image_id] = token
+        #         torch.save(token, f"../../Instagram/ESH/humor/{image_id}.pt")
+        #         pbar.update(1)
+        #     pbar.close()
+        # del self.emotions_data
+        # gc.collect()
+        print(f"Train Data size: {len(self)}")
         # self.filter_data_by_bleu(model, batch_size, bleu_threshold)
 
 class ClipCocoDataset(Dataset):
@@ -724,7 +738,7 @@ class ClipCaptionModel(nn.Module):
         b = count_trainable_parameters(self.falcon)
         # 留下小數點後兩位就好
         percent = round((b / a) * 100, 3)
-        print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
+        print("falcon Before: ", a, "After: ", b, "Percent: ", percent, "%")
 
 def PCloss(logits: torch.Tensor, tokens: torch.Tensor, use_ce=True):
     """
@@ -960,14 +974,14 @@ def main():
     # parser.add_argument('--testData', default='../Data/Oxford_HIC/parse/oxford_5384_only1_300_2_ViT-B_32_test.pkl')
     # parser.add_argument('--trainData', default='../Data/Instagram/parse/100up_only200_passlength_12_o_mcdonalds_switzerland_ViT-B_32_train.pkl')
     # parser.add_argument('--testData', default='../Data/Instagram/parse/100up_only200_passlength_12_x_mcdonalds_switzerland_ViT-B_32_test.pkl')
-    parser.add_argument('--trainData', default='../Data/Instagram/parse/100up_only200_lessNotFunImg_53_171_passlength_12_o_mcdonalds_switzerland_ViT-B_32_train.pkl')
-    parser.add_argument('--testData', default='../Data/Instagram/parse/100up_only200_lessNotFunImg_53_171_passlength_12_x_mcdonalds_switzerland_ViT-B_32_test.pkl')
-    # parser.add_argument('--trainData', default='../Data/Instagram/parse/100up_only200_passlength_10_o_sonicdrivein_ViT-B_32_train.pkl')
-    # parser.add_argument('--testData', default='../Data/Instagram/parse/100up_only200_passlength_10_x_sonicdrivein_ViT-B_32_test.pkl')
-    # parser.add_argument('--trainData', default='../Data/Instagram/parse/100up_only200_lessNotFunImg_169_55_passlength_10_o_sonicdrivein_ViT-B_32_train.pkl')
-    # parser.add_argument('--testData', default='../Data/Instagram/parse/100up_only200_lessNotFunImg_169_55_passlength_10_x_sonicdrivein_ViT-B_32_test.pkl')
-    parser.add_argument('--datafrom', default='mcdonalds_switzerland')
-    parser.add_argument('--out_dir', default='20250413_100up_only200_lessNotFunImg_53_171_passlength_12_MC_base_0410_oxford_1265_only1_300_82_ESH_filter_cross_concat_combineLoss')
+    # parser.add_argument('--trainData', default='../Data/Instagram/parse/100up_only200_lessNotFunImg_53_247_passlength_12_o_mcdonalds_switzerland_ViT-B_32_train.pkl')
+    # parser.add_argument('--testData', default='../Data/Instagram/parse/100up_only200_lessNotFunImg_53_247_passlength_12_x_mcdonalds_switzerland_ViT-B_32_test.pkl')
+    parser.add_argument('--trainData', default='../Data/Instagram/parse/100up_only200_passlength_10_o_sonicdrivein_ViT-B_32_train.pkl')
+    parser.add_argument('--testData', default='../Data/Instagram/parse/100up_only200_passlength_10_x_sonicdrivein_ViT-B_32_test.pkl')
+    # parser.add_argument('--trainData', default='../Data/Instagram/parse/100up_only200_lessNotFunImg_169_131_passlength_10_o_sonicdrivein_ViT-B_32_train.pkl')
+    # parser.add_argument('--testData', default='../Data/Instagram/parse/100up_only200_lessNotFunImg_169_131_passlength_10_x_sonicdrivein_ViT-B_32_test.pkl')
+    parser.add_argument('--datafrom', default='sonicdrivein')
+    parser.add_argument('--out_dir', default='20250505_100up_only200_passlength_10_SD_base_0421_oxford_3000_only1_300_82_ESH_filter_cross_concat_combineLoss_onlyLLMadapt')
     parser.add_argument('--prefix', default='checkpoint', help='prefix for saved filenames')
     parser.add_argument('--epochs', type=int, default=50)
     parser.add_argument('--save_every', type=int, default=1)
@@ -987,22 +1001,24 @@ def main():
         os.makedirs('D:/MemeGAN/Model/' + args.out_dir)
     args.out_dir = './Model/' + args.out_dir
     device = torch.device('cuda:0')
-    prefix_dim = 640 if args.is_rn else 512
-    args.mapping_type = {'mlp': MappingType.MLP, 'transformer': MappingType.Transformer}[args.mapping_type]
-    origin_model = ClipCaptionModel(mode='nn', prefix_length=prefix_length, clip_length=prefix_length, prefix_size=prefix_dim, num_layers=args.num_layers)
-    model = ClipCaptionModel(mode='lora', prefix_length=prefix_length, clip_length=prefix_length, prefix_size=prefix_dim, num_layers=args.num_layers)
-
-    # 20250115_totalClip_oxford_only100_300k_transformer_p40_falcon_bleu1_0.05 == 32
-    # save_file = '20250406_oxford_1408_300_8_300_2_ESH_bert_cross_concat'  #1
-    # save_file = '20250316_oxford_800_8_300_2_ESH_filter_cross_concat'  #13
-    save_file = '20250410_oxford_1265_only1_300_8_300_2_ESH_bert_cross_concat'  # 3
-    i = 3
-    origin_model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i:03d}.pt'))
-
     def count_trainable_parameters(model):
         model_parameters = filter(lambda p: p.requires_grad, model.parameters())
         params = sum([np.prod(p.size()) for p in model_parameters])
         return params
+    prefix_dim = 640 if args.is_rn else 512
+    args.mapping_type = {'mlp': MappingType.MLP, 'transformer': MappingType.Transformer}[args.mapping_type]
+    origin_model = ClipCaptionModel(mode='nn', prefix_length=prefix_length, clip_length=prefix_length, prefix_size=prefix_dim, num_layers=args.num_layers)
+    model = ClipCaptionModel(mode='lora', prefix_length=prefix_length, clip_length=prefix_length, prefix_size=prefix_dim, num_layers=args.num_layers)
+    print(count_trainable_parameters(origin_model))
+    # 20250115_totalClip_oxford_only100_300k_transformer_p40_falcon_bleu1_0.05 == 32
+    # save_file = '20250406_oxford_1408_300_8_300_2_ESH_bert_cross_concat'  #1
+    # save_file = '20250316_oxford_800_8_300_2_ESH_filter_cross_concat'  #13
+    # save_file = '20250410_oxford_1265_only1_300_8_300_2_ESH_bert_cross_concat'  # 3
+    save_file = '20250421_oxford_3000_only1_300_82_ESH_bert_cross_concat'  # 3
+    i = 4
+    origin_model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i:03d}.pt'))
+
+    print(count_trainable_parameters(origin_model))
 
     def weightToLora(fullModel, newModel):
         for name, param in fullModel.named_parameters():
@@ -1023,18 +1039,20 @@ def main():
             print(f"{name}: requires_grad={param.requires_grad}")
         return newModel
 
-    a = count_trainable_parameters(origin_model)
-    model = weightToLora(origin_model, model)
+    model = origin_model
+    a = count_trainable_parameters(model)
+    # a = count_trainable_parameters(origin_model)
+    # model = weightToLora(origin_model, model)
     del origin_model
     gc.collect()
-    b = count_trainable_parameters(model)
-    percent = round((b / a) * 100, 3)
-    print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
-
-    # model.activateLoRa()
     # b = count_trainable_parameters(model)
     # percent = round((b / a) * 100, 3)
     # print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
+
+    model.activateLoRa()
+    b = count_trainable_parameters(model)
+    percent = round((b / a) * 100, 3)
+    print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
 
     model = model.to(device, dtype=torch.bfloat16)
     model.eval()
