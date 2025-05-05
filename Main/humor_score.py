@@ -768,17 +768,30 @@ class FocalContrastiveLoss(nn.Module):
             self.loss_df = pd.DataFrame(columns=["focalLoss", "contrastive_loss", "loss"])
 
     def computeLoss(self, pred, target, sim):
-        alpha = 0.8
-        gamma = 1.3
+        alpha = 0.9
+        gamma = 2.0
 
-        margin = 0.1
         # Focal Loss
-        focalLoss = sigmoid_focal_loss(pred, target, alpha=alpha, gamma=gamma, reduction='none')
-        mask_pos = ~((target == 1) & (pred > (1 - margin)))  # keep if NOT confident positive
-        mask_neg = ~((target == 0) & (pred < margin))  # keep if NOT confident negative
-        mask = mask_pos & mask_neg
-        focalLoss = focalLoss * mask.float()
-        focalLoss = focalLoss.sum() / (mask.float().sum() + 1e-6)
+        focalLoss = sigmoid_focal_loss(pred, target, alpha=alpha, gamma=gamma, reduction='mean')
+        # focalLoss = sigmoid_focal_loss(pred, target, alpha=alpha, gamma=gamma, reduction='none')
+        ############  mask  ############
+        # margin = 0.2
+        # mask_pos = ~((target == 1) & (pred > (1 - margin)))  # keep if NOT confident positive
+        # mask_neg = ~((target == 0) & (pred < margin))  # keep if NOT confident negative
+        # mask = mask_pos & mask_neg
+        # focalLoss = focalLoss * mask.float()
+        # focalLoss = focalLoss.sum() / (mask.float().sum() + 1e-6)
+        ############ weight ############
+        # # 對於 positive 標籤，置信度越高，權重越低（但不是 0）
+        # pos_weight = 1.0 - pred  # pred 越接近 1，weight 越小
+        # # 對於 negative 標籤，置信度越低，權重越低（但不是 0）
+        # neg_weight = pred  # pred 越接近 0，weight 越小
+        # soft_weights = torch.where(target == 1, pos_weight, neg_weight) # 組合起來
+        # margin = 0.5
+        # soft_weights = torch.clamp(soft_weights / margin, min=0.0, max=1.0)
+        # focalLoss = focalLoss * soft_weights
+        # focalLoss = focalLoss.sum() / (soft_weights.sum() + 1e-6)
+        ################################
 
         # Contrastive Loss
         contrast_target = (target.unsqueeze(0) == target.unsqueeze(1)).float()
@@ -1459,24 +1472,25 @@ def test_mine(model, args, dataform: str = 'Oxford', input_num: int = 5, model_p
                 else:
                     df = pd.concat([df, data[['image_id', 'caption', 'humor_score','humor']]], axis=1)
         # df.to_csv(f'{save_path}{args.prefix}_{model_path}_test_humorscore.csv', float_format='%.15f', index=False)
-        df.to_csv(f'{save_path}0425_exchange_05_08_13_focals_08_17_temp050_{model_path}_{args.which}_humorscore.csv', float_format='%.15f', index=False)
+        # df.to_csv(f'{save_path}0425_exchange_05_08_13_focal_08_17_temp050_{model_path}_{args.which}_humorscore.csv', float_format='%.15f', index=False)
+        df.to_csv(f'{save_path}0425_exchange_05_08_13_focal_08_17_temp050_{model_path}_{args.which}_humorscore.csv', float_format='%.15f', index=False)
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dataPath', default='humorScore/humorScore_SD_pass10_MC_pass12_noAug_exchange_05_08_13_wOxford_only01', help='data path')
+    # parser.add_argument('--dataPath', default='humorScore/humorScore_SD_pass10_MC_pass12_noAug_exchange_05_08_13_wOxford_only01_train', help='data path')
     # parser.add_argument('--dataPath', default='humorScore/humorScore_SD_pass10_MC_pass12_noAug_wOxford_only01_test', help='data path')
     # parser.add_argument('--dataPath', default='humorScore/humorScore_SD_pass10_MC_pass12_noAug_wOxford_only01_train', help='data path')
     # parser.add_argument('--dataPath', default='humorScore_oxford_with_coco_only01',help='data path')
-    parser.add_argument('--out_dir', default='humorScore/humorScore_20250429_SD_pass10_MC_pass12_noAug_exchange_05_08_13_wOxford_only01_focal08_17_contrast_temp050_margin01')
+    # parser.add_argument('--out_dir', default='humorScore/humorScore_20250430_SD_pass10_MC_pass12_noAug_exchange_05_08_13_wOxford_only01_focal09_20_contrast_temp050_margin05_weight')
     ### test_mine
     # parser.add_argument('--out_dir', default='20250217_sonicdrivein_only300_base_oxford_lower_only800_transformer_onlyLLMlora_p64_falcon_swin_tf8')
-    # parser.add_argument('--out_dir', default='20250428_100up_only200_passlength_10_SD_base_0421_oxford_3000_only1_300_82_ESH_filter_cross_concat_combineLoss')
-    # parser.add_argument('--out_dir', default='20250409_100up_only200_lessNotFunImg_53_171_passlength_12_MC_base_0316_oxford_800_8_300_2_ESH_filter_cross_concat_combineLoss')
+    parser.add_argument('--out_dir', default='clip/clip_100up_only200_lessNotFunImg_169_55_passlength_10_SD_baseoxford_3000_only1_300_82')
+    # parser.add_argument('--out_dir', default='100up_only200_lessNotFunImg_169_279_passlength_10_SD_base_0421_oxford_3000_only1_300_82_ESH_filter_cross_concat_combineLoss')
     # parser.add_argument('--out_dir',default='clip_100up_only200_lessNotFunImg_53_171_passlength_12_MC_base_oxford_800_8_300_82')
     # parser.add_argument('--out_dir',default='clip_100up_only200_lessNotFunImg_169_279_passlength_10_base_oxford_800_8_300_82')
     # parser.add_argument('--out_dir', default='humorScore_20250409_SD_only100_pass10_MC_only200_pass12_funnyscore_only01_focalLoss_09')
-    parser.add_argument('--prefix', default='checkpoint', help='prefix for saved filenames')
-    # parser.add_argument('--prefix', default='humorScore_20250425_SD_pass10_MC_pass12_noAug_exchange_05_08_13_wOxford_only01_focal08_17_contrast_temp050_2', help='prefix for saved filenames')
+    # parser.add_argument('--prefix', default='checkpoint', help='prefix for saved filenames')
+    parser.add_argument('--prefix', default='humorScore_20250425_SD_pass10_MC_pass12_noAug_exchange_05_08_13_wOxford_only01_focal08_17_contrast_temp050', help='prefix for saved filenames')
     # parser.add_argument('--which', default='generate_beam')
     # parser.add_argument('--which', default='generate2')
     parser.add_argument('--which', default='ground_truth')
@@ -1492,18 +1506,20 @@ def main():
     device = torch.device('cuda:0')
     # device = torch.device('cpu')
     model = model.to(device)
-    # save_file = 'humorScore_20250314_oxford_with_coco_funnyscore_rank_MSE'
-    # i = 8
+    # save_file = 'humorScore/humorScore_20250430_SD_pass10_MC_pass12_noAug_exchange_05_08_13_wOxford_only01_focal08_17_contrast_temp050_margin04_weight'
+    # i = 9
     # model.load_state_dict(torch.load(f'./Model/{args.out_dir}/checkpoint-{i:03d}.pt'))
     model.eval()
-    train(model, args, output_dir=args.out_dir, output_prefix=args.prefix)
+    # train(model, args, output_dir=args.out_dir, output_prefix=args.prefix)
     # test(model, args, output_dir=args.out_dir, output_prefix=args.prefix)
-    # for i in range(20):
-    #     i = i + 47
-    #     if os.path.exists(f'./Model/humorScore/{args.prefix}/checkpoint-{i:03d}.pt'):
-    #         model.load_state_dict(torch.load(f'./Model/humorScore/{args.prefix}/checkpoint-{i:03d}.pt'))
-    #         # test_mine(model, args, dataform="Oxford", input_num=10, model_path = i)
-    #         test_mine(model, args, dataform="sonicdrivein", input_num=20, model_path=i)
+    for i in range(20):
+        i = i + 7
+        if os.path.exists(f'./Model/humorScore/{args.prefix}/checkpoint-{i:03d}.pt'):
+            model.load_state_dict(torch.load(f'./Model/humorScore/{args.prefix}/checkpoint-{i:03d}.pt'))
+            # test_mine(model, args, dataform="Oxford", input_num=10, model_path = i)
+            test_mine(model, args, dataform="sonicdrivein", input_num=20, model_path=i)
+            # test_mine(model, args, dataform="mcdonalds_switzerland", input_num=20, model_path=i)
+        break
 
     old_test = -1
     trainData = '../Data/Oxford_HIC/parse/oxford_lower_800up_only800_all_ViT-B_32_train.pkl'
