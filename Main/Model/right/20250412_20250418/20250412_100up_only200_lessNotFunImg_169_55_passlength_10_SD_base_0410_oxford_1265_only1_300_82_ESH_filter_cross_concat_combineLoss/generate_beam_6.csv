@@ -1,0 +1,191 @@
+image_id,caption,human_ins,human_humor,human_related,overfit,fitCount,gtNum,fluency,diversity,bleu1,bleu2,bleu3,bleu4
+sonicdrivein_531,what’ s your favorite way to eat ice cream? 1.,1,0,0,,0,1,0.960166,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_1268,there’ s nothing better to do on a hot summer day than grab some ice cream with your friends.,1,0,0,,1,1,0.9800944,0.36808044,0.0526315789473684,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_649,it's all we can do is hope for the best.,0,0,1,,1,1,0.9643525,0.36808044,0.1,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_1594,what do you think of this dog?🤣# foodforthought 10% off your next order! pic.,1,0,0,,0,1,0.6262295,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_808,what do you think i’ m going to get for christmas this year? </s> pic.,1,0,1,,1,1,0.9318204,0.36808044,0.0666666666666666,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_596,what do you think i should have for dinner tonight?🤔🍲🥗😱 🤩 👨👦.,1,0,1,,1,1,0.9508476,0.36808044,0.0833333333333333,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_2154,"what do you get when u ask for your favorite sandwich at a fast-food restaurant? </s> chicken and waffles with french fries, of course 😄👍😎🤷‍♂️🧑🏼🍔🥗🎉📰 📱 🦅 🍕 🥬 🤩 👨🇺🇸 �",1,0,0,,2,1,0.87891185,0.36808044,0.0625,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_572,"it's not about the food, it ’ s how you make a difference in your community.",0,0,0,,2,1,0.9735608,0.36808044,0.125,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_893,what do you get when 10% of the world's food is wasted every single day? i don’t even know where to start.,1,0,1,,1,1,0.978454,0.36808044,0.0454545454545454,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_234,what do you think we should get for our 10th wedding anniversary this year? it’s got to be a cake.,0,1,0,,1,1,0.97466415,0.36808044,0.05,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_496,"we’ ve got a ton of things for you to choose from, so don' t be shy.",0,0,0,,1,1,0.969069,0.36808044,0.0588235294117647,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_1272,"it's not like you want to see it, but i do n’t know why.",0,0,0,,1,1,0.95291996,0.36808044,0.0714285714285714,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_2180,what do you think we’ re going to make today? 👍👌🤩🍰🥤🧑🎉😀.,1,0,1,,0,1,0.9560708,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_1615,"if you don't know how to do it, ask a grown-up for help! </s> <a href=""https://www.",1,1,1,,0,1,0.90537333,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_78,"it's not just about the food, it ’ s also all you need for your kids birthday party.",1,0,1,,1,1,0.9682689,0.36808044,0.0555555555555555,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_697,"if you don’ t know what i'm talking about, check it out for yourself.",0,0,0,,0,1,0.9765489,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_54,"what do you get when u combine 1/2 a cup of orange juice, ½ tsp seltzer water and your favorite ice cream? strawberry cheesecake sundae! 🥧🍦☕️😍🙌🏼‍♂⏳📷 📸🚶 🛋🤔 🤣 👨👩🎉#",1,0,0,,0,1,0.8953448,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_742,what’ s up with you guys? </s> i don' t know.,0,0,0,,1,1,0.97043926,0.36808044,0.0909090909090909,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_1018,i can’ t wait to get my hands on this.,1,0,1,,1,1,0.96932495,0.36808044,0.1,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_65,if you don 't believe me when i tell ya.,0,1,1,,0,1,0.94486415,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_1384,"when i was a kid, my mom used to tell me.",1,1,1,,1,1,0.9577448,0.36808044,0.0909090909090909,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_2052,i've been thinking about it for a long time but i just can n’t bring myself to do this.,0,0,1,,0,1,0.95984924,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_41,what’ s wrong with you? </s> i don' t know.,0,1,1,,0,1,0.97297704,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_2201,i've got something to tell you.,0,0,0,,0,1,0.9791765,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_1992,"i'm going to take a bite out of my sandwich, but i don’ t know if you like it or not.",1,0,0,,1,1,0.9807546,0.36808044,0.0476190476190476,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_80,what do you get when u ask for your favorite flavor of ice-cream? </s> mint chocolate chip.,1,1,0,,1,1,0.9455848,0.36808044,0.0588235294117647,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_791,"when you’ re hungry for something new and different, check out these 10 things to try this weekend.",1,0,0,,1,1,0.9385666,0.36808044,0.0555555555555555,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_2070,we’ ve got you covered.,0,0,0,1,0,1,0.9753906,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_529,"if you don't believe me, this is what it looks like when we do n’ t know where to go.",0,1,1,,0,1,0.97097594,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_2103,it’ s been a long time since i was able to indulge in my favorite comfort food.,1,0,1,,0,1,0.9839797,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_601,it's not like we could do it all on our own.,1,0,1,,0,1,0.97499573,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_135,we've got you covered.,1,0,1,1,0,1,0.9745058,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_567,it’ s time for me to take control of my life.,0,0,1,,0,1,0.9694127,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_316,"yes, i've got it.",1,1,1,,0,1,0.954828,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_37,"if you don’ t believe me, check it out for yourself.",1,1,1,,1,1,0.97966707,0.36808044,0.0909090909090909,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_864,when you’ re not sure what to eat for lunch.,1,1,1,,0,1,0.9657904,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_470,"if you don't know what i’m talking about, here it is.",0,0,0,,0,1,0.9691059,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_548,"we’ re not going to tell you what it looks like, but we've got a pic.",1,1,1,,3,1,0.97408366,0.36808044,0.1875,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_1029,it’ s time for you and your family to take a bite out of life.,1,1,1,,1,1,0.97957885,0.36808044,0.0666666666666666,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_2024,"i'm not sure what you’ re thinking, but i know it.",1,0,1,,0,1,0.9726105,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_648,what do you think? </s> 🥤🥣🍪 🍦🧑🏃‍♂️👨📷.,1,0,0,,0,1,0.9505038,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_2200,"if you’ re going to drink it, don 't ask me where i got this.",1,1,1,,0,1,0.9785459,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_344,i don 't know if i ca n’ t make it.,0,1,1,,0,1,0.9064323,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_590,"it’ s not about the food, it's how much fun you have with your friends and family.",1,0,0,,1,1,0.96566385,0.36808044,0.0588235294117647,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_901,"we're going to have a blast on the lake this weekend, so why don’t you go with me? pic.",0,0,0,,1,1,0.9415381,0.36808044,0.0526315789473684,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_411,"♫ i've got a new set of shorts for you! ♪ we have them ready to wear in just under an hour, so hurry up and grab yours before they run out.",0,0,0,,1,1,0.94177186,0.36808044,0.03125,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_558,"it's been a long day and i need something to munch on, so here it is.",1,1,1,,2,1,0.976186,0.36808044,0.125,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_163,what do you think about this? 🤔 pic.,0,0,0,,0,1,0.8879675,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_1502,"we don't know what it is, but we don't want to miss out on any of this! </s> 🤦‍♂️🤷🏼👩🏻🧑 👨💻.",1,1,1,,3,1,0.9177621,0.36808044,0.1,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_1347,"if you don't know what i am talking about, check it out.",0,0,1,,0,1,0.97181106,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_103,it's the perfect way to end a long day.,1,1,1,,0,1,0.97106296,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_1280,"when you’ re at the end of your day and all i want to say is, “ come on down.",1,1,1,,0,1,0.96896905,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_1353,"when you’ re not sure what to put in your mouth, think of this.",1,1,1,,0,1,0.9719455,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_1368,it's the best ice cream i have ever had in my life.,1,0,0,,0,1,0.97009945,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_786,"what do you get when u order 2 large fries, a side of sour cream and ½ can coke? 🥤🥦🍹 🤩🤷‍♂⏳👨🏼🕶️ 👸🏻🎉🙌😍 🙈💰😂 😂 😅! pic.",1,0,0,,0,1,0.6163225,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_486,"what do you get when a dog, cat and lion go for lunch? </s> i don’ t know.",1,1,1,,1,1,0.9755974,0.36808044,0.0555555555555555,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_912,there's nothing better than a cold drink on your way home from work.,1,0,1,,1,1,0.9774573,0.36808044,0.0769230769230769,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_790,i'm not going to tell you what i do for a living.,1,1,1,,0,1,0.97843564,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_976,"yes, yes... we did it! i hope you like this one too.",1,1,1,,0,1,0.953076,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_1921,it's been a long time since i’ve had my feet wet.,1,0,1,,0,1,0.9840577,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_850,wasn't the first time i ’ ve had this sandwich for lunch.,1,0,0,,2,1,0.8959619,0.36808044,0.1666666666666666,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_1960,it's been a long time since i had my morning coffee.,1,1,1,,0,1,0.9823845,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_585,i'm so excited to share this with all of you.,0,0,1,,1,1,0.97295636,0.36808044,0.1,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_522,we're going to do it.,0,0,0,1,2,1,0.96842986,0.36808044,0.1797315856468886,9.997901319273777e-309,9.997901319273777e-309,9.997901319273777e-309
+sonicdrivein_691,what do i say when my kids ask me what to make for dinner tonight? '' this is the best we can come up with.,1,1,1,,3,1,0.9752305,0.36808044,0.12,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_1289,"you know, it’ s not just about the food — there are so many ways to have a good time with friends and family.",1,0,1,,2,1,0.96597165,0.36808044,0.0833333333333333,0.0434782608695652,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_2031,what do you think i’ m going to make today? </s> 👍 pic.,1,1,1,,1,1,0.92898786,0.36808044,0.0769230769230769,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_2203,it’ s been a long time since i've seen you.,0,0,0,,0,1,0.9836879,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_1457,i can't wait to eat my ice cream! </s> i hope you feel the same way.,1,0,0,,0,1,0.9755803,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_1199,what do you get when 10 of the best things in your life come together? it’ s a drink! 🍹🍷🥤🧘‍♂️🙌 🙄 😅😍🤔 🤑 👨👩🏽 🏦 💰💸📚 📱 🎉🎈 ⬇�,1,1,1,,0,1,0.9220349,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_947,i've been waiting for this moment since i was a kid.,1,1,1,,1,1,0.9760537,0.36808044,0.0909090909090909,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_1316,"when you’ re not sure what to make for dinner, just call us.",1,0,1,,1,1,0.9754861,0.36808044,0.0769230769230769,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_528,"if you don 't know what i’m talking about, just take a look at it.",1,0,1,,2,1,0.9759808,0.36808044,0.1333333333333333,0.0714285714285714,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_1337,"it's not just about the food, it’ s all of them.",1,1,1,,1,1,0.9502318,0.36808044,0.0909090909090909,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_1181,"we're not going to make you feel any better about it, but we are.",0,1,1,,0,1,0.9734114,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_89,it's time for you and me to take a break from all of this.,0,1,1,,0,1,0.9743978,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_402,"what do you make of it? "" i don't know what to think about this.",0,0,0,,0,1,0.9636426,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_784,"it's not just about the food, it ’ s also all you need to have for a night out with friends and family.",1,0,0,,0,1,0.9711571,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_348,i can't wait to see how it turns out.,0,0,0,,0,1,0.9712702,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_1346,"we're going to have a blast with this one, but if you don’ t know what we are talking about just check it out on our website! https://www.",1,1,1,,2,1,0.9463161,0.36808044,0.0714285714285714,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_789,"when i woke up this morning, there was no food in the fridge.",0,0,0,,0,1,0.9801792,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_196,"when you’ re stuck at home and have nothing else to do other than watch tv or play video games, this is your go-to.",0,0,0,,0,1,0.974922,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_964,what’ s wrong with this dog?... it doesn' t know how to use a spoon! 🤦🏻‍♀️🤷🏼.,0,0,0,,0,1,0.9427136,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_478,"it's not about the food, it ’ s more than that.",1,0,1,,0,1,0.96236485,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_369,it ’ s time to change the course of your life.,1,1,1,,0,1,0.9765629,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_1317,"when you need a little something to take your mind off things, this is it.",0,0,1,,0,1,0.9703005,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_91,"when you’ re not ready for your next shopping spree, check out these 20% off deals.",1,0,0,,0,1,0.96914655,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_1946,"yes, it's true.",0,0,0,,0,1,0.9690871,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_277,we ’ ve got you covered.,1,1,1,,0,1,0.9753906,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_981,what’ s the difference between a 30-second food ad and an hour long feature film? pic.,0,0,0,,1,1,0.9175257,0.36808044,0.0625,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_788,"yes, we're gonna do it.",1,1,1,,0,1,0.9639376,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_726,what do you think? </s> we’ re going to try this out for the first time.,0,0,1,,0,1,0.9797198,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_1002,it's time to get out of here.,0,0,0,,0,1,0.9686668,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_1379,♫ i'm going to try and do the same thing! ♬️ pic.,1,0,1,,0,1,0.7449514,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_706,"what do you get when u mix 1/2 cup of peanut butter, ½ tsp.",1,0,0,,0,1,0.8324788,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_566,i can’ t wait to try it out for myself.,1,1,1,,0,1,0.97357583,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_51,it's time to say goodbye and hello again.,0,0,0,,0,1,0.97124547,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_414,"if you can’ t hear it, just close your eyes and listen.",1,1,1,,2,1,0.96956956,0.36808044,0.1666666666666666,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_832,what's the difference between a candy cane and an ice cream cone? i don’t know.,1,1,1,,1,1,0.9730225,0.36808044,0.0666666666666666,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_1349,i can’ t wait to get my hands on some of these! </s> i hope you like them as much as we do.,0,0,1,,1,1,0.9759503,0.36808044,0.0434782608695652,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_413,"what’ s the deal? </s> well, you can get it for like$1.",1,0,0,,1,1,0.9441979,0.36808044,0.0833333333333333,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_1467,we're going to have a lot of fun this weekend.,0,0,0,,1,1,0.9789524,0.36808044,0.1,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_1572,what do you think i’ m going to make today? </s> 👍👌🤔🙅‍♂️🍰🥤🧘🏼💕😀😂🐶📷.,1,0,1,,0,1,0.9565353,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_430,"i'm not going to tell you what it is, but i know we have a lot on our plate today.",1,0,0,,2,1,0.98257107,0.36808044,0.1,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_618,i can’ t wait to see what they come up with next.,1,0,1,,1,1,0.97046036,0.36808044,0.0833333333333333,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_1017,we’ ve got you covered! </s> let me know if there is anything else i can help u with.,1,1,1,,2,1,0.963056,0.36808044,0.1052631578947368,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_690,"it's not about the food, it ’ s how you make a meal out of nothing.",1,0,0,,0,1,0.9712431,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_634,"when you’ re at a loss for what to make, this is your go-to recipe.",1,0,1,,0,1,0.9724964,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_1094,"it’ s all in the name of, so let us know if you like it or not! 👍 pic.",1,1,1,,2,1,0.729152,0.36808044,0.1052631578947368,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_945,"it's not just about the food, it’ s all about how you make a meal for your family and friends.",1,0,0,,1,1,0.9740636,0.36808044,0.05,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_1005,what do you get if u put 3 hearts in the middle of a heart? 👍🙌👎🤔😀🍰🥳🧘🏼‍♂️🐶⛺🌸💕🎉.,1,1,1,,1,1,0.91456604,0.36808044,0.0625,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_69,"do you know how to do this? </s> yes, it’ s easy.",1,1,1,,0,1,0.96789575,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_644,"it's been a long time since i was able to get some ice cream, but now it has come back! ⠀⠀⠀⠀⬇️🍦🎉🧖‍♂🏼👩🏻💕📷.",1,0,0,,1,1,0.934142,0.36808044,0.0476190476190476,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_2107,we're not going to let you down.,1,0,1,,0,1,0.97290355,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_408,what do you think? </slogan> 👍👎😊🤩🙌 🙋‍♂️🥰🍦🧑🏾🎉 🥳💕 🍬 🤔 😅😂 😂 💚🌟 🛤 📸📷 📱 📲 ⏹Ⓡ🔴 �,1,0,1,,0,1,0.94707704,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_2125,what do you think we’ re going to order for dinner tonight? </s>💕🍔🥤🧘🏼‍♂️🤩😍👨🏻🎉🙌🐶📷🔥🌟❓🔮#foodporn 📸 🍦 🥣 🫒 💚 🤗 😭 �,1,1,1,,0,1,0.9507347,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_409,i'm not a fan.,0,0,0,,1,1,0.9765927,0.36808044,0.0919698602928605,8.18558927632837e-309,8.18558927632837e-309,8.18558927632837e-309
+sonicdrivein_404,"it's not about the food, it ’ s all of us.",1,1,1,,0,1,0.9639946,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_1282,we're not going to do that.,0,0,0,,0,1,0.97308457,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_712,there’ s only one way to do it.,0,0,0,,0,1,0.97173667,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_457,it’ s time for you and me to take a walk in the snow! </s> 🤔🤓♻️🚶🏃‍♂⬇👩🏻💕📷 📸 🧤 ❄❅ ⛏🍦🥰 🥳 🍪 👨🎉😊.,1,1,1,,0,1,0.9568907,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_373,"it’ s not about the food, it's all of them.",1,1,1,,0,1,0.9541299,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_905,it’ s been a long time since i have food in my mouth.,1,0,0,,0,1,0.9842174,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_446,what do you think about this? </s> 👍👎🧔‍♂️🍰🤣🙌 🙄😊🥤🎉🐾💕📸🌟 🍬 🤩 😅 🥳 🎁 🦹🏼.,0,0,0,,0,1,0.954577,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_524,"it's not about the taste, it ’ s how you feel when u open a can of coke.",1,0,1,,1,1,0.9511586,0.36808044,0.0555555555555555,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_1984,i’ m going to give it a try and see if i can get this right! </s> pic.,0,0,0,,1,1,0.9114763,0.36808044,0.0555555555555555,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_903,i'm not going to tell you what i do n’t want.,0,0,0,,0,1,0.97119474,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_152,"i'm not going to tell you what i ate for lunch today, but it was pretty good.",1,0,0,,0,1,0.9776677,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_57,we're going to do it.,0,0,1,1,0,1,0.96842986,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_44,why do i have to say this? because it's true.,0,0,0,,1,1,0.9742634,0.36808044,0.1,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_1028,i've been thinking about it for a long time and i just can n’t wait to get my hands on this.,1,1,1,,0,1,0.967226,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_1270,what do you think? i ’ ve never heard this one before.,0,0,0,,0,1,0.9607041,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_968,it's time for you guys to get out of bed.,1,0,1,,0,1,0.97989815,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_290,it's been a long time since i had the chance to eat ice cream with my best friend.,0,0,0,,1,1,0.98123217,0.36808044,0.0555555555555555,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_505,what do you think of this? </s> what’ s your take on it? 👍👎🧔🏼‍♂️📷🍦🥤 🍪 🥳🎉# foodforthought☺ pic.,1,0,0,,1,1,0.90194094,0.36808044,0.0555555555555555,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_645,"when you’ re not sure what to do, just take a deep breath and have some fun! </s>
+<p style=”text-align: center; font-size:-20px;”><img src=”” width=156 height=74 alt="""" class=""social_share"" title="""">”&lt;&gt;<a href",0,0,0,,0,1,0.7087085,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_98,it's time for you and me to take a bite out of something.,1,1,1,,0,1,0.9805274,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_497,what do you think? </s> 👉🏽👈🤔 🤣 🧘‍♂️🦅🎥🍲🥤 🍪 🥩 😮😍 😂😂💕 💖 📸📷 ⛏⬇🏻🔴 🔵 ❄❡.,0,0,0,,0,1,0.9438974,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_1930,what do you think about this? </s> it’ s time to get your hands on some kicks.,1,0,1,,1,1,0.9761248,0.36808044,0.0588235294117647,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_228,"it's never gonna happen, but i do n’t know what it would feel like to lose my job.",0,0,0,,1,1,0.9584549,0.36808044,0.0555555555555555,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_760,what do you think i’ m going to make today.,0,0,0,,0,1,0.9719572,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_534,what do you get when u order 10 of the same thing for like$25? a free gift card! just add it to your wish list and we’ ll make sure there is enough stock in-store or on our website by march 3rd.,1,0,0,,1,1,0.86478776,0.36808044,0.0238095238095238,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_955,we’ ve got you covered.,1,1,1,1,1,1,0.9753906,0.36808044,0.0898657928234443,9.997901319273777e-309,9.997901319273777e-309,9.997901319273777e-309
+sonicdrivein_2142,what do you think of this? it’ s the same thing i had last night.,1,0,1,,0,1,0.9758893,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_780,we’ ve got you covered! we have 50% off for the first month of our subscription service.,1,0,0,,0,1,0.8336579,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_376,"we've all been through this before, so we know what to expect.",1,1,1,,0,1,0.97612834,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_1385,"it’ s time to get back in the mood with some ice cream! </s> we have a ton of options for you today, so grab your favorite flavor and enjoy it all day long.",1,0,0,,2,1,0.9679919,0.36808044,0.0588235294117647,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_753,"what’ s up with all of you? this is what i made for my mom on valentine's day last year, and she loved it so much that we decided to make our own version.",0,0,0,,0,1,0.97533983,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_1959,it's time to take a break from all of this.,1,1,1,,0,1,0.9759989,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_2115,what do you think we should have for dinner tonight? </s> i’m thinking it couldn't get any better than this.,1,0,1,,1,1,0.9774688,0.36808044,0.05,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_333,"it’ s not about the food, it's what you get with your order.",1,1,1,,2,1,0.96854335,0.36808044,0.1538461538461538,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_670,what do you get when 10 people take a sip of your favorite drink at the same time.,1,1,1,,1,1,0.96491253,0.36808044,0.0555555555555555,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_1115,it's not over.,0,0,0,,0,1,0.96578926,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_1606,"yes, it’ s been a long day.",0,1,1,,0,1,0.97366434,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_1122,we’ ve got you covered! we've partnered up to make sure everyone has a great dining out experience no matter where they are in the united states.,1,0,0,,1,1,0.93394977,0.36808044,0.037037037037037,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_570,it's time to make your dreams come true.,0,0,0,,0,1,0.96722156,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_906,it's time for you to try it out.,1,0,1,,1,1,0.97981685,0.36808044,0.125,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_594,"don't worry about it, we ’ ve got you covered.",1,1,1,,3,1,0.97234094,0.36808044,0.3,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_2171,"there's no way we could do it! </p><img src=""https://user-images.",0,0,0,,0,1,0.8886375,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_914,"i'm not going to tell you how i feel about this, but it does n’t make any sense at all! 🤦🏻‍♀️🤷🏼🧠🍰😱 😭.",0,0,1,,0,1,0.9248276,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_1983,what do you think? </s> i’ ve got one for all of u.,1,0,1,,1,1,0.9265927,0.36808044,0.0769230769230769,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_204,"no matter where you go, there's always something to eat and drink.",1,1,1,,0,1,0.97336257,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_499,it’ s time to get out of your comfort zone and try something new! </s> so what are you waiting for? give it a go.,1,0,1,,1,1,0.9784071,0.36808044,0.04,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_1909,it’ s time to get out of your comfort zone and try something new.,1,0,1,1,1,1,0.97577226,0.36808044,0.0714285714285714,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_283,we're not going to make any more of them.,0,0,0,,0,1,0.97263384,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_560,"we’ ve all heard it before, but we're going to tell you something different this year.",1,0,1,,0,1,0.9634561,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_1274,"it's not just about the food, it’ s all of us.",1,0,0,,1,1,0.96157366,0.36808044,0.0909090909090909,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_1616,you know what i’ m going to do with you today?.,1,1,1,,0,1,0.9211169,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_973,why do we have to wait so long? it’ s only 10 minutes until the end of season one.,0,0,0,,1,1,0.96591914,0.36808044,0.0526315789473684,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_1081,when you’ re not ready for your next meal.,1,1,1,,0,1,0.97438496,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_280,it’ s time to get out of your comfort zone and try something new.,1,1,1,1,2,1,0.97577226,0.36808044,0.1428571428571428,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_491,what do you get when u add 50 cents to a can of lemon-lime soda? it’ s lemonade.,1,1,1,,0,1,0.96955013,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_877,it’ s time to make your dreams come true.,1,1,1,,1,1,0.96844953,0.36808044,0.111111111111111,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_1246,"it's not about the food, it ’ s how much fun you have with your friends and family.",1,0,0,,0,1,0.96696174,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_189,"what do you think we should have for dinner this week? </s> i’ve got a bunch of ideas, so let us know what your faves are in the comments below!
+What is one thing that makes YOU happy to eat at home with friends and family on special occasions like birthdays or holidays??""
+### Questions Related To The Extract:
+1",1,0,0,,3,1,0.8449431,0.36808044,0.05,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_495,we're going to have a blast with this recipe.,1,1,1,,0,1,0.97856104,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_798,"if you don't know what i mean, check it out! </s> < s>< a href=""https://www.",1,0,0,,0,1,0.9374618,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_1269,what do you think? </s> it’ s time to start thinking about what we should be eating for lunch! 🥗🥦🍅🤔 🤓 👨🏻👩🏽‍♂️🧑🎉.,1,1,1,,2,1,0.9600808,0.36808044,0.0909090909090909,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_705,we've got you covered.,0,0,0,1,1,1,0.9745058,0.36808044,0.0919698602928605,8.18558927632837e-309,8.18558927632837e-309,8.18558927632837e-309
+sonicdrivein_1206,"i'm not going to tell you all about it, but i do n’t know how many of them there are in the world! 🤣🤷‍♂️ pic.",1,1,1,,2,1,0.82832825,0.36808044,0.0799999999999999,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_375,it's been a long time since i’ve had the chance to go out with you guys.,0,0,0,,1,1,0.98062044,0.36808044,0.0625,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_143,we're going to take a bite out of it.,1,1,1,,1,1,0.97782874,0.36808044,0.111111111111111,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_85,it’ s almost time for dinner! </s> pic.,1,0,0,,0,1,0.83074725,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_363,"if you don't know what i’m talking about, just think of it this way: 1.",0,0,0,,0,1,0.9259494,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_571,you know what i don't want to say? you ’ ve got a taste in your mouth.,1,1,1,,0,1,0.97619945,0.36808044,0.0,0.0,0.0,0.0
+sonicdrivein_1039,"what do you get when u put your finger on a dog’s ear and say, “i love ya!”? 🐶🐾🍰🤗 🤑 👦👩‍🧒🎉🥳🙌 🙋🏻♂️😊 😅.",0,0,0,,1,1,0.9330398,0.36808044,0.0434782608695652,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
