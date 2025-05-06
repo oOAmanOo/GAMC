@@ -1,0 +1,57 @@
+image_id,caption,fitCount,gtNum,fluency,diversity,bleu1,bleu2,bleu3,bleu4
+mcdonalds_switzerland_835,"yes, i've been to a lot of places and have never seen this.",0,1,0.89795667,0.4484497,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_721,the's a great way to start your day.,0,1,0.6841019,0.4484497,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_769,"the new car is a big deal, but it's also the most affordable in europe.",2,1,0.9670018,0.4484497,0.13333333333333333,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_6,"i love you, i'm sorry for the last few days.",1,1,0.9629981,0.4484497,0.10000000000000002,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_7,"yes, yes... we are a brand that is the world of food.",1,1,0.36662385,0.4484497,0.08333333333333333,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_794,my best friend is my top scorer in the world.,0,1,0.9069777,0.4484497,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_31,"we're going to have a big game tonight, so we are ready for you! the last time i was in this city is when my dad and mom were there.",2,1,0.969481,0.4484497,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_637,"`` i'm going to be a little more confident in the next game, but we have n’t been able to get out of bed for some time.",0,1,0.9616142,0.4484497,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_725,"i'm so glad you like it! i love this video, and we are ready to help our animals.",0,1,0.9721224,0.4484497,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_864,the # day of the week is here! we are ready to face any challenge that comes our way.,0,1,0.89614266,0.4484497,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_45,the first thing i see when you open your door is a face with the number 10 on it.,0,1,0.97874486,0.4484497,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_168,"yes, it is! </s> i am so happy to have you here.",2,1,0.974251,0.4484497,0.16666666666666669,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_654,"yes, yes... i love this! it's so cool that a single meme has become the trending topic of our day.",1,1,0.96540225,0.4484497,0.05000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_69,the day i was a 10th grade student and my favorite subject is math.,0,1,0.923525,0.4484497,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_60,"a few years ago, we 't have a lot of people who are not going to the beach.",0,1,0.96928847,0.4484497,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_169,@ /s: i have a new job; you can’t tell me that your parents are still in the car.,1,1,0.95392257,0.4484497,0.05263157894736841,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_222,"yes, yes! it's a lot of fun to do this.",0,1,0.9710598,0.4484497,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_27,what i get from this:.,0,1,0.6350173,0.4484497,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_22,"the first time i've been to the park, and it was a big surprise.",1,1,0.93791056,0.4484497,0.07142857142857141,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_628,the first thing i do when you get home is to check your email.,3,1,0.9839372,0.4484497,0.21428571428571425,0.15384615384615385,0.08333333333333333,2.2250738585072626e-308
+mcdonalds_switzerland_735,"the first one is a's the most popular, but it has been on for years.",3,1,0.30188638,0.4484497,0.13333333333333333,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_713,"a's a great way to start your day, but it also has some health benefits.",1,1,0.9493367,0.4484497,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_828,what are you going to do? i'm not sure.,1,1,0.97665066,0.4484497,0.08897082254631197,1.7816998627591863e-308,1.7816998627591863e-308,1.7816998627591863e-308
+mcdonalds_switzerland_1,i'm not sure if i should go to the store or just stay home.,0,1,0.9754964,0.4484497,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_172,"a: i'm not a fan of the game, but it is very easy to find my phone.",1,1,0.9758163,0.4484497,0.0588235294117647,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_774,"`` hey, '' i said to my mom.",0,1,0.91481733,0.4484497,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_265,"i love this : i have a lot of food in my bag, but it is still hard to eat.",1,1,0.9687034,0.4484497,0.05000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_181,the # moon is coming to a new level in the world.,3,1,0.86388576,0.4484497,0.16666666666666669,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_81,"the first thing you should do is eat a healthy breakfast, then go to bed and wake up in the morning.",2,1,0.9815555,0.4484497,0.09523809523809525,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_706,"when you’re trying to get your kids home from school, it can be a challenge.",0,1,0.97622603,0.4484497,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_271,the first thing you should do is to get a drink from the fridge.,0,1,0.98239696,0.4484497,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_122,"the first thing we do is to make sure that the food and drinks are clean, so you can enjoy your time with us.",0,1,0.9755417,0.4484497,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_19,"if you want to eat more, try eating a banana.",2,1,0.9819551,0.4484497,0.2,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_205,the first thing i do when you get home from work is to make breakfast.,0,1,0.9831308,0.4484497,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_793,"yes, yes.",0,1,0.85455173,0.4484497,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_737,"you know, you can’t get a job in the us if your family is from china.",2,1,0.9666999,0.4484497,0.12500000000000003,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_163,why don't you like this? </s> i just want to go out and eat some food.,2,1,0.9807957,0.4484497,0.12500000000000003,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_117,"in the end, it's a great way to get your hands on something you love.",2,1,0.9726729,0.4484497,0.13333333333333333,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_73,"you're not going to be able to find your phone, but you are lucky that we have a food delivery app.",3,1,0.9771708,0.4484497,0.09523809523809525,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_419,"the # meme is a great way to show your love for the game, and you can do it in just one minute! don't miss this moment.",1,1,0.95312744,0.4484497,0.037037037037037035,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_904,"the first one is the most popular, but i'm not sure if you like it.",1,1,0.9714155,0.4484497,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_178,the first thing i do is to ask you.,1,1,0.97555465,0.4484497,0.08897082254631197,1.7816998627591863e-308,1.7816998627591863e-308,1.7816998627591863e-308
+mcdonalds_switzerland_220,"the first time i ate this, the's a little bit different.",1,1,0.61868924,0.4484497,0.0909090909090909,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_332,"a's a day to be happy and healthy! we are going to share the joy of our food, drinks and clothes with you in this special post.",0,1,0.81906307,0.4484497,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_203,"i'm not going to give you any more information about it, but i do want the same thing! check out our new menu on instagram: https://www.",2,1,0.9522772,0.4484497,0.07692307692307693,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_90,"the world is getting more and the #10s, but i still have a lot of time to enjoy my favorite food.",3,1,0.57037246,0.4484497,0.09523809523809525,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_118,"the first thing i do when my mom asks me to eat more, is ask for a snack.",3,1,0.9808946,0.4484497,0.16666666666666669,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_16,the best way to get a job is by asking your parents for help.,0,1,0.9803125,0.4484497,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_50,"i'm not a fan of the movie, but i can tell you that this is one for which we have to be proud.",2,1,0.97450644,0.4484497,0.08695652173913045,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_13,"the first time you see it, the second one's a little more delicious than your favorite ice cream! i hope this helps.",0,1,0.97785884,0.4484497,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_237,i'm here! i am your favorite person on the planet.,1,1,0.9737922,0.4484497,0.10000000000000002,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_712,"`` i'm not going to be a cook, but if you want me on the grill.",1,1,0.9133442,0.4484497,0.0625,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_691,"i'm not a fan of the game, but i love this new version.",0,1,0.9765207,0.4484497,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_732,@ #scouts: i was a big fan of this game! why do you think the team is so fast? can u tell us more about your journey to get there?! and what are some tips for getting through finals in high school or college?& thankyou very much.,2,1,0.88349247,0.4484497,0.042553191489361694,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_662,"when you’re in a hurry and need to get your food, just order it from our app.",0,1,0.9749454,0.4484497,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_80,"a's a great game to play with your friends, but it is also an amazing video.",0,1,0.92206204,0.4484497,0.0,0.0,0.0,0.0
