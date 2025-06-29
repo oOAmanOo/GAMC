@@ -1,0 +1,58 @@
+image_id,caption,fitCount,gtNum,fluency,diversity,bleu1,bleu2,bleu3,bleu4
+sonicdrivein_369,what are you gonna do today? </s> just dress up as the locavore and head to your local farmer’ s market.,0,1,0.9771588,0.45214495,0.0,0.0,0.0,0.0
+sonicdrivein_457,we’ re not going to be here for the rest of your life.,0,1,0.97580147,0.45214495,0.0,0.0,0.0,0.0
+sonicdrivein_234,do you know what this is called? </s> it’ s the taco bell of your life.,1,1,0.9586263,0.45214495,0.0625,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_491,"yes, i don't know if it ’ s real or not.",1,1,0.961395,0.45214495,0.0909090909090909,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_690,"for the 1st time in almost a decade, we’ re going to be doing an ice cream sundae.",0,1,0.9692551,0.45214495,0.0,0.0,0.0,0.0
+sonicdrivein_98,"when you’ re trying to decide what ice cream flavor is the best, but don 't know which one it actually tastes like.",0,1,0.9545126,0.45214495,0.0,0.0,0.0,0.0
+sonicdrivein_505,"please don't forget to click on this link, it’ s the only way we can find out what you are looking for.",0,1,0.9562869,0.45214495,0.0,0.0,0.0,0.0
+sonicdrivein_143,"we're not going to be the only ones who can eat it, so please don’ t make a mess of your food.",1,1,0.9792467,0.45214495,0.04545454545454546,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_152,we're going to have a mic on this video and we want you all know what it’s about.,0,1,0.9615513,0.45214495,0.0,0.0,0.0,0.0
+sonicdrivein_486,when you go to the store and see a 10% off sale on everything but there is no ice cream in it.,2,1,0.7010573,0.45214495,0.0909090909090909,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_51,"when i was 14, my mom told me not to eat too much ice cream because it would make you fat.",0,1,0.9771956,0.45214495,0.0,0.0,0.0,0.0
+sonicdrivein_645,`` we're going to make sure you know what it feels like when they walk in the front door.,0,1,0.971747,0.45214495,0.0,0.0,0.0,0.0
+sonicdrivein_446,"it’ s the time of year to get your hair done, but i don' t know if you want it or not.",0,1,0.966984,0.45214495,0.0,0.0,0.0,0.0
+sonicdrivein_697,we're going to have a taste test for our new menu! we hope you like it.,0,1,0.97741073,0.45214495,0.0,0.0,0.0,0.0
+sonicdrivein_596,it's my first day of school.,0,1,0.97281003,0.45214495,0.0,0.0,0.0,0.0
+sonicdrivein_89,"it’ s the end of summer, and it's our last day to eat ice cream.",1,1,0.9771623,0.45214495,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_373,when i went to the grocery store with my mom and saw this ad for a $10 ice cream cone.,0,1,0.9669571,0.45214495,0.0,0.0,0.0,0.0
+sonicdrivein_65,this is the most delicious cheesecake i’ve ever had! </s> my girlfriend and I just can not get enough of it.,1,1,0.9634163,0.45214495,0.047619047619047616,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_784,we’ re here to celebrate the 10th anniversary of happy hour.,0,1,0.9803663,0.45214495,0.0,0.0,0.0,0.0
+sonicdrivein_2052,you know what i'm going to do with this.,0,1,0.9766461,0.45214495,0.0,0.0,0.0,0.0
+sonicdrivein_780,"for the first time in 2018, i’ m going to try and eat a burger on my way home from work.",2,1,0.9786388,0.45214495,0.09523809523809525,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_283,"when you’ re at a restaurant and the waiter says, “ i don t have anything for your order.",2,1,0.92441034,0.45214495,0.10526315789473682,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_497,the only thing i couldn't stop thinking about was this.,0,1,0.9718683,0.45214495,0.0,0.0,0.0,0.0
+sonicdrivein_408,question: what do you want for your birthday? question 2.,0,1,0.9697832,0.45214495,0.0,0.0,0.0,0.0
+sonicdrivein_80,"it’ s like, “ i love you so much.",0,1,0.8510761,0.45214495,0.0,0.0,0.0,0.0
+sonicdrivein_1199,"when i was 10 years old, my mom told me to go out and get a dog.",1,1,0.9739987,0.45214495,0.0588235294117647,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_196,"it's not like we’ re going to have a party this weekend, is it? but i don't think so! let me know what you want for dinner tonight.",0,1,0.9775199,0.45214495,0.0,0.0,0.0,0.0
+sonicdrivein_786,i know what you’ re thinking.,0,1,0.9768599,0.45214495,0.0,0.0,0.0,0.0
+sonicdrivein_495,"for those of you who can’ t wait to get your hands on this, we have a TON more coming soon! </s> just in time for the grand opening.",1,1,0.95843244,0.45214495,0.034482758620689655,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_798,this week we're going to be talking about things that make you sweat a little bit.,1,1,0.9753753,0.45214495,0.0625,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1384,"it's not about what you look like, it’ s who u are.",0,1,0.94375557,0.45214495,0.0,0.0,0.0,0.0
+sonicdrivein_496,"you might not know it, but i've been using this app for a month now.",1,1,0.9768683,0.45214495,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_91,♻️🤷 what’ s the best way to say “ i love you” in a text message? 👍 pic.,2,1,0.89137805,0.45214495,0.11111111111111109,0.0588235294117647,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_344,i know what you’ re thinking.,0,1,0.9768599,0.45214495,0.0,0.0,0.0,0.0
+sonicdrivein_2031,"for those of you who didn’ t get a chance to try it today, here is what we got for the 30-second challenge.",1,1,0.9691929,0.45214495,0.043478260869565216,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_69,# 1.,0,1,0.90399945,0.45214495,0.0,0.0,0.0,0.0
+sonicdrivein_571,and i’ ll be right there with you! </s> get ready for the best ice cream sandwich ever.,0,1,0.9714309,0.45214495,0.0,0.0,0.0,0.0
+sonicdrivein_1502,"a lot of people have been asking me about it, but i don’ t know what to do with this.",1,1,0.95900846,0.45214495,0.05000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_414,"it’ s my first day of high school, and i have no idea what to do.",2,1,0.9815491,0.45214495,0.12500000000000003,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_742,we're not going to let you down.,0,1,0.97290355,0.45214495,0.0,0.0,0.0,0.0
+sonicdrivein_566,"we're here to help you find your perfect ice cream flavor, but we do n’t know what it is.",0,1,0.9679939,0.45214495,0.0,0.0,0.0,0.0
+sonicdrivein_85,you know what i’ m going to do.,0,1,0.97547174,0.45214495,0.0,0.0,0.0,0.0
+sonicdrivein_893,"it's not about the ice cream, it’ s all of us.",1,1,0.9674279,0.45214495,0.0909090909090909,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_691,i've got a few things for you to check out.,0,1,0.9790121,0.45214495,0.0,0.0,0.0,0.0
+sonicdrivein_1594,"it’ s not the best time of year, but it's also a good thing to have kids in your house.",2,1,0.9738787,0.45214495,0.10000000000000002,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_534,what do you call it when an ice cream truck stops by your front door? </s> https://t.,1,1,0.9487184,0.45214495,0.0588235294117647,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_290,"you know when you’ re about to have a bad day and someone will say, “ i hope this is the best ice cream shop in new york city” or something like that.",2,1,0.95686525,0.45214495,0.060606060606060615,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_376,"you know when you’ re in the mood for something sweet, this is your go-to recipe.",1,1,0.97347224,0.45214495,0.0625,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_585,"what’ s with you? what's your favorite comfort food of all time? it might be bacon and eggs, but i love them both ways.",0,1,0.96459675,0.45214495,0.0,0.0,0.0,0.0
+sonicdrivein_78,"if you're looking for a way to add some fun and excitement into your day, check out this video.",1,1,0.9806903,0.45214495,0.05263157894736841,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_163,"i'm not sure if i like this or that, but we’ ve got to get it off the menu.",2,1,0.9778545,0.45214495,0.10526315789473682,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_832,"it's not about the size of your jeans, it ’ s more than that.",0,1,0.96723217,0.45214495,0.0,0.0,0.0,0.0
+sonicdrivein_670,"the last thing you want to do when your mom is cooking dinner for the first time in a long while, right? </s> it’ s bacon and eggs!
+<sup style=""font-size:12px; font-family:'arial'; color:#037598'><img src="""" alt='' width='46' height",2,1,0.77676237,0.45214495,0.05555555555555554,0.028571428571428577,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_522,"today's your day, everyone’ s about to get a taste of our best-selling sour cherry ice cream! it comes in two flavors: ½ pint and ⅓ cup.",2,1,0.9449373,0.45214495,0.07407407407407407,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_572,"i’ m not sure if you've heard this before, but here it is.",1,1,0.9775934,0.45214495,0.07692307692307693,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_560,when you’ re about to make a reservation at your favorite restaurant.,0,1,0.9709429,0.45214495,0.0,0.0,0.0,0.0
