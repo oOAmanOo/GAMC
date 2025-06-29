@@ -1,0 +1,189 @@
+image_id,caption,fitCount,gtNum,fluency,diversity,bleu1,bleu2,bleu3,bleu4
+sonicdrivein_135,there's nothing wrong with it.,0,1,0.9710097,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_446,what do you think? </s> it' s all right.,0,1,0.9810223,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_634,`` i've never seen this before.,0,1,0.95932955,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_558,"when i opened up my bag and saw it's gone wrong, he just shot me across the face with a knife.",3,1,0.90543115,0.3349937,0.14285714285714285,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_411,♫ i've never seen such a good time in my life.,0,1,0.9534377,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_57,"yes, i don't care.",0,1,0.96314734,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_798,"it's like this! it ’ s so funny, but i don't know what to say.",1,1,0.94187903,0.3349937,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1615,you're going to love it.,0,1,0.9728969,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_1269,ha ha! </s> i’m so proud of you for sticking to it.,0,1,0.97068787,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_143,"you've got it! you have to take a look at this, but i do n’t know what that means.",1,1,0.941496,0.3349937,0.05263157894736841,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1270,"`` oh, no! '' i said.",0,1,0.81917816,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_204,"what do you think? </s> no, it’ s just a bunch of milk and ice cream.",0,1,0.95937216,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_65,`` i'm going to tell you about it.,0,1,0.9649587,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_78,"it's not just a game, it’ s real life.",0,1,0.95056254,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_1467,"i'm not sure what to do with it, but i have a idea.",2,1,0.979381,0.3349937,0.15384615384615385,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1960,`` i'm going to give you some food.,0,1,0.9753111,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_2142,what do you think? </s> i’m going to make it.,1,1,0.9736206,0.3349937,0.10000000000000002,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_228,""" i'm so excited to share it with you.",1,1,0.94586927,0.3349937,0.11111111111111109,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1289,"yes, it's a lot of fun! i made this with my mom in the morning.",0,1,0.9685232,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_906,i've been waiting for this moment all my life.,0,1,0.97571486,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_234,"we're going to do it! we are so excited for you guys, but i have no idea what this is.",1,1,0.96644986,0.3349937,0.05000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_968,"`` i'm going to put it on my phone, but you can n’t do that.",0,1,0.9324562,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_1039,"when you're at a party and someone says, `` i need to go home now.",1,1,0.9657633,0.3349937,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_277,why do i feel so happy? </s> it’ s because of all the delicious food we ate today.,0,1,0.9711792,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_691,what do you think? </s> i have no idea.,0,1,0.9755484,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_497,i've never felt so good in my life.,0,1,0.9776358,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_726,"ha ha, we're going to do it.",0,1,0.9473895,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_1992,"i've never heard of it before, but i do n’t think so.",1,1,0.9115575,0.3349937,0.08333333333333333,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_2180,"what's up with you guys? i just want to give them a big high-five and say, ""you can do it.",2,1,0.97164917,0.3349937,0.10000000000000002,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1347,"when i found out, it was the end of my day.",1,1,0.96608555,0.3349937,0.0909090909090909,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_690,what do you think of this? i've never seen anything like it before.,0,1,0.9755887,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_2052,how do you like it? </s> how many times have i tried to put on my hair.,0,1,0.9452935,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_808,"what do you think? i've been looking for it all day, so why can’t we find a way to get back together.",2,1,0.97681695,0.3349937,0.0909090909090909,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_670,"when you're stuck in the middle of a fight and have no idea what to do, snap this photo on your phone.",0,1,0.9773696,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_1921,"i'm not sure if i like it, but this is my favorite food.",0,1,0.9798575,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_414,how are we going to make it? </s> i’m so proud of you.,1,1,0.976474,0.3349937,0.07692307692307693,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1280,"i'm not sure if you like it, but i do n’t mind.",0,1,0.9530288,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_196,when you go out for dinner with a group of people and have no idea what to say or how much food they 'll eat; i made this post.,1,1,0.93470824,0.3349937,0.034482758620689655,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_2031,`` i'm going to take care of you.,1,1,0.96811074,0.3349937,0.12500000000000003,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_2200,what do i say when you’re ready to take a drink? </s> what does it feel like in your hand after drinking too much coffee or soda.,3,1,0.9592632,0.3349937,0.07407407407407407,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1268,"there's a lot of food on the table, and we can eat it.",1,1,0.965638,0.3349937,0.07692307692307693,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_505,"i'm not going to eat it, but i am n’t eating this.",0,1,0.8843799,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_348,"i'm not sure if this is real, but it does n’t matter.",1,1,0.932542,0.3349937,0.08333333333333333,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_784,it's okay if you ca n’t find it.,0,1,0.9480663,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_44,"yes, yes.",0,1,0.85455173,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_1274,`` don 't worry about it.,0,1,0.97009116,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_864,"i'm not going to tell you this, but i do n’t know a lot of people who are excited when they see their pets for the first time.",1,1,0.9695116,0.3349937,0.03571428571428572,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_914,"i'm not going to make any more of them, but i do n’t know how long it will take.",0,1,0.96611893,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_430,it's time for you guys to take a break.,0,1,0.98099005,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_98,"when i was 10 years old, my mom gave me this as a gift and now it’s one of the best things to say before bed.",0,1,0.9511589,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_572,"i'm not going to talk about it, but i do n’t know if we can get a job at the grocery store.",3,1,0.95636857,0.3349937,0.13636363636363635,0.047619047619047616,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_37,"`` i 'll be there for you tomorrow, so don ’ t worry about it.",1,1,0.9763837,0.3349937,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_590,what do you think of this new year? </s> it’ s a fresh start for everyone.,1,1,0.97992706,0.3349937,0.0625,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1606,"yes, i've got it.",0,1,0.954828,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_955,"what's the difference between a pizza and an ice cream sundae? you can eat them both, but i just don’t know which one to choose.",2,1,0.96908164,0.3349937,0.07999999999999999,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_850,"i'm not going to eat any of it, but i have n’t had a meal in three days.",1,1,0.9392606,0.3349937,0.05555555555555554,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_567,what if we're not allowed to eat ice cream for a week? why do n’t let it go out of your mind with this idea.,0,1,0.9053192,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_470,"i've never seen anything like this in my life, but i have no idea what to do about it.",0,1,0.9733243,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_1457,"it's okay, i know you can do it.",0,1,0.9620597,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_376,"yes, we're going to do it.",0,1,0.9647616,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_1272,"i'm not going to say anything about it, but i do n’t know why people are so mad at me.",0,1,0.9681103,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_790,what's the best way to save money? call your local bank and get a credit card with low interest rates.,1,1,0.98394436,0.3349937,0.05000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1094,i'm going to show you how much i love it.,1,1,0.96167153,0.3349937,0.10000000000000002,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_791,it's like this.,0,1,0.9746406,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_534,"what's the best way to start a new year? it’ s all of these things we eat, wear and say every day.",0,1,0.95018494,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_705,"it's a great idea, but i can n’t believe it.",0,1,0.9471616,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_2024,"i'm not sure if i can do it, but we’re going to try.",0,1,0.973725,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_89,it's time for us to take a break from social media and get some rest.,2,1,0.9806615,0.3349937,0.13333333333333333,0.07142857142857141,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1282,"i'm not sure if i ca n’t do it, but this is the best way to say no.",0,1,0.95498085,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_495,`` i'm going to put it in my mouth.,0,1,0.9742982,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_1181,we're going to do this.,0,1,0.96488124,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_780,`` it's time for a party! we are ready to celebrate with our friends and family today.,1,1,0.9676492,0.3349937,0.0588235294117647,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_618,when you’ re 10 years old and have no idea what to do next.,1,1,0.9553947,0.3349937,0.07142857142857141,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_832,"when you're at the end of your day and want to go home, just snap it.",1,1,0.96953964,0.3349937,0.0625,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1029,"when i was a kid, my parents always told me to eat more vegetables.",1,1,0.9790684,0.3349937,0.07142857142857141,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_491,what do you make of it? </s> i think we need to add a little bit at the end so that they can get their new clothes! what does this mean?? share your thoughts in the comments below and let us know if there are any other options.,0,1,0.9516667,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_645,"it's like this: i love you so much, and it makes me feel really good.",1,1,0.9711799,0.3349937,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_51,it's time to get back on our feet.,0,1,0.9728118,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_1616,10:35am - you can’t touch it.,0,1,0.9555769,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_333,"there's a lot of food in the fridge, but i do n’t know where it came from.",2,1,0.9384143,0.3349937,0.11764705882352941,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_912,there's a lot of people out there who need your help.,0,1,0.98423994,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_1572,`` i'm going to tell you what we do n’t like this.,0,1,0.95534074,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_409,i'm going to show you how i made it.,0,1,0.9665853,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_596,what are you going to do today? </s> what’ s the deal with me.,0,1,0.97582847,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_1115,`` i'm going to take a bath in the morning! </s> let me know if you like it or not.,0,1,0.9744717,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_973,"what do you think of this? </s> it’ s a new year, and we want to make sure everyone gets the food they need.",3,1,0.9803289,0.3349937,0.12500000000000003,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1337,"we're going to have a lot of fun with it, but i just can n’t wait for them.",1,1,0.93285143,0.3349937,0.05555555555555554,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_981,"it’s not about the food, it's how you look at them.",0,1,0.9676033,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_877,"what do you think? </s> it’ s a good price, but i don't know if this is the right thing for me.",1,1,0.9683999,0.3349937,0.04545454545454546,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_789,"yes, it’s been a long time.",0,1,0.97728753,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_1946,"yes, it's been a long time since i added this to my bag.",1,1,0.9799289,0.3349937,0.07692307692307693,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_788,"yes, we're going to do it.",0,1,0.9647616,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_369,i've never seen it like this before.,0,1,0.96487135,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_1594,"`` i'm going to eat it, but you can n’t do that.",0,1,0.9318698,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_404,"@ 5:30pm today i had to go out for brunch with my best friend, but it’s been a long time since we went anywhere together.",0,1,0.9760075,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_566,i can't wait to see it.,0,1,0.9685637,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_644,"it's been a long day, and i just cann't wait for it to come out.",2,1,0.97358024,0.3349937,0.13333333333333333,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1002,i'm going to give you a taste of what it feels like when i get ready for dinner tonight.,1,1,0.9782956,0.3349937,0.05263157894736841,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_2103,"it's not like this, it is n’t.",0,1,0.8186698,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_528,"it's not my favorite food, but i do n’t want to eat it.",0,1,0.9460222,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_2154,"yes, yes.",0,1,0.85455173,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_571,"`` if you're going to do n’t like it, just go home.",0,1,0.9588141,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_760,`` i'm going to give you a few minutes before the end of my day.,2,1,0.9749108,0.3349937,0.13333333333333333,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1385,"yes, it’s been a long time since i ate ice cream.",0,1,0.981406,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_2070,"yes, yeah.",0,1,0.834919,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_283,we're going to do it.,0,1,0.96842986,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_486,`` i'm going to try it.,0,1,0.97274584,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_1959,"it's just a little bit different, but i still like it.",0,1,0.9665099,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_903,we're not going to do it.,0,1,0.9727077,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_697,what do you think of this? what does it say on your phone when i go to bed at night.,0,1,0.97083384,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_85,when i’m hungry and can 't decide what to have for lunch or dinner.,0,1,0.93347514,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_103,"it's been a long time since i ate ice cream, but this is the best thing ever!☺♂️🍦😊🙌🏽🇮🇩🌹💕🤗👨‍🧑🎉📚🥤🐶⛈❄❅ ❖✍🏻🔬#",0,1,0.9275546,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_2171,"when i woke up in the middle of the night, my mom said: `` don't worry about it.",0,1,0.97471356,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_1353,"when i woke up in the morning, my mouth was full of food.",1,1,0.979734,0.3349937,0.07692307692307693,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_548,"when i got home, my mom was like `` oh no! what did you get for lunch today? </s> we’re not going to eat it.",3,1,0.95708674,0.3349937,0.12000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_163,what i've been waiting for all day is to get back on the road with my dog.,1,1,0.977119,0.3349937,0.0588235294117647,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_290,it's been a long time since i had the chance to eat ice cream.,1,1,0.98168105,0.3349937,0.07142857142857141,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1983,"`` i'm going to take a bite out of it! '' </s> what do you guys think? is this the right thing for me to eat?</p>""
+### Questions and Detailed Answers Based on the Extract:
+**Question:** What are some creative snack ideas mentioned in the extract that can be enjoyed during Valentine’s Day parties or",2,1,0.94520015,0.3349937,0.036363636363636355,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1081,"`` i'm sorry, but we can n’t do it.",1,1,0.9335793,0.3349937,0.11111111111111109,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_189,"when you need a little something to eat, just open up your mouth and say: `` oh my god.",2,1,0.9653979,0.3349937,0.10526315789473682,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1346,"`` i'm going to put it on my phone, but if you don’t like the sound of this song then just close your eyes and let me do that.",1,1,0.96913993,0.3349937,0.034482758620689655,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_375,"there's a lot of people out there, but i just can n’t do it.",0,1,0.93036115,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_1984,i'm going to tell you what i do n’t like it.,1,1,0.96073395,0.3349937,0.0909090909090909,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_363,@ 5:30 p.,0,1,0.8988001,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_649,"it's a good idea, but i do n’t know where it came from.",0,1,0.93431926,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_499,what are we going to do today? </s> nothing.,3,1,0.97627854,0.3349937,0.3333333333333333,0.25,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_522,"by the end of 2018, we will be able to do it.",3,1,0.9772157,0.3349937,0.25,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_601,"it's okay, it ’ s ok.",0,1,0.96564454,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_531,"when you're at the end of your day and need something to eat, think about it.",1,1,0.9730743,0.3349937,0.0625,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_496,"yes, yes.",0,1,0.85455173,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_1018,"i'm not a vegan, but i love to try new things.",0,1,0.98076564,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_1199,what are we going to do? </s> i don't know.,0,1,0.97135264,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_1005,i'm going to tell you what i do.,0,1,0.9753794,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_1930,there are so many ways to do it.,0,1,0.9761737,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_570,it ’s so cool to be a jedi; it's like you can do anything in the galaxy with just one hand! and i am proud of myself for all my hard work.,1,1,0.9406701,0.3349937,0.03125,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_457,we're going to do it.,0,1,0.96842986,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_786,"when you're about to take a test and your phone is out of range, just hit the start button! we have no idea what’s going on.",1,1,0.9811885,0.3349937,0.03846153846153846,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1017,it's not the end of it.,1,1,0.9448568,0.3349937,0.10108844328543891,1.3495755153097447e-308,1.3495755153097447e-308,1.3495755153097447e-308
+sonicdrivein_478,what do you think of this post? it's the first thing i thought when my mom told me to stay at home for a week.,1,1,0.9755062,0.3349937,0.04000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_316,`` i'm going to take a break and go home.,0,1,0.97915465,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_1349,10:35 am.,0,1,0.85353076,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_344,"i'm not going to say no thank you, but i do n’t know what else we can bring home from the store.",0,1,0.9405955,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_964,`` i'm going to put it in my mouth.,0,1,0.9742982,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_594,"yes, it's great.",0,1,0.95741117,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_712,“ i ’m glad to see it.,0,1,0.9442317,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_373,"it's just a little bit longer, but it feels like you have to do something about them all the time.",0,1,0.9534947,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_947,i've never felt so good in my life.,0,1,0.9776358,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_753,"yes, i've seen it a few times before.",0,1,0.968078,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_54,"you know, you don't have to eat it all the time! </s> so i always carry some in my bag.",0,1,0.95793235,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_2107,i'm not going to say no.,0,1,0.97635376,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_1206,"i'm not sure what to do about it, but i have a lot of fun with my friends! let me know if you need any help.",1,1,0.9771194,0.3349937,0.03846153846153846,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1368,it's the best ice cream i ’ve ever had.,0,1,0.9705878,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_560,"yes, yes! it's a big deal.",0,1,0.96372074,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_742,i've got it.,0,1,0.96866477,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_2203,"when you're at the mall with your mom and dad, i can n’t tell if they like it or not.",0,1,0.96585286,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_2115,"`` i'm going to make it! '' and he said, with a huge smile on his face.",0,1,0.69819224,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_402,"yes, yes.",0,1,0.85455173,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_80," </s> hey, guys and girls.",0,1,0.96715194,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_893,it's time to get back on our feet.,0,1,0.9728118,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_41,"what's wrong with you? why do i have to take a shot in the face?! what does it say on your shirt? is this for me?? are u drunk or something??? </p> <blockquote class=""twitter-tweet"" data-hashtags="""" id=1025764398&amp;gt;&",0,1,0.82123095,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_2125,what are we going to do today? </s> i’m not ready for it.,0,1,0.97912234,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_1384,"when you’ re done with it, i ‘m going to put some ice cream in the fridge.",2,1,0.98338705,0.3349937,0.11764705882352941,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1316,"when you're at the end of your day, just click on this post.",1,1,0.9811352,0.3349937,0.07692307692307693,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_529,"it's not like you have to do that, but it does n’t matter.",1,1,0.92996633,0.3349937,0.07692307692307693,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_976,`` i'm going to give you a kick in the butt.,1,1,0.9784752,0.3349937,0.0909090909090909,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_91,"♫ i've never heard of it before, but now we know! ♣ ⤰⬛☺💪🏽 1/20 pic.",1,1,0.798893,0.3349937,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1379,"by the end of this year, i 'll be able to do it.",0,1,0.979455,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_1246,there's always something for everyone.,0,1,0.9584251,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_280,why do we have to take this trip? because it's the most beautiful place on planet earth.,1,1,0.95345753,0.3349937,0.0588235294117647,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1028,"it's not about the money, it’ s more than that.",0,1,0.96253324,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_1502,"`` oh, no! '' and then i saw it on my phone.",0,1,0.97026795,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_2201,we're going to get it.,0,1,0.9635717,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_152,"i'm going to take a look at it, but i do n’t know how many of them there are in my fridge.",0,1,0.94956475,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_706,"in the end, we're going to do it again.",0,1,0.97228694,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_1122,we're going to give it a try.,0,1,0.97963953,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_69,what do you think about it? </s> this is the first time i’ve ever seen an avocado in my life.,0,1,0.977544,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_408,"i'm not going to say no, but i do n’t know if you want it.",1,1,0.95610356,0.3349937,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_524,we're going to have a lot of fun with it.,0,1,0.9777435,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_905,what do you think of when i say this? </s> it’ s the best food in my life.,0,1,0.9591503,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_945,"i've got a lot of meat in my life, but i have to eat it every day.",0,1,0.9651294,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_901,we're going to do it.,0,1,0.96842986,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_585,"i'm not gonna lie, i do n’t know how many of you guys have enjoyed your day so far.",0,1,0.92823684,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_1909,there's a lot of things you can do to make your life better.,1,1,0.9794321,0.3349937,0.07692307692307693,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_648,i'm going to show you what i do n’t eat.,0,1,0.9433474,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_1317,"yes, we've got plenty to talk about this year.",0,1,0.9766827,0.3349937,0.0,0.0,0.0,0.0
+sonicdrivein_413,`` i'm going to give you a kick in the back.,2,1,0.9796229,0.3349937,0.18181818181818182,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308

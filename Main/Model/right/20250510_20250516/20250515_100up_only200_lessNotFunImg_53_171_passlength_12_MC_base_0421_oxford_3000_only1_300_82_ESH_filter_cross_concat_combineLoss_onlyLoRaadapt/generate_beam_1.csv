@@ -1,0 +1,583 @@
+image_id,caption,fitCount,gtNum,fluency,diversity,bleu1,bleu2,bleu3,bleu4
+mcdonalds_switzerland_2025,"i'm sorry, but i do n’t know where you got this from.",0,1,0.96381176,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_673,here’s what you need to do: </sup><i>&lt;strong&gt;&#x203c;</i></p> we are here for a reason.,2,1,0.9627409,0.3278656,0.15384615384615385,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_355,"when you're on the phone with your friend or family member, don’t forget to tell them about it.",2,1,0.97606784,0.3278656,0.08897082254631197,1.7816998627591863e-308,1.7816998627591863e-308,1.7816998627591863e-308
+mcdonalds_switzerland_2035,"there's a good chance that you will be able to find your way back in the morning, so please don't worry about it.",0,1,0.9763906,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1969,"in 2019, we won the world cup.",1,1,0.96374774,0.3278656,0.02230257790228158,3.473741814738195e-309,3.473741814738195e-309,3.473741814738195e-309
+mcdonalds_switzerland_2032,"what do you think is the best way to say ""thank u so much for your time today? a) i love it! b.",0,1,0.9649123,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1929,here’s what you need to do: 1.,1,1,0.9062785,0.3278656,0.01933361189094467,3.01131000863463e-309,3.01131000863463e-309,3.01131000863463e-309
+mcdonalds_switzerland_410,"what are you talking about? </s> what do i say to this guy who posted it on twitter and made me laugh so hard that my eyes popped out of their sockets! ''
+### Mathematical Questions Related to the Extract with Detailed Answers:
+
+#### Question 1
+**What is the significance level used in statistical hypothesis testing, as mentioned by a",2,1,0.9223005,0.3278656,0.03333333333333333,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1991,i'm going to take a look at your room and see what you ate for dinner.,3,1,0.97998697,0.3278656,0.13717793042749532,1.627898810444522e-308,1.627898810444522e-308,1.627898810444522e-308
+mcdonalds_switzerland_1890,you're right.,0,1,0.96877265,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_561,`` i'm going to tell you the truth.,1,1,0.962511,0.3278656,0.040581558419793724,7.223757182189463e-309,7.223757182189463e-309,7.223757182189463e-309
+mcdonalds_switzerland_645,i 'd like to tell you about it.,0,1,0.97895676,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_230,"here's what you need to do: turn off your cell phone, put it down on the table and take a deep breath.",2,1,0.97812885,0.3278656,0.0909090909090909,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_687,"i'm sorry, but i do n’t have an emoji for you.",1,1,0.9147886,0.3278656,0.06319490258171626,1.54674658298039e-308,1.54674658298039e-308,1.54674658298039e-308
+mcdonalds_switzerland_611,"yes, it's true.",0,1,0.9690871,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_433,"there's a lot of things you can do with your free time, but the most important thing is to have fun and enjoy it.",3,1,0.97166103,0.3278656,0.12500000000000003,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_117,"i'm sorry for all the people who missed out on this event, but i want to tell you that it was a great experience.",1,1,0.974959,0.3278656,0.041666666666666664,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_442,"it's like, you know.",1,1,0.7377898,0.3278656,0.003566058477249814,3.1738973982547e-310,3.1738973982547e-310,3.1738973982547e-310
+mcdonalds_switzerland_601,"`` i'm sorry to tell you this, but it was n’t the first time we met up at a coffee shop.",2,1,0.9676692,0.3278656,0.09523809523809525,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1925,"i'm sorry, but i don't know if you like it or not.",1,1,0.9792295,0.3278656,0.0649000652559504,1.7328892633971685e-308,1.7328892633971685e-308,1.7328892633971685e-308
+mcdonalds_switzerland_874,"i'm going to show you some of the best ideas in your life, but i can n’t promise that they will work.",1,1,0.97483295,0.3278656,0.04545454545454546,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_721,i'm going to show you what i can do in the kitchen! check it out and let me know if u like or not.,2,1,0.9701773,0.3278656,0.08333333333333333,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_727,"when you're on your way to work in the morning and see an ad that pops up saying, `` get ready for school today? '' it makes me feel a little bit better about myself.",5,1,0.9749448,0.3278656,0.14285714285714285,0.02941176470588235,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_388,"yes, it's true.",1,1,0.9690871,0.3278656,0.0004242112671132693,2.831704202814e-311,2.831704202814e-311,2.831704202814e-311
+mcdonalds_switzerland_398,`` i'm going to do it.,0,1,0.96237665,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_522,i'm going to show you something that will make your day a little bit better.,1,1,0.97459304,0.3278656,0.03422780793550614,1.142391010069532e-308,1.142391010069532e-308,1.142391010069532e-308
+mcdonalds_switzerland_1440,"i'm sorry, but i can't do it for you.",1,1,0.9756291,0.3278656,0.04567914338968749,9.14755210518586e-309,9.14755210518586e-309,9.14755210518586e-309
+mcdonalds_switzerland_600,don't be afraid.,0,1,0.9683034,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_431,"we're going to have a little bit of fun tonight, right? and i hope you like it.",3,1,0.9747501,0.3278656,0.12399150399935213,1.563378107280424e-308,1.563378107280424e-308,1.563378107280424e-308
+mcdonalds_switzerland_1576,"`` i'm not sure if you ca n’t do it, but here we are.",0,1,0.9413274,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1987,"i'm not going to say it, but i do n’t know if you like this app as much.",0,1,0.9512851,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1209,"i'm going to ask you a question, but i do n’t know what it is.",0,1,0.97153485,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_90,there's a lot of people who have no idea what i do.,0,1,0.98260295,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_506,i'm here to help you.,0,1,0.97972053,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_540,"you know, i'm here to show you how it works.",2,1,0.9775044,0.3278656,0.0493193927883213,5.486964580537266e-309,5.486964580537266e-309,5.486964580537266e-309
+mcdonalds_switzerland_794,you're not the only one in this room.,0,1,0.9723158,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1896,"i'm sorry, but i don't want to go out with you.",0,1,0.97900975,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1056,"i 'd like to tell you about this, but i do n’t know where your parents are at the moment.",2,1,0.9727237,0.3278656,0.10000000000000002,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1922,`` don 't worry about it.,0,1,0.97009116,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_575,"in 2019, we had the world’s largest online shopping mall with more than a million products.",3,1,0.9723532,0.3278656,0.10683427963704806,1.267808868335202e-308,1.267808868335202e-308,1.267808868335202e-308
+mcdonalds_switzerland_718,"i'm going to show you some of the best posts i have ever made on this channel, so make sure that u enjoy them! 👍👌😊🙏💪🏽♻️🥰🍅🐶🧘🏻‍♀️🌿⛺📸☹ ☼ 🦄🤣 �",2,1,0.9408143,0.3278656,0.07142857142857141,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_682,"i don't know if i'm going to get a job or not, but this is the first time in my life where you can say yes and no at once.",3,1,0.97253144,0.3278656,0.10000000000000002,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_168,"hello, everyone! we're here for you.",0,1,0.9694238,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_220,"you know, there's a lot of things that you can do to make your life more fun and interesting... but i don't have any idea what it is.",2,1,0.96469426,0.3278656,0.03571428571428572,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_950,"what do you think about this? </s> what are your thoughts on whether it’ s going to be available in the next week or two weeks, and how much will they cost? i don't know.",3,1,0.94437444,0.3278656,0.08571428571428572,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_428,"yes, you're right.",0,1,0.9555392,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1994,"yes, i'm going to do it.",0,1,0.9638076,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_227,i'm here to show you what i can do.,1,1,0.97667277,0.3278656,0.08897082254631197,1.7816998627591863e-308,1.7816998627591863e-308,1.7816998627591863e-308
+mcdonalds_switzerland_683,there's no doubt in my heart that i love you more than anyone else on this planet.,0,1,0.977435,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1913,"i'm sorry, but i don't have any idea what you are looking for.",1,1,0.97502726,0.3278656,0.04489580601104416,1.2986542960532383e-308,1.2986542960532383e-308,1.2986542960532383e-308
+mcdonalds_switzerland_1906,i'm going to show you some of the best things in this world.,4,1,0.97250926,0.3278656,0.1795832240441766,1.2986542960532383e-308,1.2986542960532383e-308,1.2986542960532383e-308
+mcdonalds_switzerland_347,"i'm not going to tell you this, but i am n’t gonna lie about it.",2,1,0.94897145,0.3278656,0.08937600613808525,1.491511611267286e-308,1.491511611267286e-308,1.491511611267286e-308
+mcdonalds_switzerland_740,we're going to show you what it feels like when i eat a bowl of chocolate ice cream every day.,4,1,0.9737596,0.3278656,0.2,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_762,"if you're looking for a burger, check out our menu.",2,1,0.9781597,0.3278656,0.08986579282344431,9.997901319273777e-309,9.997901319273777e-309,9.997901319273777e-309
+mcdonalds_switzerland_519,"there's a lot of things you can do with your phone, but be careful not to get caught up in it.",0,1,0.97551835,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_362,"please don't tell me that you... i did not see it on the internet, but there might be a lot more of them here.",3,1,0.9140093,0.3278656,0.12500000000000003,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1749,"i'm sorry to tell you this, but i’ m not sure if it will work.",1,1,0.98076916,0.3278656,0.054582050205198795,1.8217363958297824e-308,1.8217363958297824e-308,1.8217363958297824e-308
+mcdonalds_switzerland_448,i'm going to show you some of the best ideas that i came up with this morning.,1,1,0.9778742,0.3278656,0.0588235294117647,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_816,"in 2019, the u.",0,1,0.78580296,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_496,here's the first thing you need to do.,0,1,0.9757177,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_2043,i'm going to show you some of the most beautiful pictures i have ever taken in my life.,0,1,0.9716267,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_437,"it's been a long time, but i hope that we can get back on the road soon.",3,1,0.9801521,0.3278656,0.1394714758202644,1.7585612308455557e-308,1.7585612308455557e-308,1.7585612308455557e-308
+mcdonalds_switzerland_1203,i'm going to give you a taste of what i have in my mouth.,1,1,0.97166306,0.3278656,0.07142857142857141,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1842,"today's the first day of a new year, and we are going to show you all our favorite things.",0,1,0.9646103,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_535,"i'm not sure if you like it, but i would n’t want to do this.",1,1,0.962635,0.3278656,0.03422780793550614,1.142391010069532e-308,1.142391010069532e-308,1.142391010069532e-308
+mcdonalds_switzerland_1877,i'm going to show you something.,2,1,0.9725395,0.3278656,0.023161150407600514,1.546058109147204e-309,1.546058109147204e-309,1.546058109147204e-309
+mcdonalds_switzerland_173,"there are 10 things you can do in a year, but i’m not going to tell them all of it.",0,1,0.9630727,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_580,"when i woke up in the morning, my first thought was: `` why don't we have a dog for christmas this year? it would be so much fun to play with him every day.",5,1,0.9734385,0.3278656,0.14705882352941177,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_879,"i'm sorry, but i do n’t know if you like it or not.",3,1,0.9648846,0.3278656,0.11548152008320847,1.113471283070591e-308,1.113471283070591e-308,1.113471283070591e-308
+mcdonalds_switzerland_293,"i'm going to show you what we do in the summer, and i amn't gonna stay here for a long time.",1,1,0.96158636,0.3278656,0.047619047619047616,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_591,"i'm going to ask you a question: why do n’t we have more than two sides of our phone case? well, because that would make it harder for people who are deaf or hard-of-hearing to use their phones.",8,1,0.93113136,0.3278656,0.19454495987477408,2.056165296478095e-308,2.056165296478095e-308,2.056165296478095e-308
+mcdonalds_switzerland_828,i'm here to tell you about it.,1,1,0.97624403,0.3278656,0.08067401742967989,1.25653953070478e-308,1.25653953070478e-308,1.25653953070478e-308
+mcdonalds_switzerland_463,"in may 2017, the u.",0,1,0.7537405,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_792,"if you're planning to buy an iphone or ipad, make sure it has at least two iphones in your cart.",0,1,0.9654557,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_372,"it's a good idea to let your friends know how much you love them, even if they don’t like it.",2,1,0.98280704,0.3278656,0.10000000000000002,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1963,we're going to have a christmas party at the end of this year.,3,1,0.98095644,0.3278656,0.14545688921462768,1.402493394168772e-308,1.402493394168772e-308,1.402493394168772e-308
+mcdonalds_switzerland_737,"i'm sorry, but i can't post a comment right now.",0,1,0.96957064,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_514,"it's like, what are you doing here? i don't know.",1,1,0.9511446,0.3278656,0.033287108369807965,7.4066274658958e-309,7.4066274658958e-309,7.4066274658958e-309
+mcdonalds_switzerland_1071,"i'm not sure what you think about it, but today is going to be the best day of your life.",1,1,0.9696507,0.3278656,0.05000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_541,"if you have a lot of money in your bank account, don 't keep it all to yourself.",1,1,0.9720381,0.3278656,0.05555555555555554,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_354,"it's not just about you, it’ s all of us! we are the ones who make this world a better place to live in.",1,1,0.9700486,0.3278656,0.041666666666666664,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_507,`` i'm here for you.,0,1,0.9594368,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_520,"it's not about you, it was just a couple of people who didn’t want to get in touch with us.",1,1,0.9303781,0.3278656,0.05000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_515,"i'm here to help you find the perfect solution for your problem, but i do n’t know how long it will take.",6,1,0.9802579,0.3278656,0.023427881737602622,1.911388131199775e-309,1.911388131199775e-309,1.911388131199775e-309
+mcdonalds_switzerland_457,"it's a good idea, but it doesn't work.",0,1,0.975776,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_494,"yes, it's true.",0,1,0.9690871,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_508,"`` i'm sorry, but you need to put it in the fridge for at least two hours before eating.",4,1,0.96018934,0.3278656,0.16181484770394436,1.7102374408358077e-308,1.7102374408358077e-308,1.7102374408358077e-308
+mcdonalds_switzerland_402,"from what i've seen so far, it looks like a lot of people are looking at the same thing.",1,1,0.97189224,0.3278656,0.05263157894736841,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_444,"what's up with you guys? we are going to have a party this saturday night! get ready for some delicious food, drinks and lots of fun.",0,1,0.96600556,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1956,"`` i'm sorry to tell you this, but it’ s time for your check-in.",2,1,0.96185094,0.3278656,0.07511257491796854,1.1699171882659805e-308,1.1699171882659805e-308,1.1699171882659805e-308
+mcdonalds_switzerland_7,today's special: we are going to show you all the ways in which they can make money on social media.,2,1,0.96013165,0.3278656,0.10000000000000002,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_713,"i'm not a lawyer, but i do n’t know what to say about it.",2,1,0.95327604,0.3278656,0.14285714285714285,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_413,"it's been a year since i wrote this tweet, and it has n’t gotten any likes or retweets.",1,1,0.9233808,0.3278656,0.05555555555555554,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_616,"in 2019, we had the world record for most french fries eaten in one sitting.",0,1,0.9726222,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_719,you've got to try it.,1,1,0.9742911,0.3278656,0.008152440795673243,9.06989144874033e-310,9.06989144874033e-310,9.06989144874033e-310
+mcdonalds_switzerland_560,"here's what i do n’t want to say, but this is the best way you can get your money back.",3,1,0.96747935,0.3278656,0.15,0.05263157894736841,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_417,"this week, we're going to have a contest for the best video of this year.",1,1,0.9738892,0.3278656,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_902,don't believe me when i tell you.,0,1,0.9673726,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1901,"what's wrong with you? what’ s your opinion on this matter, and why don't we eat pizza at home tonight?!
+Q: where is the best place to get a slice of ice-cream for free today??
+A: i don’ t know.",2,1,0.9703479,0.3278656,0.05000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1914,"from now on, i'm going to put a lot of love in your hands.",1,1,0.96865314,0.3278656,0.05367694950537755,1.6720924800836196e-308,1.6720924800836196e-308,1.6720924800836196e-308
+mcdonalds_switzerland_1942,"in case you're looking for a new home, please check out our website: https://www.",2,1,0.96273816,0.3278656,0.05255420588163462,0.028298418551649412,8.18558927632837e-309,8.18558927632837e-309
+mcdonalds_switzerland_724,"`` i'm going to take a sip of water from your left hand, please? '' say it out loud and we’ll tell you which one is right.",2,1,0.96513623,0.3278656,0.07407407407407407,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_502,"i'm not going to tell you about it now, but i don't know if this is the right thing for me.",4,1,0.9764956,0.3278656,0.19047619047619047,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_761,i'm here to show you what i do n’t know.,1,1,0.96608055,0.3278656,0.03678794411714424,8.18558927632837e-309,8.18558927632837e-309,8.18558927632837e-309
+mcdonalds_switzerland_472,"if you have any questions or concerns, please feel free to call us at 1-805-674293.",0,1,0.94022053,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_2042,`` i'm so excited to meet you.,0,1,0.9669242,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_706,i'm glad you liked it.,1,1,0.9777029,0.3278656,0.1637461506155964,1.8217363958297824e-308,1.8217363958297824e-308,1.8217363958297824e-308
+mcdonalds_switzerland_1132,"when i got home, my wife told me that she 'd been sleeping in the middle of her bed all night.",0,1,0.98260814,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_484,"i'm going to give you a little taste of what we eat every day, and i hope it will make your stomach happy! 👍👌🎉🍴🥗😊🙏 🙄 🤤🤣 😅 😂😂💪🏽🦰 🧘🏻‍♂️🐶 🐷 🍲 �",6,1,0.9483291,0.3278656,0.1875,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_2006,"yes, i'm here.",0,1,0.94904244,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_684,i've been thinking about it for a long time.,1,1,0.98396033,0.3278656,0.05704634655917688,1.142391010069532e-308,1.142391010069532e-308,1.142391010069532e-308
+mcdonalds_switzerland_356,"it's your turn to make the most of this week, and we hope you enjoy it! here are a few ideas that might come in handy: eat more plant-based meals; drink plenty of water or herbal tea.",7,1,0.97836417,0.3278656,0.1891891891891892,0.02777777777777778,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_435,"it's not like this, but it isn't.",0,1,0.96987087,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_16,"`` i'm not sure if you know it, but my friend who works at a fast-food restaurant is one of the best people on this planet.",0,1,0.96662825,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_596,we're going to do it.,1,1,0.96842986,0.3278656,0.060238842382440407,6.701793672595377e-309,6.701793672595377e-309,6.701793672595377e-309
+mcdonalds_switzerland_1657,"yes, yes.",0,1,0.85455173,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1939,"it's not just about you, but it could be for everyone in the world! we are here to help each and every one of us reach our goals together.",4,1,0.9654229,0.3278656,0.13793103448275862,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_2004,"in 2019, the world’s most popular video game was released for free! but it didn't get a lot of attention until now.",3,1,0.8970505,0.3278656,0.1189807217549214,1.941433220050148e-308,1.941433220050148e-308,1.941433220050148e-308
+mcdonalds_switzerland_1898,`` i'm glad you like this! check out all the new features that have been added to youtube in just a few days.,2,1,0.9747083,0.3278656,0.08695652173913045,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1941,"`` i'm sorry, but you don't like it.",1,1,0.9596147,0.3278656,0.0459849301464303,8.18558927632837e-309,8.18558927632837e-309,8.18558927632837e-309
+mcdonalds_switzerland_764,you can't do that.,0,1,0.96789336,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1909,`` i'm here for you.,0,1,0.9594368,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1193,here's another example of what not to do.,2,1,0.9538589,0.3278656,0.049227918801048515,4.38143020931725e-309,4.38143020931725e-309,4.38143020931725e-309
+mcdonalds_switzerland_1006,"i'm not going to ask you about it, but i do n’t know if this is the right thing for me.",2,1,0.9719211,0.3278656,0.09523809523809525,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_432,"in 2017, apple introduced a new version of the iphone with an app that allows you to order food from any restaurant in your area within minutes.",2,1,0.940644,0.3278656,0.07407407407407407,0.03846153846153846,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_492,"when you're at a party and someone’s looking for something to eat, just ask them if they have an ice cream sandwich! it will make the whole event more fun.",3,1,0.97599185,0.3278656,0.10000000000000002,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1897,"`` i'm sorry, but we don't have a cell phone.",0,1,0.9617786,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_232,i'm here to help you find your perfect boyfriend or girlfriend.,1,1,0.97490203,0.3278656,0.0909090909090909,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_537,i 'd like to tell you a few things.,1,1,0.9694325,0.3278656,0.07124226538110606,1.4266737208830245e-308,1.4266737208830245e-308,1.4266737208830245e-308
+mcdonalds_switzerland_1899,`` you can't do that.,0,1,0.9530812,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1322,"`` i'm not sure if you ca n’t hear me, but this is the only way to say it.",1,1,0.9464718,0.3278656,0.049933130527180895,2.110993164779763e-308,2.110993164779763e-308,2.110993164779763e-308
+mcdonalds_switzerland_603,"it's funny, right? check it out! 👍👌👏👆👇👈👉👊👋👅👄👂👀👁👦👧👨‍♀️🕶🏼 🗺️🤣 🤔😱😂👩💪🎬🍲�",0,1,0.9462743,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_769,you can't believe it.,0,1,0.9735242,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_614,1 / 20 of the people who say they like this post will be randomly selected to receive a gift voucher for your next purchase.,4,1,0.9534011,0.3278656,0.15999999999999998,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_620,"what's wrong with you? why do n’t like this app so much?! 🤦‍♂️👍🤗
+• what is your opinion on it? 👏🙌😊😂 😅 🙋🏼 🧘🩰 💪💫🥳 🥇🍽 🍲 🌸 📷 😍",2,1,0.92673135,0.3278656,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_363,`` i 'd like to have a drink with you every day for the rest of your life.,2,1,0.9716068,0.3278656,0.09942659075715217,1.991083571408152e-308,1.991083571408152e-308,1.991083571408152e-308
+mcdonalds_switzerland_426,"when you're ready to eat, just click on this link.",0,1,0.9770312,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_618,it's a really good idea.,1,1,0.975243,0.3278656,0.03305977764431731,3.678022350221663e-309,3.678022350221663e-309,3.678022350221663e-309
+mcdonalds_switzerland_647,`` i'm going to show you some of the best things in your life.,4,1,0.9705935,0.3278656,0.04460515580456316,3.473741814738195e-309,3.473741814738195e-309,3.473741814738195e-309
+mcdonalds_switzerland_716,"i'm sorry to tell you this, but i can n’t eat it anymore.",1,1,0.96246904,0.3278656,0.07692307692307693,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_677,"`` i don't like it, '' he said.",0,1,0.898574,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_414,i'm going to show you what it looks like.,2,1,0.9769692,0.3278656,0.0016732853901444496,1.67543261074466e-310,1.67543261074466e-310,1.67543261074466e-310
+mcdonalds_switzerland_646,15:30.,0,1,0.6216656,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_633,"i'm not sure if you like it, so let me ask for your opinion.",2,1,0.97485965,0.3278656,0.09306272250443651,1.4495000173229606e-308,1.4495000173229606e-308,1.4495000173229606e-308
+mcdonalds_switzerland_623,"i'm sorry, but i was n’t expecting you to do that! let me take a look at your bag and see if it fits in the back of my pants.",2,1,0.9730532,0.3278656,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_2041,""" i'm not going to do it.",0,1,0.95582134,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_746,"if you like it, i'm here.",1,1,0.9705367,0.3278656,0.08556951983876535,1.142391010069532e-308,1.142391010069532e-308,1.142391010069532e-308
+mcdonalds_switzerland_2000,"i'm not going to do it, but i am n’t planning on doing anything else for the next few days.",0,1,0.9567234,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1882,"there are 30 seconds left, so let’s see how long it takes you to finish this quiz! and then we will give a prize for the first person who answers all of them right away.",1,1,0.9527955,0.3278656,0.028571428571428577,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_262,i'm excited to share this with you.,0,1,0.9780341,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_528,"in the next 10 minutes, you will be able to take a selfie with your phone and post it on instagram.",2,1,0.9716673,0.3278656,0.09523809523809525,0.05000000000000001,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1037,what's the point of this video? do n’t forget to share it with your friends and loved ones.,1,1,0.9693765,0.3278656,0.05555555555555554,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_505,"there's a lot of things you can do to make money on the internet, but it takes time and effort.",5,1,0.97678626,0.3278656,0.19470019576785122,0.040989514898494984,1.7328892633971685e-308,1.7328892633971685e-308
+mcdonalds_switzerland_666,"`` i'm not sure if you like it, but here’s a way to say hello! </s> click on the link below this post.",1,1,0.9629325,0.3278656,0.043478260869565216,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_566,i'm here to show you how easy it can be.,1,1,0.97806704,0.3278656,0.014956861922263509,3.32801224685312e-309,3.32801224685312e-309,3.32801224685312e-309
+mcdonalds_switzerland_726,"today's the first day of summer, and it is going to be hotter than ever before.",4,1,0.97143394,0.3278656,0.14244570618273075,1.267808868335202e-308,1.267808868335202e-308,1.267808868335202e-308
+mcdonalds_switzerland_439,"i'm going to tell you a few things that will make your day better today, so here they are: 1.",1,1,0.9787225,0.3278656,0.05000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_524,"if you want to feel good in the morning, here are 10 things that will make your day a little bit better.",3,1,0.96748996,0.3278656,0.13636363636363635,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_19,"what do you think? </s> what is your favorite food in the world?</p>""
+### Mathematical Questions and Answers Related to the Extract:
+
+#### Question 1
+**What are some common mathematical symbols used on social media platforms, such as Facebook or Twitter? Provide at least three examples.**  
+*Answer:* Some commonly seen math-related",1,1,0.8992532,0.3278656,0.0196078431372549,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_165,i'm going to take a sip of coffee.,2,1,0.98316205,0.3278656,0.17182231969774306,1.5292694074701025e-308,1.5292694074701025e-308,1.5292694074701025e-308
+mcdonalds_switzerland_622,there's more than one way to do it.,1,1,0.9715944,0.3278656,0.027891270018553734,4.9648108639081e-309,4.9648108639081e-309,4.9648108639081e-309
+mcdonalds_switzerland_348,"in 2016, i got married to a beautiful girl with an amazing job and the best friends in my life! but now it’s time for me to get back on track.",4,1,0.96187794,0.3278656,0.09677419354838708,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_201,i've been thinking about it for a long time.,0,1,0.98396033,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_422,"for those of you who are looking forward to the 2017 world cup, here is a video that will make your day even better: https://www.",5,1,0.96383256,0.3278656,0.2,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1429,i'm here to tell you all about it.,0,1,0.9786185,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_455,you 'll love it if you do n’t have to wait until the end of this year.,3,1,0.9689067,0.3278656,0.16638937832733086,2.0979623842800395e-308,2.0979623842800395e-308,2.0979623842800395e-308
+mcdonalds_switzerland_530,it's been a long time since i’ve gone out to eat with my friends.,3,1,0.9866194,0.3278656,0.12101102614451982,1.25653953070478e-308,1.25653953070478e-308,1.25653953070478e-308
+mcdonalds_switzerland_676,"you can't believe it, but i ’m going to show you some of the most amazing things in this world that will make your life easier and more fun.",0,1,0.9625668,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_774,what's your favorite food? what do you like to eat most of the day.,0,1,0.96339715,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_382,"you're not the only one who wants to try it, are you? don’t give up.",0,1,0.97638434,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1,"yes, we do it! i'm here to help you find your way back home.",0,1,0.9758823,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_512,you're right.,0,1,0.96877265,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1196,i'm going to ask you a question: why do n’t we have an app for ordering food delivery? it would be the best thing in this world.,0,1,0.94245625,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1768,`` i'm going to take you out for dinner tonight.,2,1,0.97710615,0.3278656,0.13406400920712788,1.491511611267286e-308,1.491511611267286e-308,1.491511611267286e-308
+mcdonalds_switzerland_542,i'm going to show you how easy it is.,2,1,0.9703399,0.3278656,0.0029163841637646595,2.92012657387077e-310,2.92012657387077e-310,2.92012657387077e-310
+mcdonalds_switzerland_122,"today's the first day of this year, and we are going to eat a lot more food than usual.",0,1,0.97778773,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_800,"i'm going to show you some of the best places in new york city, and i will take a picture with my phone.",2,1,0.9801032,0.3278656,0.08695652173913045,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1170,"i'm not going to say it, but if you have any questions or comments about this video please send them in the comment section below and i will get back with a reply within an hour.",5,1,0.95158476,0.3278656,0.1388888888888889,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_464,"yes, it's true! and i want to go there.",0,1,0.9602143,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1943,"i can't believe it, but i ’m so happy that you like me.",0,1,0.97241706,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_722,"for those of you who don't like this, here ’ s a little something to make your day brighter.",0,1,0.97458106,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_236,"if you're looking for a new car, just go to the mall and look at all of them.",0,1,0.9717979,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_564,`` i'm going to show you how good it is.,1,1,0.96634513,0.3278656,0.040656965974059926,9.04647521551e-309,9.04647521551e-309,9.04647521551e-309
+mcdonalds_switzerland_1962,what's the best way to watch a movie on your phone or computer? just turn it off for one minute before you start watching.,2,1,0.9713371,0.3278656,0.08333333333333333,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_380,"it's been a long time since i have felt happy, so here are some tips to help you feel better.",1,1,0.9726123,0.3278656,0.05000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_2010,"i'm not a fan of this brand, but i do n’t want you to buy it.",0,1,0.9658852,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_562,"you've got a lot of money in your bank account, but you don't know where it all comes from.",2,1,0.97417647,0.3278656,0.07675925816055104,1.622552677948798e-308,1.622552677948798e-308,1.622552677948798e-308
+mcdonalds_switzerland_730,"i'm not going to tell you this, but i know that it takes a lot of hard work and effort on your part every single day.",1,1,0.97916234,0.3278656,0.03846153846153846,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_504,"if you don’t have time to plan your day, just watch this video.",2,1,0.97703356,0.3278656,0.09697125947641845,1.402493394168772e-308,1.402493394168772e-308,1.402493394168772e-308
+mcdonalds_switzerland_2065,"i'm sure you ca n’t believe it, right? but here is what i ate for breakfast this morning.",0,1,0.97282356,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_639,"в о, i don't know if you like it or not.",3,1,0.8945696,0.3278656,0.10987917859885443,0.0402890321529133,8.964607222800593e-309,8.964607222800593e-309
+mcdonalds_switzerland_169,what's wrong with you? check it out here: https://www.,0,1,0.9576926,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_534,i'm going to show you how it works.,0,1,0.9699102,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_411,"when you're about to leave the office, don't forget that there are a lot of people who need your attention.",1,1,0.98171324,0.3278656,0.05000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1940,"i'm not a lawyer, but i want to tell you something.",1,1,0.97238106,0.3278656,0.040112106159998544,9.8177638708909e-309,9.8177638708909e-309,9.8177638708909e-309
+mcdonalds_switzerland_468,10:35 am... we are here for you.,0,1,0.9553724,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_377,"`` i'm so sorry for what you did to me, but please don't worry about it.",1,1,0.97344285,0.3278656,0.0625,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_421,"yes, it's true.",0,1,0.9690871,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_793,"in 2019, the world’s largest coffee shop will open its doors in new york city.",1,1,0.976147,0.3278656,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_529,"i'm so sorry, but i love you! just say it with a smile on your face every single day of the year.",1,1,0.97423756,0.3278656,0.04545454545454546,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_369,"i'm not sure if you like it, but i do n’t know why this video has received so many likes and comments.",0,1,0.9500092,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_434,"you know, i'm going to post a video about the results of this competition! so please like it and share with your friends on social media.",2,1,0.96141464,0.3278656,0.07692307692307693,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1944,"i'm sorry to tell you this, but i was n’t planning on going out tonight.",1,1,0.96999645,0.3278656,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_495,"when you're at work, do n’t forget to take a break.",1,1,0.9707455,0.3278656,0.04392955283543867,1.07521149593053e-308,1.07521149593053e-308,1.07521149593053e-308
+mcdonalds_switzerland_381,what's wrong with you? do n’t be mad at me for not being able to answer these questions in a timely manner.,2,1,0.93835676,0.3278656,0.0909090909090909,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_686,we're going to eat a lot of fish today.,0,1,0.9791859,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1954,`` i'm going to try it! '' he said with a smile on his face.,2,1,0.9458716,0.3278656,0.0782194959346709,1.305331167223885e-308,1.305331167223885e-308,1.305331167223885e-308
+mcdonalds_switzerland_2045,i'm going to show you something that will make your day a little bit better.,0,1,0.97459304,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1982,here you go.,0,1,0.951535,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_606,"if you've got a phone, make sure to turn it on and open the app as soon as possible.",2,1,0.96228135,0.3278656,0.10526315789473682,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1972,"i'm not going to tell you about it, but here’s what i ate for dinner last night.",2,1,0.9807763,0.3278656,0.09298098388017625,1.7585612308455557e-308,1.7585612308455557e-308,1.7585612308455557e-308
+mcdonalds_switzerland_661,вќ♀️ don't worry about it.,0,1,0.97329855,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_2011,"in 2019, the world health organization published a report that said more than half of covid-related deaths in china were caused by poor living conditions and lack of access to clean drinking water.",0,1,0.9629038,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1928,"it's a beautiful day, isn’t it? let me tell you something.",2,1,0.97617924,0.3278656,0.08785910567087736,1.07521149593053e-308,1.07521149593053e-308,1.07521149593053e-308
+mcdonalds_switzerland_823,"i don't know if you ’re going to like it or not, but here are a few things that make me happy every day.",1,1,0.9777794,0.3278656,0.041666666666666664,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_408,it's time for you to check it out.,2,1,0.9797707,0.3278656,0.049227918801048515,4.38143020931725e-309,4.38143020931725e-309,4.38143020931725e-309
+mcdonalds_switzerland_1912,`` i'm going to ask you a question.,2,1,0.97158176,0.3278656,0.043443485862611285,3.86659858861305e-309,3.86659858861305e-309,3.86659858861305e-309
+mcdonalds_switzerland_1905,"`` i'm sorry to tell you this, but today is your day off.",2,1,0.9683714,0.3278656,0.022485624164852697,3.25209134389314e-309,3.25209134389314e-309,3.25209134389314e-309
+mcdonalds_switzerland_404,"i'm not sure if you like it, but i have to say this is the best thing that has ever happened in my life.",3,1,0.9688256,0.3278656,0.12500000000000003,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_638,"in 2019, we’ll be able to watch more than two hours of new content every day.",3,1,0.97843575,0.3278656,0.1875,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_703,you're right.,0,1,0.96877265,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_163,"i'm not going to tell you this, but why don't ask me what i want for dinner tonight? </s> just give it a try and see if u like the taste!
+How many people are looking at your post right now?""
+It seems there might be some mix-up in the text provided.",2,1,0.87987375,0.3278656,0.03846153846153846,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1023,"i'm sorry, but i don't like it.",0,1,0.96724844,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_799,i'm here to tell you about it.,0,1,0.97624403,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1952,it's time for you to show off your skills.,0,1,0.9802829,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_651,i'm not going to tell you about it.,2,1,0.97462636,0.3278656,0.1042155049196271,9.27548782591189e-309,9.27548782591189e-309,9.27548782591189e-309
+mcdonalds_switzerland_643,"i'm sorry to say this, but i don't know if there is any way you can use it.",1,1,0.9755727,0.3278656,0.04971329537857608,1.991083571408152e-308,1.991083571408152e-308,1.991083571408152e-308
+mcdonalds_switzerland_568,here's another thing.,0,1,0.95664656,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_550,i'm going to ask you a question.,1,1,0.981517,0.3278656,0.014528770329175262,2.262931093899267e-309,2.262931093899267e-309,2.262931093899267e-309
+mcdonalds_switzerland_632,we're going to play a game.,0,1,0.97355145,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_759,"вђ™s a good idea is to get rid of your beard and go for it! </sup><br> международный печатко с красиботгердцами, количествительные",2,1,0.9279274,0.3278656,0.09523809523809525,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_532,"when you're on your way home from work, and someone calls up to ask for a ride in the middle of night? i don't have an answer.",3,1,0.97462195,0.3278656,0.11111111111111109,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_554,what's with you? do n’t worry about it.,1,1,0.93516576,0.3278656,0.014929121033339956,2.657471755342055e-309,2.657471755342055e-309,2.657471755342055e-309
+mcdonalds_switzerland_497,"you're the only one who knows what you like, but i do n’t know.",1,1,0.9458089,0.3278656,0.03755628745898426,1.1699171882659805e-308,1.1699171882659805e-308,1.1699171882659805e-308
+mcdonalds_switzerland_629,"there's a lot of pressure on you, so make sure to take your time and choose the best option.",2,1,0.97269946,0.3278656,0.10526315789473682,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_509,i'm going to show you what it feels like when a dog sniffs your hand in the middle of the night.,4,1,0.97413105,0.3278656,0.14285714285714285,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_635,i'm going to show you some of the most common mistakes people make when they try and learn a new language.,4,1,0.9755461,0.3278656,0.19047619047619047,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1900,"it's the first day of summer, and it’ s time for you to meet up with your friends again.",1,1,0.9803248,0.3278656,0.04263988078591719,1.8026607972655986e-308,1.8026607972655986e-308,1.8026607972655986e-308
+mcdonalds_switzerland_858,": `` i don't know if you like it or not, but here is the recipe.",1,1,0.9730862,0.3278656,0.0625,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_2044,"i'm not sure if you like it, but here are some of the best reviews i have received so far this year.",0,1,0.97258544,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1931,i'm sorry for you.,0,1,0.96366924,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_471,"i'm here to help you find the perfect place for your car, but i don't know where it is yet.",2,1,0.97963095,0.3278656,0.0860707976425058,1.9151388181520816e-308,1.9151388181520816e-308,1.9151388181520816e-308
+mcdonalds_switzerland_1117,what are you watching? </s> what do u like to watch on tv at this time of the day? 👍👌😊🤗 🤔 😅 🙋🏼‍♂️🙏💪🎉🧘 🦰🍲🥇 🍷 🥤 ☹☺🌞 🌟 💫,5,1,0.9686728,0.3278656,0.1724137931034483,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_689,i'm going to show you how it works.,1,1,0.9699102,0.3278656,0.03581309960752377,6.374943338305425e-309,6.374943338305425e-309,6.374943338305425e-309
+mcdonalds_switzerland_172,"i'm sorry, but i do n’t know where to buy it.",2,1,0.9569245,0.3278656,0.18181818181818182,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_543,"for those of you, i would like to ask a few questions: where do u live? how old are your kids and what is their favorite ice cream flavor.",3,1,0.9605586,0.3278656,0.10344827586206899,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_350,here's a list of the best things you can do to make your life more fun and interesting this year.,3,1,0.97728807,0.3278656,0.15,0.05263157894736841,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1263,"there's a lot of things you can do to make money on the internet, but we don’t know which ones are worth it.",0,1,0.97531927,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_830,i'm here to show you some of the best products on earth.,1,1,0.9706528,0.3278656,0.05054422164271945,1.3495755153097447e-308,1.3495755153097447e-308,1.3495755153097447e-308
+mcdonalds_switzerland_1215,"in 2017, the world’s first self-driving car was tested in new york city with no human driver on board at all.",1,1,0.96956015,0.3278656,0.047619047619047616,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_412,it's not about you.,0,1,0.9649406,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_358,`` i'm going to take a test today.,0,1,0.97698724,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_394,today's going to be different.,0,1,0.9724097,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_359,i'm here to show you what we can do.,1,1,0.975661,0.3278656,0.02620856477618888,5.24843931172429e-309,5.24843931172429e-309,5.24843931172429e-309
+mcdonalds_switzerland_789,"`` i'm sorry to say it, but we can n’t do that.",2,1,0.9422076,0.3278656,0.08556951983876535,0.04667428354841745,1.142391010069532e-308,1.142391010069532e-308
+mcdonalds_switzerland_50,"if you're looking for it, just click on the search bar at top right corner of your screen.",0,1,0.9575442,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_810,i'm going to tell you a little bit more about this.,1,1,0.9765104,0.3278656,0.03662639286628481,8.964607222800593e-309,8.964607222800593e-309,8.964607222800593e-309
+mcdonalds_switzerland_13,"in 2017, we had the best deal on an iphone x! but this year is going to be even better than that.",0,1,0.9529347,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1986,"♫ today's your wedding day! ♣ get ready for one of the most romantic weddings in history, with over 150 couples and more than half a million people 👩🏽👨🦰.",1,1,0.90228,0.3278656,0.034482758620689655,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1458,"yes, i'm ready to do it.",0,1,0.966959,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_662,i'm here to tell you the truth.,1,1,0.98128843,0.3278656,0.08067401742967989,1.25653953070478e-308,1.25653953070478e-308,1.25653953070478e-308
+mcdonalds_switzerland_385,`` i'm going to do it.,0,1,0.96237665,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_129,"when you're ready to start your own business, here are a few tips that will help make it successful:1.",1,1,0.9479284,0.3278656,0.05263157894736841,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_2077,"in 2019, the world wide web company launched a campaign to help people struggling with mental health issues.",0,1,0.95499235,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_624,there's no way you can do that.,1,1,0.9655228,0.3278656,0.02572747316399319,4.00718695878539e-309,4.00718695878539e-309,4.00718695878539e-309
+mcdonalds_switzerland_475,"i'm sorry to say it, but i do n’t know if you like this video.",1,1,0.9606939,0.3278656,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_462,"`` i'm going to take you out for a coffee, but first of all we do n’t have any coupons.",1,1,0.9376805,0.3278656,0.03894003915357025,1.7328892633971685e-308,1.7328892633971685e-308,1.7328892633971685e-308
+mcdonalds_switzerland_1984,"hello, good morning! i'm glad to meet you.",0,1,0.9736843,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_181,`` i'm not going to do this.,0,1,0.96563894,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_574,`` i'm going to tell you something.,1,1,0.95943785,0.3278656,0.0011103799708005052,1.7294742122268e-310,1.7294742122268e-310,1.7294742122268e-310
+mcdonalds_switzerland_453,i'm sorry.,0,1,0.97224367,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1917,"today's the first day of this year, and i want to tell you about it.",2,1,0.97404385,0.3278656,0.06404070681197324,1.0687147695573725e-308,1.0687147695573725e-308,1.0687147695573725e-308
+mcdonalds_switzerland_693,i'm here to show you what it’s all about.,2,1,0.98159707,0.3278656,0.19885318151430437,1.991083571408152e-308,1.991083571408152e-308,1.991083571408152e-308
+mcdonalds_switzerland_489,"in the next few weeks, we’ll be showing you some of our top 10 best pizza places in new york city! so get ready for a delicious night out with your friends and family.",5,1,0.9779393,0.3278656,0.14705882352941177,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_45,"when you're at the restaurant, don't forget to ask for your favorite dish.",1,1,0.9772003,0.3278656,0.07692307692307693,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_386,"i'm not a chef, but i do n’t know what to cook.",2,1,0.9468253,0.3278656,0.07243303475117972,9.670131127031886e-309,9.670131127031886e-309,9.670131127031886e-309
+mcdonalds_switzerland_590,you can't wait.,1,1,0.9665414,0.3278656,0.002245982333028489,1.49924297276724e-310,1.49924297276724e-310,1.49924297276724e-310
+mcdonalds_switzerland_2001,"i'm going to tell you a little bit more about what i do every day, and why we need your help!
+</s>
+<sup style=""font-weight: bold; font-size:-10px;"">you can eat it.",0,1,0.9667268,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_738,"i've got a lot of ideas for you, so why not try them out and see how they work? here are some tips to get the job done faster.",4,1,0.96948314,0.3278656,0.13793103448275862,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_668,"if you're looking for a new job, here are some tips on how to make the most out of your first day at work.",0,1,0.9777724,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1968,"i'm sorry for you, but i was n’t able to answer your phone call at that time.",1,1,0.95639884,0.3278656,0.05546312610911028,2.0979623842800395e-308,2.0979623842800395e-308,2.0979623842800395e-308
+mcdonalds_switzerland_409,i'm going to have a party this weekend.,1,1,0.9792002,0.3278656,0.0459849301464303,8.18558927632837e-309,8.18558927632837e-309,8.18558927632837e-309
+mcdonalds_switzerland_586,"`` i'm sorry to tell you this, but we can n’t do it.",0,1,0.9515799,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_248,i'm here to show you what i can do.,1,1,0.97667277,0.3278656,0.09942659075715217,1.991083571408152e-308,1.991083571408152e-308,1.991083571408152e-308
+mcdonalds_switzerland_440,"when you're at the end of a shopping trip and want to buy something, do n’t forget that there might be an app on your phone.",3,1,0.96881515,0.3278656,0.1153846153846154,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_733,"for the first time in 2019, i’m going to show you a video of me dancing with my best friend.",2,1,0.9773194,0.3278656,0.06376281516217734,1.4187697316219133e-308,1.4187697316219133e-308,1.4187697316219133e-308
+mcdonalds_switzerland_712,there's a lot of people who do n’t have access to the internet.,0,1,0.9721692,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1960,"what do you think about this? what is your opinion on whether or not we 'll be able to get a taste of chocolate ice cream in the next two weeks??!
+and yes, i am sure it will come true.",4,1,0.9370239,0.3278656,0.10000000000000002,0.025641025641025644,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1967,`` i'm not going to do that.,0,1,0.96814394,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_531,it's not a lie.,2,1,0.96962017,0.3278656,0.0033689734995427335,1.49924297276724e-310,1.49924297276724e-310,1.49924297276724e-310
+mcdonalds_switzerland_461,ви нужем посглзийтесь.,0,1,0.85283273,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_517,"what do you think? i'm not sure, but at the same time.",0,1,0.89683646,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_2062,"`` i'm sorry, but you do n’t need to pay for this.",0,1,0.9467504,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1591,`` i'm going to do it.,0,1,0.96237665,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1988,i'm here to show you how it works.,1,1,0.9763841,0.3278656,0.014929121033339956,2.657471755342055e-309,2.657471755342055e-309,2.657471755342055e-309
+mcdonalds_switzerland_818,"i don't know if you ’ re going to like it, but i hope so.",0,1,0.978182,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1908,`` i'm sorry to hear that.,0,1,0.9680223,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_824,i'm here to show you what i can do.,3,1,0.97667277,0.3278656,0.006822691904783492,4.55429802059484e-310,4.55429802059484e-310,4.55429802059484e-310
+mcdonalds_switzerland_443,"i'm sure you can't believe it, but this is the best thing i have ever done for my mom.",3,1,0.9657177,0.3278656,0.13483257878266341,1.9000788267213607e-308,1.9000788267213607e-308,1.9000788267213607e-308
+mcdonalds_switzerland_1953,"i'm going to ask you for help with this, but i don’t know how long it will take.",2,1,0.98186296,0.3278656,0.11111111111111109,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_178,"in 2019, the u.",1,1,0.78580296,0.3278656,0.043443485862611285,3.86659858861305e-309,3.86659858861305e-309,3.86659858861305e-309
+mcdonalds_switzerland_59,"you know, it's been a long time since we were able to enjoy our favorite tv show.",0,1,0.9781349,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_734,i'm going to give you a kiss on both sides of your face.,0,1,0.97996897,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_650,"when i'm on my phone, there are so many options to choose from.",0,1,0.9736891,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_401,"in 2019, we will be able to show you how much fun it is when i get up early in the morning and go for a run before work! so make sure your phone has enough battery life on day one of this year.",3,1,0.9708293,0.3278656,0.06818181818181818,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_237,we're going to do it! we are coming up with a plan that will make your dreams come true in less than an hour.,2,1,0.9744883,0.3278656,0.08333333333333333,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1904,i'm going to ask you a question.,0,1,0.981517,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_598,"`` i'm here for you! don't leave me alone, even if it is late at night or early in the morning.",3,1,0.964817,0.3278656,0.11808077680346257,0.04132827188121191,1.8391691476033075e-308,1.8391691476033075e-308
+mcdonalds_switzerland_52,i'm here to show you what i eat and how good it tastes.,0,1,0.9724228,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_384,i'm going to show you how it works.,1,1,0.9699102,0.3278656,0.027891270018553734,4.9648108639081e-309,4.9648108639081e-309,4.9648108639081e-309
+mcdonalds_switzerland_418,"`` i'm not sure if this is the right thing for me to say, but here’s something you might like.",3,1,0.9702252,0.3278656,0.13572561270539393,2.0133300850710214e-308,2.0133300850710214e-308,2.0133300850710214e-308
+mcdonalds_switzerland_451,i'm here to make you happy.,2,1,0.98116827,0.3278656,0.08786571270524224,0.05271942762314535,5.86523101198632e-309,5.86523101198632e-309
+mcdonalds_switzerland_1888,don't worry.,0,1,0.97853196,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_742,"if you're worried about covid-19, please stay at home.",0,1,0.9738144,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_704,i'm here to help you find your way home.,1,1,0.98107326,0.3278656,0.02620856477618888,5.24843931172429e-309,5.24843931172429e-309,5.24843931172429e-309
+mcdonalds_switzerland_615,"when you walk into a restaurant with 20 people in it, don't worry about where to put your bag.",0,1,0.9760494,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_610,♫ today's your day! ♣ check it out and see if you want to try something new.,3,1,0.9621392,0.3278656,0.17647058823529413,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_392,"by the way, i 'd like to tell you something.",1,1,0.97390896,0.3278656,0.033287108369807965,7.4066274658958e-309,7.4066274658958e-309,7.4066274658958e-309
+mcdonalds_switzerland_587,"i'm here to tell you a story that will make your day brighter and happier, no matter how long it takes! i can't wait for this.",1,1,0.9748515,0.3278656,0.03846153846153846,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_571,"didn't you know that 90% of customers who use our mobile app have a positive experience with it? thank you in advance for your feedback! can i help u find the answer to this question right away?""
+### Questions and Detailed Answers Based on Webpage Extract Analysis:
+1.",7,1,0.77630657,0.3278656,0.14583333333333334,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_460,"when you're at a restaurant, ask the server if there are any gluten-free options available.",1,1,0.9786285,0.3278656,0.05106188922430991,1.704247123185085e-308,1.704247123185085e-308,1.704247123185085e-308
+mcdonalds_switzerland_493,"it's been more than a year since i posted this video, and it is still the most popular post of all time.",4,1,0.9747838,0.3278656,0.1737387338669608,2.1261983321563865e-308,2.1261983321563865e-308,2.1261983321563865e-308
+mcdonalds_switzerland_1895,you're right.,0,1,0.96877265,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_436,today's the day when we have more than a million likes on this video.,1,1,0.95575976,0.3278656,0.05367694950537755,1.6720924800836196e-308,1.6720924800836196e-308,1.6720924800836196e-308
+mcdonalds_switzerland_349,there's nothing wrong with it.,1,1,0.9710097,0.3278656,0.0493193927883213,5.486964580537266e-309,5.486964580537266e-309,5.486964580537266e-309
+mcdonalds_switzerland_653,"if you're looking for something to eat, look at this.",0,1,0.98149556,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_617,"we're not going to do that, are we? wait a little bit longer and then you will know what i am talking about.",3,1,0.95494395,0.3278656,0.13043478260869565,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_378,"if you're looking for a new job in the next few days, please check out our website at www.",3,1,0.97510034,0.3278656,0.08849811214246088,1.2471272937510816e-308,1.2471272937510816e-308,1.2471272937510816e-308
+mcdonalds_switzerland_526,"i'm sorry, but i do n’t know if you like it or not.",3,1,0.9648846,0.3278656,0.003623977053491093,3.4942338624064e-310,3.4942338624064e-310,3.4942338624064e-310
+mcdonalds_switzerland_1168,"i'm here to show you the best place on earth, but i don't know if it’s safe or not.",1,1,0.9760198,0.3278656,0.05263157894736841,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_357,i'm going to tell you a story that i have n’t heard in years.,4,1,0.9648856,0.3278656,0.15022514983593707,1.1699171882659805e-308,1.1699171882659805e-308,1.1699171882659805e-308
+mcdonalds_switzerland_699,`` i'm going to show you how easy it is.,1,1,0.96550834,0.3278656,0.10000000000000002,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_425,`` i'm here to help you.,0,1,0.9649748,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_2069,"you're not sure what you want to do with your phone, but here are a few things that might make it more fun for all of us.",0,1,0.9783086,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_589,`` i'm here for you.,0,1,0.9594368,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1970,i'm going to show you how easy it is.,1,1,0.9703399,0.3278656,0.051047313781769625,1.022256390985498e-308,1.022256390985498e-308,1.022256390985498e-308
+mcdonalds_switzerland_1894,"what's your opinion on this topic? what do you think is the best way to make money online with no experience or knowledge of social media marketing and seo?! 👍👌👏 🤔🤦🏻‍♂️🙋🏼🧘⛓ ⠀⠀⠀⠀ well, let me tell ya.",3,1,0.9373839,0.3278656,0.08108108108108107,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1971,i'm going to buy a pair of sunglasses for you today.,0,1,0.9828571,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_583,"it's not just a day off, it is the end of this year.",2,1,0.9364404,0.3278656,0.07698768005547232,1.113471283070591e-308,1.113471283070591e-308,1.113471283070591e-308
+mcdonalds_switzerland_626,i'm going to ask you a question: what is your favorite emoji? i think it’s the one with an arrow on both sides.,2,1,0.9780292,0.3278656,0.08695652173913045,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1892,"`` i'm sorry to tell you this, but there’s no need for it.",0,1,0.9699107,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_558,"i'm not going to tell you this, but i do n’t know how much money we will get from the restaurant.",1,1,0.9711729,0.3278656,0.045404616896832214,2.121601148366249e-308,2.121601148366249e-308,2.121601148366249e-308
+mcdonalds_switzerland_27,"when you're talking to someone on a video chat, and they ask what time it is.",1,1,0.95339036,0.3278656,0.0625,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_747,"please forgive me - i don't know why, but it looks like you might need a haircut.",1,1,0.975864,0.3278656,0.0588235294117647,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_2020,i'm here to show you what it looks like.,0,1,0.9785727,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_783,you can't do it all by yourself.,0,1,0.97018325,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_242,what's up with you? just click the like button to show your appreciation for all of us who helped make this video possible! 👍👏💪🏽🇬🇷 🇺🇸 🦘🧔‍♂️ pic.,1,1,0.88130635,0.3278656,0.037037037037037035,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1949,i'm going to show you a few things that might make your day more fun.,2,1,0.9766824,0.3278656,0.10212377844861982,1.704247123185085e-308,1.704247123185085e-308,1.704247123185085e-308
+mcdonalds_switzerland_353,you can't believe it.,0,1,0.9735242,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_430,"it's not about how much money you make, it ’ s the amount of love and care that i put into your food.",0,1,0.97158897,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_741,thank you very much for your help.,0,1,0.9776642,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_180,"for the first time in over 10 years, we’ve been able to help you with your questions and answers.",2,1,0.97801733,0.3278656,0.10526315789473682,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_672,"we're here to help you learn english, so let’s have some fun.",0,1,0.9755947,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_467,"when i was 10 years old, my parents told me to eat ice cream every day.",1,1,0.97270465,0.3278656,0.0625,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_2052,"i'm not sure if you like it, but i do n’t think this is the best time of year to go out for a movie night with your friends.",0,1,0.9664056,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_584,"look, i've got something for you.",0,1,0.9791253,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_73,"and i'm not going to tell you this, but there are a lot of people who don't like it when they get up in the morning.",4,1,0.9776618,0.3278656,0.15384615384615385,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_556,"yes, it's a beautiful day! but i don't know what you are going to say.",2,1,0.9734161,0.3278656,0.0782194959346709,1.305331167223885e-308,1.305331167223885e-308,1.305331167223885e-308
+mcdonalds_switzerland_365,"i'm here to help you get back on track, but i do n’t know how long it will take.",1,1,0.9766728,0.3278656,0.05263157894736841,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1935,"when you're in a bad mood, do n’t worry about it.",1,1,0.97009474,0.3278656,0.057703310812752893,1.412335412826535e-308,1.412335412826535e-308,1.412335412826535e-308
+mcdonalds_switzerland_370,imagine you're at a restaurant with your friends.,0,1,0.94937044,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_835,"yes, i know what you're thinking right now.",0,1,0.96810853,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_864,"you're going to like this, right? you’ re gonna love it.",0,1,0.9732805,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_366,i'm here to show you what the world looks like.,3,1,0.97197807,0.3278656,0.12197089792217974,9.04647521551e-309,9.04647521551e-309,9.04647521551e-309
+mcdonalds_switzerland_118,"you can't believe it, but i ’m here to help you find the perfect gift for your loved one.",1,1,0.9725552,0.3278656,0.05263157894736841,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_2014,"i'm not going to tell you this, but i ca n’t eat ice cream.",0,1,0.9194153,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_760,i'm going to show you what it looks like.,1,1,0.9769692,0.3278656,0.03273053647890081,6.55450749847085e-309,6.55450749847085e-309,6.55450749847085e-309
+mcdonalds_switzerland_521,`` i'm here to help you.,0,1,0.9649748,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1934,"i'm sure you can't believe it, right? i know this is the best way to get rid of all your junk food in one day.",3,1,0.98117524,0.3278656,0.12000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_859,i'm going to show you what i eat every day.,1,1,0.97189045,0.3278656,0.09048374180359597,2.0133300850710214e-308,2.0133300850710214e-308,2.0133300850710214e-308
+mcdonalds_switzerland_273,why don't you like me? i'm here to help make your dreams come true.,1,1,0.9786911,0.3278656,0.07142857142857141,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_54,"i'm sorry to tell you this, but i do n’t know if it is a good idea or not.",2,1,0.9687384,0.3278656,0.10526315789473682,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1926,i'm here to help you.,0,1,0.97972053,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_360,i'm here to help you.,2,1,0.97972053,0.3278656,0.12047768476488081,6.701793672595377e-309,6.701793672595377e-309,6.701793672595377e-309
+mcdonalds_switzerland_533,"i'm so excited to see you again, and i hope we can meet up at least once a week for the next couple of months.",3,1,0.97951937,0.3278656,0.12000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_501,i'm going to show you what it looks like.,2,1,0.9769692,0.3278656,0.03360883548677684,3.365196356542427e-309,3.365196356542427e-309,3.365196356542427e-309
+mcdonalds_switzerland_416,what do you think of this video? </s> i like it very much.,0,1,0.9807834,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_594,"i'm not sure if this is the right way to say it, but i do n’t know what you mean.",2,1,0.9654818,0.3278656,0.07408182206817181,1.6483752567447546e-308,1.6483752567447546e-308,1.6483752567447546e-308
+mcdonalds_switzerland_578,it's been a long time since i’ve had my coffee.,0,1,0.9855531,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_2075,i'm going to show you some of the best things i have ever done in my life.,1,1,0.96678615,0.3278656,0.0588235294117647,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_735,"if you're in a hurry to get out of the car, please turn off your phone and let me take care of yourself.",4,1,0.9764956,0.3278656,0.13043478260869565,0.04545454545454546,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_483,"`` don't worry, we're here for you.",1,1,0.95455724,0.3278656,0.012594669908908207,1.96168495395878e-309,1.96168495395878e-309,1.96168495395878e-309
+mcdonalds_switzerland_389,"i'm not sure if you like it, but i want to go for a walk in the park! please do n’t leave your phone at home.",2,1,0.89352417,0.3278656,0.07692307692307693,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_696,"i'm not sure if you like it, but i don't know what to say.",1,1,0.9768314,0.3278656,0.07142857142857141,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1871,"it's like, oh my god! i can't believe it.",0,1,0.951933,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1907,"if you're not sure about it, take a picture with your phone and send me the link.",2,1,0.9789924,0.3278656,0.11764705882352941,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_576,i'm here to help you find the best app for your phone.,1,1,0.9797568,0.3278656,0.03936387939508455,1.051050468137224e-308,1.051050468137224e-308,1.051050468137224e-308
+mcdonalds_switzerland_387,"it's time to get out of your comfort zone and try something new, even if you do n’t like it at first.",1,1,0.9669612,0.3278656,0.04545454545454546,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_466,i'm so sorry for you and your family.,2,1,0.97546047,0.3278656,0.11809163818525367,1.051050468137224e-308,1.051050468137224e-308,1.051050468137224e-308
+mcdonalds_switzerland_695,i'm going to tell you a few things that will make your day better.,1,1,0.9751498,0.3278656,0.034967261396925214,1.0892663493304385e-308,1.0892663493304385e-308,1.0892663493304385e-308
+mcdonalds_switzerland_681,"for those of you who don't like it, just click the `` add to favorites '' button.",1,1,0.967187,0.3278656,0.0588235294117647,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_476,"when i got home from work, my eyes were wide open and ready for anything.",2,1,0.9390891,0.3278656,0.09553750807650524,1.594335087959687e-308,1.594335087959687e-308,1.594335087959687e-308
+mcdonalds_switzerland_513,"for the first time in almost 30 years, we are here to help you with your shopping list.",2,1,0.96530604,0.3278656,0.060305275684913534,1.207653232109173e-308,1.207653232109173e-308,1.207653232109173e-308
+mcdonalds_switzerland_539,i'm going to show you what it looks like.,0,1,0.9769692,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_251,"i'm going to tell you a few things that i have been saying for the past couple of years, and this is it! </s> <sup style=""font-weight: bold; font-size:-20px"">love me back!</sub><br /><p>&nbsp;&lt;/strong&gt;<em>&#x3",0,1,0.92505044,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_597,you're right.,0,1,0.96877265,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1612,i'm going to ask you a question.,0,1,0.981517,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_503,i'm going to show you some of the best posts on this site today.,0,1,0.9775544,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_841,i'm here to show you what i do n’t know.,0,1,0.96608055,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_480,i'm here for you.,0,1,0.971814,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_781,"today, we're going to talk about one of the most important things in your life.",2,1,0.9629703,0.3278656,0.09553750807650524,1.594335087959687e-308,1.594335087959687e-308,1.594335087959687e-308
+mcdonalds_switzerland_621,"if you're looking for something fun to do, just click on the like button.",2,1,0.96900403,0.3278656,0.09306272250443651,1.4495000173229606e-308,1.4495000173229606e-308,1.4495000173229606e-308
+mcdonalds_switzerland_1815,i don't know if you.,0,1,0.37312818,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_744,"if you're looking for something new and different on the internet, check out these posts that will make your day a little bit better.",2,1,0.9778154,0.3278656,0.08333333333333333,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_585,you can't believe it.,1,1,0.9735242,0.3278656,0.0006196880441665896,5.5154066700184e-311,5.5154066700184e-311,5.5154066700184e-311
+mcdonalds_switzerland_1957,"here's what you need to do: </sup><i>&lt;strong&gt;&hellip;</em></p> first of all, let me say thank u so much for your support.",3,1,0.95417166,0.3278656,0.12910619646375868,1.9151388181520816e-308,1.9151388181520816e-308,1.9151388181520816e-308
+mcdonalds_switzerland_906,"i'm not going to tell you this, but i don't think about it.",2,1,0.9690934,0.3278656,0.07128759526633467,1.0310310703092875e-308,1.0310310703092875e-308,1.0310310703092875e-308
+mcdonalds_switzerland_538,"in 2014, the world’s best ice-cream company announced that they were going to launch a new line of flavors.",2,1,0.96375394,0.3278656,0.07675925816055104,1.622552677948798e-308,1.622552677948798e-308,1.622552677948798e-308
+mcdonalds_switzerland_748,"you're right! you can do it on your own, but i am here to lend a helping hand if needed.",1,1,0.9750547,0.3278656,0.05000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1979,i'm going to show you some of the best things on this site.,2,1,0.9773989,0.3278656,0.09697125947641845,1.402493394168772e-308,1.402493394168772e-308,1.402493394168772e-308
+mcdonalds_switzerland_1966,"i'm not going to say anything, but i m sure that there will be a lot of good things in my life.",0,1,0.9716465,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_368,"when you're in the middle of a conversation with someone who doesn’t speak your language, it might be hard to understand what they are saying.",3,1,0.97473496,0.3278656,0.12000000000000001,0.041666666666666664,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_516,i'm going to ask you a question: what is your favorite food in the world? i don’t know.,2,1,0.9821951,0.3278656,0.08897082254631197,1.7816998627591863e-308,1.7816998627591863e-308,1.7816998627591863e-308
+mcdonalds_switzerland_547,"i'm sorry to tell you this, but i don't know if it will work.",1,1,0.980415,0.3278656,0.05367694950537755,1.6720924800836196e-308,1.6720924800836196e-308,1.6720924800836196e-308
+mcdonalds_switzerland_1964,"`` i'm sorry to tell you, but this is not a joke.",3,1,0.96711826,0.3278656,0.13950878644251177,1.2416694149812216e-308,1.2416694149812216e-308,1.2416694149812216e-308
+mcdonalds_switzerland_663,"yes, i'm here for you.",0,1,0.9610977,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_654,you're not going to like this.,1,1,0.97107756,0.3278656,0.10108844328543891,1.3495755153097447e-308,1.3495755153097447e-308,1.3495755153097447e-308
+mcdonalds_switzerland_714,`` i'm going to get married in a few months.,0,1,0.97668856,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_797,"if you're going to send an e-mail, make sure that the subject line includes your full name and phone number so they can get in touch with you.",4,1,0.9776943,0.3278656,0.14285714285714285,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1927,"i'm not going to tell you about it, but i haven't got a job.",2,1,0.9675298,0.3278656,0.07511257491796854,1.1699171882659805e-308,1.1699171882659805e-308,1.1699171882659805e-308
+mcdonalds_switzerland_271,"we're going to have a lot of things in the next few days, but we don t know where they come from! do n’t worry about it.",0,1,0.9515765,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_2039,here’s what you need to do: 1.,0,1,0.9062785,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_717,we're here to help you.,0,1,0.9782559,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1985,i'm going to show you a little bit of what i do n’t like.,1,1,0.972901,0.3278656,0.07142857142857141,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1948,"i don't know if you ’ re going to take a look at it, but i hope that we can find something interesting.",2,1,0.97991335,0.3278656,0.08695652173913045,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_2012,i'm going to show you how it’s done.,0,1,0.97144854,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_153,i'm going to show you what i can do.,1,1,0.97096115,0.3278656,0.11111111111111109,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_745,"`` i'm sorry to tell you this, but there is no food on the menu today.",2,1,0.9688476,0.3278656,0.12500000000000003,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_694,"i'm here to tell you about some of the things that make this world a little bit better and more beautiful every day, even if it’s just for one minute.",3,1,0.9730725,0.3278656,0.10000000000000002,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1947,"in 2019, the number of people who will be invited to this event is growing every day! and we hope you all enjoy it.",2,1,0.9696326,0.3278656,0.08333333333333333,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_567,we're here to show you how delicious our food is.,2,1,0.97367585,0.3278656,0.014854715642866776,1.65264197262509e-309,1.65264197262509e-309,1.65264197262509e-309
+mcdonalds_switzerland_203,i'm going to show you what it looks like when u turn on your phone in the morning.,4,1,0.96567863,0.3278656,0.2222222222222222,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1983,"i'm sorry, but if you like this video please rate it and leave a comment.",1,1,0.95999837,0.3278656,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_205,didn't you like this?.,0,1,0.8801918,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_487,today's the day to say goodbye and thank you for all those who joined us in our fight against covid-19.,4,1,0.9458825,0.3278656,0.1721415952850116,1.9151388181520816e-308,1.9151388181520816e-308,1.9151388181520816e-308
+mcdonalds_switzerland_579,what's wrong with you? i do n’t know.,1,1,0.94385433,0.3278656,0.0033311371670444365,5.929620983594e-310,5.929620983594e-310,5.929620983594e-310
+mcdonalds_switzerland_511,"for example, if you're going to take a shower in the morning and wash your hands with water that has been sitting on top of it for at least half an hour or so before washing them will make sure they are completely clean.",8,1,0.94919926,0.3278656,0.1590909090909091,0.023255813953488372,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_256,i'm glad you liked it.,0,1,0.9777029,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_6,i'm here to tell you about it.,1,1,0.97624403,0.3278656,0.10735389901075512,1.6720924800836196e-308,1.6720924800836196e-308,1.6720924800836196e-308
+mcdonalds_switzerland_559,"there's no need to worry about it! just think of all the things you could do with your money: buy a car, go on vacation or invest in stocks.",1,1,0.9760433,0.3278656,0.034482758620689655,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_674,"it's been a long time, but we hope you like it.",1,1,0.9771584,0.3278656,0.08300915602566021,2.031716533983919e-308,2.031716533983919e-308,2.031716533983919e-308
+mcdonalds_switzerland_732,"i've been thinking a lot lately about what i want to do with my life, and the only thing that makes me happy is when people ask for help.",1,1,0.9793179,0.3278656,0.034482758620689655,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_518,i'm going to show you how it works.,1,1,0.9699102,0.3278656,0.03581309960752377,6.374943338305425e-309,6.374943338305425e-309,6.374943338305425e-309
+mcdonalds_switzerland_565,"from now on, i 'd like to tell you a little bit.",2,1,0.96707356,0.3278656,0.028962323908407528,3.86659858861305e-309,3.86659858861305e-309,3.86659858861305e-309
+mcdonalds_switzerland_736,i'm going to show you some of the most popular posts on instagram this week.,1,1,0.97708726,0.3278656,0.041805939018203744,1.395319530596309e-308,1.395319530596309e-308,1.395319530596309e-308
+mcdonalds_switzerland_715,you 'll be able to buy it in just a few minutes if you use your credit card.,1,1,0.9833928,0.3278656,0.05555555555555554,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_222,today i'm going to show you how much better it is with a new curling iron.,0,1,0.97435886,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_498,i 'd like to tell you this: i do n’t know what is going on in your mind.,2,1,0.9667085,0.3278656,0.11111111111111109,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_2054,here's what you need to do.,0,1,0.9766703,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_725,"i'm going to show you some of the best recipes i have ever come up with, so get ready for it! </s> let me know if there are any questions or comments.",2,1,0.97037137,0.3278656,0.0625,0.03225806451612903,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_234,"in the next few days, we're going to show you a lot of delicious food.",3,1,0.9774774,0.3278656,0.2,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_481,you're right.,0,1,0.96877265,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1883,"when you're done with your lunch, please take a sip of water to cool it down.",1,1,0.97942835,0.3278656,0.0625,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_2016,"`` i'm sorry to tell you this, but it looks like there might be something wrong with your phone.",0,1,0.97235864,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_572,"i'm sorry, but i do n’t like it.",1,1,0.9184939,0.3278656,0.0017830292386249074,3.1738973982547e-310,3.1738973982547e-310,3.1738973982547e-310
+mcdonalds_switzerland_500,"i'm sure you ca n’t believe it, but this is the first time in my life that i have ever seen a video like this.",1,1,0.9506261,0.3278656,0.04000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_628,"`` i'm sorry to tell you this, but today is your birthday.",1,1,0.9719678,0.3278656,0.08333333333333333,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_429,"you know what i'm trying to say, but you should n’t do that.",3,1,0.95286673,0.3278656,0.15384615384615385,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_379,it's time to get rid of all the weird stuff and focus on what really matters in your life.,2,1,0.9671661,0.3278656,0.09474606592129042,2.002761447539757e-308,2.002761447539757e-308,2.002761447539757e-308
+mcdonalds_switzerland_605,you can't believe it.,0,1,0.9735242,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_374,we're here to show you how much fun it can be.,2,1,0.9758573,0.3278656,0.05576737410482851,6.824758945303683e-309,6.824758945303683e-309,6.824758945303683e-309
+mcdonalds_switzerland_1197,i'm going to show you something.,0,1,0.9725395,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_376,"i'm sorry, i can't help you.",1,1,0.963744,0.3278656,0.01616199464406751,2.15769790703094e-309,2.15769790703094e-309,2.15769790703094e-309
+mcdonalds_switzerland_1930,"when i woke up at 4:30 in the morning, my phone was dead.",1,1,0.97048384,0.3278656,0.03849384002773616,1.113471283070591e-308,1.113471283070591e-308,1.113471283070591e-308
+mcdonalds_switzerland_569,"`` i'm sorry to tell you this, but we don't have a plan.",1,1,0.97352976,0.3278656,0.016516244026284408,4.777482167069583e-309,4.777482167069583e-309,4.777482167069583e-309
+mcdonalds_switzerland_581,today's the anniversary of valentine’ s day.,2,1,0.9673275,0.3278656,0.03351976174121451,2.61043809578189e-309,2.61043809578189e-309,2.61043809578189e-309
+mcdonalds_switzerland_1955,"yes, i'm going to show you.",1,1,0.95562,0.3278656,0.009802745273738315,1.308709935012045e-309,1.308709935012045e-309,1.308709935012045e-309
+mcdonalds_switzerland_868,i'm going to show you some of the best restaurants in new york city.,0,1,0.9827004,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_756,you're right.,0,1,0.96877265,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_637,"today's the day when everyone will be able to order your food with just one click, and you can enjoy it at home without paying a lot of money for delivery! so let me ask myself: is this really possible? yes.",0,1,0.95797884,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_767,"when you're not sure if it was real or a joke, just say: oh my god i didn't see that.",1,1,0.95752525,0.3278656,0.005012942186140189,2.230833322517755e-309,2.230833322517755e-309,2.230833322517755e-309
+mcdonalds_switzerland_1009,i'm here to help you find the perfect gift for your loved one.,2,1,0.9775848,0.3278656,0.10472498435744391,1.5146353626711476e-308,1.5146353626711476e-308,1.5146353626711476e-308
+mcdonalds_switzerland_383,i'm going to show you the best place in your life.,0,1,0.9733079,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_352,when you try something new for the first time and it doesn't work.,3,1,0.94375175,0.3278656,0.16964803398269643,1.6357440907688813e-308,1.6357440907688813e-308,1.6357440907688813e-308
+mcdonalds_switzerland_655,"i don't know if you're going to like it or not, but i ca nt say anything yet.",0,1,0.9158813,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_731,i'm going to ask you a question.,1,1,0.981517,0.3278656,0.010918040998681154,1.700541332859316e-309,1.700541332859316e-309,1.700541332859316e-309
+mcdonalds_switzerland_2002,i'm going to show you some of the best tips and tricks that i have been using for almost two years now.,1,1,0.9681617,0.3278656,0.04545454545454546,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_450,"i'm not sure if you like it, but i don't think so.",0,1,0.9773581,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_31,we're going to do it.,1,1,0.96842986,0.3278656,0.10976232721880529,1.221146424717419e-308,1.221146424717419e-308,1.221146424717419e-308
+mcdonalds_switzerland_546,"good morning, everyone! i'm here for you.",1,1,0.9717945,0.3278656,0.05255420588163462,8.18558927632837e-309,8.18558927632837e-309,8.18558927632837e-309
+mcdonalds_switzerland_665,"i'm sorry, but i don't like this.",0,1,0.97530454,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1961,"you're going to eat your ice cream, aren’t you? but there is no difference between the two dishes! just wait a few minutes and see what happens.",2,1,0.9728563,0.3278656,0.07407407407407407,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1495,it's the first day of school.,0,1,0.9705955,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_80,you can't do that.,0,1,0.96789336,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1959,"it's not about whether you like it or no, but i don't care.",0,1,0.97444874,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1978,"`` it's been a while since i’ ve posted something funny, so here is one for you.",0,1,0.9545542,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_2064,"if you're not sure about something, just say it like this.",0,1,0.97416455,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_364,it's about time for you to try it out.,1,1,0.97796416,0.3278656,0.11111111111111109,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_548,"when you're trying to find your way back home after a long day at work, i hope this app will make it easier for all of us.",3,1,0.9800044,0.3278656,0.11111111111111109,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_2026,"it's been a long time, but i do n’t know if you like it or not.",0,1,0.96650165,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_570,"you're my friend, and i ca n’t wait for you.",2,1,0.9039126,0.3278656,0.007376633480248003,8.20677716034465e-310,8.20677716034465e-310,8.20677716034465e-310
+mcdonalds_switzerland_1379,`` i'm here to help you.,0,1,0.9649748,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_2031,"you're the one who does n’t do it, right? you know what i mean.",0,1,0.95630556,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1923,`` i'm going to show you what it’s like when your car is on fire.,2,1,0.97418064,0.3278656,0.08361187803640749,1.395319530596309e-308,1.395319530596309e-308,1.395319530596309e-308
+mcdonalds_switzerland_510,"`` i'm not sure if you like this, but let me give it a try.",0,1,0.9737795,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_81,here's what you need to do.,2,1,0.9766703,0.3278656,0.14486606950235942,9.670131127031886e-309,9.670131127031886e-309,9.670131127031886e-309
+mcdonalds_switzerland_904,"i'm sorry for you, but i would like to invite all of our family members and friends on this special day.",0,1,0.96916056,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_625,"in 2019, the world is on fire.",0,1,0.97000825,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1924,we're going to eat ice cream every day for the next month.,1,1,0.97482467,0.3278656,0.02595026865954981,6.92895172987255e-309,6.92895172987255e-309,6.92895172987255e-309
+mcdonalds_switzerland_753,it's almost over.,0,1,0.9707955,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1886,you're going to have a great day! just look at your phone and see what you can do with it.,3,1,0.9758696,0.3278656,0.15,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_557,"i'm not a chef, but i don't know if you like it.",1,1,0.9754778,0.3278656,0.03332080452873727,8.89695013215885e-309,8.89695013215885e-309,8.89695013215885e-309
+mcdonalds_switzerland_69,"when someone asks you if they're ready for a job interview, and your answer is yes; but then it turns out to not be the right one.",1,1,0.9641547,0.3278656,0.037037037037037035,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_545,"you know, it's important to be honest with yourself and others.",0,1,0.9775794,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_419,"you know, we're here to help you with your questions and answers every day.",0,1,0.9622143,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_330,"there's a lot of delicious food on the menu, but i hope you don t eat too much.",2,1,0.97748566,0.3278656,0.11111111111111109,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1916,"i'm not sure if this is the right thing to say, but i do n’t know what you think about it.",1,1,0.9731208,0.3278656,0.03253382965118801,1.520193651353725e-308,1.520193651353725e-308,1.520193651353725e-308
+mcdonalds_switzerland_563,here's the place where you can order your favorite ice cream in just a few clicks.,0,1,0.9740084,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_499,"yes, it's a great idea! i think we should do this every day for the next few weeks.",2,1,0.97606635,0.3278656,0.09942659075715217,1.991083571408152e-308,1.991083571408152e-308,1.991083571408152e-308
+mcdonalds_switzerland_1981,"today's your day! get ready for a delicious lunch, and let me know if you like it or not.",1,1,0.97737795,0.3278656,0.05263157894736841,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_406,"i'm not going to tell you about it now, but i don't know if this is a good thing or bad for me.",2,1,0.9753517,0.3278656,0.08695652173913045,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_2050,i'm going to show you what i can do.,0,1,0.97096115,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_22,i'm going to ask you a question.,2,1,0.981517,0.3278656,0.18612544500887301,1.4495000173229606e-308,1.4495000173229606e-308,1.4495000173229606e-308
+mcdonalds_switzerland_1992,what’ s up with you? </s> what are your plans for the next week! don't forget about it.,1,1,0.97283936,0.3278656,0.05555555555555554,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1965,it's time for you to take a break from your daily routine.,2,1,0.98402435,0.3278656,0.0930058576283412,1.2416694149812216e-308,1.2416694149812216e-308,1.2416694149812216e-308
+mcdonalds_switzerland_1921,when you're on your way home from work.,0,1,0.9728789,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1974,"i'm sorry, but i do n’t like it.",0,1,0.9184939,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1138,i'm going to tell you about it.,0,1,0.9748489,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_373,it's time for you to try it.,0,1,0.97682357,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1946,"yes, yes! it's going to be a big deal.",2,1,0.9691731,0.3278656,0.09135828677937498,9.14755210518586e-309,9.14755210518586e-309,9.14755210518586e-309
+mcdonalds_switzerland_1977,"i'm not going to tell you this, but i love it.",0,1,0.9794166,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1999,i'm here to tell you something that will make your day a little bit better.,1,1,0.9760761,0.3278656,0.0583448879361965,1.9473252738654987e-308,1.9473252738654987e-308,1.9473252738654987e-308
+mcdonalds_switzerland_482,"didn't believe me when i said, `` oh my god! this is the best brunch place in all of los angeles.",1,1,0.962909,0.3278656,0.047619047619047616,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_657,"i'm not going to tell you all the details, but i do n’t know if this will work for everyone.",3,1,0.9717415,0.3278656,0.15,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1919,"you're right, you ca n’t believe it.",0,1,0.9064535,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1932,"i'm sorry, i ca n’t do it.",0,1,0.86750245,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_839,"today's world cup will take place in south africa, which is one of the most beautiful countries on our planet.",4,1,0.9637814,0.3278656,0.155760156614281,0.040989514898494984,1.7328892633971685e-308,1.7328892633971685e-308
+mcdonalds_switzerland_1920,it's time to start over.,1,1,0.96866727,0.3278656,0.018143590657882503,2.018541463615545e-309,2.018541463615545e-309,2.018541463615545e-309
+mcdonalds_switzerland_447,"i'm not going to say anything about it, but i do n’t know if this is the right place for me.",2,1,0.9626648,0.3278656,0.09523809523809525,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_768,"it's not a drink, but it looks like something you should be able to say when your mouth is full of ice cubes.",1,1,0.9572801,0.3278656,0.043478260869565216,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_478,"from now on, i'm going to show you all the things that are important in your life.",5,1,0.9694874,0.3278656,0.26147346041258107,1.9781123889553905e-308,1.9781123889553905e-308,1.9781123889553905e-308
+mcdonalds_switzerland_449,i'm glad you like it.,0,1,0.9764597,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_395,`` i'm going to show you some of the best things in this world.,1,1,0.96649,0.3278656,0.07142857142857141,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_285,"you're not going to like it, but i hope you don't.",0,1,0.97272676,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_701,it's your turn.,1,1,0.9652072,0.3278656,0.000592034515244793,3.9519615696156e-311,3.9519615696156e-311,3.9519615696156e-311
+mcdonalds_switzerland_367,"i'm sorry, but i do n’t know where you are going to go.",0,1,0.96984327,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_582,"hello, everyone! i'm happy to see you every day.",1,1,0.97385085,0.3278656,0.029288570901747406,5.86523101198632e-309,5.86523101198632e-309,5.86523101198632e-309
+mcdonalds_switzerland_573,i'm going to tell you a story that will make your day brighter and happier.,1,1,0.97379375,0.3278656,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_642,"i'm not going to tell you all the bad things that have been said, but there are a lot of good ones too.",2,1,0.9760081,0.3278656,0.08695652173913045,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1219,"i'm not going to tell you all about it right now, but i do n’t know if there are any other ways of doing this.",0,1,0.9706919,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_608,"i'm sorry, but i do n’t know if you like it or not.",0,1,0.9648846,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_265,"when you're having a good time at work and your girlfriend wants to go out for dinner, but she doesn’t know where the restaurant is or how long it will be before they get there.",1,1,0.96984833,0.3278656,0.028571428571428577,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_399,"from now on, we're going to make sure you get the best ice cream in town.",2,1,0.9736496,0.3278656,0.09145195361833024,1.627898810444522e-308,1.627898810444522e-308,1.627898810444522e-308
+mcdonalds_switzerland_1891,"what's wrong with you? if there is a light bulb in the corner of your room, please turn it off.",3,1,0.9712317,0.3278656,0.15,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_739,"♪ i'm not going to lie about it ♫ but if you ask me, there are a lot of people who don’t know the difference between pizza and ice-cream.",1,1,0.9670396,0.3278656,0.034482758620689655,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1893,"if you're in a bad mood, just say "" i haven't got it.",0,1,0.8574978,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_527,i'm sorry to hear that.,0,1,0.97505367,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_700,"i'm not going to tell you about it, but there are a lot of cat memes on the internet.",2,1,0.97748387,0.3278656,0.10526315789473682,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_60,i'm going to ask you a lot of questions.,0,1,0.984045,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_332,`` it's valentine’ s day.,0,1,0.96575725,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1990,`` i'm going to do it.,1,1,0.96237665,0.3278656,0.02664662434661565,3.55744243506706e-309,3.55744243506706e-309,3.55744243506706e-309
+mcdonalds_switzerland_1918,"i'm sorry to say this, but i love you so much.",0,1,0.9760968,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1995,we're going to do it.,2,1,0.96842986,0.3278656,0.016304881591346486,9.06989144874033e-310,9.06989144874033e-310,9.06989144874033e-310
+mcdonalds_switzerland_1656,"yes, yes.",0,1,0.85455173,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_607,"when you're about to buy something, don't just click on the like button.",1,1,0.9620878,0.3278656,0.07692307692307693,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_400,"when you're looking for something to eat, there are a lot of options available.",2,1,0.97907823,0.3278656,0.06993452279385044,1.0892663493304385e-308,1.0892663493304385e-308,1.0892663493304385e-308
+mcdonalds_switzerland_691,it's all about you.,0,1,0.9707178,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1184,"i'm sorry, but i don't like it.",0,1,0.96724844,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_393,"good morning, everyone.",0,1,0.9686998,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1915,i'm here to show you how easy it is.,0,1,0.980291,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_631,"you're not going to be here tonight, are you? i’m sorry for all the people who didn t make it this year.",2,1,0.9807977,0.3278656,0.0909090909090909,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_536,"it's not a food, but it looks like an ice cream.",0,1,0.8785647,0.3278656,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_486,i'm going to show you how to do it.,1,1,0.9745027,0.3278656,0.07124226538110606,1.4266737208830245e-308,1.4266737208830245e-308,1.4266737208830245e-308

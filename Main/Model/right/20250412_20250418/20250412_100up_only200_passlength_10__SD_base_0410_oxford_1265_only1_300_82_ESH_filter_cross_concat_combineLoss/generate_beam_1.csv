@@ -1,0 +1,194 @@
+image_id,caption,human_ins,human_humor,human_related,overfit,fitCount,gtNum,fluency,diversity,bleu1,bleu2,bleu3,bleu4
+sonicdrivein_1385,"it’ s the time of year for ice cream, so we thought it would be a great idea to make our own.",1,0,0,,2,1,0.9664396,0.3780709,0.0909090909090909,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_893,"when you’ re done with your ice cream, grab a drink and head to the drive-in.",1,0,0,,1,1,0.9844072,0.3780709,0.0625,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_798,when you’ re done with your day and need a little pick me up.,1,1,1,,1,1,0.87436134,0.3780709,0.07142857142857141,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_786,"what’ s your favorite ice cream flavor? we have a ton of options to choose from, but you can only pick one.",1,0,0,,0,1,0.97224355,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_973,"what do you think of our new sonic drive-in experience? it’ s all about the food, and we have a ton to offer! get your taste buds ready for some sweet treats at 10:35pm on sept.",1,0,0,,3,1,0.9515114,0.3780709,0.08333333333333333,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_2154,we’ ve got you covered.,1,1,1,1,0,1,0.9753906,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_1457,"it's not just a drink, it’ s an experience.",1,0,1,,1,1,0.96567696,0.3780709,0.11111111111111109,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_376,what are you waiting for? head to the drive-in with your friends and family this weekend! </s> pic.,1,0,1,,2,1,0.9168682,0.3780709,0.11111111111111109,0.0588235294117647,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_69,we’ re so excited to share this with you.,1,0,1,,0,1,0.97460854,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_1268,"we’ ve got you covered with our 50% off deal on all new and used cars, trucks, vans, minivans.",1,0,1,,1,1,0.5754432,0.3780709,0.05263157894736841,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1280,what’ s for dinner tonight? 🍔🍟🥤🧑🏾 10:35 pm.,1,0,0,,0,1,0.9179922,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_1029,"it’ s time to celebrate the 50th anniversary of sonic, and we need your help.",1,0,0,1,0,1,0.97474706,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_1572,what’ s your favorite ice cream flavor? 🍦 1/2 of a scoop is just the right amount.,1,0,0,,2,1,0.89819115,0.3780709,0.11764705882352941,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1615,we’ re so excited to bring you our 10th anniversary limited-time offer! enjoy a free sonic drink with your purchase of any item in the store.,1,0,0,,1,1,0.8956591,0.3780709,0.03846153846153846,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1274,we’ ve got you covered! 10% off your first order at sonicdrive-in.,1,0,1,,0,1,0.842535,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_1081,we’ ve got you covered.,0,0,0,1,0,1,0.9753906,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_1316,we’ ve got you covered! check out our limited-time offers at sonicdrivein.,1,0,1,,1,1,0.962078,0.3780709,0.08333333333333333,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_348,"we’ re so excited to see you at the 2019 sonic drive-in this summer! we hope your day is filled with fun, ice cream sundaes and more.",1,0,0,,0,1,0.96868885,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_877,"it’ s the perfect time of year for you and your family to get together, so why not make it a special one-of-a-kind experience.",1,0,0,,1,1,0.97628194,0.3780709,0.041666666666666664,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_80,what’ s your favorite ice cream flavor? </s> let us know in the comments and we might be able to give you a free scoop of sonic sour patch kids.,1,0,1,,3,1,0.8869456,0.3780709,0.10000000000000002,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_742,we’ ve got you covered.,0,0,0,1,0,1,0.9753906,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_1028,what are you waiting for? head over to my shop and get 10% off your first order.,1,1,1,,0,1,0.97678655,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_283,"what do you think about this? 1/3 of the world’ s population lives on less than$2 a day, and that number is expected to rise by nearly half in just five years.",0,0,0,,1,1,0.9661421,0.3780709,0.03125,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_753,it’ s time to celebrate the 2018 season with a sonic sour cream sundae! add your favorite toppings for an extra kick of flavor.,1,0,0,,1,1,0.9629237,0.3780709,0.041666666666666664,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_409,we’ re so excited to have you for our 10/25th anniversary sale! get a free sonic drink with your purchase of any item in the store.,1,0,0,,1,1,0.7510647,0.3780709,0.03846153846153846,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_981,"we’ re excited to bring you the best of 2019, and we hope your taste buds are in for a treat.",1,0,0,,1,1,0.9735599,0.3780709,0.047619047619047616,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1269,it’ s time to celebrate the new year with some of our favorite sonic treats! 🍒🥤🍇🎉# happynewyear 2019.,1,0,0,,1,1,0.9021485,0.3780709,0.05555555555555554,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1094,it’ s time to celebrate the 10th anniversary of sonic.,1,0,0,,1,1,0.9725901,0.3780709,0.10000000000000002,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_316,"we’ re all in the same boat, right? </s> you know what i mean.",1,1,1,,1,1,0.9793255,0.3780709,0.07142857142857141,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_413,we’ re so excited to share this with you all! we hope it makes your day a little brighter.,1,0,1,,2,1,0.9781422,0.3780709,0.10526315789473682,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_163,we’ re excited to announce that we will be celebrating our 50th anniversary this year! 🎉🎁 pic.,1,0,0,,0,1,0.9409913,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_1005,what’ s up with you guys? we have a contest to see who can make the best ice cream sundae in 10 seconds.,1,1,1,,1,1,0.9795263,0.3780709,0.043478260869565216,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1017,we’ ve got you covered.,0,0,0,1,1,1,0.9753906,0.3780709,0.08986579282344431,9.997901319273777e-309,9.997901319273777e-309,9.997901319273777e-309
+sonicdrivein_705,we’ re excited to bring you a new sonic experience that will make your taste buds dance.,1,0,0,,2,1,0.9781516,0.3780709,0.11764705882352941,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1959,it’ s time for you to take a break from the screen and get some fresh air.,0,0,0,,2,1,0.9797744,0.3780709,0.11764705882352941,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_2070,"we’ ve got you covered with our 30-day free trial, so why not give it a try and see what all the buzz is about.",0,0,0,,2,1,0.94556403,0.3780709,0.07999999999999999,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1282,we’ re so excited to share this with you! we have a limited time offer of 1/2 price drinks and ice cream combos.,1,0,0,,0,1,0.9345438,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_914,"when you’ re craving something sweet, check out these 50 of the best ice cream flavors in america! 🍦🍨🧀🥤☕️🌮😋# summericecreamscentinelight ☀️🇺🇸 🇬🇷 🏃‍♂⛹🏆 🥑🤩🎉",1,0,0,,1,1,0.92261374,0.3780709,0.041666666666666664,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_670,"when you’ re done with your morning coffee, why not top it off? add a splash of orange juice for an extra kick.",1,0,0,,0,1,0.9802413,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_1317,what’ s the best way to celebrate your 50th wedding anniversary? with a special delivery from sonic.,1,0,1,,0,1,0.9798196,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_2052,"it’ s time to celebrate the 10th anniversary of sonic, and you can do it in a way that feels right for your family.",1,0,0,,1,1,0.97407067,0.3780709,0.041666666666666664,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_560,"when you’ re craving something sweet and salty, this is your go-to recipe! 1/2 cup greek yogurt ½ tsp vanilla extract ⅓ c.",1,0,0,,0,1,0.7997398,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_789,it’ s been a long time since we've had the chance to celebrate with our friends and family.,0,0,0,,1,1,0.98228145,0.3780709,0.05555555555555554,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_375,"we are so excited to announce that we’ ve got some of the best ice cream sandwiches in town! ''
+### Mathematical Questions and Answers Related to the Extract:
+
+#### Question 1: What is a sonic boom, and how does it occur?
+**Answer:** A sonic boom occurs when an object travels through air faster than sound waves can propagate.",1,0,0,,1,1,0.96309793,0.3780709,0.016949152542372878,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_344,we're all in this together.,0,0,1,,1,1,0.95711976,0.3780709,0.08986579282344431,9.997901319273777e-309,9.997901319273777e-309,9.997901319273777e-309
+sonicdrivein_780,we’ re excited to bring you the best of 2019.,0,0,1,1,0,1,0.9660311,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_548,what’ s up with you guys? 👀👁🏽🚨🍔🥤🎉 10:35pm today.,1,1,1,,1,1,0.9647628,0.3780709,0.11111111111111109,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1346,what’ s your favorite ice cream flavor of all time? we want to hear from you! tweet us a pic and hashtag # sonicicecreamcontest.,1,0,0,,1,1,0.9313421,0.3780709,0.041666666666666664,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_496,we’ ve got you covered! we have 20% off your first pair of shoes and a free gift card for every order over$15.,0,0,0,,1,1,0.9405139,0.3780709,0.043478260869565216,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_648,we’ re excited to see you all at sonic 2018! we hope everyone has a great time.,1,0,1,,0,1,0.9724815,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_1992,it’ s time to get your hands on some of the best ice cream you can imagine.,1,0,0,,0,1,0.9729163,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_196,"it's not just a sandwich, it ’ s the perfect way to start your day.",1,0,0,,1,1,0.9696937,0.3780709,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_947,we’ re so excited to see you all on valentine's day! we hope your hearts are filled with love.,0,0,0,,0,1,0.9720078,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_499,it’ s 10 a.,0,0,0,1,0,1,0.95503336,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_408,we've got you covered.,0,1,1,1,0,1,0.9745058,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_1502,what do you think of this? </s> 👍👌🏽💃🏻🧘‍♂️🍦🥤🎉# sonicdrivein2019 pic.,1,0,0,,0,1,0.9274225,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_790,what do you think of our new sonic drive-in experience? we’ re adding a 10% discount to all orders in the next few days.,1,0,0,,1,1,0.9758631,0.3780709,0.041666666666666664,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_645,we’ ve got you covered with our 50% off deal on all-you-can-eat ice cream sundae combos.,1,0,0,,1,1,0.8531141,0.3780709,0.0625,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1467,i've got you covered.,0,0,0,1,0,1,0.9771817,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_486,it's time for you to take a bite out of your day.,0,0,0,,1,1,0.979143,0.3780709,0.08333333333333333,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_808,what’ s your favorite flavor of ice cream? i love mint chocolate chip.,1,0,0,,2,1,0.9683412,0.3780709,0.15384615384615385,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_2201,we’ re so excited to bring you the latest and greatest in our 2018 holiday collection.,0,0,0,,1,1,0.9240104,0.3780709,0.0625,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_522,what’ s your favorite ice cream flavor? share it with us in the comments.,1,0,0,,0,1,0.8029461,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_430,it’ s time for a new twist on the classic “ who is your favorite ice cream flavor? 🤔.,1,0,0,,0,1,0.94647694,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_864,"what’ s your favorite ice cream flavor? share it in the comments below and we might be able to scoop up a free cone for you! </s>
+Q: what do they give away at sonic drive-ins? A.",1,0,0,,1,1,0.93143874,0.3780709,0.02702702702702703,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_566,we’ re so excited to announce that we have a limited-time offer on all our products.,0,0,0,,1,1,0.97471946,0.3780709,0.0625,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1909,we’ re excited to bring you a new flavor of ice cream that will make your taste buds dance.,1,0,0,,1,1,0.9819948,0.3780709,0.05263157894736841,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_2171,we’ re so excited to share this with you! 10/25 of our customers will receive a free ice cream cone when they sign up for the giveaway.,1,0,0,,0,1,0.969876,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_505,what’ s the best way to celebrate your 50th birthday? with a sonic drive-in burger.,1,0,1,,1,1,0.9761569,0.3780709,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_2107,we’ re all set to celebrate the 50th anniversary of sonic.,1,0,1,1,0,1,0.97774804,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_649,"it's not just about the food, it’ s all around you.",1,1,1,,1,1,0.9527424,0.3780709,0.0909090909090909,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1289,we’ re so excited to share our new recipe with you! try it for yourself and let us know what your thoughts are in the comments below.,1,0,1,,1,1,0.94094527,0.3780709,0.037037037037037035,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_706,"we’ re excited to bring you the best of 2018, and we hope that this year will be even better than last.",1,0,1,,1,1,0.9721202,0.3780709,0.04545454545454546,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1199,what’ s the best way to celebrate your 50th birthday this year? 🎉🎁🍰🥳🧘🏽️# happybirthday 👩🏻👨💕🤗 🙌🙋‍♀️😊.,1,1,1,,0,1,0.9554171,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_89,"it’ s time to celebrate the 50th anniversary of sonic, and we want you in on it.",1,0,0,,0,1,0.9718817,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_85,what’ s for dinner tonight? </s>🍔🥗🧀# sonicdrivein2019 pic.,1,0,1,,0,1,0.9205669,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_41,"what’ s wrong with you? 🤔, i don' t know what it is.",0,1,1,,0,1,0.93953,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_1606,what’ s your favorite ice cream flavor? share it with us in the comments below.,1,0,0,,1,1,0.94730806,0.3780709,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1379,what’ s the best way to start your day? 10:35am.,1,0,1,,0,1,0.95173687,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_901,we’ ve got you covered with our 50% off deal on all-you-can-eat hot dogs and cheeseburgers at sonic drive in.,1,0,0,,0,1,0.8876144,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_373,we've got the best of both worlds in our new sonic drive-in experience.,1,0,1,,0,1,0.94053245,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_2180,"what’ s your favorite ice cream flavor? 🍦🍓🥤🧀🎉# sonicdrivein2019, we have a ton of flavors to choose from.",1,0,0,,1,1,0.96404684,0.3780709,0.05555555555555554,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_478,we’ ve got you covered.,0,0,0,1,1,1,0.9753906,0.3780709,0.08986579282344431,9.997901319273777e-309,9.997901319273777e-309,9.997901319273777e-309
+sonicdrivein_1349,what’ s the best way to start your day? get a 50% off deal at sonicdrivein.,1,0,0,,0,1,0.9735512,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_98,"what’ s your favorite ice cream flavor of the year? 🤔# summericecreamcontest 10/26/23
+• what is it like to be a dog lover who can't wait for their next scoop at sonic drive-in®?? check out this video and see if you are one too! ⠀⠀⠀⠀⬇",1,0,0,,1,1,0.9344152,0.3780709,0.022222222222222227,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_470,"if you’ re looking for something to do with your kids on a rainy day, check out these 10 of the best ice cream flavors in america.",1,0,0,,1,1,0.9759529,0.3780709,0.037037037037037035,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_2200,it’ s time to get your hands on some of the best ice cream in town.,1,0,0,,0,1,0.9734293,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_531,what’ s the difference between a 50¢ hot dog and an ice cream sundae? you can get both for just one price.,1,0,0,,2,1,0.9762958,0.3780709,0.0909090909090909,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_51,we’ ve got you covered with our 50¢ all-you-can-eat deal.,1,0,0,,1,1,0.9608874,0.3780709,0.10000000000000002,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_2125,what’ s your favorite ice cream flavor? we ask you to share it with us in the comments below.,1,0,1,,1,1,0.950919,0.3780709,0.05263157894736841,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_712,"we’ ve got you covered with our 10-course meal plan, which includes a delicious breakfast and lunch every day of the week for just £25 per month.",0,0,0,,1,1,0.9265915,0.3780709,0.037037037037037035,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1018,it’ s time to celebrate the end of summer with these 10 best ice cream sundae combos! 🍦🥤🍨.,1,0,0,,1,1,0.92693233,0.3780709,0.05555555555555554,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_567,what’ s the difference between a 50¢ coke and an ice cream sundae? you can get both for just one price.,1,0,0,,2,1,0.9767468,0.3780709,0.09523809523809525,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_2203,"if you’ re looking for the perfect way to end your day, check out these 10 of our favorite ice cream flavors.",1,0,0,,0,1,0.9718482,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_290,we’ ve got you covered.,1,1,1,1,0,1,0.9753906,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_1368,we’ re so excited to share this with you! we hope it makes your day even more special.,0,0,1,,0,1,0.9763738,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_690,"what’ s your favorite ice cream flavor? 🍦 1/2 scoop of rocky road, mint chocolate chip or cookies and snickerdoodles.",1,0,0,1,0,1,0.5331089,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_1002,"we’ re so excited to share our new recipe with you all! 1/2 cup frozen mixed berries, ½ teaspoon ground cinnamon and a dash of vanilla extract.",1,0,1,,1,1,0.90587497,0.3780709,0.037037037037037035,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_572,it’ s time to celebrate the 20th anniversary of sonic.,1,0,0,,1,1,0.9732317,0.3780709,0.10000000000000002,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1921,"we’ re excited to bring you the best of 2019, and we hope that it will be a great year for all our customers.",1,0,1,,1,1,0.9711193,0.3780709,0.041666666666666664,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_234,"we’ re so excited to see you all at the 2018 spring fair! get your tickets now before they sell out on friday, march 3rd.",0,0,0,,1,1,0.96214384,0.3780709,0.04000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_601,it’ s time to take a break from your screen and enjoy the great outdoors! ⏰# summerfunday </s> 🚶‍♂️ pic.,0,0,0,,1,1,0.92250335,0.3780709,0.05000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_644,we’ re excited to share this with you.,0,0,0,,0,1,0.97774315,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_91,it’ s the perfect time of year to indulge in a sweet treat.,1,0,0,,2,1,0.9798851,0.3780709,0.15384615384615385,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_596,"what do you think about this? </s> 🤔🤓😀# sonicdrivein2019
+• what’ s your favorite ice cream flavor of all time?! 👍👎🧑️🍦🥤 🍨 😋💚🎉🏆 🏃🏻♀️🇺🇸 🇬�",1,0,0,,0,1,0.95402855,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_558,"it's not just about the food, it’ s all you need to do is take a bite and see what we have in store for your taste buds.",1,0,0,,1,1,0.9639483,0.3780709,0.03571428571428572,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_277,what’ s the difference between a 50¢ hot fudge sundae and an ice cream cone? you can get both for only ½ price.,1,0,0,,0,1,0.8900266,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_402,"you’ re not alone in your quest to find the perfect pair of shoes, but we are here for you too.",0,0,0,,0,1,0.9741232,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_495,get ready for a sonic blast! 1/2 price on all ice cream cones and shakes from noon to closing time.,1,0,0,,0,1,0.7398631,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_333,we’ re excited to bring you the best of 2018.,0,0,0,1,1,1,0.9666891,0.3780709,0.10000000000000002,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_524,we’ re so excited to be back with you all the way through this year! we hope your 2019 is even better than ours.,0,0,1,,1,1,0.9489618,0.3780709,0.041666666666666664,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_945,"it’ s time to say “ no, thank you.",0,0,0,,0,1,0.9342406,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_2031,it’ s time to celebrate the 50th anniversary of ice cream.,1,0,0,,1,1,0.97737736,0.3780709,0.0909090909090909,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_528,"when you’ re done with your breakfast, head to the drive-in and grab a hot dog.",1,0,1,,0,1,0.98540896,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_457,it’ s time for you to take a break from your daily routine and enjoy some of the best ice cream in town.,1,0,0,,0,1,0.9814306,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_37,we’ re excited to bring you the best sonic experience of 2019.,1,0,1,,1,1,0.96555257,0.3780709,0.08333333333333333,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1272,"we're all set to get our hands on some of the best ice cream in town, and we can n’t wait for it.",1,0,1,,1,1,0.96481377,0.3780709,0.043478260869565216,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_103,it’ s time to get your hands on some of the world's best ice cream.,1,0,0,,0,1,0.96923864,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_618,"we’ re so excited to announce that we have a limited-time offer on all of our new products at 25% off your entire order! just click the link in this post, and you can save up to £10.",1,0,0,,4,1,0.91756696,0.3780709,0.10526315789473682,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_791,"we’ re so excited to be back with you guys! we hope your day is filled w/ fun, food & friends.",1,0,1,,0,1,0.9175595,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_204,we’ re all set to celebrate the 50th anniversary of sonic.,1,1,1,1,1,1,0.97774804,0.3780709,0.0909090909090909,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1930,"when you’ re at the end of your day and need a pick-me up, this is it.",1,0,1,,2,1,0.9666399,0.3780709,0.11764705882352941,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_78,we’ ve got 10 of the best ice cream flavors for you to choose from.,1,0,0,,1,1,0.96745837,0.3780709,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_534,"what’ s the best way to celebrate your 30th birthday this year? get a new car, but not just any old one.",0,0,0,,2,1,0.96894306,0.3780709,0.0909090909090909,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1983,"what’ s your favorite ice cream flavor? 🍦 1/2 scoop of rocky road, mint chocolate chip or cookies and snickerdoodles.",1,0,1,1,0,1,0.5331089,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_2115,what’ s your favorite ice cream flavor? we want to hear from you.,1,0,0,,0,1,0.97520816,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_369,it’ s time for sonic the dolphin to make a comeback.,1,0,0,,0,1,0.9754397,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_784,we’ re all set to celebrate the end of summer with these 10 best ice cream sundae ideas.,1,0,0,,0,1,0.94106615,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_1946,it’ s time to take a break from the screen and get some fresh air.,1,1,1,,1,1,0.9784046,0.3780709,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_280,it’ s time to celebrate the 50th anniversary of your favorite ice cream flavor.,1,0,0,1,2,1,0.97612244,0.3780709,0.14285714285714285,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_905,it’ s time to celebrate the 50th anniversary of sonic boom.,1,0,0,,0,1,0.9689839,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_446,"what are you waiting for? check out our new 50¢ hot dogs at sonic drive-ins across the country on thursday, sept.",1,0,0,,0,1,0.96091574,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_529,"we’ re so excited to have you on our team this summer! </s> we hope your day is filled with fun, adventure and lots of ice cream.",1,0,0,,0,1,0.9634507,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_912,"it’ s time to celebrate the 10th anniversary of sonic with a delicious ice cream sundae! grab your friends and family, head out for some sweet treats.",1,0,1,,1,1,0.9741095,0.3780709,0.037037037037037035,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1270,what’ s your favorite ice cream flavor? 🍦🍨🧀🥤🎉# sonicdrivein2019 pic.,1,0,1,,0,1,0.9015452,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_1039,what’ s the difference between a 50¢ hot dog and an all-you-can-eat buffet? 🤔 pic.,1,0,0,,0,1,0.9250096,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_65,what’ s the difference between a 5-star review and one that doesn' t say anything about it? you can tell by looking at how many stars they got.,0,0,0,,1,1,0.9495726,0.3780709,0.03571428571428572,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_491,"what do you think is the best way to spend your 50th birthday? a trip around town with friends and family, of course! but if that’ s not an option for this special day in our lives.",1,1,1,,0,1,0.9074612,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_955,"when you’ re at the end of your day and need a quick pick-me up, this is it.",1,0,1,,0,1,0.96255153,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_411,"we’ re all in this together, so let's make it a little more fun.",0,0,0,,1,1,0.9715664,0.3780709,0.07142857142857141,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_363,we’ re so excited to bring you the best of 2019.,1,0,1,,0,1,0.95837015,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_189,it’ s time to celebrate the end of summer with these 10 best-of ice cream sundae combos.,1,0,0,,2,1,0.9741242,0.3780709,0.11764705882352941,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1337,we're going to have a blast with you! what are your plans for the weekend? let us know in the comments.,0,0,0,,2,1,0.9282431,0.3780709,0.047619047619047616,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_570,it’ s time to make your dreams come true! 1/3 of a dollar is all it takes for you and the rest will be yours.,1,0,1,,0,1,0.9641182,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_697,"when you’ re not sure what to do today, check out our top 10 must-do activities for the week.",0,0,0,,1,1,0.9746559,0.3780709,0.05263157894736841,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1246,"it’ s been a long day at the beach, and you need something sweet to end it all.",1,0,0,,1,1,0.97833633,0.3780709,0.05555555555555554,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_634,"when you’ re done with your lunch, head to the drive-in and grab a hot dog.",1,0,0,,0,1,0.985152,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_832,"it’ s time for you and your friends to take a break from the screen, grab some ice cream ( or whatever floats their boat), then head outside.",1,0,1,,3,1,0.9825449,0.3780709,0.10714285714285714,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_760,"we’ ve got you covered with 10% off all new and used cars, trucks, vans, minivans, sport utility vehicles and more.",1,0,0,,0,1,0.25841388,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_594,it’ s time to celebrate the 10th anniversary of your favorite brand with a limited-time deal! get one drink for every dollar you spend at sonic drinks.,1,0,0,,1,1,0.9699065,0.3780709,0.037037037037037035,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_228,"when you’ re not sure what to make for your next dinner party, check out these 10 easy-to-make side dishes that are guaranteed crowd pleasers.",0,0,0,,1,1,0.9661373,0.3780709,0.04000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1384,we’ re so excited to share this with you! 1/3 of a pound is all it takes.,1,1,1,,2,1,0.9648455,0.3780709,0.11764705882352941,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_414,we’ re excited to bring you a new twist on the classic “peanut butter and jelly” sandwich.,1,0,0,,1,1,0.97036564,0.3780709,0.0588235294117647,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_497,"we’ ve all been there, and we know what it feels like to be in the driver' s lane at a drive-in.",1,1,1,,1,1,0.9759798,0.3780709,0.04545454545454546,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_691,"what’ s the best way to start your day? 10:37am, of course.",0,0,0,,0,1,0.966069,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_1594,we’ ve got you covered.,1,1,1,1,0,1,0.9753906,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_903,it's time to get your taste buds on the go.,1,0,1,,0,1,0.97740686,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_1616,it’ s time to celebrate 2019 with a sonic blast of your favorite ice cream flavors! 🍦🍫🥤🎉# summerfunday pic.,1,0,1,,2,1,0.90951306,0.3780709,0.10526315789473682,0.05555555555555554,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_850,what’ s your favorite ice cream flavor? we have a ton of options to choose from.,1,0,0,,0,1,0.97836864,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_143,we’ re excited to bring you the best of 2019.,0,0,0,1,0,1,0.9660311,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_788,it’ s time to hit the road.,0,0,0,,0,1,0.9736319,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_54,"it’ s time to celebrate the 10th anniversary of sonic boom! this year, we have a special offer for our loyal fans.",1,1,1,,0,1,0.97500664,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_590,"it’ s time to celebrate the 50th anniversary of sonic, and we need your help.",1,0,0,1,0,1,0.97474706,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_44,it’ s time to celebrate the 50th anniversary of your favorite ice cream flavor.,1,0,0,1,1,1,0.97612244,0.3780709,0.07142857142857141,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1206,"it's not about the food, it’ s what you do with your friends and family to make memories that will last a lifetime.",1,0,1,,1,1,0.977567,0.3780709,0.043478260869565216,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_2103,"we’ re excited to be back with you for the 20th anniversary of sonic, and we can only imagine what it will feel like when our favorite characters come together! 🎉🎈🦄👀# sonic1984— Sonic Team (@sonicteam) December 3rd, 2022.",1,0,0,,2,1,0.94036764,0.3780709,0.05263157894736841,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1353,"when you’ re done with your breakfast, head to the drive-in.",1,1,1,,1,1,0.98355085,0.3780709,0.0909090909090909,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_152,what’ s your favorite ice cream flavor? i love mint chocolate chip and rocky road.,1,0,0,,0,1,0.9358328,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_1115,it’ s 10 a.,0,0,0,1,0,1,0.95503336,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_404,we’ ve got you covered with 50% off all of our best-in-class drinks.,1,1,1,,0,1,0.73359513,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_2142,what’ s your favorite ice cream flavor? 🤔# 10thanniversaryicecreamcontest! pic.,1,0,1,,0,1,0.753774,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_1984,what’ s your favorite flavor of ice cream? 1.,1,0,1,,0,1,0.9628082,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_1347,we’ ve got you covered with our 10-course meal plan.,1,0,0,,0,1,0.9321423,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_906,"we’ ve all been there, and we know what it feels like to be stuck at home with no one else in the house.",0,0,0,,0,1,0.9779587,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_976,we’ ve got you covered.,0,0,0,1,0,1,0.9753906,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_135,"it’ s time to celebrate the 50th anniversary of sonic, and we have a few ideas for how you can make it even more special.",1,0,1,,0,1,0.9686649,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_571,"when you’ re not sure what to do, just head for the sonic drive-in.",1,1,1,,0,1,0.97877014,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_1181,"we’ re so excited to see you all on thursday, may 10th! we have a limited-time offer for our best deals of the month.",1,0,0,,1,1,0.9670417,0.3780709,0.041666666666666664,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1960,we are so excited to have you on board for our sonic drive-in experience.,1,0,0,,0,1,0.9636985,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_2024,we’ re excited to share some of the best deals from spring 2019 with you.,1,0,1,,0,1,0.9744212,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_968,"we’ re so excited to see you all at sonic tomorrow, and we hope that this is just the beginning of a new chapter in your life.",1,0,1,,3,1,0.9714466,0.3780709,0.11111111111111109,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1122,we’ re excited to bring you the best sonic experience of 2018.,1,1,1,,0,1,0.9641615,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_585,what’ s for dinner tonight? 🍔🍟🥗# sonicdrivein 8:30pm-12/5.,1,0,1,,0,1,0.8240625,0.3780709,0.0,0.0,0.0,0.0
+sonicdrivein_964,"we’ re so excited to be back with you guys! 🎉🎊🥤🍦🧑🏃♂️👨‍💻 10:45 am on thursday, march 26th at sonic drive-in in new orleans.",1,0,0,,1,1,0.9625594,0.3780709,0.043478260869565216,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_57,we're excited to announce that we have a limited-time offer.,1,0,1,,1,1,0.9745705,0.3780709,0.10000000000000002,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_726,"what are you waiting for? 🎉 10:35pm on thursday, march 24th.",0,0,0,,0,1,0.9366515,0.3780709,0.0,0.0,0.0,0.0
