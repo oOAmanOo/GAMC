@@ -22,10 +22,8 @@ import torch.nn as nn
 from torch import Tensor
 from torch.nn import functional as nnf
 from torch.utils.data import Dataset, DataLoader
-# from transformers import GPT2Tokenizer, GPT2LMHeadModel
 from transformers import get_linear_schedule_with_warmup
 from transformers import AutoTokenizer, AutoModelForCausalLM
-# from transformers import AutoConfig, AutoTokenizer, Gemma2ForCausalLM
 
 seed = 42
 random.seed(seed)
@@ -38,6 +36,7 @@ class MappingType(Enum):
     Transformer = 'transformer'
 
 class OxfordDataset(torch.utils.data.Dataset):
+
     def __len__(self) -> int:
         return len(self.captions_tokens)
 
@@ -75,7 +74,6 @@ class OxfordDataset(torch.utils.data.Dataset):
             humor = torch.cat((humor, torch.zeros(padding_humor, dtype=torch.int64)))
         elif padding_humor < 0:
             humor = humor[:self.max_seq_len_emo]
-
         return emotion, sentiment, humor
 
     def __getitem__(self, item: int) -> tuple[Tensor, Tensor, Any, int, Tensor, Tensor, Tensor, Any]:
@@ -90,76 +88,17 @@ class OxfordDataset(torch.utils.data.Dataset):
             emotion = torch.load('../../Instagram/ESH/emotion/' + self.image_ids[item] + '.pt', weights_only=False).cpu()
             sentiment = torch.load('../../Instagram/ESH/sentiment/' + self.image_ids[item] + '.pt', weights_only=False).cpu()
             humor = torch.load('../../Instagram/ESH/humor/' + self.image_ids[item] + '.pt', weights_only=False).cpu()
-            # emotion, sentiment, humor = self.emotion[self.image_ids[item]], self.sentiment[self.image_ids[item]], self.humor[self.image_ids[item]]
-            # emotion, sentiment, humor = self.pad_emotion(item)
-            # emotion, sentiment, humor = self.bertTokenize(self.emotion[self.image_ids[item]]), self.bertTokenize(self.sentiment[self.image_ids[item]]), self.bertTokenize(self.humor[self.image_ids[item]])
-
         if self.normalize_prefix:
             prefix = prefix.float()
             prefix = prefix / prefix.norm(2, -1)
         funnyscore = self.funny_scores[item]
         return tokens, mask, prefix, item, emotion, sentiment, humor, funnyscore
 
-    def filter_data_by_bleu(self, model, batch_size=20, bleu_threshold=0.1):
-        """
-        Filter dataset based on BLEU scores using batch processing.
-
-        Args:
-            model: The model used for generating sentences.
-            batch_size: Number of samples per batch.
-            bleu_threshold: Minimum BLEU score to keep a sample.
-        """
-        dataloader = DataLoader(self, batch_size=batch_size, shuffle=False, drop_last=True)
-
-        # Temporary storage for filtered indices
-        filtered_indices = []
-        device = torch.device('cuda:0')
-
-        progress = tqdm(total=len(dataloader), desc="Filtering train dataset")
-        for batch in dataloader:
-            tokens_batch, masks_batch, prefixes_batch, original_indices = batch
-            tokens_batch, masks_batch, prefixes_batch = tokens_batch.to(device), masks_batch.to(
-                device), prefixes_batch.to(device, dtype=torch.bfloat16)
-
-            # Forward pass
-            prefix_embeds = model.clip_project(prefixes_batch).view(-1, self.prefix_length, model.embedding_size)
-            text_embeds = model.falcon.model.embed_tokens(tokens_batch)
-            embedding_cat = torch.cat((prefix_embeds, text_embeds), dim=1)
-            outputs = model.falcon(inputs_embeds=embedding_cat, attention_mask=masks_batch)
-            logits = outputs.logits[:, self.prefix_length - 1:-1]
-            generated_tokens_batch = torch.argmax(logits, dim=-1)
-
-            # BLEU calculation and filtering
-            for i, original_idx in enumerate(original_indices):
-                reference = self.captions_tokens[original_idx].tolist()
-                candidate = generated_tokens_batch[i].tolist()
-                bleu_score = sentence_bleu([reference], candidate, weights=(1, 0, 0, 0))
-
-                if bleu_score <= bleu_threshold:
-                    filtered_indices.append(original_idx)
-            progress.update()
-
-        # Update dataset based on filtered indices
-        print(f"Before Filtered: {len(self.captions_tokens)}, After Filtered: {len(filtered_indices)}, BLEU <= {bleu_threshold}")
-        self.captions = [self.captions[i] for i in filtered_indices]
-        self.image_ids = [self.image_ids[i] for i in filtered_indices]
-        self.captions_tokens = [self.captions_tokens[i] for i in filtered_indices]
-        self.caption2embedding = [self.caption2embedding[i] for i in filtered_indices]
-        del tokens_batch, masks_batch, prefixes_batch, original_indices, prefix_embeds, text_embeds, embedding_cat, outputs, logits, generated_tokens_batch, reference, candidate, bleu_score
-        gc.collect()
-        torch.cuda.empty_cache()
-
-    def __init__(self, data_path: str, prefix_length: int, normalize_prefix=False,
-                 batch_size=30, bleu_threshold=0.4, datafrom='Oxford'):
+    def __init__(self, data_path: str, prefix_length: int, normalize_prefix=False, datafrom='Oxford'):
         self.data_path = data_path
         self.datafrom = datafrom
         self.bleu = False
-        # self.tokenizer = GPT2Tokenizer.from_pretrained(gpt2_type)
-        # self.tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
         self.tokenizer = AutoTokenizer.from_pretrained("tiiuae/Falcon3-1B-Base")
-        # self.tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B")
-        # self.tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neo-1.3B")
-        # self.tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neo-2.7B")
         self.prefix_length = prefix_length
         self.normalize_prefix = normalize_prefix
         with open(data_path, 'rb') as f:
@@ -170,6 +109,7 @@ class OxfordDataset(torch.utils.data.Dataset):
         self.funny_scores = all_data["funnyscore"]
         self.image_ids = [caption["image_id"] for caption in captions_raw]
         self.captions = [caption['caption'] for caption in captions_raw]
+
         if os.path.isfile(f"{data_path[:-4]}_bleu_all.pkl"):
             del all_data
             gc.collect()
@@ -187,192 +127,17 @@ class OxfordDataset(torch.utils.data.Dataset):
             self.max_seq_len = max_seq_len
             with open(f"{self.data_path[:-4]}_bleu_all.pkl", 'wb') as f:
                 pickle.dump([self.captions_tokens, self.caption2embedding, self.max_seq_len], f)
+
         if datafrom == 'Oxford':
-            # self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford.csv')
-            # self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_filter.csv')
-            # self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_sentence_generate_Oxford.csv')
-            # self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_sentence_generate_Oxford_bert.csv')
-            self.emotions_data = pd.read_csv(
-                '../Data/Oxford_HIC/Generate_original/Minigpt4_sentence_generate_Oxford/Minigpt4_sentence_generate_Oxford_bert_6844.csv')
-            # self.emotion_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_emotion_filter.csv')
-            # self.sentiment_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_sentiment_filter.csv')
-            # self.humor_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_humor_filter.csv')
+            self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Generate_original/Minigpt4_sentence_generate_Oxford/Minigpt4_sentence_generate_Oxford_bert_6844.csv')
         else:
-            # self.emotions_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{datafrom}.csv')
-            # self.emotions_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{datafrom}_filter.csv')
-            # self.emotions_data = pd.read_csv(f'../Data/Instagram/Minigpt4_sentence_{datafrom}.csv')
             self.emotions_data = pd.read_csv(f'../Data/Instagram/Minigpt4_sentence_{datafrom}_bert.csv')
-            # self.emotion_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{datafrom}_emotion_filter.csv')
-            # self.sentiment_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{datafrom}_sentiment_filter.csv')
-            # self.humor_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{datafrom}_humor_filter.csv')
-        # self.emotion will save the emotion data for each image
+
         self.emotion = dict()
         self.sentiment = dict()
         self.humor = dict()
 
-        # self.max_seq_len_emo = 21
-        # for i in range(self.emotions_data.shape[0]):
-        #     image_id = self.emotions_data.iloc[i]['image_id']
-        #     emotion = str(self.emotions_data.iloc[i]['emotion']).replace(';', ' ')
-        #     sentiment = str(self.emotions_data.iloc[i]['sentiment']).replace(';', ' ')
-        #     humor = str(self.emotions_data.iloc[i]['humor']).replace(';', ' ')
-        #     self.emotion[image_id] = torch.tensor(self.tokenizer.encode(emotion, max_length=64, truncation=True), dtype=torch.int64)
-        #     self.sentiment[image_id] = torch.tensor(self.tokenizer.encode(sentiment, max_length=64, truncation=True), dtype=torch.int64)
-        #     self.humor[image_id] = torch.tensor(self.tokenizer.encode(humor, max_length=64, truncation=True, padding=True), dtype=torch.int64)
-
-        # padding_emotion = 384 - (self.emotion_data.shape[1] - 1)
-        # padding_sentiment = 384 - (self.sentiment_data.shape[1] - 1)
-        # padding_humor = 768 - (self.humor_data.shape[1] - 1)
-        # for i in range(self.emotion_data.shape[0]):
-        #     image_id = self.emotion_data.iloc[i]['image_id']
-        #     emotion = torch.tensor(self.emotion_data.iloc[i][1:].tolist())
-        #     self.emotion[image_id] = torch.cat((emotion, torch.zeros(padding_emotion, dtype=torch.int64)))
-        #     sentiment = torch.tensor(self.sentiment_data.iloc[i][1:].tolist())
-        #     self.sentiment[image_id] = torch.cat((sentiment, torch.zeros(padding_sentiment, dtype=torch.int64)))
-        #     humor = torch.tensor(self.humor_data.iloc[i][1:].tolist())
-        #     self.humor[image_id] = torch.cat((humor, torch.zeros(padding_humor, dtype=torch.int64)))
-
-        # with tqdm(total=self.emotions_data.shape[0]) as pbar:
-        #     for i in range(self.emotions_data.shape[0]):
-        #         image_id = self.emotions_data.iloc[i]['image_id']
-        #         # if image_id in self.image_ids:
-        #         token = torch.tensor(ast.literal_eval(self.emotions_data.iloc[i]['emotion']))
-        #         self.emotion[image_id] = token
-        #         torch.save(token, f"../../Instagram/ESH/emotion/{image_id}.pt")
-        #         token = torch.tensor(ast.literal_eval(self.emotions_data.iloc[i]['sentiment']))
-        #         self.sentiment[image_id] = token
-        #         torch.save(token, f"../../Instagram/ESH/sentiment/{image_id}.pt")
-        #         token = torch.tensor(ast.literal_eval(self.emotions_data.iloc[i]['humor']))
-        #         self.humor[image_id] = token
-        #         torch.save(token, f"../../Instagram/ESH/humor/{image_id}.pt")
-        #         pbar.update(1)
-        #     pbar.close()
-        # del self.emotions_data
-        # gc.collect()
         print(f"Train Data size: {len(self)}")
-        # self.filter_data_by_bleu(model, batch_size, bleu_threshold)
-
-class ClipCocoDataset(Dataset):
-
-    def __len__(self) -> int:
-        return len(self.captions_tokens)
-
-    def pad_tokens(self, item: int):
-        tokens = self.captions_tokens[item].cpu()
-        padding = self.max_seq_len - tokens.shape[0]
-        if padding > 0:
-            tokens = torch.cat((tokens, torch.zeros(padding, dtype=torch.int64) - 1))
-            self.captions_tokens[item] = tokens
-        elif padding < 0:
-            tokens = tokens[:self.max_seq_len]
-            self.captions_tokens[item] = tokens
-        mask = tokens.ge(0)  # mask is zero where we out of sequence
-        tokens[~mask] = 0
-        mask = mask.float()
-        mask = torch.cat((torch.ones(self.prefix_length), mask), dim=0)  # adding prefix mask
-        return tokens, mask
-
-    def __getitem__(self, item: int) -> tuple[Tensor, Tensor, Any, int]:
-        tokens, mask = self.pad_tokens(item)
-        prefix = self.prefixes[self.caption2embedding[item]]
-        if self.normalize_prefix:
-            prefix = prefix.float()
-            prefix = prefix / prefix.norm(2, -1)
-        return tokens, mask, prefix, item
-
-    def filter_data_by_bleu(self, model, batch_size=20, bleu_threshold=0.1):
-        """
-        Filter dataset based on BLEU scores using batch processing.
-
-        Args:
-            model: The model used for generating sentences.
-            batch_size: Number of samples per batch.
-            bleu_threshold: Minimum BLEU score to keep a sample.
-        """
-        dataloader = DataLoader(self, batch_size=batch_size, shuffle=False, drop_last=True)
-
-        # Temporary storage for filtered indices
-        filtered_indices = []
-        device = torch.device('cuda:0')
-        progress = tqdm(total=len(dataloader), desc="Filtering train dataset")
-        for batch in dataloader:
-            tokens_batch, masks_batch, prefixes_batch, original_indices = batch
-            tokens_batch, masks_batch, prefixes_batch = tokens_batch.to(device), masks_batch.to(
-                device), prefixes_batch.to(device, dtype=torch.bfloat16)
-
-            # Forward pass
-            # prefix_embeds = model.clip_project(prefixes_batch).view(-1, self.prefix_length, model.embedding_size)
-            # text_embeds = model.falcon.model.embed_tokens(tokens_batch)
-            # embedding_cat = torch.cat((prefix_embeds, text_embeds), dim=1)
-            # outputs = model.falcon(inputs_embeds=embedding_cat, attention_mask=masks_batch)
-            outputs = model(tokens_batch, prefixes_batch, masks_batch)
-            logits = outputs.logits[:, self.prefix_length - 1: -1]
-            generated_tokens_batch = torch.argmax(logits, dim=-1)
-
-            # BLEU calculation and filtering
-            for i, original_idx in enumerate(original_indices):
-                reference = self.captions_tokens[original_idx].tolist()
-                candidate = generated_tokens_batch[i].tolist()
-                bleu_score = sentence_bleu([reference], candidate, weights=(1, 0, 0, 0))
-
-                if bleu_score <= bleu_threshold:
-                    filtered_indices.append(original_idx)
-            progress.update()
-
-        # Update dataset based on filtered indices
-        print(f"Before Filtered: {len(self.captions_tokens)}, After Filtered: {len(filtered_indices)}, BLEU <= {bleu_threshold}")
-        self.captions = [self.captions[i] for i in filtered_indices]
-        self.image_ids = [self.image_ids[i] for i in filtered_indices]
-        self.captions_tokens = [self.captions_tokens[i] for i in filtered_indices]
-        self.caption2embedding = [self.caption2embedding[i] for i in filtered_indices]
-        del tokens_batch, masks_batch, prefixes_batch, original_indices, outputs, logits, generated_tokens_batch, reference, candidate, bleu_score
-        gc.collect()
-        torch.cuda.empty_cache()
-
-    def __init__(self, data_path: str, prefix_length: int, normalize_prefix=False, model=None,
-                 batch_size=30, bleu_threshold=0.4):
-        self.data_path = data_path
-        self.bleu = False
-        # self.tokenizer = GPT2Tokenizer.from_pretrained(gpt2_type)
-        # self.tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
-        self.tokenizer = AutoTokenizer.from_pretrained("tiiuae/Falcon3-1B-Base")
-        # self.tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B")
-        # self.tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neo-1.3B")
-        # self.tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neo-2.7B")
-        self.prefix_length = prefix_length
-        self.normalize_prefix = normalize_prefix
-        with open(data_path, 'rb') as f:
-            all_data = pickle.load(f)
-        sys.stdout.flush()
-        self.prefixes = all_data["clip_embedding"]
-        captions_raw = all_data["captions"]
-        self.image_ids = [caption["image_id"] for caption in captions_raw]
-        self.captions = [caption['caption'] for caption in captions_raw]
-        if os.path.isfile(f"{data_path[:-4]}_bleu_all.pkl"):
-            del all_data
-            gc.collect()
-            torch.cuda.empty_cache()
-            with open(f"{data_path[:-4]}_bleu_all.pkl", 'rb') as f:
-                self.captions_tokens, self.caption2embedding, self.max_seq_len = pickle.load(f)
-            all_len = torch.tensor([len(self.captions_tokens[i]) for i in range(len(self))]).float()
-            self.max_seq_len = min(int(all_len.mean() + all_len.std() * 10), int(all_len.max()))
-        else:
-            self.captions_tokens = []
-            self.caption2embedding = []
-            max_seq_len = 0
-            for caption in captions_raw:
-                self.captions_tokens.append(
-                    torch.tensor(self.tokenizer.encode(caption['caption'], max_length=64, truncation=True),
-                                 dtype=torch.int64))
-                self.caption2embedding.append(caption["clip_embedding"])
-                max_seq_len = max(max_seq_len, self.captions_tokens[-1].shape[0])
-            self.max_seq_len = max_seq_len
-            all_len = torch.tensor([len(self.captions_tokens[i]) for i in range(len(self))]).float()
-            self.max_seq_len = min(int(all_len.mean() + all_len.std() * 10), int(all_len.max()))
-            with open(f"{self.data_path[:-4]}_bleu_all.pkl", 'wb') as f:
-                pickle.dump([self.captions_tokens, self.caption2embedding, self.max_seq_len], f)
-        print(f"Train Data size: {len(self.captions_tokens)}")
-        self.filter_data_by_bleu(model, batch_size, bleu_threshold)
 
 class MLP(nn.Module):
 
@@ -392,6 +157,7 @@ class MLP(nn.Module):
         self.model = nn.Sequential(*layers)
 
 class MlpTransformer(nn.Module):
+
     def __init__(self, mode: str, in_dim, h_dim, out_d: Optional[int] = None, act=nnf.relu, dropout=0.):
         super().__init__()
         out_d = out_d if out_d is not None else in_dim
@@ -433,9 +199,7 @@ class MultiHeadAttention(nn.Module):
         y = y if y is not None else x
         b, n, c = x.shape
         _, m, d = y.shape
-        # b n h dh
         queries = self.to_queries(x).reshape(b, n, self.num_heads, c // self.num_heads)
-        # b m 2 h dh
         keys_values = self.to_keys_values(y).reshape(b, m, 2, self.num_heads, c // self.num_heads)
         keys, values = keys_values[:, :, 0], keys_values[:, :, 1]
         attention = torch.einsum('bnhd,bmhd->bnmh', queries, keys) * self.scale
@@ -461,8 +225,7 @@ class TransformerLayer(nn.Module):
         x = x + self.mlp(self.norm2(x))
         return x
 
-    def __init__(self, mode: str, dim_self, dim_ref, num_heads, mlp_ratio=4., bias=True, dropout=0., act=nnf.relu,
-                 norm_layer: nn.Module = nn.LayerNorm):
+    def __init__(self, mode: str, dim_self, dim_ref, num_heads, mlp_ratio=4., bias=True, dropout=0., act=nnf.relu, norm_layer: nn.Module = nn.LayerNorm):
         super().__init__()
         self.norm1 = norm_layer(dim_self)
         self.attn = MultiHeadAttention(mode, dim_self, dim_ref, num_heads, bias=bias, dropout=dropout)
@@ -513,15 +276,9 @@ class Transformer(nn.Module):
 class TransformerMapper(nn.Module):
 
     def forward(self, x):
-        ### clip ###
-        # x = self.linear(x).view(x.shape[0], self.clip_length, -1)
         ### swin ###
         if x.shape[2] == 768:
             x = self.linear(x)
-        ############
-        ### 768 ###
-        # if x.shape[2] != 768:
-        #     x = self.linear(x)
         ############
         prefix = self.prefix_const.unsqueeze(0).expand(x.shape[0], *self.prefix_const.shape)
         prefix = torch.cat((x, prefix), dim=1)
@@ -532,34 +289,20 @@ class TransformerMapper(nn.Module):
         super(TransformerMapper, self).__init__()
         self.clip_length = clip_length
         self.transformer = Transformer(mode, dim_embedding, 8, num_layers)
-        ### clip ###
-        # self.linear = nn.Linear(dim_clip, clip_length * dim_embedding)
         ### swin ###
         self.linear = nn.Linear(768, dim_embedding)
-        ############
-        ### 768 ###
-        # self.linear = nn.Linear(2048, dim_embedding)
         ############
         self.prefix_const = nn.Parameter(torch.randn(prefix_length, dim_embedding), requires_grad=True)
 
 class CrossTransformerMapper(nn.Module):
 
     def forward(self, x, y):
-        ### clip ###
-        # x = self.linear(x).view(x.shape[0], self.clip_length, -1)
         ### swin ###
         if x.shape[2] == 768:
             x = self.linear(x)
         if y.shape[2] == 768:
             y = self.linear(y)
         ############
-        ### 768 ###
-        # if x.shape[2] != 768:
-        #     x = self.linear(x)
-        # if y.shape[2] != 768:
-        #     y = self.linear(y)
-        ############
-
         out = self.transformer(x, y)
         return out
 
@@ -567,13 +310,8 @@ class CrossTransformerMapper(nn.Module):
         super(CrossTransformerMapper, self).__init__()
         self.clip_length = clip_length
         self.transformer = Transformer(mode, dim_embedding, 8, num_layers, cross=True)
-        ### clip ###
-        # self.linear = nn.Linear(dim_clip, clip_length * dim_embedding)
         ### swin ###
         self.linear = nn.Linear(768, dim_embedding)
-        ############
-        ### 768 ###
-        # self.linear = nn.Linear(2048, dim_embedding)
         ############
 
 class ClipCaptionModel(nn.Module):
@@ -584,58 +322,28 @@ class ClipCaptionModel(nn.Module):
     def forward(self, tokens: torch.Tensor, prefix: torch.Tensor, mask: Optional[torch.Tensor] = None,
                 labels: Optional[torch.Tensor] = None, emotion: torch.Tensor = None, sentiment: torch.Tensor = None,
                 humor: torch.Tensor = None) -> tuple[Any, Any] | Any:
-        # embedding_text = self.gemma.model.embed_tokens(tokens)
-        # embedding_text = self.gemma.base_model.model.model.embed_tokens(tokens)
-        # embedding_text = self.gpt.transformer.wte(tokens)
         if self.LoRaActivated:
             embedding_text = self.falcon.base_model.model.model.embed_tokens(tokens)
-            # embedding_emotion = self.falcon.base_model.model.model.embed_tokens(emotion)
-            # embedding_sentiment = self.falcon.base_model.model.model.embed_tokens(sentiment)
-            # embedding_humor = self.falcon.base_model.model.model.embed_tokens(humor)
         else:
             embedding_text = self.falcon.model.embed_tokens(tokens)
-            # embedding_emotion = self.falcon.model.embed_tokens(emotion)
-            # embedding_sentiment = self.falcon.model.embed_tokens(sentiment)
-            # embedding_humor = self.falcon.model.embed_tokens(humor)
-        #
-        # empty_ESH = torch.zeros(embedding_emotion.shape[0], 1, embedding_emotion.shape[2], dtype=torch.bfloat16, device=embedding_text.device)
-        # embedding_ESH = torch.cat((empty_ESH, embedding_emotion, embedding_sentiment, embedding_humor), dim=1)
 
-        # emotion_proj = self.emotion_linear(emotion).unsqueeze(1)
-        # sentiment_proj = self.sentiment_linear(sentiment).unsqueeze(1)
-        # humor_proj = self.humor_linear(humor).unsqueeze(1)
-        # embedding_ESH = torch.cat((emotion_proj, sentiment_proj, humor_proj), dim=1)
-        # embedding_ESH = self.ESH_linear(embedding_ESH.transpose(1, 2)).transpose(1, 2)
-
+        ##################################################################################################
         embedding_ESH = torch.cat((emotion, sentiment, humor), dim=1)
         embedding_ESH = self.ESH_linear(embedding_ESH.transpose(1, 2)).transpose(1, 2)
-        ############################################ 202503 ##############################################
+        ##################################################################################################
         clip_projections = self.clip_project(prefix).view(-1, self.prefix_length, self.embedding_size)
         visual_projections_swin = self.visual_project_swin(embedding_ESH, clip_projections)
         visual_projections_ESH = self.visual_project_ESH(clip_projections, embedding_ESH)
-        ########################################################################################
-        ### 20250302_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8  ###
-        ########################################################################################
+        ##################################################################################################
         visual_projections = torch.cat((visual_projections_swin, visual_projections_ESH), dim=1)
         visual_projections = self.visual_project(visual_projections.transpose(1, 2)).transpose(1, 2)
-        ########################################################################################
-        #######  20250303_oxford_lower_800up_only800_rest_300up_top300_ESH_co_swin_tf8   #######
-        ########################################################################################
-        # visual_projections = visual_projections_swin
-        #######################################################################################
-        # 20250310_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_768_swin_tf8    #
-        # 20250307_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_768_swin_tf8 #
-        #######################################################################################
-        # visual_projections = self.linear(visual_projections)
-        #######################################################################################
+        ##################################################################################################
         embedding_cat = torch.cat((visual_projections, embedding_text), dim=1)
         ##################################################################################################
 
         if labels is not None:
             dummy_token = self.get_dummy_token(tokens.shape[0], tokens.device)
             labels = torch.cat((dummy_token, tokens), dim=1)
-        # out = self.gpt(inputs_embeds=embedding_cat, labels=labels, attention_mask=mask)
-        # out = self.gemma(inputs_embeds=embedding_cat, labels=labels, attention_mask=mask)
         out = self.falcon(inputs_embeds=embedding_cat, labels=labels, attention_mask=mask)
         if self.mode == 'lora' or self.LoRaActivated:
             fc = self.funnyscore_mlp1(embedding_cat).squeeze(-1)
@@ -644,68 +352,22 @@ class ClipCaptionModel(nn.Module):
             fc = self.funnyscore_sigmoid(fc)
             return out, fc
         else:
-            return out
+            return out, 0
 
-    def __init__(self, mode: str, prefix_length: int, clip_length: Optional[int] = None, prefix_size: int = 512,
-                 num_layers: int = 8):
+    def __init__(self, mode: str, prefix_length: int, clip_length: Optional[int] = None, prefix_size: int = 512, num_layers: int = 8):
         super(ClipCaptionModel, self).__init__()
         self.prefix_length = prefix_length
         self.LoRaActivated = False
         self.mode = mode
-        # self.gemma = Gemma2ForCausalLM.from_pretrained("google/gemma-2-2b-it", device_map="auto", torch_dtype=torch.bfloat16)
-        # self.embedding_size = 2304
-        # LORAconfig = LoraConfig(
-        #     task_type=TaskType.CAUSAL_LM,
-        #     target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
-        #     inference_mode=False,  # 训练模式
-        #     r=8,  # Lora 秩
-        #     lora_alpha=32,  # Lora alaph，具体作用参见 Lora 原理
-        #     lora_dropout=0.1  # Dropout 比例
-        # )
-        #
-        # def count_trainable_parameters(model):
-        #     model_parameters = filter(lambda p: p.requires_grad, model.parameters())
-        #     params = sum([np.prod(p.size()) for p in model_parameters])
-        #     return params
-        # a = count_trainable_parameters(self.gemma)
-        # self.gemma = get_peft_model(self.gemma, LORAconfig)
-        # b = count_trainable_parameters(self.gemma)
-        # #留下小數點後兩位就好
-        # percent = round((b / a) * 100, 3)
-        # print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
-        # self.gemma.eval()
-        # for param in self.gemma.parameters():
-        #     param.requires_grad = False
-
-        # self.gpt = GPT2LMHeadModel.from_pretrained('gpt2')
-        # self.gpt = AutoModelForCausalLM.from_pretrained("EleutherAI/gpt-neo-1.3B")
-        # self.gpt = AutoModelForCausalLM.from_pretrained("EleutherAI/gpt-neo-2.7B")
-        # self.embedding_size = self.gpt.transformer.wte.weight.shape[1]
-        # self.gpt.eval()
-        # for param in self.gpt.parameters():
-        #     param.requires_grad = False
 
         self.falcon = AutoModelForCausalLM.from_pretrained("tiiuae/Falcon3-1B-Base")
-        # self.falcon = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B")
         self.embedding_size = self.falcon.model.embed_tokens.weight.shape[1]
-        # self.embedding_size = 768
-        # self.falcon.eval()
-        # for param in self.falcon.parameters():
-        #     param.requires_grad = False
         self.clip_project = TransformerMapper(mode, prefix_size, self.embedding_size, prefix_length, clip_length, num_layers)
         self.visual_project_swin = CrossTransformerMapper(mode, prefix_size, self.embedding_size, clip_length, num_layers)
         self.visual_project_ESH = CrossTransformerMapper(mode, prefix_size, self.embedding_size, clip_length, num_layers)
-        #######################################################################################
-        ### 20250228_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8 ###
-        #######################################################################################
         self.visual_project = nn.Linear(128, 64)
-        # self.linear = nn.Linear(self.embedding_size, 2048)
-
-        # self.emotion_linear = nn.Linear(384, 768)
-        # self.sentiment_linear = nn.Linear(384, 768)
-        # self.humor_linear = nn.Linear(768, 768)
         self.ESH_linear = nn.Linear(64 * 3, 64)
-        # self.ESH_linear = nn.Linear(3, 64)
+
         if mode == 'lora' or self.LoRaActivated:
             self.funnyscore_mlp1 = nn.Linear(self.embedding_size, 1)
             self.funnyscore_relu = nn.ReLU()
@@ -736,43 +398,8 @@ class ClipCaptionModel(nn.Module):
         a = count_trainable_parameters(self.falcon)
         self.falcon = get_peft_model(self.falcon, LORAconfig)
         b = count_trainable_parameters(self.falcon)
-        # 留下小數點後兩位就好
         percent = round((b / a) * 100, 3)
         print("falcon Before: ", a, "After: ", b, "Percent: ", percent, "%")
-
-def PCloss(logits: torch.Tensor, tokens: torch.Tensor, use_ce=True):
-    """
-    :param logits: output word logits from the generation model in shape [N, L, E]
-    :param tokens:
-    :param use_ce:
-    :return:
-    """
-    EPSILON = torch.finfo(torch.bfloat16).eps
-    token_length = logits.shape[1]
-    vocab_size = logits.shape[2]
-    loss_weight = 100
-    fp_weights = [4*idx/token_length for idx in range(token_length)]
-    fp_weights = torch.FloatTensor(fp_weights).to(logits.device)
-    if use_ce:
-        ce_thresh = 0.90
-        fp_weights_ = fp_weights[None, fp_weights < ce_thresh, None]
-        prob = nnf.sigmoid(logits[:, fp_weights < ce_thresh])
-        label = nnf.one_hot(tokens[:, fp_weights < ce_thresh], num_classes=vocab_size)
-        bce_entropy = label * torch.log(prob + EPSILON)
-        bce_inv_entropy = (1 - label) * torch.log(1 - prob + EPSILON) * fp_weights_
-        bce_loss = -torch.mean(bce_entropy+bce_inv_entropy)*loss_weight
-        ce_loss = nnf.cross_entropy(logits[:, fp_weights >= ce_thresh].reshape(-1, logits.shape[-1]),
-                                    tokens[:, fp_weights >= ce_thresh].flatten())
-        loss = bce_loss + ce_loss
-        return loss
-    else:
-        fp_weights = fp_weights[None, :, None]
-        prob = nnf.sigmoid(logits)
-        label = nnf.one_hot(tokens, num_classes=vocab_size)
-        bce_entropy = label * torch.log(prob + EPSILON)
-        bce_inv_entropy = (1 - label) * torch.log(1 - prob + EPSILON) * fp_weights
-        loss = -torch.mean(bce_entropy+bce_inv_entropy)*loss_weight
-        return loss
 
 class CombinedLoss(nn.Module):
 
@@ -787,12 +414,9 @@ class CombinedLoss(nn.Module):
         # humor // 1 ==1 > 1 , else == 0> 0
         funnyscore = funnyscore // 1
         fc_loss = nnf.binary_cross_entropy(output_fc.flatten(), funnyscore.flatten())
-        # reward  = output_fc.mean()
         loss = output_loss + fc_loss * 10# - reward * 10
-
         self.loss_df = pd.concat([self.loss_df, pd.DataFrame([[output_loss.item(), fc_loss.item(), loss.item()]], columns=["caption_loss", "fc_loss", "loss"])])
         self.loss_df.to_csv(f"{self.output_dir}/{self.traintest}_separateLoss.csv", index=False)
-
         return loss
 
 def train(trainData, testData, model: ClipCaptionModel, args,
@@ -826,6 +450,7 @@ def train(trainData, testData, model: ClipCaptionModel, args,
     epoch = 0
     trainLoss_class = CombinedLoss(output_dir, output_prefix, 'train')
     testLoss_class = CombinedLoss(output_dir, output_prefix, 'test')
+
     while len(trainDataset) > batch_size and len(testDataset) > batch_size:
         model.train()
         optimizer = AdamW(model.parameters(), lr=lr)
@@ -844,22 +469,22 @@ def train(trainData, testData, model: ClipCaptionModel, args,
         for idx, (tokens, mask, prefix, original_indices, emotion, sentiment, humor, funnyscore) in enumerate(train_dataloader):
             model.zero_grad()
             tokens, mask, prefix = tokens.to(device), mask.to(device), prefix.to(device, dtype=torch.bfloat16)
-            # emotion, sentiment, humor = emotion.to(device), sentiment.to(device), humor.to(device)
             emotion, sentiment, humor = emotion.to(device, dtype=torch.bfloat16), sentiment.to(device, dtype=torch.bfloat16), humor.to(device, dtype=torch.bfloat16)
             outputs,output_fc = model(tokens, prefix, mask, emotion=emotion, sentiment=sentiment, humor=humor)
             logits = outputs.logits[:, trainDataset.prefix_length - 1: -1]
             loss = trainLoss_class.combine_loss(logits, tokens, funnyscore.to(device, dtype=torch.bfloat16), output_fc)
-            # loss = PCloss(logits, tokens)
             trainLoss += loss.item()
             generated_tokens = torch.argmax(logits, dim=-1)
             bleu_score = sentence_bleu([tokens.flatten().tolist()], generated_tokens.flatten().tolist(),weights=(1, 0, 0, 0))
             trainBleu += bleu_score
-            # loss = loss - 10 * bleu_score
+            del tokens, mask, prefix, emotion, sentiment, humor, outputs, output_fc, logits, generated_tokens, bleu_score
+            gc.collect()
+            torch.cuda.empty_cache()
             loss.backward()
             optimizer.step()
             scheduler.step()
             optimizer.zero_grad()
-            progress.set_postfix({"loss": loss.item(), "bleu": bleu_score})
+            progress.set_postfix({"loss": loss.item()})
             progress.update()
             # if idx % 101 == 100:
             #     break
@@ -876,19 +501,18 @@ def train(trainData, testData, model: ClipCaptionModel, args,
             for idx, (tokens, mask, prefix, original_indices, emotion, sentiment, humor, funnyscore) in enumerate(test_dataloader):
                 model.zero_grad()
                 tokens, mask, prefix = tokens.to(device), mask.to(device), prefix.to(device, dtype=torch.bfloat16)
-                # emotion, sentiment, humor = emotion.to(device), sentiment.to(device), humor.to(device)
                 emotion, sentiment, humor = emotion.to(device, dtype=torch.bfloat16), sentiment.to(device, dtype=torch.bfloat16), humor.to(device, dtype=torch.bfloat16)
                 outputs, output_fc = model(tokens, prefix, mask, emotion=emotion, sentiment=sentiment, humor=humor)
                 logits = outputs.logits[:, trainDataset.prefix_length - 1: -1]
                 loss = testLoss_class.combine_loss(logits, tokens, funnyscore.to(device, dtype=torch.bfloat16), output_fc)
-                # loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens.flatten(), ignore_index=0)
-                # loss = PCloss(logits, tokens)
                 testLoss += loss.item()
                 generated_tokens = torch.argmax(logits, dim=-1)
                 bleu_score = sentence_bleu([tokens.flatten().tolist()], generated_tokens.flatten().tolist(), weights=(1, 0, 0, 0))
                 testBleu += bleu_score
-
-                progress.set_postfix({"loss": loss.item(), "bleu": bleu_score})
+                del tokens, mask, prefix, emotion, sentiment, humor, outputs, output_fc, logits, generated_tokens
+                gc.collect()
+                torch.cuda.empty_cache()
+                progress.set_postfix({"loss": loss.item()})
                 progress.update()
         testLoss /= len(test_dataloader)
         testBleu /= len(test_dataloader)
@@ -936,52 +560,24 @@ def train(trainData, testData, model: ClipCaptionModel, args,
         plt.show()
 
         epoch += 1
-        # if testBleu > bleu_threshold:
-        #     bleu_threshold += 0.05
-        #     model.eval()
-        #     del trainDataset, testDataset, train_dataloader, test_dataloader, optimizer, scheduler, progress, tokens, mask, prefix, outputs, logits, generated_tokens, bleu_score
-        #     gc.collect()
-        #     torch.cuda.empty_cache()
-        #     trainDataset = ClipCocoDataset(trainData, prefix_length, normalize_prefix, model=model,
-        #                                    batch_size=batch_size, bleu_threshold=bleu_threshold)
-        #     testDataset = ClipCocoDataset(testData, prefix_length, normalize_prefix, model=model, batch_size=batch_size,
-        #                                   bleu_threshold=bleu_threshold)
-        #     train_dataloader = DataLoader(trainDataset, batch_size=batch_size, shuffle=True, drop_last=True)
-        #     test_dataloader = DataLoader(testDataset, batch_size=batch_size, shuffle=True, drop_last=True)
-        #     best_train_loss = 9999999999
-        #     best_test_loss = 9999999999
-        #     while len(trainDataset) < batch_size or len(testDataset) < batch_size:
-        #         bleu_threshold += 0.05
-        #         model.eval()
-        #         del trainDataset, testDataset, train_dataloader, test_dataloader
-        #         gc.collect()
-        #         torch.cuda.empty_cache()
-        #         trainDataset = ClipCocoDataset(trainData, prefix_length, normalize_prefix, model=model,
-        #                                        batch_size=batch_size, bleu_threshold=bleu_threshold)
-        #         testDataset = ClipCocoDataset(testData, prefix_length, normalize_prefix, model=model,
-        #                                       batch_size=batch_size, bleu_threshold=bleu_threshold)
-        #         train_dataloader = DataLoader(trainDataset, batch_size=batch_size, shuffle=True, drop_last=True)
-        #         test_dataloader = DataLoader(testDataset, batch_size=batch_size, shuffle=True, drop_last=True)
-        #         best_train_loss = 9999999999
-        #         best_test_loss = 9999999999
-        # if bleu_threshold > 1:
-        #     break
     return model
 
 def main():
     parser = argparse.ArgumentParser()
-    # parser.add_argument('--trainData', default='../Data/Oxford_HIC/parse/oxford_5384_only1_300_8_ViT-B_32_train.pkl')
-    # parser.add_argument('--testData', default='../Data/Oxford_HIC/parse/oxford_5384_only1_300_2_ViT-B_32_test.pkl')
-    # parser.add_argument('--trainData', default='../Data/Instagram/parse/100up_only200_passlength_12_o_mcdonalds_switzerland_ViT-B_32_train.pkl')
-    # parser.add_argument('--testData', default='../Data/Instagram/parse/100up_only200_passlength_12_x_mcdonalds_switzerland_ViT-B_32_test.pkl')
-    # parser.add_argument('--trainData', default='../Data/Instagram/parse/100up_only200_lessNotFunImg_53_247_passlength_12_o_mcdonalds_switzerland_ViT-B_32_train.pkl')
-    # parser.add_argument('--testData', default='../Data/Instagram/parse/100up_only200_lessNotFunImg_53_247_passlength_12_x_mcdonalds_switzerland_ViT-B_32_test.pkl')
-    parser.add_argument('--trainData', default='../Data/Instagram/parse/100up_only200_passlength_10_o_sonicdrivein_ViT-B_32_train.pkl')
-    parser.add_argument('--testData', default='../Data/Instagram/parse/100up_only200_passlength_10_x_sonicdrivein_ViT-B_32_test.pkl')
-    # parser.add_argument('--trainData', default='../Data/Instagram/parse/100up_only200_lessNotFunImg_169_131_passlength_10_o_sonicdrivein_ViT-B_32_train.pkl')
-    # parser.add_argument('--testData', default='../Data/Instagram/parse/100up_only200_lessNotFunImg_169_131_passlength_10_x_sonicdrivein_ViT-B_32_test.pkl')
-    parser.add_argument('--datafrom', default='sonicdrivein')
-    parser.add_argument('--out_dir', default='20250505_100up_only200_passlength_10_SD_base_0421_oxford_3000_only1_300_82_ESH_filter_cross_concat_combineLoss_onlyLLMadapt')
+    ########################  pre-trained  model ########################
+    # parser.add_argument('--trainData', default='../Data/Oxford_HIC/parse/oxford_3000_only1_300_8_ViT-B_32_train.pkl')
+    # parser.add_argument('--testData', default='../Data/Oxford_HIC/parse/oxford_3000_only1_300_2_ViT-B_32_test.pkl')
+    ######################  mcdonalds_switzerland  ######################
+    parser.add_argument('--trainData', default='../Data/Instagram/parse/100up_only200_lessNotFunImg_53_171_passlength_12_o_mcdonalds_switzerland_ViT-B_32_train.pkl')
+    parser.add_argument('--testData', default='../Data/Instagram/parse/100up_only200_lessNotFunImg_53_171_passlength_12_x_mcdonalds_switzerland_ViT-B_32_test.pkl')
+    parser.add_argument('--datafrom', default='mcdonalds_switzerland')
+    parser.add_argument('--out_dir', default='20250514_100up_only200_lessNotFunImg_53_171_passlength_12_MC_base_0421_oxford_3000_only1_300_82_ESH_filter_cross_concat_combineLoss')
+    ##########################  sonicdrivein  ###########################
+    # parser.add_argument('--trainData', default='../Data/Instagram/parse/100up_only200_lessNotFunImg_169_55_passlength_10_o_sonicdrivein_ViT-B_32_train.pkl')
+    # parser.add_argument('--testData', default='../Data/Instagram/parse/100up_only200_lessNotFunImg_169_55_passlength_10_x_sonicdrivein_ViT-B_32_test.pkl')
+    # parser.add_argument('--datafrom', default='sonicdrivein')
+    # parser.add_argument('--out_dir', default='20250428_100up_only200_lessNotFunImg_169_55_passlength_10_SD_base_0421_oxford_3000_only1_300_82_ESH_filter_cross_concat_combineLoss')
+    #####################################################################
     parser.add_argument('--prefix', default='checkpoint', help='prefix for saved filenames')
     parser.add_argument('--epochs', type=int, default=50)
     parser.add_argument('--save_every', type=int, default=1)
@@ -1010,22 +606,23 @@ def main():
     origin_model = ClipCaptionModel(mode='nn', prefix_length=prefix_length, clip_length=prefix_length, prefix_size=prefix_dim, num_layers=args.num_layers)
     model = ClipCaptionModel(mode='lora', prefix_length=prefix_length, clip_length=prefix_length, prefix_size=prefix_dim, num_layers=args.num_layers)
     print(count_trainable_parameters(origin_model))
-    # 20250115_totalClip_oxford_only100_300k_transformer_p40_falcon_bleu1_0.05 == 32
-    # save_file = '20250406_oxford_1408_300_8_300_2_ESH_bert_cross_concat'  #1
-    # save_file = '20250316_oxford_800_8_300_2_ESH_filter_cross_concat'  #13
-    # save_file = '20250410_oxford_1265_only1_300_8_300_2_ESH_bert_cross_concat'  # 3
-    save_file = '20250421_oxford_3000_only1_300_82_ESH_bert_cross_concat'  # 3
+
+    ####################  Load the pre-trained model ####################
+    save_file = '20250421_oxford_3000_only1_300_82_ESH_bert_cross_concat'
     i = 4
     origin_model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i:03d}.pt'))
-
     print(count_trainable_parameters(origin_model))
+    #####################################################################
 
+    #######################   Activate adapters   #######################
     def weightToLora(fullModel, newModel):
         for name, param in fullModel.named_parameters():
             newModel.state_dict()[name].copy_(param.data)
 
         for name, param in newModel.named_parameters():
             if 'falcon' not in name:
+                # if 'clip_project.' in name or 'visual_project_swin.' in name or 'visual_project_ESH.' in name:
+                # if 'clip_project.' not in name:
                 if "lora_" not in name:  # 只讓 LoRA 參數訓練
                     if 'bias' in name:
                         param.requires_grad = True
@@ -1035,24 +632,29 @@ def main():
                         param.requires_grad = True
                 else:
                     param.requires_grad = True
+                # else:
+                #     param.requires_grad = True
+
         for name, param in newModel.named_parameters():
             print(f"{name}: requires_grad={param.requires_grad}")
         return newModel
 
-    model = origin_model
-    a = count_trainable_parameters(model)
-    # a = count_trainable_parameters(origin_model)
-    # model = weightToLora(origin_model, model)
+    a = count_trainable_parameters(origin_model)
+    model = weightToLora(origin_model, model)
     del origin_model
     gc.collect()
-    # b = count_trainable_parameters(model)
-    # percent = round((b / a) * 100, 3)
-    # print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
-
-    model.activateLoRa()
+    torch.cuda.empty_cache()
     b = count_trainable_parameters(model)
     percent = round((b / a) * 100, 3)
     print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
+    #####################################################################
+
+    ####################### Activate LoRA in LLM  #######################
+    # model.activateLoRa()
+    # b = count_trainable_parameters(model)
+    # percent = round((b / a) * 100, 3)
+    # print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
+    #####################################################################
 
     model = model.to(device, dtype=torch.bfloat16)
     model.eval()

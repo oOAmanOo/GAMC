@@ -8,15 +8,12 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import gc
-import ast
 import clip
 import pickle
-import PIL.Image
 import numpy as np
 import pandas as pd
 import loralib as lora
 from tqdm import tqdm
-from torch.optim import AdamW
 from scipy.special import softmax
 from nltk.translate.bleu_score import sentence_bleu
 from typing import Tuple, List, Union, Optional, Any
@@ -27,9 +24,7 @@ import torch.nn as nn
 from torch import Tensor
 from torch.nn import functional as nnf
 from torch.utils.data import Dataset, DataLoader
-from transformers import AutoConfig, Gemma2ForCausalLM
 from transformers import AutoTokenizer, AutoModelForCausalLM
-from transformers import  GPT2Tokenizer, GPT2LMHeadModel, get_linear_schedule_with_warmup
 
 N = type(None)
 V = np.array
@@ -52,6 +47,7 @@ D = torch.device
 CPU = torch.device("cpu")
 
 class Predictor(object):
+
     def __init__(self, prefix_length, cp_num, train_caption, test_caption, train_image_id_list, test_image_id_list):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.imageList = []
@@ -103,6 +99,7 @@ class Predictor(object):
         print("clip model loaded")
 
     def fitCounter(self, data_mode, caption, dataIndex):
+        #### for oxford >> 1 image vs N captions ####
         bleu1_sum = 0
         bleu2_sum = 0
         bleu3_sum = 0
@@ -142,6 +139,7 @@ class Predictor(object):
         return fitCount, gtNum, bleu1_sum, bleu2_sum, bleu3_sum, bleu4_sum
 
     def fitCounter_test(self, caption, ground_truth):
+        #### for ins >> 1 image vs 1 caption ####
         bleu1_sum = 0
         bleu2_sum = 0
         bleu3_sum = 0
@@ -157,7 +155,6 @@ class Predictor(object):
             if caption_words[k] in gt_words:
                 fitCount += 1
         gtNum = 1
-
         return fitCount, gtNum, bleu1_sum, bleu2_sum, bleu3_sum, bleu4_sum
 
     def parrot_fluency(self, caption):
@@ -190,13 +187,8 @@ class Predictor(object):
         self.embedding_size = model.embedding_size
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         tokens, masks, prefixs = tokens.to(device), masks.to(device), prefixs.to(device, dtype=torch.bfloat16)
-        # emotion, sentiment, humor = emotion.to(device), sentiment.to(device), humor.to(device)
         emotion, sentiment, humor = emotion.to(device, dtype=torch.bfloat16), sentiment.to(device, dtype=torch.bfloat16), humor.to(device, dtype=torch.bfloat16)
-
-        # tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
-        # tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
         tokenizer = AutoTokenizer.from_pretrained("tiiuae/Falcon3-1B-Base")
-        # tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B")
         tokenizer.pad_token = tokenizer.eos_token
 
         model.eval()
@@ -206,53 +198,21 @@ class Predictor(object):
             print('--------- ground truth ---------')
             print(text)
             print('--------- generate_beam ---------')
-            # if model.LoRaActivated:
-            #     embedding_emotion = model.falcon.base_model.model.model.embed_tokens(emotion[i].unsqueeze(0))
-            #     embedding_sentiment = model.falcon.base_model.model.model.embed_tokens(sentiment[i].unsqueeze(0))
-            #     embedding_humor = model.falcon.base_model.model.model.embed_tokens(humor[i].unsqueeze(0))
-            # else:
-            #     embedding_emotion = model.falcon.model.embed_tokens(emotion[i].unsqueeze(0))
-            #     embedding_sentiment = model.falcon.model.embed_tokens(sentiment[i].unsqueeze(0))
-            #     embedding_humor = model.falcon.model.embed_tokens(humor[i].unsqueeze(0))
-            #
-            # empty_ESH = torch.zeros(embedding_emotion.shape[0], 1, embedding_emotion.shape[2], dtype=torch.bfloat16,
-            #                         device=embedding_emotion.device)
-            # embedding_ESH = torch.cat((empty_ESH, embedding_emotion, embedding_sentiment, embedding_humor), dim=1)
-
-            # emotion_proj = model.emotion_linear(emotion[i].unsqueeze(0)).unsqueeze(1)
-            # sentiment_proj = model.sentiment_linear(sentiment[i].unsqueeze(0)).unsqueeze(1)
-            # humor_proj = model.humor_linear(humor[i].unsqueeze(0)).unsqueeze(1)
-            # embedding_ESH = torch.cat((emotion_proj, sentiment_proj, humor_proj), dim=1)
-            # embedding_ESH = model.ESH_linear(embedding_ESH.transpose(1, 2)).transpose(1, 2)
-
+            ##########################################################################################
             embedding_ESH = torch.cat((emotion[i].unsqueeze(0), sentiment[i].unsqueeze(0), humor[i].unsqueeze(0)), dim=1)
             embedding_ESH = model.ESH_linear(embedding_ESH.transpose(1, 2)).transpose(1, 2)
-
-            ############################################ 202503 ##############################################
-            clip_projections = model.clip_project(prefixs[i].unsqueeze(0)).view(-1, model.prefix_length,
-                                                                                model.embedding_size)
+            ##########################################################################################
+            clip_projections = model.clip_project(prefixs[i].unsqueeze(0)).view(-1, model.prefix_length, model.embedding_size)
             visual_projections_swin = model.visual_project_swin(embedding_ESH, clip_projections)
             visual_projections_ESH = model.visual_project_ESH(clip_projections, embedding_ESH)
-            ########################################################################################
-            ## 20250302_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8  ###
-            ########################################################################################
+            ##########################################################################################
             prefix_embed = torch.cat((visual_projections_swin, visual_projections_ESH), dim=1)
             prefix_embed = model.visual_project(prefix_embed.transpose(1, 2)).transpose(1, 2)
-            ########################################################################################
-            #### 20250303_oxford_lower_800up_only800_rest_300up_top300_ESH_co_concat_swin_tf8   ####
-            ########################################################################################
-            # prefix_embed = visual_projections_swin
-            #######################################################################################
-            # 20250310_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_768_swin_tf8    #
-            # 20250307_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_768_swin_tf8 #
-            #######################################################################################
-            # prefix_embed = model.linear(prefix_embed)
-            ################################################################################
-
+            ##########################################################################################
             caption = generate_beam(model, tokenizer, embed=prefix_embed)[0]
-            caption_token = tokenizer(caption, return_tensors='pt', padding='max_length', truncation=True,
-                                      max_length=74)
+            caption_token = tokenizer(caption, return_tensors='pt', padding='max_length', truncation=True, max_length=74)
             print(caption)
+            ##########################################################################################
             if self.generate_beam_output != None:
                 self.generate_beam_output = torch.cat((self.generate_beam_output, caption_token['input_ids']), dim=0)
             else:
@@ -266,11 +226,13 @@ class Predictor(object):
             self.generate_beam_bleu2.append(bleu2)
             self.generate_beam_bleu3.append(bleu3)
             self.generate_beam_bleu4.append(bleu4)
+
             print('---------generate2---------')
+            ##########################################################################################
             caption = generate2(model, tokenizer, embed=prefix_embed)
-            caption_token = tokenizer(caption, return_tensors='pt', padding='max_length', truncation=True,
-                                      max_length=74)
+            caption_token = tokenizer(caption, return_tensors='pt', padding='max_length', truncation=True, max_length=74)
             print(caption)
+            ##########################################################################################
             if self.generate2_output != None:
                 self.generate2_output = torch.cat((self.generate2_output, caption_token['input_ids']), dim=0)
             else:
@@ -284,42 +246,30 @@ class Predictor(object):
             self.generate2_bleu2.append(bleu2)
             self.generate2_bleu3.append(bleu3)
             self.generate2_bleu4.append(bleu4)
+
             print('---------train---------')
-            # embedding_text = model.gemma.model.embed_tokens(tokens[i].unsqueeze(0))
-            # embedding_text = model.gemma.base_model.model.model.embed_tokens(tokens[i].unsqueeze(0))
-            # embedding_text = model.gpt.transformer.wte(tokens[i].unsqueeze(0))
             if model.LoRaActivated:
                 embedding_text = model.falcon.base_model.model.model.embed_tokens(tokens[i].unsqueeze(0))
             else:
                 embedding_text = model.falcon.model.embed_tokens(tokens[i].unsqueeze(0))
-            print(prefix_embed.shape, embedding_text.shape)
             embedding_cat = torch.cat((prefix_embed, embedding_text), dim=1)
-            # out = model.gemma(inputs_embeds=embedding_cat, attention_mask=masks[i].unsqueeze(0))
-            # out = model.gpt(inputs_embeds=embedding_cat, attention_mask=masks[i].unsqueeze(0))
             out = model.falcon(inputs_embeds=embedding_cat, attention_mask=masks[i].unsqueeze(0))
             logits = out.logits[:, self.prefix_length - 1: -1]
             if model.mode == 'lora' or model.LoRaActivated:
-                print(embedding_cat.shape)
                 output_fc = model.funnyscore_mlp1(embedding_cat).squeeze(-1)
-                print(output_fc.shape)
                 output_fc = model.funnyscore_relu(output_fc)
-                print(output_fc.shape)
                 output_fc = model.funnyscore_mlp2(output_fc).squeeze(-1)
-                print(output_fc.shape)
                 output_fc = model.funnyscore_sigmoid(output_fc)
-                print(output_fc.shape)
                 capLoss, fcLoss, loss = combine_loss(logits, tokens[i],funnyscore[i].unsqueeze(0).to(device, dtype=torch.bfloat16), output_fc)
                 self.train_caption_loss.append(capLoss.item())
                 self.train_fc_loss.append(fcLoss.item())
             else:
                 loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens[i].flatten(), ignore_index=0)
-                # loss = PCloss(logits, tokens[i].unsqueeze(0))
-            print(loss)
             caption_token = logits.argmax(-1)[0].cpu()
             caption = tokenizer.decode(caption_token, skip_special_tokens=True)
-            caption_token = \
-            tokenizer(caption, return_tensors='pt', padding='max_length', truncation=True, max_length=489)['input_ids']
+            caption_token =  tokenizer(caption, return_tensors='pt', padding='max_length', truncation=True, max_length=489)['input_ids']
             print(caption)
+
             if self.train_output != None:
                 self.train_output = torch.cat((self.train_output, caption_token), dim=0)
             else:
@@ -349,11 +299,9 @@ class Predictor(object):
 
             test = pd.DataFrame()
             test['Name'] = ['test1', 'test2', 'test3', 'test4', 'test5', 'test6', 'test7', 'test8', 'test9', 'test10',
-                            'train1', 'train2', 'train3', 'train4', 'train5', 'train6', 'train7',
-                            'train8', 'train9', 'train10']
+                            'train1', 'train2', 'train3', 'train4', 'train5', 'train6', 'train7', 'train8', 'train9', 'train10']
             test['image_id'] = self.test_image_id_list[:10] + self.train_image_id_list[:10]
-            generate_beam_df = pd.DataFrame(self.generate_beam_output.cpu().detach(),
-                                            columns=[f"{i}" for i in range(0, 74)])
+            generate_beam_df = pd.DataFrame(self.generate_beam_output.cpu().detach(), columns=[f"{i}" for i in range(0, 74)])
             generate_beam_df = pd.concat([test, generate_beam_df, dataframe_Name("-", 74, 16)], axis=1)
             generate_beam_df['text'] = self.generate_beam_text
             generate_beam_df['fitCount'] = self.generate_beam_fitCount
@@ -432,17 +380,11 @@ class Predictor(object):
                     test_avgscore[column] = ["-"]
             train_df = pd.concat([train_df, test_avgscore, train_avgscore], axis=0)
 
-            print(dataframe_Name("generate_beam").shape, generate_beam_df.shape, dataframe_Name("generate2").shape,
-                  generate2_df.shape, dataframe_Name("train").shape, train_df.shape)
-            final = pd.concat([dataframe_Name("generate_beam"), generate_beam_df, dataframe_Name("generate2"),
-                               generate2_df, dataframe_Name("train"), train_df], axis=0)
+            print(dataframe_Name("generate_beam").shape, generate_beam_df.shape, dataframe_Name("generate2").shape, generate2_df.shape, dataframe_Name("train").shape, train_df.shape)
+            final = pd.concat([dataframe_Name("generate_beam"), generate_beam_df, dataframe_Name("generate2"), generate2_df, dataframe_Name("train"), train_df], axis=0)
             print(final.shape)
             print(final.columns)
-            # final.to_csv(f'./Model/{save_file}/test_{self.cp_num:03d}.csv', float_format='%.15f', index=False)
-
-            # final.to_csv(f'./Model/{save_file}/{save_file}_test_{self.cp_num:03d}.csv', float_format='%.15f', index=False)
             final.to_csv(f'./Model/{save_file}/test_{self.cp_num:03d}.csv', float_format='%.15f', index=False)
-            # final.to_csv(f'./Model/{save_file}/Generate_mcdonalds_all.csv', index=False)
 
     def test(self, test_dataset, model, output_dir):
         device = torch.device('cuda:0')
@@ -463,63 +405,28 @@ class Predictor(object):
                 self.embedding_size = model.embedding_size
                 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
                 tokens, masks, prefixs = tokens.to(device), masks.to(device), prefixs.to(device, dtype=torch.bfloat16)
-                # emotion, sentiment, humor = emotion.to(device), sentiment.to(device), humor.to(device)
                 emotion, sentiment, humor = emotion.to(device, dtype=torch.bfloat16), sentiment.to(device, dtype=torch.bfloat16), humor.to(device, dtype=torch.bfloat16)
-
-                # tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
-                # tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
                 tokenizer = AutoTokenizer.from_pretrained("tiiuae/Falcon3-1B-Base")
-                # tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B")
                 tokenizer.pad_token = tokenizer.eos_token
 
                 model.eval()
                 model.to(device, dtype=torch.bfloat16)
-                # print('--------- ground truth ---------')
-                # print(ground_truth)
-                # print('--------- generate_beam ---------')
-                # if model.LoRaActivated:
-                #     embedding_emotion = model.falcon.base_model.model.model.embed_tokens(emotion)
-                #     embedding_sentiment = model.falcon.base_model.model.model.embed_tokens(sentiment)
-                #     embedding_humor = model.falcon.base_model.model.model.embed_tokens(humor)
-                # else:
-                #     embedding_emotion = model.falcon.model.embed_tokens(emotion)
-                #     embedding_sentiment = model.falcon.model.embed_tokens(sentiment)
-                #     embedding_humor = model.falcon.model.embed_tokens(humor)
-                #
-                # empty_ESH = torch.zeros(embedding_emotion.shape[0], 1, embedding_emotion.shape[2], dtype=torch.bfloat16, device=embedding_emotion.device)
-                # embedding_ESH = torch.cat((empty_ESH, embedding_emotion, embedding_sentiment, embedding_humor), dim=1)
-
+                ##################################################################################################
                 embedding_ESH = torch.cat((emotion, sentiment, humor), dim=1)
                 embedding_ESH = model.ESH_linear(embedding_ESH.transpose(1, 2)).transpose(1, 2)
-
-                # emotion_proj = model.emotion_linear(emotion).unsqueeze(1)
-                # sentiment_proj = model.sentiment_linear(sentiment).unsqueeze(1)
-                # humor_proj = model.humor_linear(humor).unsqueeze(1)
-                # embedding_ESH = torch.cat((emotion_proj, sentiment_proj, humor_proj), dim=1)
-                # embedding_ESH = model.ESH_linear(embedding_ESH.transpose(1, 2)).transpose(1, 2)
-                ############################################ 202503 ##############################################
+                ##################################################################################################
                 clip_projections = model.clip_project(prefixs).view(-1, model.prefix_length, model.embedding_size)
                 visual_projections_swin = model.visual_project_swin(embedding_ESH, clip_projections)
                 visual_projections_ESH = model.visual_project_ESH(clip_projections, embedding_ESH)
-                ########################################################################################
-                ## 20250302_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8  ###
-                ########################################################################################
+                ##################################################################################################
                 prefix_embed = torch.cat((visual_projections_swin, visual_projections_ESH), dim=1)
                 prefix_embed = model.visual_project(prefix_embed.transpose(1, 2)).transpose(1, 2)
-                ########################################################################################
-                #### 20250303_oxford_lower_800up_only800_rest_300up_top300_ESH_co_concat_swin_tf8   ####
-                ########################################################################################
-                # prefix_embed = visual_projections_swin
-                #######################################################################################
-                # 20250310_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_768_swin_tf8    #
-                # 20250307_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_768_swin_tf8 #
-                #######################################################################################
-                # prefix_embed = model.linear(prefix_embed)
-                ################################################################################
-
+                ##################################################################################################
                 caption = generate_beam(model, tokenizer, embed=prefix_embed)[0]
                 caption_token = tokenizer(caption, return_tensors='pt', padding='max_length', truncation=True, max_length=74)
-                # print(caption)
+                print(caption)
+                ##################################################################################################
+
                 if self.generate_beam_output != None:
                     self.generate_beam_output = torch.cat((self.generate_beam_output, caption_token['input_ids']), dim=0)
                 else:
@@ -533,10 +440,13 @@ class Predictor(object):
                 self.generate_beam_bleu2.append(bleu2)
                 self.generate_beam_bleu3.append(bleu3)
                 self.generate_beam_bleu4.append(bleu4)
-                # print('---------generate2---------')
+
+                print('---------generate2---------')
+                ##########################################################################################
                 caption = generate2(model, tokenizer, embed=prefix_embed)
                 caption_token = tokenizer(caption, return_tensors='pt', padding='max_length', truncation=True, max_length=74)
-                # print(caption)
+                print(caption)
+                ##########################################################################################
                 if self.generate2_output != None:
                     self.generate2_output = torch.cat((self.generate2_output, caption_token['input_ids']), dim=0)
                 else:
@@ -550,18 +460,13 @@ class Predictor(object):
                 self.generate2_bleu2.append(bleu2)
                 self.generate2_bleu3.append(bleu3)
                 self.generate2_bleu4.append(bleu4)
-                # print('---------train---------')
-                # embedding_text = model.gemma.model.embed_tokens(tokens)
-                # embedding_text = model.gemma.base_model.model.model.embed_tokens(tokens)
-                # embedding_text = model.gpt.transformer.wte(tokens)
+
+                print('---------train---------')
                 if model.LoRaActivated:
                     embedding_text = model.falcon.base_model.model.model.embed_tokens(tokens)
                 else:
                     embedding_text = model.falcon.model.embed_tokens(tokens)
-                # print(prefix_embed.shape, embedding_text.shape)
                 embedding_cat = torch.cat((prefix_embed, embedding_text), dim=1)
-                # out = model.gemma(inputs_embeds=embedding_cat, attention_mask=masks)
-                # out = model.gpt(inputs_embeds=embedding_cat, attention_mask=masks)
                 out = model.falcon(inputs_embeds=embedding_cat, attention_mask=masks)
                 logits = out.logits[:, self.prefix_length - 1: -1]
                 if model.mode == 'lora' or model.LoRaActivated:
@@ -575,12 +480,11 @@ class Predictor(object):
                 else:
                     loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens.flatten(),
                                              ignore_index=0)
-                    # loss = PCloss(logits, tokens)
-                # print(loss)
                 caption_token = logits.argmax(-1)[0].cpu()
                 caption = tokenizer.decode(caption_token, skip_special_tokens=True)
                 caption_token = tokenizer(caption, return_tensors='pt', padding='max_length', truncation=True, max_length=489)['input_ids']
-                # print(caption)
+                print(caption)
+
                 if self.train_output != None:
                     self.train_output = torch.cat((self.train_output, caption_token), dim=0)
                 else:
@@ -680,6 +584,7 @@ class MLP(nn.Module):
         self.model = nn.Sequential(*layers)
 
 class MlpTransformer(nn.Module):
+
     def __init__(self, mode: str, in_dim, h_dim, out_d: Optional[int] = None, act=nnf.relu, dropout=0.):
         super().__init__()
         out_d = out_d if out_d is not None else in_dim
@@ -801,15 +706,9 @@ class Transformer(nn.Module):
 class TransformerMapper(nn.Module):
 
     def forward(self, x):
-        ### clip ###
-        # x = self.linear(x).view(x.shape[0], self.clip_length, -1)
         ### swin ###
         if x.shape[2] == 768:
             x = self.linear(x)
-        ############
-        ### 768 ###
-        # if x.shape[2] != 768:
-        #     x = self.linear(x)
         ############
         prefix = self.prefix_const.unsqueeze(0).expand(x.shape[0], *self.prefix_const.shape)
         prefix = torch.cat((x, prefix), dim=1)
@@ -821,34 +720,20 @@ class TransformerMapper(nn.Module):
         super(TransformerMapper, self).__init__()
         self.clip_length = clip_length
         self.transformer = Transformer(mode, dim_embedding, 8, num_layers)
-        ### clip ###
-        # self.linear = nn.Linear(dim_clip, clip_length * dim_embedding)
         ### swin ###
         self.linear = nn.Linear(768, dim_embedding)
-        ############
-        ### 768 ###
-        # self.linear = nn.Linear(2048, dim_embedding)
         ############
         self.prefix_const = nn.Parameter(torch.randn(prefix_length, dim_embedding), requires_grad=True)
 
 class CrossTransformerMapper(nn.Module):
 
     def forward(self, x, y):
-        ### clip ###
-        # x = self.linear(x).view(x.shape[0], self.clip_length, -1)
         ### swin ###
         if x.shape[2] == 768:
             x = self.linear(x)
         if y.shape[2] == 768:
             y = self.linear(y)
         ############
-        ### 768 ###
-        # if x.shape[2] != 768:
-        #     x = self.linear(x)
-        # if y.shape[2] != 768:
-        #     y = self.linear(y)
-        ############
-
         out = self.transformer(x, y)
         return out
 
@@ -857,13 +742,8 @@ class CrossTransformerMapper(nn.Module):
         super(CrossTransformerMapper, self).__init__()
         self.clip_length = clip_length
         self.transformer = Transformer(mode, dim_embedding, 8, num_layers, cross=True)
-        ### clip ###
-        # self.linear = nn.Linear(dim_clip, clip_length * dim_embedding)
         ### swin ###
         self.linear = nn.Linear(768, dim_embedding)
-        ############
-        ### 768 ###
-        # self.linear = nn.Linear(2048, dim_embedding)
         ############
 
 class ClipCaptionModel(nn.Module):
@@ -874,58 +754,28 @@ class ClipCaptionModel(nn.Module):
     def forward(self, tokens: torch.Tensor, prefix: torch.Tensor, mask: Optional[torch.Tensor] = None,
                 labels: Optional[torch.Tensor] = None, emotion: torch.Tensor = None, sentiment: torch.Tensor = None,
                 humor: torch.Tensor = None) -> tuple[Any, Any] | Any:
-        # embedding_text = self.gemma.model.embed_tokens(tokens)
-        # embedding_text = self.gemma.base_model.model.model.embed_tokens(tokens)
-        # embedding_text = self.gpt.transformer.wte(tokens)
         if self.LoRaActivated:
             embedding_text = self.falcon.base_model.model.model.embed_tokens(tokens)
-            # embedding_emotion = self.falcon.base_model.model.model.embed_tokens(emotion)
-            # embedding_sentiment = self.falcon.base_model.model.model.embed_tokens(sentiment)
-            # embedding_humor = self.falcon.base_model.model.model.embed_tokens(humor)
         else:
             embedding_text = self.falcon.model.embed_tokens(tokens)
-            # embedding_emotion = self.falcon.model.embed_tokens(emotion)
-            # embedding_sentiment = self.falcon.model.embed_tokens(sentiment)
-            # embedding_humor = self.falcon.model.embed_tokens(humor)
 
-        # empty_ESH = torch.zeros(embedding_emotion.shape[0], 1, embedding_emotion.shape[2], dtype=torch.bfloat16, device=embedding_text.device)
-        # embedding_ESH = torch.cat((empty_ESH, embedding_emotion, embedding_sentiment, embedding_humor), dim=1)
-
-        # emotion_proj = self.emotion_linear(emotion).unsqueeze(1)
-        # sentiment_proj = self.sentiment_linear(sentiment).unsqueeze(1)
-        # humor_proj = self.humor_linear(humor).unsqueeze(1)
-        # embedding_ESH = torch.cat((emotion_proj, sentiment_proj, humor_proj), dim=1)
-        # embedding_ESH = self.ESH_linear(embedding_ESH.transpose(1, 2)).transpose(1, 2)
-
+        ##################################################################################################
         embedding_ESH = torch.cat((emotion, sentiment, humor), dim=1)
         embedding_ESH = self.ESH_linear(embedding_ESH.transpose(1, 2)).transpose(1, 2)
-        ############################################ 202503 ##############################################
+        ##################################################################################################
         clip_projections = self.clip_project(prefix).view(-1, self.prefix_length, self.embedding_size)
         visual_projections_swin = self.visual_project_swin(embedding_ESH, clip_projections)
         visual_projections_ESH = self.visual_project_ESH(clip_projections, embedding_ESH)
-        ########################################################################################
-        ### 20250302_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8  ###
-        ########################################################################################
+        ##################################################################################################
         visual_projections = torch.cat((visual_projections_swin, visual_projections_ESH), dim=1)
         visual_projections = self.visual_project(visual_projections.transpose(1, 2)).transpose(1, 2)
-        ########################################################################################
-        #######  20250303_oxford_lower_800up_only800_rest_300up_top300_ESH_co_swin_tf8   #######
-        ########################################################################################
-        # visual_projections = visual_projections_swin
-        #######################################################################################
-        # 20250310_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_add_768_swin_tf8    #
-        # 20250307_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_768_swin_tf8 #
-        #######################################################################################
-        # visual_projections = self.linear(visual_projections)
-        #######################################################################################
+        ##################################################################################################
         embedding_cat = torch.cat((visual_projections, embedding_text), dim=1)
         ##################################################################################################
 
         if labels is not None:
             dummy_token = self.get_dummy_token(tokens.shape[0], tokens.device)
             labels = torch.cat((dummy_token, tokens), dim=1)
-        # out = self.gpt(inputs_embeds=embedding_cat, labels=labels, attention_mask=mask)
-        # out = self.gemma(inputs_embeds=embedding_cat, labels=labels, attention_mask=mask)
         out = self.falcon(inputs_embeds=embedding_cat, labels=labels, attention_mask=mask)
         if self.mode == 'lora' or self.LoRaActivated:
             fc = self.funnyscore_mlp1(embedding_cat).squeeze(-1)
@@ -942,63 +792,13 @@ class ClipCaptionModel(nn.Module):
         self.prefix_length = prefix_length
         self.LoRaActivated = False
         self.mode = mode
-        # self.gemma = Gemma2ForCausalLM.from_pretrained("google/gemma-2-2b-it", device_map="auto", torch_dtype=torch.bfloat16)
-        # self.embedding_size = 2304
-        # LORAconfig = LoraConfig(
-        #     task_type=TaskType.CAUSAL_LM,
-        #     target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
-        #     inference_mode=False,  # 训练模式
-        #     r=8,  # Lora 秩
-        #     lora_alpha=32,  # Lora alaph，具体作用参见 Lora 原理
-        #     lora_dropout=0.1  # Dropout 比例
-        # )
-        #
-        # def count_trainable_parameters(model):
-        #     model_parameters = filter(lambda p: p.requires_grad, model.parameters())
-        #     params = sum([np.prod(p.size()) for p in model_parameters])
-        #     return params
-        # a = count_trainable_parameters(self.gemma)
-        # self.gemma = get_peft_model(self.gemma, LORAconfig)
-        # b = count_trainable_parameters(self.gemma)
-        # #留下小數點後兩位就好
-        # percent = round((b / a) * 100, 3)
-        # print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
-        # self.gemma.eval()
-        # for param in self.gemma.parameters():
-        #     param.requires_grad = False
-
-        # self.gpt = GPT2LMHeadModel.from_pretrained('gpt2')
-        # self.gpt = AutoModelForCausalLM.from_pretrained("EleutherAI/gpt-neo-1.3B")
-        # self.gpt = AutoModelForCausalLM.from_pretrained("EleutherAI/gpt-neo-2.7B")
-        # self.embedding_size = self.gpt.transformer.wte.weight.shape[1]
-        # self.gpt.eval()
-        # for param in self.gpt.parameters():
-        #     param.requires_grad = False
-
         self.falcon = AutoModelForCausalLM.from_pretrained("tiiuae/Falcon3-1B-Base")
-        # self.falcon = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B")
         self.embedding_size = self.falcon.model.embed_tokens.weight.shape[1]
-        # self.embedding_size = 768
-        # self.falcon.eval()
-        # for param in self.falcon.parameters():
-        #     param.requires_grad = False
-        self.clip_project = TransformerMapper(mode, prefix_size, self.embedding_size, prefix_length, clip_length,
-                                              num_layers)
-        self.visual_project_swin = CrossTransformerMapper(mode, prefix_size, self.embedding_size, clip_length,
-                                                          num_layers)
-        self.visual_project_ESH = CrossTransformerMapper(mode, prefix_size, self.embedding_size, clip_length,
-                                                         num_layers)
-        #######################################################################################
-        ### 20250228_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8 ###
-        #######################################################################################
+        self.clip_project = TransformerMapper(mode, prefix_size, self.embedding_size, prefix_length, clip_length, num_layers)
+        self.visual_project_swin = CrossTransformerMapper(mode, prefix_size, self.embedding_size, clip_length, num_layers)
+        self.visual_project_ESH = CrossTransformerMapper(mode, prefix_size, self.embedding_size, clip_length, num_layers)
         self.visual_project = nn.Linear(128, 64)
-        # self.linear = nn.Linear(self.embedding_size, 2048)
-
-        # self.emotion_linear = nn.Linear(384, 768)
-        # self.sentiment_linear = nn.Linear(384, 768)
-        # self.humor_linear = nn.Linear(768, 768)
         self.ESH_linear = nn.Linear(64 * 3, 64)
-        # self.ESH_linear = nn.Linear(3, 64)
         if mode == 'lora' or self.LoRaActivated:
             self.funnyscore_mlp1 = nn.Linear(self.embedding_size, 1)
             self.funnyscore_relu = nn.ReLU()
@@ -1029,55 +829,23 @@ class ClipCaptionModel(nn.Module):
         a = count_trainable_parameters(self.falcon)
         self.falcon = get_peft_model(self.falcon, LORAconfig)
         b = count_trainable_parameters(self.falcon)
-        # 留下小數點後兩位就好
         percent = round((b / a) * 100, 3)
         print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
-
-def PCloss(logits: torch.Tensor, tokens: torch.Tensor, use_ce=True):
-    """
-    :param logits: output word logits from the generation model in shape [N, L, E]
-    :param tokens:
-    :param use_ce:
-    :return:
-    """
-    EPSILON = torch.finfo(torch.bfloat16).eps
-    token_length = logits.shape[1]
-    vocab_size = logits.shape[2]
-    loss_weight = 100
-    fp_weights = [4*idx/token_length for idx in range(token_length)]
-    fp_weights = torch.FloatTensor(fp_weights).to(logits.device)
-    if use_ce:
-        ce_thresh = 0.90
-        fp_weights_ = fp_weights[None, fp_weights < ce_thresh, None]
-        prob = nnf.sigmoid(logits[:, fp_weights < ce_thresh])
-        label = nnf.one_hot(tokens[:, fp_weights < ce_thresh], num_classes=vocab_size)
-        bce_entropy = label * torch.log(prob + EPSILON)
-        bce_inv_entropy = (1 - label) * torch.log(1 - prob + EPSILON) * fp_weights_
-        bce_loss = -torch.mean(bce_entropy+bce_inv_entropy)*loss_weight
-        ce_loss = nnf.cross_entropy(logits[:, fp_weights >= ce_thresh].reshape(-1, logits.shape[-1]),
-                                    tokens[:, fp_weights >= ce_thresh].flatten())
-        loss = bce_loss + ce_loss
-        return loss
-    else:
-        fp_weights = fp_weights[None, :, None]
-        prob = nnf.sigmoid(logits)
-        label = nnf.one_hot(tokens, num_classes=vocab_size)
-        bce_entropy = label * torch.log(prob + EPSILON)
-        bce_inv_entropy = (1 - label) * torch.log(1 - prob + EPSILON) * fp_weights
-        loss = -torch.mean(bce_entropy+bce_inv_entropy)*loss_weight
-        return loss
 
 def combine_loss(logits: torch.Tensor, tokens: torch.Tensor, funnyscore: torch.Tensor, output_fc: torch.Tensor):
     output_loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens.flatten(), ignore_index=0)
     # humor // 1 ==1 > 1 , else == 0> 0
     funnyscore = funnyscore // 1
     fc_loss = nnf.binary_cross_entropy(output_fc.flatten(), funnyscore.flatten())
-    # reward  = output_fc.mean()
     loss = output_loss + fc_loss * 10 #- reward * 10
     return output_loss, fc_loss, loss
 
-def generate_beam(model, tokenizer, beam_size: int = 5, prompt=None, embed=None, entry_length=74, temperature=1.5,
-                  stop_token: str = ".", repetition_penalty = 1.5):
+def generate_beam(model, tokenizer, beam_size: int = 5, prompt=None, embed=None, entry_length=74, temperature=1.5, stop_token: str = ".", repetition_penalty = 1.5):
+    """
+        Args:
+            temperature : 0.8 -> greedy, 1.0 -> normal, >2.0 -> more random
+            repetition_penalty : 1.0 -> no penalty, >2.0 -> penalize repeated tokens
+    """
     model.eval()
     stop_token_index = tokenizer.encode(stop_token)[0]
     tokens = None
@@ -1092,17 +860,13 @@ def generate_beam(model, tokenizer, beam_size: int = 5, prompt=None, embed=None,
             if tokens is None:
                 tokens = torch.tensor(tokenizer.encode(prompt))
                 tokens = tokens.unsqueeze(0).to(device)
-                # generated = model.gpt.transformer.wte(tokens)
-                # generated = model.gemma.model.embed_tokens(tokens)
-                # generated = model.gemma.base_model.model.model.embed_tokens(tokens)
                 generated = model.falcon.model.embed_tokens(tokens)
         for i in range(entry_length):
-            # outputs = model.gemma(inputs_embeds=generated)
-            # outputs = model.gpt(inputs_embeds=generated)
             outputs = model.falcon(inputs_embeds=generated)
             logits = outputs.logits
             logits = logits[:, -1, :] / (temperature if temperature > 0 else 1.0)
-            # penalty add here #
+
+            ############################## repetition_penalty ##############################
             if tokens is not None:
                 for i in range(tokens.shape[0]):
                     for previous_token in set(tokens[i].tolist()):
@@ -1110,7 +874,7 @@ def generate_beam(model, tokenizer, beam_size: int = 5, prompt=None, embed=None,
                             logits[i, previous_token] /= repetition_penalty
                         else:
                             logits[i, previous_token] *= repetition_penalty
-
+            ################################################################################
 
             logits = logits.softmax(-1).log()
             if scores is None:
@@ -1128,9 +892,7 @@ def generate_beam(model, tokenizer, beam_size: int = 5, prompt=None, embed=None,
                 scores_sum = scores[:, None] + logits
                 seq_lengths[~is_stopped] += 1
                 scores_sum_average = scores_sum / seq_lengths[:, None]
-                scores_sum_average, next_tokens = scores_sum_average.view(-1).topk(
-                    beam_size, -1
-                )
+                scores_sum_average, next_tokens = scores_sum_average.view(-1).topk(beam_size, -1)
                 next_tokens_source = next_tokens // scores_sum.shape[1]
                 seq_lengths = seq_lengths[next_tokens_source]
                 next_tokens = next_tokens % scores_sum.shape[1]
@@ -1140,9 +902,6 @@ def generate_beam(model, tokenizer, beam_size: int = 5, prompt=None, embed=None,
                 generated = generated[next_tokens_source]
                 scores = scores_sum_average * seq_lengths
                 is_stopped = is_stopped[next_tokens_source]
-            # next_token_embed = model.gpt.transformer.wte(next_tokens.squeeze()).view(generated.shape[0], 1, -1)
-            # next_token_embed = model.gemma.model.embed_tokens(next_tokens.squeeze()).view(generated.shape[0], 1, -1)
-            # next_token_embed = model.gemma.base_model.model.model.embed_tokens(next_tokens.squeeze()).view( generated.shape[0], 1, -1)
             if model.LoRaActivated:
                 next_token_embed = model.falcon.base_model.model.model.embed_tokens(next_tokens.squeeze()).view(generated.shape[0], 1, -1)
             else:
@@ -1161,10 +920,16 @@ def generate_beam(model, tokenizer, beam_size: int = 5, prompt=None, embed=None,
     output_texts = [output_texts[i] for i in order]
     return output_texts
 
-def generate2(model, tokenizer, tokens=None, prompt=None, embed=None, entry_count=1, entry_length=74, top_p=0.05,
-              temperature=1.5, stop_token: str = ".", repetition_penalty= 1.5):
+def generate2(model, tokenizer, tokens=None, prompt=None, embed=None, entry_count=1, entry_length=74, top_p=0.05, temperature=1.5, stop_token: str = ".", repetition_penalty= 1.5):
+    """
+        Random text generation :
+            original generate2 >> max output (only one result)
+            rebuilt generate2  >> random output (different result everytime)
+        Args:
+            temperature : 0.8 -> greedy, 1.0 -> normal, >2.0 -> more random
+            repetition_penalty : 1.0 -> no penalty, >2.0 -> penalize repeated tokens
+    """
     model.eval()
-    generated_num = 0
     generated_list = []
     stop_token_index = tokenizer.encode(stop_token)[0]
     filter_value = -float("Inf")
@@ -1179,22 +944,16 @@ def generate2(model, tokenizer, tokens=None, prompt=None, embed=None, entry_coun
                 if tokens is None:
                     tokens = torch.tensor(tokenizer.encode(prompt))
                     tokens = tokens.unsqueeze(0).to(device)
-
-                # generated = model.gpt.transformer.wte(tokens)
-                # generated = model.gemma.model.embed_tokens(tokens)
-                # generated = model.gemma.base_model.model.model.embed_tokens(tokens)
                 if model.LoRaActivated:
                     generated = model.falcon.base_model.model.model.embed_tokens(tokens)
                 else:
                     generated = model.falcon.model.embed_tokens(tokens)
             for i in range(entry_length):
-                # outputs = model.gemma(inputs_embeds=generated)
-                # outputs = model.gpt(inputs_embeds=generated)
                 outputs = model.falcon(inputs_embeds=generated)
                 logits = outputs.logits
                 logits = logits[:, -1, :] / (temperature if temperature > 0 else 1.0)
-                # penalty add here #
-                # Apply repetition penalty
+
+                ############################## repetition_penalty ##############################
                 if tokens is not None:
                     for i in range(tokens.shape[0]):
                         for previous_token in set(tokens[i].tolist()):
@@ -1202,28 +961,24 @@ def generate2(model, tokenizer, tokens=None, prompt=None, embed=None, entry_coun
                                 logits[i, previous_token] /= repetition_penalty
                             else:
                                 logits[i, previous_token] *= repetition_penalty
+                ################################################################################
 
                 sorted_logits, sorted_indices = torch.sort(logits, descending=True)
-                cumulative_probs = torch.cumsum(
-                    nnf.softmax(sorted_logits, dim=-1), dim=-1
-                )
+                cumulative_probs = torch.cumsum(nnf.softmax(sorted_logits, dim=-1), dim=-1)
                 sorted_indices_to_remove = cumulative_probs > top_p
-                sorted_indices_to_remove[..., 1:] = sorted_indices_to_remove[
-                                                    ..., :-1
-                                                    ].clone()
+                sorted_indices_to_remove[..., 1:] = sorted_indices_to_remove[..., :-1].clone()
                 sorted_indices_to_remove[..., 0] = 0
 
                 indices_to_remove = sorted_indices[sorted_indices_to_remove]
                 logits[:, indices_to_remove] = filter_value
+
                 #############   max output  #############
                 # next_token = torch.argmax(logits, -1).unsqueeze(0)
                 ############# random output #############
                 probs = nnf.softmax(logits, dim=-1)
                 next_token = torch.multinomial(probs, num_samples=1)
                 #########################################
-                # next_token_embed = model.gemma.model.embed_tokens(next_token)
-                # next_token_embed = model.gemma.base_model.model.model.embed_tokens(next_token)
-                # next_token_embed = model.gpt.transformer.wte(next_token)
+
                 if model.LoRaActivated:
                     next_token_embed = model.falcon.base_model.model.model.embed_tokens(next_token)
                 else:
@@ -1245,6 +1000,7 @@ def generate2(model, tokenizer, tokens=None, prompt=None, embed=None, entry_coun
     return generated_list[0]
 
 class OxfordDataset(torch.utils.data.Dataset):
+
     def __len__(self) -> int:
         return self.data_len
 
@@ -1292,7 +1048,6 @@ class OxfordDataset(torch.utils.data.Dataset):
             humor = torch.cat((humor, torch.zeros(padding_humor, dtype=torch.int64)))
         elif padding_humor < 0:
             humor = humor[:self.max_seq_len_emo]
-
         return emotion, sentiment, humor
 
     def __getitem__(self, item: int) -> tuple[Tensor, Tensor, Any, int, Tensor, Tensor, Tensor, Any, Any, Any]:
@@ -1307,80 +1062,19 @@ class OxfordDataset(torch.utils.data.Dataset):
             emotion = torch.load('../../Instagram/ESH/emotion/' + self.image_ids[item] + '.pt', weights_only=False).cpu()
             sentiment = torch.load('../../Instagram/ESH/sentiment/' + self.image_ids[item] + '.pt', weights_only=False).cpu()
             humor = torch.load('../../Instagram/ESH/humor/' + self.image_ids[item] + '.pt', weights_only=False).cpu()
-            # emotion, sentiment, humor = self.emotion[self.image_ids[item]], self.sentiment[self.image_ids[item]], self.humor[self.image_ids[item]]
-            # emotion, sentiment, humor = self.pad_emotion(item)
-            # emotion, sentiment, humor = self.bertTokenize(self.emotion[self.image_ids[item]]), self.bertTokenize(self.sentiment[self.image_ids[item]]), self.bertTokenize(self.humor[self.image_ids[item]])
-
         if self.normalize_prefix:
             prefix = prefix.float()
             prefix = prefix / prefix.norm(2, -1)
         funnyscore = self.funny_scores[item]
         image_id = self.image_ids[item]
         caption = self.captions[item]
-
-        # return tokens, mask, prefix, item, emotion, sentiment, humor, funnyscore
         return tokens, mask, prefix, item, emotion, sentiment, humor, funnyscore, image_id, caption
 
-    def filter_data_by_bleu(self, model, batch_size=20, bleu_threshold=0.1, file_path=None):
-        """
-        Filter dataset based on BLEU scores using batch processing.
-
-        Args:
-            model: The model used for generating sentences.
-            batch_size: Number of samples per batch.
-            bleu_threshold: Minimum BLEU score to keep a sample.
-        """
-        dataloader = DataLoader(self, batch_size=batch_size, shuffle=False, drop_last=True)
-
-        # Temporary storage for filtered indices
-        filtered_indices = []
-        device = torch.device('cuda:0')
-
-        progress = tqdm(total=len(dataloader), desc="Filtering train dataset")
-        for batch in dataloader:
-            tokens_batch, masks_batch, prefixes_batch, original_indices = batch
-            tokens_batch, masks_batch, prefixes_batch = tokens_batch.to(device), masks_batch.to(
-                device), prefixes_batch.to(device, dtype=torch.bfloat16)
-
-            # Forward pass
-            prefix_embeds = model.clip_project(prefixes_batch).view(-1, self.prefix_length, model.embedding_size)
-            text_embeds = model.falcon.model.embed_tokens(tokens_batch)
-            embedding_cat = torch.cat((prefix_embeds, text_embeds), dim=1)
-            outputs = model.falcon(inputs_embeds=embedding_cat, attention_mask=masks_batch)
-            logits = outputs.logits[:, self.prefix_length - 1:-1]
-            generated_tokens_batch = torch.argmax(logits, dim=-1)
-
-            # BLEU calculation and filtering
-            for i, original_idx in enumerate(original_indices):
-                reference = self.captions_tokens[original_idx].tolist()
-                candidate = generated_tokens_batch[i].tolist()
-                bleu_score = sentence_bleu([reference], candidate, weights=(1, 0, 0, 0))
-
-                if bleu_score <= bleu_threshold:
-                    filtered_indices.append(original_idx)
-            progress.update()
-
-        # Update dataset based on filtered indices
-        print(f"Before Filtered: {len(self.captions_tokens)}, After Filtered: {len(filtered_indices)}, BLEU <= {bleu_threshold}")
-        self.captions = [self.captions[i] for i in filtered_indices]
-        self.image_ids = [self.image_ids[i] for i in filtered_indices]
-        self.captions_tokens = [self.captions_tokens[i] for i in filtered_indices]
-        self.caption2embedding = [self.caption2embedding[i] for i in filtered_indices]
-        del tokens_batch, masks_batch, prefixes_batch, original_indices, prefix_embeds, text_embeds, embedding_cat, outputs, logits, generated_tokens_batch, reference, candidate, bleu_score
-        gc.collect()
-        torch.cuda.empty_cache()
-
-    def __init__(self, data_path: str, prefix_length: int, normalize_prefix=False,
-                 batch_size=30, bleu_threshold=0.4, datafrom='Oxford'):
+    def __init__(self, data_path: str, prefix_length: int, normalize_prefix=False, datafrom='Oxford'):
         self.data_path = data_path
         self.datafrom = datafrom
         self.bleu = False
-        # self.tokenizer = GPT2Tokenizer.from_pretrained(gpt2_type)
-        # self.tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
         self.tokenizer = AutoTokenizer.from_pretrained("tiiuae/Falcon3-1B-Base")
-        # self.tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B")
-        # self.tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neo-1.3B")
-        # self.tokenizer = AutoTokenizer.from_pretrained("EleutherAI/gpt-neo-2.7B")
         self.prefix_length = prefix_length
         self.normalize_prefix = normalize_prefix
         with open(data_path, 'rb') as f:
@@ -1440,144 +1134,26 @@ class OxfordDataset(torch.utils.data.Dataset):
                 self.data_len = len(self.captions_tokens)
                 with open(f"{self.data_path[:-4]}_bleu_all.pkl", 'wb') as f:
                     pickle.dump([self.captions_tokens, self.caption2embedding, self.max_seq_len], f)
-        if datafrom == 'Oxford':
-            print("Load ESH from file")
-            # self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford.csv')
-            # self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_filter.csv')
-            # self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_sentence_generate_Oxford.csv')
-            # self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_sentence_generate_Oxford_bert.csv')
-            # self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_sentence_generate_Oxford_bert_5384.csv')
-            # self.emotion_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_emotion_filter.csv')
-            # self.sentiment_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_sentiment_filter.csv')
-            # self.humor_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_humor_filter.csv')
-        else:
-            # self.emotions_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{datafrom}.csv')
-            # self.emotions_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{datafrom}_filter.csv')
-            # self.emotions_data = pd.read_csv(f'../Data/Instagram/Minigpt4_sentence_{datafrom}.csv')
+        if datafrom != 'Oxford':
             self.emotions_data = pd.read_csv(f'../Data/Instagram/Minigpt4_sentence_{datafrom}_bert.csv')
-            # self.emotion_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{datafrom}_emotion_filter.csv')
-            # self.sentiment_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{datafrom}_sentiment_filter.csv')
-            # self.humor_data = pd.read_csv(f'../Data/Instagram/Minigpt4_{datafrom}_humor_filter.csv')
-            # self.emotion will save the emotion data for each image
             self.emotion = dict()
             self.sentiment = dict()
             self.humor = dict()
-
-            # self.max_seq_len_emo = 21
-            # for i in range(self.emotions_data.shape[0]):
-            #     image_id = self.emotions_data.iloc[i]['image_id']
-            #     emotion = str(self.emotions_data.iloc[i]['emotion']).replace(';', ' ')
-            #     sentiment = str(self.emotions_data.iloc[i]['sentiment']).replace(';', ' ')
-            #     humor = str(self.emotions_data.iloc[i]['humor']).replace(';', ' ')
-            #     self.emotion[image_id] = torch.tensor(self.tokenizer.encode(emotion, max_length=64, truncation=True), dtype=torch.int64)
-            #     self.sentiment[image_id] = torch.tensor(self.tokenizer.encode(sentiment, max_length=64, truncation=True), dtype=torch.int64)
-            #     self.humor[image_id] = torch.tensor(self.tokenizer.encode(humor, max_length=64, truncation=True, padding=True), dtype=torch.int64)
-
-            # padding_emotion = 384 - (self.emotion_data.shape[1] - 1)
-            # padding_sentiment = 384 - (self.sentiment_data.shape[1] - 1)
-            # padding_humor = 768 - (self.humor_data.shape[1] - 1)
-            # for i in range(self.emotion_data.shape[0]):
-            #     image_id = self.emotion_data.iloc[i]['image_id']
-            #     emotion = torch.tensor(self.emotion_data.iloc[i][1:].tolist())
-            #     self.emotion[image_id] = torch.cat((emotion, torch.zeros(padding_emotion, dtype=torch.int64)))
-            #     sentiment = torch.tensor(self.sentiment_data.iloc[i][1:].tolist())
-            #     self.sentiment[image_id] = torch.cat((sentiment, torch.zeros(padding_sentiment, dtype=torch.int64)))
-            #     humor = torch.tensor(self.humor_data.iloc[i][1:].tolist())
-            #     self.humor[image_id] = torch.cat((humor, torch.zeros(padding_humor, dtype=torch.int64)))
-
-            # with tqdm(total=self.emotions_data.shape[0]) as pbar:
-            #     for i in range(self.emotions_data.shape[0]):
-            #         image_id = self.emotions_data.iloc[i]['image_id']
-            #         # if image_id in self.image_ids:
-            #         token = torch.tensor(ast.literal_eval(self.emotions_data.iloc[i]['emotion']))
-            #         self.emotion[image_id] = token
-            #         torch.save(token, f"../../Instagram/ESH/emotion/{image_id}.pt")
-            #         token = torch.tensor(ast.literal_eval(self.emotions_data.iloc[i]['sentiment']))
-            #         self.sentiment[image_id] = token
-            #         torch.save(token, f"../../Instagram/ESH/sentiment/{image_id}.pt")
-            #         token = torch.tensor(ast.literal_eval(self.emotions_data.iloc[i]['humor']))
-            #         self.humor[image_id] = token
-            #         torch.save(token, f"../../Instagram/ESH/humor/{image_id}.pt")
-            #         pbar.update(1)
-            #     pbar.close()
-            # del self.emotions_data
-            # gc.collect()
         print(f"Train Data size: {len(self)}")
-        # self.filter_data_by_bleu(model, batch_size, bleu_threshold)
-
-class ClipCocoDataset(Dataset):
-
-    def __len__(self) -> int:
-        return len(self.captions_tokens)
-
-    def pad_tokens(self, item: int):
-        tokens = self.captions_tokens[item]
-        padding = self.max_seq_len - tokens.shape[0]
-        if padding > 0:
-            tokens = torch.cat((tokens, torch.zeros(padding, dtype=torch.int64) - 1))
-            self.captions_tokens[item] = tokens
-        elif padding < 0:
-            tokens = tokens[:self.max_seq_len]
-            self.captions_tokens[item] = tokens
-        mask = tokens.ge(0)  # mask is zero where we out of sequence
-        tokens[~mask] = 0
-        mask = mask.float()
-        mask = torch.cat((torch.ones(self.prefix_length), mask), dim=0)  # adding prefix mask
-        return tokens, mask
-
-    def __getitem__(self, item: int) -> Tuple[torch.Tensor, ...]:
-        tokens, mask = self.pad_tokens(item)
-        prefix = self.prefixes[self.caption2embedding[item]]
-        if self.normalize_prefix:
-            prefix = prefix.float()
-            prefix = prefix / prefix.norm(2, -1)
-        return tokens, mask, prefix
-
-    def __init__(self, data_path: str, prefix_length: int, gpt2_type: str = "gpt2",
-                 normalize_prefix=False):
-        # self.tokenizer = GPT2Tokenizer.from_pretrained(gpt2_type)
-        # self.tokenizer = AutoTokenizer.from_pretrained("google/gemma-2-2b-it")
-        self.tokenizer = AutoTokenizer.from_pretrained("tiiuae/Falcon3-1B-Base")
-        self.prefix_length = prefix_length
-        self.normalize_prefix = normalize_prefix
-        with open(data_path, 'rb') as f:
-            all_data = pickle.load(f)
-        print("Data size is %0d" % len(all_data["clip_embedding"]))
-        sys.stdout.flush()
-        self.prefixes = all_data["clip_embedding"]
-        captions_raw = all_data["captions"]
-        self.image_ids = [caption["image_id"] for caption in captions_raw]
-        self.captions = [caption['caption'] for caption in captions_raw]
-        if os.path.isfile(f"{data_path[:-4]}_tokens.pkl"):
-            with open(f"{data_path[:-4]}_tokens.pkl", 'rb') as f:
-                self.captions_tokens, self.caption2embedding, self.max_seq_len = pickle.load(f)
-        else:
-            self.captions_tokens = []
-            self.caption2embedding = []
-            max_seq_len = 0
-            for caption in captions_raw:
-                self.captions_tokens.append(torch.tensor(self.tokenizer.encode(caption['caption']), dtype=torch.int64))
-                self.caption2embedding.append(caption["clip_embedding"])
-                max_seq_len = max(max_seq_len, self.captions_tokens[-1].shape[0])
-            # self.max_seq_len = max_seq_len
-            with open(f"{data_path[:-4]}_tokens.pkl", 'wb') as f:
-                pickle.dump([self.captions_tokens, self.caption2embedding, max_seq_len], f)
-        all_len = torch.tensor([len(self.captions_tokens[i]) for i in range(len(self))]).float()
-        self.max_seq_len = min(int(all_len.mean() + all_len.std() * 10), int(all_len.max()))
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+########################  pre-trained  model ########################
 # trainData = '../Data/Oxford_HIC/parse/oxford_3000_only1_300_8_ViT-B_32_train.pkl'
 # testData = '../Data/Oxford_HIC/parse/oxford_3000_only1_300_2_ViT-B_32_test.pkl'
-# trainData = '../Data/Instagram/parse/100up_only200_passlength_12_o_mcdonalds_switzerland_ViT-B_32_train.pkl'
-# testData = '../Data/Instagram/parse/100up_only200_passlength_12_x_mcdonalds_switzerland_ViT-B_32_test.pkl'
-# trainData = '../Data/Instagram/parse/100up_only200_passlength_10_o_sonicdrivein_ViT-B_32_train.pkl'
-# testData = '../Data/Instagram/parse/100up_only200_passlength_10_x_sonicdrivein_ViT-B_32_test.pkl'
-# trainData = '../Data/Instagram/parse/100up_only200_lessNotFunImg_53_171_passlength_12_o_mcdonalds_switzerland_ViT-B_32_train.pkl'
-# testData = '../Data/Instagram/parse/100up_only200_lessNotFunImg_53_247_passlength_12_x_mcdonalds_switzerland_ViT-B_32_test.pkl'
-# testData = '../Data/Instagram/parse/100up_only200_lessNotFunImg_53_247_passlength_12_x_mcdonalds_switzerland_ViT-B_32_testAll.pkl'
-trainData = '../Data/Instagram/parse/100up_only200_lessNotFunImg_169_131_passlength_10_o_sonicdrivein_ViT-B_32_train.pkl'
+######################  mcdonalds_switzerland  ######################
+trainData = '../Data/Instagram/parse/100up_only200_lessNotFunImg_53_171_passlength_12_o_mcdonalds_switzerland_ViT-B_32_train.pkl'
+testData = '../Data/Instagram/parse/100up_only200_lessNotFunImg_53_171_passlength_12_x_mcdonalds_switzerland_ViT-B_32_test.pkl'
+testData = '../Data/Instagram/parse/100up_only200_lessNotFunImg_53_171_passlength_12_x_mcdonalds_switzerland_ViT-B_32_testAll.pkl'
+##########################  sonicdrivein  ###########################
+# trainData = '../Data/Instagram/parse/100up_only200_lessNotFunImg_169_55_passlength_10_o_sonicdrivein_ViT-B_32_train.pkl'
 # testData = '../Data/Instagram/parse/100up_only200_lessNotFunImg_169_55_passlength_10_x_sonicdrivein_ViT-B_32_test.pkl'
-testData = '../Data/Instagram/parse/100up_only200_lessNotFunImg_169_131_passlength_10_x_sonicdrivein_ViT-B_32_testAll.pkl'
+testData = '../Data/Instagram/parse/100up_only200_lessNotFunImg_169_55_passlength_10_x_sonicdrivein_ViT-B_32_testAll.pkl'
+#####################################################################
 prefix_length = 64
 normalize_prefix = False
 train_dataform = "sonicdrivein"
@@ -1588,90 +1164,6 @@ train_dataform = None
 test_dataform = None
 
 if train_dataform:
-    ##################### oxford_300k #####################
-    # train_image = ['imgflip_34', 'bokete_3820', 'imgflip_0','imgflip_8', 'imgflip_15', 'imgflip_19', 'bokete_104530','imgflip_730', 'imgflip_130', 'imgflip_677']
-    # train_text = ['You finish doing something at your friends house and look at your phone; 7 missed calls from your mom; 7 missed calls from your mom'
-    #               ,'I\'m in my 50s!'
-    #               ,'School; Memes'
-    #               ,'image tagged in memes,one does not simply'
-    #               ,'THAT; IS WHAT A GOOD MEME LOOKS LIKE'
-    #               ,'NOT SURE IF PEOPLE ARE UPVOTING MEMES; OR USER NAMES'
-    #               ,'It\'s a family night runaway.'
-    #               ,'CHUCK IS THE GOOD TYPE OF SCUMBAG; CUZ HE ONLY ROASTS YOU FROM YOUR INSIDES'
-    #               ,'SO YOUR TELLIN\' ME THAT SCHOOLS GOOD FOR YOU'
-    #               ,'Y\'ALL GOT ANY MORE OF THEM; JOBS?']
-    ##################### oxford_100k #####################
-    # train_image = ['imgflip_34', 'bokete_3820', 'imgflip_0','imgflip_8', 'imgflip_15', 'imgflip_19', 'bokete_104530','imgflip_730', 'imgflip_130', 'imgflip_677']
-    # train_text = ['You finish doing something at your friends house and look at your phone; 7 missed calls from your mom; 7 missed calls from your mom'
-    #               ,'I\'m in my 50s!'
-    #               ,'School; Memes'
-    #               ,'image tagged in memes,one does not simply'
-    #               ,'THAT; IS WHAT A GOOD MEME LOOKS LIKE'
-    #               ,'NOT SURE IF PEOPLE ARE UPVOTING MEMES; OR USER NAMES'
-    #               ,'It\'s a family night runaway.'
-    #               ,'Chuck Norris doesn\'t go washroom; He goes washBOOM!'
-    #               ,'SO YOUR TELLIN\' ME THAT SCHOOLS GOOD FOR YOU'
-    #               ,'Y\'ALL GOT ANY MORE OF THEM; JOBS?']
-    ##################### oxford_Top10_300k #####################
-    # train_image = ['bokete_100136', 'bokete_100144', 'bokete_100174','bokete_100193', 'bokete_100268', 'bokete_100287', 'bokete_100295','bokete_10031', 'bokete_100498', 'bokete_24339']
-    # train_text = ['The wax isn\'t dry yet.'
-    #               ,'I\'m sorry to hear that.'
-    #               ,'You didn\'t put that microphone in the register, did you?'
-    #               ,'I\'m showing my brother the privilege of being the youngest.'
-    #               ,'Are you ready to join us?'
-    #               ,'He\'s cute, he\'s 100% capable of killing.'
-    #               ,'The ground suddenly fell to the left.'
-    #               ,'"Mama, there\'s something in the front mat!"'
-    #               ,'"You don\'t have a dad?" "You don\'t have a mom?"'
-    #               ,'This month, I\'ve only got this much to offer.']
-    ##################### oxford_Top10_300k_mess #####################
-    # train_image = ['bokete_100345', 'bokete_100360', 'bokete_100364','bokete_100193', 'bokete_100372', 'bokete_100432', 'bokete_100295','bokete_100453', 'bokete_100498', 'bokete_100459']
-    # train_text = ['I had a dream about going to school, so I want to take a day off from school.'
-    #               ,'I went to the woods for a jog, and there was a lot of spider webs.'
-    #               ,'I\'d like to ask you a different color.'
-    #               ,'I\'m showing my brother the privilege of being the youngest.'
-    #               ,'Ah! You bumped into me in the morning!'
-    #               ,'Are you sure it\'s your dad who left you when you were three?'
-    #               ,'The ground suddenly fell to the left.'
-    #               ,'In the first place, there\'s a problem with Snow White, who eats apples given to an old lady who looks so bad.'
-    #               ,'It was at this time that they switched.'
-    #               ,'Did you think it was corn?']
-    ##################### oxford_Only1200_300k #####################
-    # train_image = ['imgflip_0', 'imgflip_101', 'imgflip_1033','imgflip_11', 'imgflip_117', 'imgflip_16', 'imgflip_189','imgflip_23', 'imgflip_47', 'imgflip_504']
-    # train_text = ['12 dollars; 11 dollars with 1 dollar shipping'
-    #               ,'I HAD A GIRLFRIEND; AAAAAAND ITS GONE'
-    #               ,'I POUR THE CEREAL AFTER I POUR THE MILK'
-    #               ,'WAITING FOR MY PHONE TO GET  TO 100%'
-    #               ,'You when you have over one test at school in a day'
-    #               ,'IF SOMEONE WANTS TO KILL YOU; GO TO A LIVING ROOM'
-    #               ,'you; eating 5 pounds of cheese; every day; your stomach'
-    #               ,'Me:stands up to stretch my legs; The person who had been pushing my wheelchair for the last 26 years'
-    #               ,'Me: Opens door for some fresh air; Everyone else in the submarine:'
-    #               ,'THEY TOOK AWAY MY HAPPY MEAL I TOOK AWAY THEIR HAPPINESS']
-    ##################### oxford_Only100_300k #####################
-    # train_image = ['2spbgym', 'all-the-things', 'imgflip_0', 'imgflip_1033','imgflip_11', 'imgflip_117', 'imgflip_16', 'imgflip_189','imgflip_23', 'imgflip_504']
-    # train_text = ['climb a mountain? pff, i have wings...'
-    #               ,'go to a pizza buffet eat all the pizza'
-    #               ,'12 dollars; 11 dollars with 1 dollar shipping'
-    #               ,'I POUR MILK BEFORE CEREAL'
-    #               ,'ME WAITING FOR MY INTERNET TO RECONNECT'
-    #               ,'calling the teacher mom'
-    #               ,'IF SOMEONE DIES IN THE LIVING ROOM... IS IT STILL CALLED THE LIVING ROOM?'
-    #               ,'you; losing a few seconds of your life looking at this'
-    #               ,'me: gets up and starts clapping because the chiefs won; the guy who has been pushing my wheelchair for 10 years'
-    #               ,'THEY TOOK AWAY MY HAPPY MEAL I TOOK AWAY THEIR HAPPINESS']
-    ##################### oxford_only10 #####################
-    # train_image = ['2spbgym', 'all-the-things', 'imgflip_0', 'imgflip_1033','imgflip_11', 'imgflip_117', 'imgflip_16', 'imgflip_189','imgflip_23', 'imgflip_504']
-    # train_text = ['i\'ll take it sure ur not chicken?',
-    #               'avoid all the work',
-    #               'due tomorrow; do tomorrow',
-    #               'i want to speak to your manager',
-    #               'school: *closes*; the kid who was in the bathroom:',
-    #               'almost getting pass an extremely hard level but failing last minute',
-    #               'you can\'t lose your mind; if you don\'t have one',
-    #               'you; doing nothing; today; teacher',
-    #               'students: *acting crazy*; teacher: pay attention! that kid named attention:',
-    #               'they called me four eyes. i call them no eyes.']
     ####################### default #######################
     train_image = []
     train_text = []
@@ -1713,7 +1205,6 @@ if train_dataform:
                 tokens_list.append(tokens)
                 mask_list.append(mask)
                 prefix_list.append(prefix)
-                # emotion, sentiment, humor = trainDataset.pad_emotion(item)
                 train_emotion_list.append(emotion)
                 train_sentiment_list.append(sentiment)
                 train_humor_list.append(humor)
@@ -1737,7 +1228,6 @@ if train_dataform:
                     mask_list.append(mask)
                     prefix_list.append(prefix)
                     train_gt.append(caption)
-                    # emotion, sentiment, humor = trainDataset.pad_emotion(item)
                     train_emotion_list.append(emotion)
                     train_sentiment_list.append(sentiment)
                     train_humor_list.append(humor)
@@ -1754,38 +1244,6 @@ if train_dataform:
     print(train_emotion.shape, train_sentiment.shape, train_humor.shape, train_funnyscore.shape)
 
 if test_dataform:
-    ##################### oxford_300k #####################
-    # test_image = ['imgflip_7', 'imgflip_32']
-    # test_text = ['CHEESE; ME AT 3 AM; CHEESE; MY MOM WHO WAS WAITING; ME'
-    #               ,'IS THIS A PIGEON?']
-    ##################### oxford_100k #####################
-    # test_image = ['imgflip_7', 'imgflip_32']
-    # test_text = ['THE DOG FOOD; MY DOG; DOG FOOD; ME LOOKING AT HIM; MY DOG'
-    #               ,'MATH; ME; IS THIS THE REASON I DROPPED OUT OF COLLEGE?']
-    ##################### oxford_10 k #####################
-    # test_image = ['bokete_111723', 'imgflip_57']
-    # test_text = ['I\'m going to take care of you. I\'m going to take care of you. I\'m going to take care of you.'
-    #               ,'WHAT\'S DONE IN THE DARK WILL ALWAYS COME OUT IN THE LIGHT; BUT THATS NONE OF MY BUSINESS']
-    ##################### oxford_Top10_300k ###############
-    # test_image = ['are-you-serious-face', 'bokete_24326']
-    # test_text = ['you have windows 98 seriously?'
-    #               ,'The answer is 10.']
-    ##################### oxford_Top10_300k_mess ##########
-    # test_image = ['imgflip_156', 'bokete_24326']
-    # test_text = ['Friend: I just had a dream in which I married my crush! My dreams:'
-    #               ,'The answer is 10.']
-    ##################### oxford_Only1200_300k ############
-    # test_image = ['imgflip_130', 'imgflip_659']
-    # test_text = ['0 VIEWS 5 DISLIKES'
-    #               ,'when the mobile game ad is so laggy that it crashes your game and you lose out on a reward:']
-    ##################### oxford_Only100_300k #############
-    # test_image = ['i-love-coloring-kid', 'imgflip_130']
-    # test_text = ['she started writing notes !!'
-    #               ,'WHEN YOUR FRIEND; DOSENT LIKE ROOT BEER']
-    ##################### oxford_only10 ###################
-    # test_image = ['bokete_100174', 'imgflip_834']
-    # test_text = ['get out of my way. i\'ll do it.'
-    #                 ,'me fully prepared for the test; question 1']
     ####################### default #######################
     test_image = []
     test_text = []
@@ -1830,7 +1288,6 @@ if test_dataform:
                 tokens_list.append(tokens)
                 mask_list.append(mask)
                 prefix_list.append(prefix)
-                # emotion, sentiment, humor = testDataset.pad_emotion(item)
                 test_emotion_list.append(emotion)
                 test_sentiment_list.append(sentiment)
                 test_humor_list.append(humor)
@@ -1848,12 +1305,10 @@ if test_dataform:
                     test_caption[image_id] = []
                     test_caption[image_id].append(caption)
                 if caption in test_text and image_id not in test_image_id_list:
-                    # print(f"Image ID: {image_id}, Caption: {caption}")
                     tokens, mask, prefix, item, emotion, sentiment, humor, funnyscore = testDataset[i]
                     tokens_list.append(tokens)
                     mask_list.append(mask)
                     prefix_list.append(prefix)
-                    # emotion, sentiment, humor = testDataset.pad_emotion(item)
                     test_emotion_list.append(emotion)
                     test_sentiment_list.append(sentiment)
                     test_humor_list.append(humor)
@@ -1871,10 +1326,13 @@ if test_dataform:
     print(test_tokens.shape, test_mask.shape, test_prefix.shape)
     print(test_emotion.shape, test_sentiment.shape, test_humor.shape, test_funnyscore.shape)
 
+####################  Load the pre-trained model ####################
 model = ClipCaptionModel(mode='nn', prefix_length=prefix_length, clip_length=prefix_length, prefix_size=512, num_layers=8)
 adapter = True
 save_file = '20250421_oxford_3000_only1_300_82_ESH_bert_cross_concat'
 i = 4
+#####################################################################
+
 if adapter :
     model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i:03d}.pt'))
     model_adapt = ClipCaptionModel(mode='lora', prefix_length=prefix_length, clip_length=prefix_length, prefix_size=512, num_layers=8)
@@ -1884,7 +1342,7 @@ if adapter :
         params = sum([np.prod(p.size()) for p in model_parameters])
         return params
 
-
+    #######################   Activate adapters   #######################
     def weightToLora(fullModel, newModel):
         for name, param in fullModel.named_parameters():
             newModel.state_dict()[name].copy_(param.data)
@@ -1904,20 +1362,24 @@ if adapter :
         return newModel
 
     a = count_trainable_parameters(model)
-    # model = weightToLora(model, model_adapt)
+    model = weightToLora(model, model_adapt)
     del model_adapt
-    # gc.collect()
-    # b = count_trainable_parameters(model)
-    # percent = round((b / a) * 100, 3)
-    # print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
-
-    model.activateLoRa()
-
+    gc.collect()
     b = count_trainable_parameters(model)
     percent = round((b / a) * 100, 3)
     print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
+    #####################################################################
 
+    ####################### Activate LoRA in LLM  #######################
+    # model.activateLoRa()
+    # b = count_trainable_parameters(model)
+    # percent = round((b / a) * 100, 3)
+    # print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
+    #####################################################################
+
+######################  Load the adpated model ######################
 save_file = '20250505_100up_only200_lessNotFunImg_169_131_passlength_10_SD_base_0421_oxford_3000_only1_300_82_ESH_filter_cross_concat_combineLoss_onlyLLMadapt'
+#####################################################################
 for i in range(20):
     # i += 10
     if os.path.exists(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'):
@@ -1926,12 +1388,19 @@ for i in range(20):
         model = model.to(device, dtype=torch.bfloat16)
         print(f"Model {i + 1:03d} loaded.")
         out_dir = f'./Model/{save_file}/'
+        ################  Test all the images in test dataset ################
         pred = Predictor(prefix_length, cp_num=i + 1, train_caption=[], test_caption=[],train_image_id_list=[], test_image_id_list=[])
         pred.test(testDataset, model, out_dir)
-#         pred = Predictor(prefix_length, cp_num=i + 1, train_caption=train_caption, test_caption=test_caption, train_image_id_list=train_image_id_list, test_image_id_list=test_image_id_list)
-#         pred.predict("test", test_tokens, test_mask, test_prefix, test_gt, model, test_emotion, test_sentiment, test_humor, test_funnyscore)
-#         pred.predict("train", train_tokens, train_mask, train_prefix, train_gt, model, train_emotion, train_sentiment, train_humor, train_funnyscore)
-#
+        ############### Test 10 images in train + test dataset ###############
+        # pred = Predictor(prefix_length, cp_num=i + 1, train_caption=train_caption, test_caption=test_caption, train_image_id_list=train_image_id_list, test_image_id_list=test_image_id_list)
+        # pred.predict("test", test_tokens, test_mask, test_prefix, test_gt, model, test_emotion, test_sentiment, test_humor, test_funnyscore)
+        # pred.predict("train", train_tokens, train_mask, train_prefix, train_gt, model, train_emotion, train_sentiment, train_humor, train_funnyscore)
+        ######################################################################
+
+######################################################################
+#               Test 10 images in train + test dataset               #
+#                         Concat the results                         #
+######################################################################
 # AllCaption = pd.DataFrame()
 # for i in range(20):
 #     if os.path.exists(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'):
@@ -1946,3 +1415,4 @@ for i in range(20):
 #         AllCaption = pd.concat([AllCaption, textAndLoss], axis=1)
 # # AllCaption.to_csv(f'./Model/{save_file}/{save_file}_test_all.csv', float_format='%.15f', index=False)
 # AllCaption.to_csv(f'./Model/{save_file}/test_all.csv', float_format='%.15f', index=False)
+#####################################################################
