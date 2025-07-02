@@ -533,6 +533,40 @@ def load_model(config_path: str, epoch_or_latest: Union[str, int] = '_latest'):
         print(f"{model_path} is not exist")
     return model, parser
 
+def PCloss(logits: torch.Tensor, tokens: torch.Tensor, use_ce=True):
+    """
+    :param logits: output word logits from the generation model in shape [N, L, E]
+    :param tokens:
+    :param use_ce:
+    :return:
+    """
+    EPSILON = torch.finfo(torch.bfloat16).eps
+    token_length = logits.shape[1]
+    vocab_size = logits.shape[2]
+    loss_weight = 100
+    fp_weights = [4*idx/token_length for idx in range(token_length)]
+    fp_weights = torch.FloatTensor(fp_weights).to(logits.device)
+    if use_ce:
+        ce_thresh = 0.90
+        fp_weights_ = fp_weights[None, fp_weights < ce_thresh, None]
+        prob = nnf.sigmoid(logits[:, fp_weights < ce_thresh])
+        label = nnf.one_hot(tokens[:, fp_weights < ce_thresh], num_classes=vocab_size)
+        bce_entropy = label * torch.log(prob + EPSILON)
+        bce_inv_entropy = (1 - label) * torch.log(1 - prob + EPSILON) * fp_weights_
+        bce_loss = -torch.mean(bce_entropy+bce_inv_entropy)*loss_weight
+        ce_loss = nnf.cross_entropy(logits[:, fp_weights >= ce_thresh].reshape(-1, logits.shape[-1]),
+                                    tokens[:, fp_weights >= ce_thresh].flatten())
+        loss = bce_loss + ce_loss
+        return loss
+    else:
+        fp_weights = fp_weights[None, :, None]
+        prob = nnf.sigmoid(logits)
+        label = nnf.one_hot(tokens, num_classes=vocab_size)
+        bce_entropy = label * torch.log(prob + EPSILON)
+        bce_inv_entropy = (1 - label) * torch.log(1 - prob + EPSILON) * fp_weights
+        loss = -torch.mean(bce_entropy+bce_inv_entropy)*loss_weight
+        return loss
+
 def train(trainData, testData, model: ClipCaptionModel, args,
           lr: float = 2e-5, warmup_steps: int = 5000, output_dir: str = ".", output_prefix: str = "",
           bleu_batch_size=30, bleu_threshold=0.05):
@@ -581,7 +615,9 @@ def train(trainData, testData, model: ClipCaptionModel, args,
             tokens, mask, prefix = tokens.to(device), mask.to(device), prefix.to(device, dtype=torch.bfloat16)
             outputs = model(tokens, prefix, mask)
             logits = outputs.logits[:, trainDataset.prefix_length - 1: -1]
-            loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens.flatten(), ignore_index=0)
+            # loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens.flatten(), ignore_index=0)
+            print(logits.shape, tokens.shape)
+            loss = PCloss(logits, tokens)
             trainLoss += loss.item()
             generated_tokens = torch.argmax(logits, dim=-1)
             bleu_score = sentence_bleu([tokens.flatten().tolist()], generated_tokens.flatten().tolist(),
@@ -612,7 +648,8 @@ def train(trainData, testData, model: ClipCaptionModel, args,
 
                 outputs = model(tokens, prefix, mask)
                 logits = outputs.logits[:, testDataset.prefix_length - 1: -1]
-                loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens.flatten(), ignore_index=0)
+                # loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens.flatten(), ignore_index=0)
+                loss = PCloss(logits, tokens)
                 testLoss += loss.item()
 
                 prefix_embeds = model.clip_project(prefix).view(-1, args.prefix_length, model.embedding_size)
@@ -705,12 +742,12 @@ def train(trainData, testData, model: ClipCaptionModel, args,
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--trainData', default='../Data/Oxford_HIC/parse/oxford_lower_800up_only800_all_ViT-B_32_train.pkl')
-    parser.add_argument('--testData', default='../Data/Oxford_HIC/parse/oxford_lower_800up_only800_rest_300up_top300_ViT-B_32_test.pkl')
-    # parser.add_argument('--trainData', default='../Data/Instagram/parse/10up_only10_sonicdrivein_ViT-B_32_train.pkl')
-    # parser.add_argument('--testData', default='../Data/Instagram/parse/10up_only10_sonicdrivein_ViT-B_32_test.pkl')
-    parser.add_argument('--dataFrom', default='Oxford')
-    parser.add_argument('--out_dir', default='20250216_oxford_lower_800up_only800_rest_300up_top300_transformer_p64_falcon_swin_tf8')
+    # parser.add_argument('--trainData', default='../Data/Oxford_HIC/parse/oxford_lower_800up_only800_all_ViT-B_32_train.pkl')
+    # parser.add_argument('--testData', default='../Data/Oxford_HIC/parse/oxford_lower_800up_only800_rest_300up_top300_ViT-B_32_test.pkl')
+    parser.add_argument('--trainData', default='../Data/Instagram/parse/300up_only300_all_sonicdrivein_ViT-B_32_train.pkl')
+    parser.add_argument('--testData', default='../Data/Instagram/parse/300up_only300_rest_200up_top200_sonicdrivein_ViT-B_32_test.pkl')
+    parser.add_argument('--dataFrom', default='sonicdrivein')
+    parser.add_argument('--out_dir', default='test')
     parser.add_argument('--prefix', default='checkpoint', help='prefix for saved filenames')
     parser.add_argument('--epochs', type=int, default=50)
     parser.add_argument('--save_every', type=int, default=1)

@@ -189,7 +189,8 @@ class Predictor(object):
             out = model.falcon(inputs_embeds=embedding_cat, attention_mask=masks[i].unsqueeze(0))
 
             logits = out.logits[:, self.prefix_length-1: -1]
-            loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens[i].flatten(), ignore_index=0)
+            # loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens[i].flatten(), ignore_index=0)
+            loss = PCloss(logits, tokens[i].unsqueeze(0))
             print(loss)
             caption_token = logits.argmax(-1)[0].cpu()
             caption = tokenizer.decode(caption_token, skip_special_tokens=True)
@@ -300,8 +301,9 @@ class Predictor(object):
                                generate2_df, dataframe_Name("train"), train_df], axis=0)
             print(final.shape)
             print(final.columns)
+            final.to_csv(f'./Model/{save_file}/test_{self.cp_num:03d}.csv', float_format='%.15f', index=False)
 
-            final.to_csv(f'./Model/{save_file}/{save_file}_test_{self.cp_num:03d}.csv', float_format='%.15f', index=False)
+            # final.to_csv(f'./Model/{save_file}/{save_file}_test_{self.cp_num:03d}.csv', float_format='%.15f', index=False)
             # final.to_csv(f'./Model/{save_file}/Generate_mcdonalds_all.csv', index=False)
 
 class MLP(nn.Module):
@@ -550,6 +552,40 @@ class ClipCaptionPrefix(ClipCaptionModel):
         super(ClipCaptionPrefix, self).train(mode)
         self.gpt.eval()
         return self
+
+def PCloss(logits: torch.Tensor, tokens: torch.Tensor, use_ce=True):
+    """
+    :param logits: output word logits from the generation model in shape [N, L, E]
+    :param tokens:
+    :param use_ce:
+    :return:
+    """
+    EPSILON = torch.finfo(torch.bfloat16).eps
+    token_length = logits.shape[1]
+    vocab_size = logits.shape[2]
+    loss_weight = 100
+    fp_weights = [4*idx/token_length for idx in range(token_length)]
+    fp_weights = torch.FloatTensor(fp_weights).to(logits.device)
+    if use_ce:
+        ce_thresh = 0.90
+        fp_weights_ = fp_weights[None, fp_weights < ce_thresh, None]
+        prob = nnf.sigmoid(logits[:, fp_weights < ce_thresh])
+        label = nnf.one_hot(tokens[:, fp_weights < ce_thresh], num_classes=vocab_size)
+        bce_entropy = label * torch.log(prob + EPSILON)
+        bce_inv_entropy = (1 - label) * torch.log(1 - prob + EPSILON) * fp_weights_
+        bce_loss = -torch.mean(bce_entropy+bce_inv_entropy)*loss_weight
+        ce_loss = nnf.cross_entropy(logits[:, fp_weights >= ce_thresh].reshape(-1, logits.shape[-1]),
+                                    tokens[:, fp_weights >= ce_thresh].flatten())
+        loss = bce_loss + ce_loss
+        return loss
+    else:
+        fp_weights = fp_weights[None, :, None]
+        prob = nnf.sigmoid(logits)
+        label = nnf.one_hot(tokens, num_classes=vocab_size)
+        bce_entropy = label * torch.log(prob + EPSILON)
+        bce_inv_entropy = (1 - label) * torch.log(1 - prob + EPSILON) * fp_weights
+        loss = -torch.mean(bce_entropy+bce_inv_entropy)*loss_weight
+        return loss
 
 def generate_beam(model, tokenizer, beam_size: int = 5, prompt=None, embed=None, entry_length=74, temperature=1.0,
                   stop_token: str = ".", ):
@@ -831,10 +867,10 @@ class ClipCocoDataset(Dataset):
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-# trainData = '../Data/Oxford_HIC/parse/oxford_800up_only800_all_ViT-B_32_train.pkl'
-# testData = '../Data/Oxford_HIC/parse/oxford_800up_only800_rest_300up_top300_ViT-B_32_test.pkl'
+# trainData = '../Data/Oxford_HIC/parse/oxford_lower_800up_only800_all_ViT-B_32_train.pkl'
+# testData = '../Data/Oxford_HIC/parse/oxford_lower_800up_only800_rest_300up_top300_ViT-B_32_test.pkl'
 trainData = '../Data/Instagram/parse/300up_only300_all_sonicdrivein_ViT-B_32_train.pkl'
-testData = '../Data/Instagram/parse/300up_only300_rest_200up_top200_sonicdrivein_ViT-B_32_test.pkl'
+testData = '../Data/Instagram/parse/100up_only100_rest_50up_top50_sonicdrivein_ViT-B_32_test.pkl'
 prefix_length = 64
 normalize_prefix = False
 train_dataform = "sonicdrivein"
@@ -987,9 +1023,6 @@ if train_dataform:
     train_mask = torch.stack(mask_list).to(device)
     train_prefix = torch.stack(prefix_list).to(device)
     print(train_tokens.shape, train_mask.shape, train_prefix.shape, len(train_image_id_list))
-    for i in range(len(train_text)):
-        print(f'Image ID: {train_image[i]}, Caption: {train_text[i]}')
-        print(train_text[i] in inside)
 
 if test_dataform:
     ##################### oxford_300k #####################
@@ -1088,10 +1121,9 @@ if test_dataform:
     print(test_tokens.shape, test_mask.shape, test_prefix.shape)
 
 model = ClipCaptionModel(prefix_length, clip_length=prefix_length, prefix_size=512, num_layers=8)
-adapter = False
-# save_file = '202502014_oxford_only800_base_sonicdrivein_only300_transformer_lora_p64_falcon_swin_tf8'
+adapter = True
+save_file = '20250218_300up_only300_rest_200up_top200_sonicdrivein_transformer_p64_falcon_swin_tf8_pcloss'
 i = 1
-
 if adapter :
     model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i:03d}.pt'))
 
@@ -1118,7 +1150,7 @@ if adapter :
 
     model.activateLoRa()
 
-save_file = '202502014_oxford_only800_base_sonicdrivein_only300_transformer_lora_p64_falcon_swin_tf8'
+save_file = '202502018_oxford_lower_only800_base_sonicdrivein_only300_transformer_lora_p64_falcon_swin_tf8_pcloss'
 for i in range(10):
     if os.path.exists(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'):
         model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i + 1:03d}.pt'))
@@ -1138,5 +1170,6 @@ for i in range(10):
         if AllCaption.empty:
             AllCaption = df[['Name']]
         AllCaption = pd.concat([AllCaption, textAndLoss], axis=1)
-AllCaption.to_csv(f'./Model/{save_file}/{save_file}_test_all.csv', float_format='%.15f', index=False)
+# AllCaption.to_csv(f'./Model/{save_file}/{save_file}_test_all.csv', float_format='%.15f', index=False)
+AllCaption.to_csv(f'./Model/{save_file}/test_all.csv', float_format='%.15f', index=False)
 
