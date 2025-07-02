@@ -1,33 +1,29 @@
 import os
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+
+import os
+import gc
+import ast
+import sys
+import pickle
+import random
+import argparse
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from typing import Tuple, Optional, Any
+from nltk.translate.bleu_score import sentence_bleu
+from tqdm import tqdm
+from enum import Enum
 import torch
 import torch.nn as nn
 from torch import Tensor
+from torch.optim import AdamW
 from torch.nn import functional as nnf
 from torch.utils.data import Dataset, DataLoader
-from enum import Enum
-from transformers import GPT2Tokenizer, GPT2LMHeadModel
+from transformers import BertTokenizer, BertModel
 from transformers import get_linear_schedule_with_warmup
 from transformers import AutoTokenizer, AutoModelForCausalLM
-# from transformers import AutoConfig, AutoTokenizer, Gemma2ForCausalLM
-from tqdm import tqdm
-import os
-import pickle
-import sys
-import argparse
-import json
-from typing import Tuple, Optional, Union, Any
-import numpy as np
-import random
-import matplotlib.pyplot as plt
-import pandas as pd
-# from peft import LoraConfig, TaskType, get_peft_model
-from nltk.translate.bleu_score import sentence_bleu
-import gc
-import torch.nn.functional as F
-from transformers import BertTokenizer, BertModel
-import ast
-from torch.optim import AdamW
 
 seed = 42
 random.seed(seed)
@@ -35,12 +31,8 @@ np.random.seed(seed)
 torch.manual_seed(seed)
 torch.cuda.manual_seed_all(seed)
 
-
-class MappingType(Enum):
-    MLP = 'mlp'
-    Transformer = 'transformer'
-
 class OxfordDataset(torch.utils.data.Dataset):
+
     def __len__(self) -> int:
         return len(self.captions_tokens)
 
@@ -78,7 +70,6 @@ class OxfordDataset(torch.utils.data.Dataset):
             humor = torch.cat((humor, torch.zeros(padding_humor, dtype=torch.int64)))
         elif padding_humor < 0:
             humor = humor[:self.max_seq_len_emo]
-
         return emotion, sentiment, humor
 
     def bertTokenize(self, text):
@@ -100,11 +91,12 @@ class OxfordDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, item: int) -> tuple[Tensor, Tensor, Any, int, Tensor, Tensor, Tensor]:
         tokens, mask = self.pad_tokens(item)
+
         if self.datafrom == 'Oxford':
-            prefix = torch.load('../../Oxford_HIC/ImageData/' + self.image_ids[item] + '.pt', weights_only=False)
-            emotion = torch.load('../../Oxford_HIC/ESH/bert_5384/emotion/' + self.image_ids[item] + '.pt', weights_only=False)
-            sentiment = torch.load('../../Oxford_HIC/ESH/bert_5384/sentiment/' + self.image_ids[item] + '.pt', weights_only=False)
-            humor = torch.load('../../Oxford_HIC/ESH/bert_5384/humor/' + self.image_ids[item] + '.pt', weights_only=False)
+            prefix = torch.load('../../Oxford_HIC/ImageData/' + self.image_ids[item] + '.pt', weights_only=False).cpu()
+            emotion = torch.load('../../Oxford_HIC/ESH/bert_5384/emotion/' + self.image_ids[item] + '.pt', weights_only=False).cpu()
+            sentiment = torch.load('../../Oxford_HIC/ESH/bert_5384/sentiment/' + self.image_ids[item] + '.pt', weights_only=False).cpu()
+            humor = torch.load('../../Oxford_HIC/ESH/bert_5384/humor/' + self.image_ids[item] + '.pt', weights_only=False).cpu()
         else:
             prefix = torch.load('../../Instagram/ImageData/' + self.datafrom + '/' + self.image_ids[item] + '.pt', weights_only=False)
             emotion, sentiment, humor = self.emotion[self.image_ids[item]], self.sentiment[self.image_ids[item]], self.humor[self.image_ids[item]]
@@ -165,8 +157,7 @@ class OxfordDataset(torch.utils.data.Dataset):
         gc.collect()
         torch.cuda.empty_cache()
 
-    def __init__(self, data_path: str, prefix_length: int, gpt2_type: str = "gpt2", normalize_prefix=False, model=None,
-                 batch_size=30, bleu_threshold=0.4, datafrom='Oxford'):
+    def __init__(self, data_path: str, prefix_length: int, gpt2_type: str = "gpt2", normalize_prefix=False, model=None, batch_size=30, bleu_threshold=0.4, datafrom='Oxford'):
         self.data_path = data_path
         self.datafrom = datafrom
         self.bleu = False
@@ -189,28 +180,40 @@ class OxfordDataset(torch.utils.data.Dataset):
         self.image_ids = [caption["image_id"] for caption in captions_raw]
         self.captions = [caption['caption'] for caption in captions_raw]
         if os.path.isfile(f"{data_path[:-4]}_bleu_all.pkl"):
-            del all_data
+            del self.prefixes, captions_raw, self.captions, all_data
             gc.collect()
             torch.cuda.empty_cache()
             with open(f"{data_path[:-4]}_bleu_all.pkl", 'rb') as f:
                 self.captions_tokens, self.caption2embedding, self.max_seq_len = pickle.load(f)
+            self.data_len = len(self.captions_tokens)
             all_len = torch.tensor([len(self.captions_tokens[i]) for i in range(len(self))]).float()
             self.max_seq_len = min(int(all_len.mean() + all_len.std() * 10), int(all_len.max()))
+            del self.captions_tokens, self.caption2embedding, self.bert_tokenizer, self.bert_model
+            gc.collect()
+            torch.cuda.empty_cache()
+            sys.stdout.flush()
         else:
             self.captions_tokens = []
             self.caption2embedding = []
             max_seq_len = 0
-            for caption in captions_raw:
-                self.captions_tokens.append(
-                    torch.tensor(self.tokenizer.encode(caption['caption'], max_length=64, truncation=True),
-                                 dtype=torch.int64))
-                self.caption2embedding.append(caption["clip_embedding"])
-                max_seq_len = max(max_seq_len, self.captions_tokens[-1].shape[0])
+            counter = 0
+            with tqdm(total=len(captions_raw)) as pbar:
+                for idx, caption in enumerate(captions_raw):
+                    token = torch.tensor(self.tokenizer.encode(caption['caption'], max_length=64, truncation=True),dtype=torch.int64)
+                    torch.save(token, f"../../Oxford_HIC/caption/bert_5384/{counter}.pt")
+                    self.captions_tokens.append(token)
+                    self.caption2embedding.append(caption["clip_embedding"])
+                    max_seq_len = max(max_seq_len, self.captions_tokens[-1].shape[0])
+                    counter+= 1
+                    pbar.update(1)
             self.max_seq_len = max_seq_len
+            self.data_len = len(self.captions_tokens)
             all_len = torch.tensor([len(self.captions_tokens[i]) for i in range(len(self))]).float()
             self.max_seq_len = min(int(all_len.mean() + all_len.std() * 10), int(all_len.max()))
             with open(f"{self.data_path[:-4]}_bleu_all.pkl", 'wb') as f:
                 pickle.dump([self.captions_tokens, self.caption2embedding, self.max_seq_len], f)
+            del self.captions_tokens, self.caption2embedding
+            gc.collect()
         # if datafrom == 'Oxford':
         #     # self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford.csv')
         #     # self.emotions_data = pd.read_csv('../Data/Oxford_HIC/Minigpt4_Oxford_filter.csv')
@@ -263,7 +266,7 @@ class OxfordDataset(torch.utils.data.Dataset):
         #     pbar.close()
         # del self.emotions_data
         # gc.collect()
-        print(f"Train Data size: {len(self.captions_tokens)}")
+        print(f"Train Data size: {len(self)}")
         # self.filter_data_by_bleu(model, batch_size, bleu_threshold)
 
 class ClipCocoDataset(Dataset):
@@ -375,9 +378,7 @@ class ClipCocoDataset(Dataset):
             self.caption2embedding = []
             max_seq_len = 0
             for caption in captions_raw:
-                self.captions_tokens.append(
-                    torch.tensor(self.tokenizer.encode(caption['caption'], max_length=64, truncation=True),
-                                 dtype=torch.int64))
+                self.captions_tokens.append(torch.tensor(self.tokenizer.encode(caption['caption'], max_length=64, truncation=True), dtype=torch.int64))
                 self.caption2embedding.append(caption["clip_embedding"])
                 max_seq_len = max(max_seq_len, self.captions_tokens[-1].shape[0])
             self.max_seq_len = max_seq_len
@@ -387,6 +388,10 @@ class ClipCocoDataset(Dataset):
                 pickle.dump([self.captions_tokens, self.caption2embedding, self.max_seq_len], f)
         print(f"Train Data size: {len(self.captions_tokens)}")
         self.filter_data_by_bleu(model, batch_size, bleu_threshold)
+
+class MappingType(Enum):
+    MLP = 'mlp'
+    Transformer = 'transformer'
 
 class MLP(nn.Module):
 
@@ -403,6 +408,7 @@ class MLP(nn.Module):
         self.model = nn.Sequential(*layers)
 
 class MlpTransformer(nn.Module):
+
     def __init__(self, in_dim, h_dim, out_d: Optional[int] = None, act=nnf.relu, dropout=0.):
         super().__init__()
         out_d = out_d if out_d is not None else in_dim
@@ -512,12 +518,9 @@ class Transformer(nn.Module):
 class TransformerMapper(nn.Module):
 
     def forward(self, x):
-        ### clip ###
-        # x = self.linear(x).view(x.shape[0], self.clip_length, -1)
         ### swin ###
         if x.shape[2] == 768:
             x = self.linear(x)
-        ############
         ### 768 ###
         # if x.shape[2] != 768:
         #     x = self.linear(x)
@@ -535,7 +538,6 @@ class TransformerMapper(nn.Module):
         # self.linear = nn.Linear(dim_clip, clip_length * dim_embedding)
         ### swin ###
         self.linear = nn.Linear(768, dim_embedding)
-        ############
         ### 768 ###
         # self.linear = nn.Linear(2048, dim_embedding)
         ############
@@ -551,7 +553,6 @@ class CrossTransformerMapper(nn.Module):
             x = self.linear(x)
         if y.shape[2] == 768:
             y = self.linear(y)
-        ############
         ### 768 ###
         # if x.shape[2] != 768:
         #     x = self.linear(x)
@@ -587,19 +588,24 @@ class ClipCaptionModel(nn.Module):
         # embedding_text = self.gemma.base_model.model.model.embed_tokens(tokens)
         # embedding_text = self.gpt.transformer.wte(tokens)
         embedding_text = self.falcon.model.embed_tokens(tokens)
+        ######   Option 1 : LLM embedded + Concat Emotion Sentiment Humor ######
         # embedding_emotion = self.falcon.model.embed_tokens(emotion)
         # embedding_sentiment = self.falcon.model.embed_tokens(sentiment)
         # embedding_humor = self.falcon.model.embed_tokens(humor)
         # empty_ESH = torch.zeros(embedding_emotion.shape[0], 1, embedding_emotion.shape[2], dtype=torch.bfloat16, device=embedding_text.device)
         # embedding_ESH = torch.cat((empty_ESH, embedding_emotion, embedding_sentiment, embedding_humor), dim=1)
+        ######  Option 2 : BERT embedded + linear + Concat Emotion Sentiment Humor ######
         # emotion_proj = self.emotion_linear(emotion).unsqueeze(1)
         # sentiment_proj = self.sentiment_linear(sentiment).unsqueeze(1)
         # humor_proj = self.humor_linear(humor).unsqueeze(1)
         # embedding_ESH = torch.cat((emotion_proj, sentiment_proj, humor_proj), dim=1)
         # embedding_ESH = self.ESH_linear(embedding_ESH.transpose(1, 2)).transpose(1, 2)
+        ######  Option 3 : BERT embedded + Concat Emotion Sentiment Humor + linear ######
         embedding_ESH = torch.cat((emotion, sentiment, humor), dim=1)
         embedding_ESH = self.ESH_linear(embedding_ESH.transpose(1, 2)).transpose(1, 2)
-        ############################################ 202503 ##############################################
+        #################################################################################
+
+        ##################################################################################################
         clip_projections = self.clip_project(prefix).view(-1, self.prefix_length, self.embedding_size)
         visual_projections_swin = self.visual_project_swin(embedding_ESH, clip_projections)
         visual_projections_ESH = self.visual_project_ESH(clip_projections, embedding_ESH)
@@ -665,27 +671,18 @@ class ClipCaptionModel(nn.Module):
         # self.gpt.eval()
         # for param in self.gpt.parameters():
         #     param.requires_grad = False
-
-        self.falcon = AutoModelForCausalLM.from_pretrained("tiiuae/Falcon3-1B-Base")
         # self.falcon = AutoModelForCausalLM.from_pretrained("meta-llama/Llama-3.2-1B")
+        self.falcon = AutoModelForCausalLM.from_pretrained("tiiuae/Falcon3-1B-Base")
         self.embedding_size = self.falcon.model.embed_tokens.weight.shape[1]
         # self.embedding_size = 768
         # self.falcon.eval()
         # for param in self.falcon.parameters():
         #     param.requires_grad = False
-        if mapping_type == MappingType.MLP:
-            self.clip_project = MLP(
-                (prefix_size, (self.embedding_size * prefix_length) // 2, self.embedding_size * prefix_length))
-        else:
-            self.clip_project = TransformerMapper(prefix_size, self.embedding_size, prefix_length, clip_length, num_layers)
+        self.clip_project = TransformerMapper(prefix_size, self.embedding_size, prefix_length, clip_length, num_layers)
         self.visual_project_swin = CrossTransformerMapper(prefix_size, self.embedding_size, prefix_length, clip_length, num_layers)
         self.visual_project_ESH = CrossTransformerMapper(prefix_size, self.embedding_size, prefix_length, clip_length, num_layers)
-        #######################################################################################
-        ### 20250228_oxford_lower_800up_only800_rest_300up_top300_ESH_cross_concat_swin_tf8 ###
-        #######################################################################################
         self.visual_project = nn.Linear(128, 64)
         # self.linear = nn.Linear(self.embedding_size, 2048)
-
         # self.emotion_linear = nn.Linear(384, 768)
         # self.sentiment_linear = nn.Linear(384, 768)
         # self.humor_linear = nn.Linear(768, 768)
@@ -739,14 +736,24 @@ def train(trainData, testData, model: ClipCaptionModel, args,
     trainData_size_list = []
     testData_size_list = []
 
-    device = torch.device('cuda:0')
+    # train_losses = []
+    # test_losses = []
+    # best_train_loss = 9999999999
+    # best_test_loss = 9999999999
+    # train_bleus = []
+    # test_bleus = []
+    # save = []
+    # bleu_threshold_list = []
+    # trainData_size_list = []
+    # testData_size_list = []
+
     batch_size = args.bs
     epochs = args.epochs
     normalize_prefix = args.normalize_prefix
     prefix_length = args.prefix_length
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-    model = model.to(device, dtype=torch.bfloat16)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.eval()
     trainDataset = OxfordDataset(trainData, prefix_length, normalize_prefix, model=model, batch_size=bleu_batch_size, bleu_threshold=bleu_threshold, datafrom=args.datafrom)
     testDataset = OxfordDataset(testData, prefix_length, normalize_prefix, model=model, batch_size=bleu_batch_size, bleu_threshold=bleu_threshold, datafrom=args.datafrom)
@@ -780,15 +787,20 @@ def train(trainData, testData, model: ClipCaptionModel, args,
             # loss = PCloss(logits, tokens)
             trainLoss += loss.item()
             generated_tokens = torch.argmax(logits, dim=-1)
-            bleu_score = sentence_bleu([tokens.flatten().tolist()], generated_tokens.flatten().tolist(),
-                                       weights=(1, 0, 0, 0))
+            bleu_score = sentence_bleu([tokens.flatten().tolist()], generated_tokens.flatten().tolist(), weights=(1, 0, 0, 0))
             trainBleu += bleu_score
+            progress.set_postfix({"loss": loss.item(), "bleu": bleu_score})
+            del tokens, mask, prefix, emotion, sentiment, humor, outputs, logits, generated_tokens, bleu_score
+            gc.collect()
+            torch.cuda.empty_cache()  # 清掉保留但沒用的空間
             # loss = loss - 10 * bleu_score
             loss.backward()
             optimizer.step()
             scheduler.step()
             optimizer.zero_grad()
-            progress.set_postfix({"loss": loss.item(), "bleu": bleu_score})
+            del loss
+            gc.collect()
+            torch.cuda.empty_cache()  # 清掉保留但沒用的空間
             progress.update()
             # if idx % 101 == 100:
             #     break
@@ -807,7 +819,6 @@ def train(trainData, testData, model: ClipCaptionModel, args,
                 tokens, mask, prefix = tokens.to(device), mask.to(device), prefix.to(device, dtype=torch.bfloat16)
                 # emotion, sentiment, humor = emotion.to(device), sentiment.to(device), humor.to(device)
                 emotion, sentiment, humor = emotion.to(device, dtype=torch.bfloat16), sentiment.to(device, dtype=torch.bfloat16), humor.to(device, dtype=torch.bfloat16)
-
                 outputs = model(tokens, prefix, mask, emotion=emotion, sentiment=sentiment, humor=humor)
                 logits = outputs.logits[:, testDataset.prefix_length - 1: -1]
                 loss = nnf.cross_entropy(logits.reshape(-1, logits.shape[-1]), tokens.flatten(), ignore_index=0)
@@ -816,8 +827,10 @@ def train(trainData, testData, model: ClipCaptionModel, args,
                 generated_tokens = torch.argmax(logits, dim=-1)
                 bleu_score = sentence_bleu([tokens.flatten().tolist()], generated_tokens.flatten().tolist(), weights=(1, 0, 0, 0))
                 testBleu += bleu_score
-
                 progress.set_postfix({"loss": loss.item(), "bleu": bleu_score})
+                del loss, outputs, logits, generated_tokens, bleu_score, tokens, mask, prefix, emotion, sentiment, humor
+                gc.collect()
+                torch.cuda.empty_cache()  # 清掉保留但沒用的空間
                 progress.update()
         testLoss /= len(test_dataloader)
         testBleu /= len(test_dataloader)
@@ -901,10 +914,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--trainData', default='../Data/Oxford_HIC/parse/oxford_5384_only1_300_8_ViT-B_32_train.pkl')
     parser.add_argument('--testData', default='../Data/Oxford_HIC/parse/oxford_5384_only1_300_2_ViT-B_32_test.pkl')
-    # parser.add_argument('--trainData', default='../Data/Instagram/parse/300up_only300_all_sonicdrivein_ViT-B_32_train.pkl')
-    # parser.add_argument('--testData', default='../Data/Instagram/parse/300up_only300_rest_200up_top200_sonicdrivein_ViT-B_32_test.pkl')
     parser.add_argument('--datafrom', default='Oxford')
-    parser.add_argument('--out_dir', default='20250420_oxford_5384_only1_300_82_ESH_bert_cross_concat')
+    parser.add_argument('--out_dir', default='20250421_oxford_3000_only1_300_82_ESH_bert_cross_concat')
     parser.add_argument('--prefix', default='checkpoint', help='prefix for saved filenames')
     parser.add_argument('--epochs', type=int, default=50)
     parser.add_argument('--save_every', type=int, default=1)
@@ -928,12 +939,14 @@ def main():
     args.mapping_type = {'mlp': MappingType.MLP, 'transformer': MappingType.Transformer}[args.mapping_type]
     model = ClipCaptionModel(prefix_length, clip_length=prefix_length, prefix_size=prefix_dim, num_layers=args.num_layers, mapping_type=args.mapping_type)
     sys.stdout.flush()
+
     device = torch.device('cuda:0')
     model = model.to(device, dtype=torch.bfloat16)
+
     # 20250115_totalClip_oxford_only100_300k_transformer_p40_falcon_bleu1_0.05 == 32
-    # save_file = '20250204_totalClip_oxford_1000up_only1000_rest_300up_top300_transformer_p64_falcon_swin_tf8_ins'
-    # i = 27
-    # model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i:03d}.pt'))
+    save_file = '20250421_oxford_5384_only1_300_82_ESH_bert_cross_concat'
+    i = 1
+    model.load_state_dict(torch.load(f'./Model/{save_file}/checkpoint-{i:03d}.pt'))
     model.eval()
     train(args.trainData, args.testData, model, args, output_dir=args.out_dir, output_prefix=args.prefix, bleu_batch_size=20, bleu_threshold=0.05)
 
