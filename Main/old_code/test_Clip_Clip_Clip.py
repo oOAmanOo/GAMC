@@ -506,7 +506,7 @@ Generator.generate_withText(image, text_id, 'train', mask)
 
 print('=======================  sample1 =========================')
 print(train[train['image_id'] == 'bokete_51227'].shape[0] > 0)
-image = torch.load('../../Oxford_HIC/ImageClip/imgflip_34.pt', weights_only=False).unsqueeze(0).to(device, dtype=torch.bfloat16)
+image = torch.load('../../../Oxford_HIC/ImageClip/imgflip_34.pt', weights_only=False).unsqueeze(0).to(device, dtype=torch.bfloat16)
 test_gt = ['You finish doing something at your friends house and look at your phone; 7 missed calls from your mom; 7 missed calls from your mom']
 print("ground_truth: ", test_gt)
 text_data = tokenizer(test_gt, return_tensors='pt', padding='max_length', truncation=True, max_length=10)
@@ -524,7 +524,7 @@ Generator.generate_withText(image, text_id, 'train', mask)
 
 print('=======================  sample2 =========================')
 print(train[train['image_id'] == 'bokete_3820'].shape[0] > 0)
-image = torch.load('../../Oxford_HIC/ImageClip/bokete_3820.pt', weights_only=False).unsqueeze(0).to(device, dtype=torch.bfloat16)
+image = torch.load('../../../Oxford_HIC/ImageClip/bokete_3820.pt', weights_only=False).unsqueeze(0).to(device, dtype=torch.bfloat16)
 test_gt = ['I\'m in my 50s!']
 print("ground_truth: ", test_gt)
 text_data = tokenizer(test_gt, return_tensors='pt', padding='max_length', truncation=True, max_length=10)
@@ -542,7 +542,7 @@ Generator.generate_withText(image, text_id, 'train', mask)
 
 print('=======================  sample3 =========================')
 print(train[train['image_id'] == 'imgflip_0'].shape[0] > 0)
-image = torch.load('../../Oxford_HIC/ImageClip/imgflip_0.pt', weights_only=False).unsqueeze(0).to(device, dtype=torch.bfloat16)
+image = torch.load('../../../Oxford_HIC/ImageClip/imgflip_0.pt', weights_only=False).unsqueeze(0).to(device, dtype=torch.bfloat16)
 test_gt = ['Getting hurt from cutting open your leg; Getting hurt from taking off a bandaid']
 print("ground_truth: ", test_gt)
 text_data = tokenizer(test_gt, return_tensors='pt', padding='max_length', truncation=True, max_length=10)
@@ -560,7 +560,7 @@ Generator.generate_withText(image, text_id, 'train', mask)
 
 print('=======================  sample4 =========================')
 print(train[train['image_id'] == 'imgflip_8'].shape[0] > 0)
-image = torch.load('../../Oxford_HIC/ImageClip/imgflip_8.pt', weights_only=False).unsqueeze(0).to(device, dtype=torch.bfloat16)
+image = torch.load('../../../Oxford_HIC/ImageClip/imgflip_8.pt', weights_only=False).unsqueeze(0).to(device, dtype=torch.bfloat16)
 test_gt = ['image tagged in memes,one does not simply']
 print("ground_truth: ", test_gt)
 text_data = tokenizer(test_gt, return_tensors='pt', padding='max_length', truncation=True, max_length=10)
@@ -578,7 +578,7 @@ Generator.generate_withText(image, text_id, 'train', mask)
 
 print('=======================  sample5 =========================')
 print(train[train['image_id'] == 'imgflip_15'].shape[0] > 0)
-image = torch.load('../../Oxford_HIC/ImageClip/imgflip_15.pt', weights_only=False).unsqueeze(0).to(device, dtype=torch.bfloat16)
+image = torch.load('../../../Oxford_HIC/ImageClip/imgflip_15.pt', weights_only=False).unsqueeze(0).to(device, dtype=torch.bfloat16)
 test_gt = ['KIDS WHEN THEIR PARENTS GIVE THEM; "THE TALK"']
 print("ground_truth: ", test_gt)
 text_data = tokenizer(test_gt, return_tensors='pt', padding='max_length', truncation=True, max_length=10)
@@ -596,7 +596,7 @@ Generator.generate_withText(image, text_id, 'train', mask)
 
 print('=======================  sample6 =========================')
 print(train[train['image_id'] == 'imgflip_19'].shape[0] > 0)
-image = torch.load('../../Oxford_HIC/ImageClip/imgflip_19.pt', weights_only=False).unsqueeze(0).to(device, dtype=torch.bfloat16)
+image = torch.load('../../../Oxford_HIC/ImageClip/imgflip_19.pt', weights_only=False).unsqueeze(0).to(device, dtype=torch.bfloat16)
 test_gt = ['NOT SURE IF PEOPLE ARE UPVOTING MEMES; OR USER NAMES']
 print("ground_truth: ", test_gt)
 text_data = tokenizer(test_gt, return_tensors='pt', padding='max_length', truncation=True, max_length=10)
@@ -614,7 +614,7 @@ Generator.generate_withText(image, text_id, 'train', mask)
 
 print('=======================  sample7 =========================')
 print(train[train['image_id'] == 'bokete_104530'].shape[0] > 0)
-image = torch.load('../../Oxford_HIC/ImageClip/bokete_104530.pt', weights_only=False).unsqueeze(0).to(device, dtype=torch.bfloat16)
+image = torch.load('../../../Oxford_HIC/ImageClip/bokete_104530.pt', weights_only=False).unsqueeze(0).to(device, dtype=torch.bfloat16)
 test_gt = ['It\'s a family night runaway.']
 print("ground_truth: ", test_gt)
 text_data = tokenizer(test_gt, return_tensors='pt', padding='max_length', truncation=True, max_length=10)
@@ -632,7 +632,7 @@ Generator.generate_withText(image, text_id, 'train', mask)
 
 print('=======================  sample8 =========================')
 print(train[train['image_id'] == 'imgflip_730'].shape[0] > 0)
-image = torch.load('../../Oxford_HIC/ImageClip/imgflip_730.pt', weights_only=False).unsqueeze(0).to(device, dtype=torch.bfloat16)
+image = torch.load('../../../Oxford_HIC/ImageClip/imgflip_730.pt', weights_only=False).unsqueeze(0).to(device, dtype=torch.bfloat16)
 test_gt = ['CHUCK IS THE GOOD TYPE OF SCUMBAG; CUZ HE ONLY ROASTS YOU FROM YOUR INSIDES']
 print("ground_truth: ", test_gt)
 text_data = tokenizer(test_gt, return_tensors='pt', padding='max_length', truncation=True, max_length=10)
@@ -650,7 +650,7 @@ Generator.generate_withText(image, text_id, 'train', mask)
 
 print('=======================  sample9 =========================')
 print(train[train['image_id'] == 'imgflip_130'].shape[0] > 0)
-image = torch.load('../../Oxford_HIC/ImageClip/imgflip_130.pt', weights_only=False).unsqueeze(0).to(device, dtype=torch.bfloat16)
+image = torch.load('../../../Oxford_HIC/ImageClip/imgflip_130.pt', weights_only=False).unsqueeze(0).to(device, dtype=torch.bfloat16)
 test_gt = ['SO YOUR TELLIN\' ME THAT SCHOOLS GOOD FOR YOU']
 print("ground_truth: ", test_gt)
 text_data = tokenizer(test_gt, return_tensors='pt', padding='max_length', truncation=True, max_length=10)
@@ -668,7 +668,7 @@ Generator.generate_withText(image, text_id, 'train', mask)
 
 print('=======================  sample10 =========================')
 print(train[train['image_id'] == 'imgflip_677'].shape[0] > 0)
-image = torch.load('../../Oxford_HIC/ImageClip/imgflip_677.pt', weights_only=False).unsqueeze(0).to(device, dtype=torch.bfloat16)
+image = torch.load('../../../Oxford_HIC/ImageClip/imgflip_677.pt', weights_only=False).unsqueeze(0).to(device, dtype=torch.bfloat16)
 test_gt = ['Y\'ALL GOT ANY MORE OF THEM; JOBS?']
 print("ground_truth: ", test_gt)
 text_data = tokenizer(test_gt, return_tensors='pt', padding='max_length', truncation=True, max_length=10)
