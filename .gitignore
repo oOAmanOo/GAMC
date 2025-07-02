@@ -1,5 +1,7 @@
 /Citations/CLIP_prefix_caption/Model/
 /Citations/vilio/input/
+/Citations/vilio/data/hm_vgattr3636_MC_all.tsv
+/Citations/vilio/data/hm_vgattr3636_SD_all.tsv
 /Citations/CLIP_prefix_caption/data/
 /Citations/minigpt4/eval_configs/prerained_minigpt4_7b.pth
 /Citations/minigpt4/eval_configs/pretrained_minigpt4_llama2_7b.pth
