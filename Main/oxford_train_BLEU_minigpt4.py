@@ -77,15 +77,11 @@ class OxfordDataset(torch.utils.data.Dataset):
 
         if self.datafrom == 'Oxford':
             prefix = torch.load('../../Oxford_HIC/ImageData/' + self.image_ids[item] + '.pt', weights_only=False)
-            emotion = torch.load('../../Oxford_HIC/ESH/bert_5384/emotion/' + self.image_ids[item] + '.pt',
-                                 weights_only=False)
-            sentiment = torch.load('../../Oxford_HIC/ESH/bert_5384/sentiment/' + self.image_ids[item] + '.pt',
-                                   weights_only=False)
-            humor = torch.load('../../Oxford_HIC/ESH/bert_5384/humor/' + self.image_ids[item] + '.pt',
-                               weights_only=False)
+            emotion = torch.load('../../Oxford_HIC/ESH/bert_5384/emotion/' + self.image_ids[item] + '.pt', weights_only=False)
+            sentiment = torch.load('../../Oxford_HIC/ESH/bert_5384/sentiment/' + self.image_ids[item] + '.pt', weights_only=False)
+            humor = torch.load('../../Oxford_HIC/ESH/bert_5384/humor/' + self.image_ids[item] + '.pt', weights_only=False)
         else:
-            prefix = torch.load('../../Instagram/ImageData/' + self.datafrom + '/' + self.image_ids[item] + '.pt',
-                                weights_only=False)
+            prefix = torch.load('../../Instagram/ImageData/' + self.datafrom + '/' + self.image_ids[item] + '.pt', weights_only=False)
             emotion, sentiment, humor = self.emotion[self.image_ids[item]], self.sentiment[self.image_ids[item]], \
             self.humor[self.image_ids[item]]
 
