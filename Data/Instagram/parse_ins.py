@@ -1,15 +1,11 @@
-import torch
-import skimage.io as io
 import clip
-from PIL import Image
+import torch
 import pickle
-import json
-import os
-from tqdm import tqdm
 import argparse
 import pandas as pd
-from sklearn.model_selection import train_test_split
-
+import skimage.io as io
+from PIL import Image
+from tqdm import tqdm
 
 def main(clip_model_type: str):
     device = torch.device('cuda:0')
