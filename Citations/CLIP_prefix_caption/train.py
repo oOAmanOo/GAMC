@@ -1,28 +1,29 @@
 import os
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+
+import sys
+import json
+import clip
+import pickle
+import argparse
+import numpy as np
+import pandas as pd
+import loralib as lora
+import matplotlib.pyplot as plt
+from enum import Enum
+from tqdm import tqdm
+from scipy.special import softmax
+from typing import Tuple, Optional, Union
+from nltk.translate.bleu_score import sentence_bleu
+from Citations.Parrot_Paraphraser.parrot.filters import Fluency
 import torch
 import torch.nn as nn
+from torch.optim import AdamW
 from torch.nn import functional as nnf
 from torch.utils.data import Dataset, DataLoader
-from enum import Enum
-from transformers import GPT2Tokenizer, GPT2LMHeadModel, AdamW, get_linear_schedule_with_warmup
-from tqdm import tqdm
-import os
-import pickle
-import sys
-import argparse
-import json
-from typing import Tuple, Optional, Union
-import pandas as pd
-import matplotlib.pyplot as plt
-import numpy as np
-from Citations.Parrot_Paraphraser.parrot.filters import Fluency
-from scipy.special import softmax
-from nltk.translate.bleu_score import sentence_bleu
-import clip
+from transformers import GPT2Tokenizer, GPT2LMHeadModel, get_linear_schedule_with_warmup
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-import gc
-import loralib as lora
 
 class MappingType(Enum):
     MLP = 'mlp'
@@ -64,18 +65,40 @@ class ClipCocoDataset(Dataset):
         self.tokenizer.pad_token = self.tokenizer.eos_token
         self.prefix_length = prefix_length
         self.normalize_prefix = normalize_prefix
+
+        ################### Load Instagram Data ###################
         with open(data_path, 'rb') as f:
             all_data = pickle.load(f)
         print("Data size is %0d" % len(all_data["clip_embedding"]))
         sys.stdout.flush()
         self.prefixes = all_data["clip_embedding"]
+        print(type(self.prefixes))
         captions_raw = all_data["captions"]
         self.image_ids = [caption["image_id"] for caption in captions_raw]
         self.captions = [caption['caption'] for caption in captions_raw]
-        # if os.path.isfile(f"{data_path[:-4]}_tokens.pkl"):
-        #     with open(f"{data_path[:-4]}_tokens.pkl", 'rb') as f:
-        #         self.captions_tokens, self.caption2embedding, self.max_seq_len = pickle.load(f)
-        # else:
+        print("Ins Loaded")
+        print(f"Prefix {self.prefixes.shape}, image_ids {len(self.image_ids)}, captions {len(self.captions)}")
+        ################## Load Oxford_HIC  Data ##################
+        if 'train' in data_path:
+            oxford_data_path = '../../Data/Oxford_HIC/parse/oxford_3000_only1_300_8_ViT-B_32_train.pkl'
+        else:
+            oxford_data_path = '../../Data/Oxford_HIC/parse/oxford_3000_only1_300_2_ViT-B_32_test.pkl'
+        with open(oxford_data_path, 'rb') as f:
+            oxford_all_data = pickle.load(f)
+        print("Data size is %0d" % len(oxford_all_data["clip_embedding"]))
+        sys.stdout.flush()
+        oxford_prefixes = torch.cat(oxford_all_data["clip_embedding"], dim=0)
+        oxford_captions_raw = oxford_all_data["captions"]
+        oxford_image_ids = [caption["image_id"] for caption in oxford_captions_raw]
+        oxford_captions = [caption['caption'] for caption in oxford_captions_raw]
+        print("Oxford Ins Loaded")
+        print(f"Oxford Prefix {oxford_prefixes.shape}, image_ids {len(oxford_image_ids)}, captions {len(oxford_captions)}")
+        self.prefixes = torch.cat((self.prefixes, oxford_prefixes), dim=0)
+        self.image_ids += oxford_image_ids
+        self.captions += oxford_captions
+        print("ALL Loaded")
+        print(f"Prefix {self.prefixes.shape}, image_ids {len(self.image_ids)}, captions {len(self.captions)}")
+        ###########################################################
         self.captions_tokens = []
         self.caption2embedding = []
         max_seq_len = 0
@@ -83,9 +106,6 @@ class ClipCocoDataset(Dataset):
             self.captions_tokens.append(torch.tensor(self.tokenizer.encode(caption['caption']), dtype=torch.int64))
             self.caption2embedding.append(caption["clip_embedding"])
             max_seq_len = max(max_seq_len, self.captions_tokens[-1].shape[0])
-        # self.max_seq_len = max_seq_len
-        # with open(f"{data_path[:-4]}_tokens.pkl", 'wb') as f:
-        #     pickle.dump([self.captions_tokens, self.caption2embedding, max_seq_len], f)
         all_len = torch.tensor([len(self.captions_tokens[i]) for i in range(len(self))]).float()
         self.max_seq_len = min(int(all_len.mean() + all_len.std() * 10), int(all_len.max()))
 
@@ -145,9 +165,7 @@ class MultiHeadAttention(nn.Module):
         y = y if y is not None else x
         b, n, c = x.shape
         _, m, d = y.shape
-        # b n h dh
         queries = self.to_queries(x).reshape(b, n, self.num_heads, c // self.num_heads)
-        # b m 2 h dh
         keys_values = self.to_keys_values(y).reshape(b, m, 2, self.num_heads, c // self.num_heads)
         keys, values = keys_values[:, :, 0], keys_values[:, :, 1]
         attention = torch.einsum('bnhd,bmhd->bnmh', queries, keys) * self.scale
@@ -256,11 +274,9 @@ class ClipCaptionModel(nn.Module):
         self.gpt = GPT2LMHeadModel.from_pretrained('gpt2')
         self.gpt_embedding_size = self.gpt.transformer.wte.weight.shape[1]
         if mapping_type == MappingType.MLP:
-            self.clip_project = MLP((prefix_size, (self.gpt_embedding_size * prefix_length) // 2,
-                                     self.gpt_embedding_size * prefix_length))
+            self.clip_project = MLP((prefix_size, (self.gpt_embedding_size * prefix_length) // 2, self.gpt_embedding_size * prefix_length))
         else:
-            self.clip_project = TransformerMapper(mode, prefix_size, self.gpt_embedding_size, prefix_length,
-                                                                     clip_length, num_layers)
+            self.clip_project = TransformerMapper(mode, prefix_size, self.gpt_embedding_size, prefix_length, clip_length, num_layers)
 
 class ClipCaptionPrefix(ClipCaptionModel):
 
@@ -737,15 +753,23 @@ class Predictor(object):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--trainData', default='../../Data/Oxford_HIC/parse/oxford_lower_800up_only800_all_ViT-B_32_train.pkl')
-    parser.add_argument('--testData', default='../../Data/Oxford_HIC/parse/oxford_lower_800up_only800_rest_300up_top300_ViT-B_32_test.pkl')
-    # parser.add_argument('--trainData', default='../../Data/Instagram/parse/100up_only100_passlength_o_10_sonicdrivein_ViT-B_32_train.pkl')
-    # parser.add_argument('--testData', default='../../Data/Instagram/parse/100up_only100_passlength_x_10_sonicdrivein_ViT-B_32_test.pkl')
-    # parser.add_argument('--trainData', default='../../Data/Instagram/parse/100up_only200_passlength_12_o_mcdonalds_switzerland_ViT-B_32_train.pkl')
-    # parser.add_argument('--testData', default='../../Data/Instagram/parse/100up_only200_passlength_12_x_mcdonalds_switzerland_ViT-B_32_test.pkl')
-    parser.add_argument('--out_dir', default='./Model/clip_100up_only200_passlength_12_MC_base_oxford_800_8_300_82')
+    ########################  pre-trained  model ########################
+    # parser.add_argument('--trainData', default='../../Data/Oxford_HIC/parse/oxford_3000_only1_300_8_ViT-B_32_train.pkl')
+    # parser.add_argument('--testData', default='../../Data/Oxford_HIC/parse/oxford_3000_only1_300_2_ViT-B_32_test.pkl')
+    # parser.add_argument('--out_dir', default='./Model/clip_oxford_3000_only1_300_82')
+    ######################  mcdonalds_switzerland  ######################
+    parser.add_argument('--trainData', default='../../Data/Instagram/parse/100up_only200_lessNotFunImg_53_171_passlength_12_o_mcdonalds_switzerland_ViT-B_32_train.pkl')
+    parser.add_argument('--testData', default='../../Data/Instagram/parse/100up_only200_lessNotFunImg_53_171_passlength_12_x_mcdonalds_switzerland_ViT-B_32_test.pkl')
+    parser.add_argument('--testData', default='../../Data/Instagram/parse/100up_only200_lessNotFunImg_53_171_passlength_12_x_mcdonalds_switzerland_ViT-B_32_testAll.pkl')
+    parser.add_argument('--out_dir', default='./Model/clip_100up_only200_lessNotFunImg_53_171_passlength_12_MC_with_oxford_3000_only1_300_82')
+    ##########################  sonicdrivein  ###########################
+    parser.add_argument('--trainData', default='../../Data/Instagram/parse/100up_only200_lessNotFunImg_169_55_passlength_10_o_sonicdrivein_ViT-B_32_train.pkl')
+    parser.add_argument('--testData', default='../../Data/Instagram/parse/100up_only200_lessNotFunImg_169_55_passlength_10_x_sonicdrivein_ViT-B_32_test.pkl')
+    parser.add_argument('--testData', default='../../Data/Instagram/parse/100up_only200_lessNotFunImg_169_55_passlength_10_x_sonicdrivein_ViT-B_32_testAll.pkl')
+    parser.add_argument('--out_dir', default='./Model/clip_100up_only200_lessNotFunImg_169_55_passlength_10_SD_with_oxford_3000_only1_300_82')
+    #####################################################################
     parser.add_argument('--prefix', default='coco_prefix', help='prefix for saved filenames')
-    parser.add_argument('--epochs', type=int, default=10)
+    parser.add_argument('--epochs', type=int, default=20)
     parser.add_argument('--save_every', type=int, default=1)
     parser.add_argument('--prefix_length', type=int, default=10)
     parser.add_argument('--prefix_length_clip', type=int, default=10)
@@ -766,15 +790,18 @@ def main():
 
     sys.stdout.flush()
 
+    ####################  Load the pre-trained model ####################
     save_file = 'clip_oxford_800_8_300_82'
     i = 3
     origin_model.load_state_dict(torch.load(f'./Model/{save_file}/{args.prefix}-{i:03d}.pt'))
+    #####################################################################
 
     def count_trainable_parameters(model):
         model_parameters = filter(lambda p: p.requires_grad, model.parameters())
         params = sum([np.prod(p.size()) for p in model_parameters])
         return params
 
+    #######################   Activate adapters   #######################
     def weightToLora(fullModel, newModel):
         for name, param in fullModel.named_parameters():
             newModel.state_dict()[name].copy_(param.data)
@@ -799,14 +826,11 @@ def main():
     b = count_trainable_parameters(model)
     percent = round((b / a) * 100, 3)
     print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
-    # a = count_trainable_parameters(model)
-    # model.activateLoRa()
-    # b = count_trainable_parameters(model)
-    # percent = round((b / a) * 100, 3)
-    # print("Before: ", a, "After: ", b, "Percent: ", percent, "%")
+    #####################################################################
 
+    ####### TRAIN ########
     # train(train_dataset, test_dataset, model, args, output_dir=args.out_dir, output_prefix=args.prefix)
-
+    ####### TEST  ########
     for i in range(20):
         if os.path.exists(f'{args.out_dir}/{args.prefix}-{i + 1:03d}.pt'):
             model.load_state_dict(torch.load(f'{args.out_dir}/{args.prefix}-{i + 1:03d}.pt'))
@@ -814,7 +838,7 @@ def main():
             pred = Predictor()
             print(f"Model {i + 1:03d} loaded.")
             pred.predict(test_dataset, model, args, i + 1)
-
+    ######################
 
 if __name__ == '__main__':
     main()
