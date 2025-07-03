@@ -5,8 +5,11 @@
 /Citations/CLIP_prefix_caption/Model/complete
 /Citations/minigpt4/eval_configs/prerained_minigpt4_7b.pth
 /Citations/minigpt4/eval_configs/pretrained_minigpt4_llama2_7b.pth
-
-/Data/Oxford_HIC/Generate_original/
+/Citations/BITA/BITA/BITA/BITA/output/output/
+/Citations/BITA/BITA/BITA/BITA/BITA_weights/data/
+/Citations/BITA/BITA/BITA/BITA/BITA_weights/Stage1/
+/Citations/BITA/BITA/BITA/BITA/BITA_weights/Stage2/
+/Citations/BITA/BITA/BITA/BITA/BITA_weights/Caption/
 
 /Data/Instagram/Generate_mcdonalds.csv
 /Data/Instagram/Generate_mcdonalds_switzerland.csv
@@ -16,6 +19,7 @@
 /Data/Instagram/Minigpt4_sentence_mcdonalds_switzerland_bert.csv
 /Data/Instagram/Minigpt4_sentence_sonicdrivein_bert.csv
 
+/Data/Oxford_HIC/Generate_original/
 /Data/Oxford_HIC/Generate_bert_oringinal/
 /Data/Oxford_HIC/parse/
 /Data/Oxford_HIC/CaptionID_oxford_hic_data.csv
