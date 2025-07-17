@@ -4,17 +4,29 @@
 [![GitHub](https://img.shields.io/badge/GitHub-runjiali--rl/Oxford_HIC-darkgreen)](https://github.com/runjiali-rl/Oxford_HIC)
 [![Data](https://img.shields.io/badge/Data-Google_drive-red)](https://drive.google.com/drive/folders/1BDuUcMeaWrFD8TwgHLhFPkuAwmoHaVNQ)
 ### 2. Instagram
-[![Code](https://img.shields.io/badge/Code-instagram.ipynb-green)](../Data/Instagram/instagram.ipynb)
+[![Code](https://img.shields.io/badge/Code-instagram.ipynb-green)](Data/Instagram/instagram.ipynb)
 [![Data](https://img.shields.io/badge/Data-Directory-red)](../Data/Instagram/)
-* Original_File/Home_xxx.csv >> Instagram Post in home page (text == img alt)
-* Original_File/Done_xxx.csv >> Instagram Post in post page (text == caption)
-* CaptionID_xxx.csv >> Full Data with humor score
-* Filter_xxx.csv >> Remove missing images
-* Generate_xxx.csv >> After caption augmentation
+* `Original_File/Home_xxx.csv` >> Instagram Post in home page (text == img alt)
+* `Original_File/Done_xxx.csv` >> Instagram Post in post page (text == caption)
+* `CaptionID_xxx.csv` >> Full Data with humor score
+* `Filter_xxx.csv` >> Remove missing images
+* `Generate_xxx.csv` >> After caption augmentation
 ### 3. Emotion-Sentiment-Humor Description by MiniGPT4 
 [![DOI](https://zenodo.org/badge/DOI/10.48550/arXiv.2304.10592.svg)](https://doi.org/10.48550/arXiv.2304.10592)
 [![GitHub](https://img.shields.io/badge/GitHub-Vision--CAIR/MiniGPT--4-darkgreen)](https://github.com/Vision-CAIR/MiniGPT-4.git)
-[![Code](https://img.shields.io/badge/Code-instagram.ipynb-green)](../Citations/minigpt4/demo_getdata.py)
+[![Code](https://img.shields.io/badge/Code-instagram.ipynb-green)](Citations/minigpt4/demo_getdata.py)
+
+# Code
+### GAMC [![DOI](https://zenodo.org/badge/DOI/10.6342/NTU202501318.svg)](https://doi.org/10.6342/NTU202501318)
+* Step 1 : `Main model` [oxford_train_BLEU_minigpt4.py](Main/oxford_train_BLEU_minigpt4.py)
+* Step 2 : `Adaptation` [oxford_train_BLEU_adapter_minigpt4.py](Main/oxford_train_BLEU_adapter_minigpt4.py)
+* Step 3 : `Test result` [oxford_predict_minigpt4.py](Main/oxford_predict_minigpt4.py)
+### Evaluation
+* `Humor Score` >> [humor_score.py](Main/humor_score.py)
+* `Benign Score` >> Vilio [![DOI](https://zenodo.org/badge/DOI/10.48550/arXiv.2012.07788.svg)](https://doi.org/10.48550/arXiv.2012.07788) 
+[![GitHub](https://img.shields.io/badge/GitHub-Muennighoff/vilio-darkgreen)](https://github.com/Muennighoff/vilio)
+* `Fluency score` >> Parrot [![GitHub](https://img.shields.io/badge/GitHub-PrithivirajDamodaran/Parrot_Paraphraser-darkgreen)](https://github.com/PrithivirajDamodaran/Parrot_Paraphraser)
+* `Diversity score` >> cosine similarity of image caption pairs clip embeddings
 
 # Baseline
 ### 1. ClipCap
