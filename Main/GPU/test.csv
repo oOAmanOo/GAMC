@@ -1,0 +1,19 @@
+﻿index, name, memory.total [MiB], memory.used [MiB], memory.free [MiB], temperature.gpu, pstate, utilization.gpu [%], utilization.memory [%]
+0, NVIDIA GeForce RTX 4090, 24564 MiB, 23878 MiB, 265 MiB, 44, P2, 100 %, 1 %
+0, NVIDIA GeForce RTX 4090, 24564 MiB, 23878 MiB, 265 MiB, 44, P2, 100 %, 1 %
+0, NVIDIA GeForce RTX 4090, 24564 MiB, 23878 MiB, 265 MiB, 44, P2, 96 %, 12 %
+0, NVIDIA GeForce RTX 4090, 24564 MiB, 23878 MiB, 265 MiB, 44, P2, 97 %, 12 %
+0, NVIDIA GeForce RTX 4090, 24564 MiB, 23878 MiB, 265 MiB, 44, P2, 97 %, 12 %
+0, NVIDIA GeForce RTX 4090, 24564 MiB, 23878 MiB, 265 MiB, 43, P2, 16 %, 0 %
+0, NVIDIA GeForce RTX 4090, 24564 MiB, 23878 MiB, 265 MiB, 44, P2, 100 %, 2 %
+0, NVIDIA GeForce RTX 4090, 24564 MiB, 23878 MiB, 265 MiB, 44, P2, 93 %, 21 %
+0, NVIDIA GeForce RTX 4090, 24564 MiB, 23878 MiB, 265 MiB, 45, P2, 92 %, 20 %
+0, NVIDIA GeForce RTX 4090, 24564 MiB, 23878 MiB, 265 MiB, 42, P2, 1 %, 0 %
+0, NVIDIA GeForce RTX 4090, 24564 MiB, 23878 MiB, 265 MiB, 44, P2, 100 %, 1 %
+0, NVIDIA GeForce RTX 4090, 24564 MiB, 23878 MiB, 265 MiB, 44, P2, 97 %, 13 %
+0, NVIDIA GeForce RTX 4090, 24564 MiB, 23878 MiB, 265 MiB, 44, P2, 96 %, 12 %
+0, NVIDIA GeForce RTX 4090, 24564 MiB, 23878 MiB, 265 MiB, 43, P2, 1 %, 0 %
+0, NVIDIA GeForce RTX 4090, 24564 MiB, 23878 MiB, 265 MiB, 43, P2, 100 %, 1 %
+0, NVIDIA GeForce RTX 4090, 24564 MiB, 23878 MiB, 265 MiB, 45, P2, 93 %, 20 %
+0, NVIDIA GeForce RTX 4090, 24564 MiB, 23878 MiB, 265 MiB, 45, P2, 93 %, 21 %
+0, NVIDIA GeForce RTX 4090, 24564 MiB, 23878 MiB, 265 MiB, 42, P2, 7 %, 2 %
