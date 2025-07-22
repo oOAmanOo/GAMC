@@ -1,10 +1,9 @@
-import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 import torch
 import torch.nn as nn
 from transformers import GPT2Tokenizer, GPT2LMHeadModel
-from Main.extractor import textExtraction, imageExtraction
+from Main.ipynb_tools.extractor import imageExtraction
 eps = torch.finfo(torch.bfloat16).eps
 
 batch_size = 15
