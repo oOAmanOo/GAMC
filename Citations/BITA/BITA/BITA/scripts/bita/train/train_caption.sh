@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=0 python3 -m torch.distributed.run --nproc_per_node=1 train.py --cfg-path /mnt/c/Users/user/PycharmProjects/BITA/BITA/BITA/BITA/project/bita/train/caption_rsicd_ft.yaml

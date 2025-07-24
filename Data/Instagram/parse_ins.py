@@ -1,146 +1,65 @@
-import torch
-import skimage.io as io
 import clip
-from PIL import Image
+import torch
 import pickle
-import json
-import os
-from tqdm import tqdm
 import argparse
 import pandas as pd
-from sklearn.model_selection import train_test_split
-
+import skimage.io as io
+from PIL import Image
+from tqdm import tqdm
 
 def main(clip_model_type: str):
     device = torch.device('cuda:0')
     clip_model_name = clip_model_type.replace('/', '_')
     clip_model, preprocess = clip.load(clip_model_type, device=device, jit=False)
-    # with open('C:/Users/user/fiftyone/coco-2014/raw/captions_train2014.json', 'r') as f:
-    #     data = json.load(f)
-    # data = data['annotations']
-
+    # Generate >> augmented data
     dirPath = './Generate_mcdonalds_switzerland.csv'
     data = pd.read_csv(dirPath)
+    data['caption'] = data['caption'].str.lower()
     print("shape of data: ", data.shape)
     image_id_counts = data['image_id'].value_counts()
-    threshold = 12
-    #
+    # Filter >> original data remove duplicates image caption pairs
     original = pd.read_csv('./Filter_mcdonalds_switzerland.csv')
     original['caption'] = original['caption'].str.lower()
-    data['caption'] = data['caption'].str.lower()
     original['text_len'] = original['caption'].apply(lambda x: len(x.split()))
     original['gen_count'] = original['image_id'].apply(lambda x: image_id_counts[x] if x in image_id_counts else 0)
+
+    """
+        Filter data with following conditions:
+            McDonalds Switzerland: 53 funny image caption pairs, 171 other image caption pairs
+                -- gen_count >= 100
+                -- text_len >= 12
+            Sonic Drive-In: 169 funny image caption pairs, 55 other image caption pairs
+                -- gen_count >= 100
+                -- text_len >= 10
+    """
     original = original[original['gen_count'] >= 100]
     print('shape of 100up: ', original.shape, 'images:', len(original['image_id'].unique()))
+    threshold = 12
     original_train = original[original['text_len'] >= threshold]
     original_train_funny = original_train[original_train['funny_score'] == 1]
     original_train_others = original_train[original_train['funny_score'] != 1]
     print('funny:', len(original_train_funny['image_id'].unique()), 'else:', len(original_train_others['image_id'].unique()))
-
-    original_train = pd.concat([original_train_funny, original_train_others[:395]])
+    original_train = pd.concat([original_train_funny, original_train_others[:171]])
     print("shape of original_train: ", original_train.shape, 'images:', len(original_train['image_id'].unique()))
     print('train_funny:' , original_train[original_train['funny_score'] == 1].shape[0], 'train_else:', original_train[original_train['funny_score'] != 1].shape[0])
     train = data.merge(original_train, on='image_id', how='inner', suffixes=('', '_'))
     print("shape of train: ", train.shape, 'images:', len(train['image_id'].unique()))
+    # get 200 datas ( original data +0, augmented data -0.1)
     train = (
         train.sort_values(by=['image_id', 'funny_score'], ascending=[True, False])
         .groupby('image_id')
-        .head(100)
+        .head(200)
     )
     print("shape of train: ", train.shape, 'images:', len(train['image_id'].unique()))
     original_test = original[original['text_len'] < threshold]
     print("shape of test: ", original_test.shape, 'images:', len(original_test['image_id'].unique()))
     print('funny:', original_test[original_test['funny_score'] == 1].shape[0], 'else:', original_test[original_test['funny_score'] != 1].shape[0])
-    # get  top 200 datas on funnyscore
+    # 80 20 split, test is 1/4 of train >> test
+    # all data >> testAll
     test = original_test.sort_values(by=['funny_score'], ascending=[False])[:(len(train['image_id'].unique())//4)]
     print("shape of test: ", test.shape, 'images:', len(test['image_id'].unique()))
     print('funny:', test[test['funny_score'] == 1].shape[0], 'else:', test[test['funny_score'] != 1].shape[0])
 
-    # ######################################################################################################
-    # valid_image_ids = image_id_counts[image_id_counts >= 100].index
-    # print("shape of valid_image_ids: ", valid_image_ids.shape)
-    # filtered_data = data[data['image_id'].isin(valid_image_ids)]
-    # print("shape of filtered_data: ", filtered_data.shape)
-    # data = (
-    #     filtered_data.sort_values(by=['image_id', 'funny_score'], ascending=[True, False])
-    #     .groupby('image_id')
-    #     .head(200)
-    # )
-    # print("shape of train: ", data.shape)
-
-    # valid_image_ids = image_id_counts[(image_id_counts >= 50) & (image_id_counts < 100)].index
-    # print("shape of valid_image_ids: ", valid_image_ids.shape)
-    # filtered_data = data[data['image_id'].isin(valid_image_ids)]
-    # print("shape of filtered_data: ", filtered_data.shape)
-    # test = (
-    #     filtered_data.sort_values(by=['image_id', 'funny_score'], ascending=[True, False])
-    #     .groupby('image_id')
-    #     .head(50)
-    # )
-    # print("shape of test: ", test.shape)
-    ######################################################################################################
-    # print("=============== Train ================")
-    # image_id_counts = data['image_id'].value_counts()
-    # print(f'Number of unique image_id: {len(image_id_counts)}')
-    # valid_image_ids = image_id_counts[image_id_counts >= 300].index
-    # train_img_count = len(valid_image_ids)
-    # print(f'Number of image_id with 300 captions: {len(valid_image_ids)}')
-    # temp = original[original['image_id'].isin(valid_image_ids)]
-    # print('funny:', temp[temp['funny_score'] == 1].shape[0], 'else:', temp[temp['funny_score'] != 1].shape[0])
-    # filtered_data = data[data['image_id'].isin(valid_image_ids)]
-    #
-    # print(f'Number of data all: {filtered_data.shape[0]}')
-    # train = (
-    #     filtered_data.sort_values(by=['image_id', 'funny_score'], ascending=[True, False])
-    #     .groupby('image_id')
-    #     .head(300)
-    # )
-    # print(f'Number of data 300: {train.shape[0]}')
-    #
-    # print("=============== Test ================")
-    # valid_image_ids = image_id_counts[(image_id_counts >= 200) & (image_id_counts < 300)].index
-    # print(f'Number of image_id with 200 captions: {len(valid_image_ids)}')
-    # # 篩選原始資料
-    # filtered_data = original[original['image_id'].isin(valid_image_ids)]
-    # humorscore_avg = filtered_data.groupby('image_id')['funny_score'].mean()
-    # top_humor_image_image_id = humorscore_avg.nlargest(train_img_count // 4).index
-    # print("len of top_humor_image_image_id: ", len(top_humor_image_image_id))
-    # filtered_data = filtered_data[filtered_data['image_id'].isin(top_humor_image_image_id)]
-    # print(f'Number of data all: {filtered_data.shape[0]}')
-    # print('funny:', filtered_data[filtered_data['funny_score'] == 1].shape[0], 'else:', filtered_data[filtered_data['funny_score'] != 1].shape[0])
-    # # test = (
-    # #     filtered_data.sort_values(by=['image_id', 'funny_score'], ascending=[True, False])
-    # #     .groupby('image_id')
-    # #     .head(200)
-    # # )
-    # test = original.merge(filtered_data, on=['image_id', 'caption'], how='inner', suffixes=('', '_'))
-    # print(f'Number of data 200: {test.shape[0]}')
-    ######################################################################################################
-    # train = pd.DataFrame()
-    # test = pd.DataFrame()
-    # for image_id, group in data.groupby("image_id"):
-    #     train_split, test_split = train_test_split(group, test_size=0.2, random_state=42)
-    #     train = pd.concat([train, train_split])
-    #     test = pd.concat([test, test_split])
-    # print(f'train: {train.shape}')
-    # print(f'test: {test.shape}')
-    ######################################################################################################
-    # data = data.sample(n=300000, random_state=42, replace=True).reset_index(drop=True)
-    # print("sample of data: ", data.shape)
-    # train, test = train_test_split(data, test_size=0.2, random_state=42)
-    # print(data.shape)
-    # print("%0d captions loaded from json " % len(data))
-    ######################################################################################################
-    # unique_image_ids = data['image_id'].unique()
-    # train_ids, test_ids = train_test_split(unique_image_ids, test_size=0.2, random_state=42)
-    # train = data[data['image_id'].isin(train_ids)]
-    # image_id_counts = train['image_id'].value_counts()
-    # print(f'train image_id_counts: ', len(image_id_counts))
-    # test = data[data['image_id'].isin(test_ids)]
-    # image_id_counts = test['image_id'].value_counts()
-    # print(f'test image_id_counts: ', len(image_id_counts))
-    # print(train.shape, test.shape)
-    ######################################################################################################
 
     def parse(out_path, data):
         all_embeddings = []
@@ -168,8 +87,10 @@ def main(clip_model_type: str):
         print('Done')
         print("%0d embeddings saved " % len(all_embeddings))
         return 0
-    out_path_train = f"./parse/100up_only100_lessNotFunImg_53_395_passlength_{threshold}_o_mcdonalds_switzerland_{clip_model_name}_train.pkl"
-    out_path_test = f"./parse/100up_only100_lessNotFunImg_53_395_passlength_{threshold}_x_mcdonalds_switzerland_{clip_model_name}_test.pkl"
+
+    out_path_train = f"./parse/100up_only200_lessNotFunImg_53_171_passlength_{threshold}_o_mcdonalds_switzerland_{clip_model_name}_train.pkl"
+    out_path_test = f"./parse/100up_only200_lessNotFunImg_53_171_passlength_{threshold}_x_mcdonalds_switzerland_{clip_model_name}_test.pkl"
+    # out_path_test = f"./parse/100up_only200_lessNotFunImg_53_171_passlength_{threshold}_x_mcdonalds_switzerland_{clip_model_name}_testAll.pkl"
     parse(out_path_train, train)
     parse(out_path_test, test)
     return 0

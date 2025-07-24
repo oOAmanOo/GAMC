@@ -1146,9 +1146,9 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # trainData = '../Data/Oxford_HIC/parse/oxford_3000_only1_300_8_ViT-B_32_train.pkl'
 # testData = '../Data/Oxford_HIC/parse/oxford_3000_only1_300_2_ViT-B_32_test.pkl'
 ######################  mcdonalds_switzerland  ######################
-trainData = '../Data/Instagram/parse/100up_only200_lessNotFunImg_53_171_passlength_12_o_mcdonalds_switzerland_ViT-B_32_train.pkl'
-testData = '../Data/Instagram/parse/100up_only200_lessNotFunImg_53_171_passlength_12_x_mcdonalds_switzerland_ViT-B_32_test.pkl'
-testData = '../Data/Instagram/parse/100up_only200_lessNotFunImg_53_171_passlength_12_x_mcdonalds_switzerland_ViT-B_32_testAll.pkl'
+# trainData = '../Data/Instagram/parse/100up_only200_lessNotFunImg_53_171_passlength_12_o_mcdonalds_switzerland_ViT-B_32_train.pkl'
+# testData = '../Data/Instagram/parse/100up_only200_lessNotFunImg_53_171_passlength_12_x_mcdonalds_switzerland_ViT-B_32_test.pkl'
+# testData = '../Data/Instagram/parse/100up_only200_lessNotFunImg_53_171_passlength_12_x_mcdonalds_switzerland_ViT-B_32_testAll.pkl'
 ##########################  sonicdrivein  ###########################
 # trainData = '../Data/Instagram/parse/100up_only200_lessNotFunImg_169_55_passlength_10_o_sonicdrivein_ViT-B_32_train.pkl'
 # testData = '../Data/Instagram/parse/100up_only200_lessNotFunImg_169_55_passlength_10_x_sonicdrivein_ViT-B_32_test.pkl'
@@ -1158,7 +1158,7 @@ prefix_length = 64
 normalize_prefix = False
 train_dataform = "sonicdrivein"
 test_dataform = "sonicdrivein"
-trainDataset = OxfordDataset(trainData, prefix_length, normalize_prefix=normalize_prefix, datafrom = train_dataform)
+# trainDataset = OxfordDataset(trainData, prefix_length, normalize_prefix=normalize_prefix, datafrom = train_dataform)
 testDataset = OxfordDataset(testData, prefix_length, normalize_prefix=normalize_prefix, datafrom = test_dataform)
 train_dataform = None
 test_dataform = None
