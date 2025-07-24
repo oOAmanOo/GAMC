@@ -1,0 +1,60 @@
+image_id,caption,fitCount,gtNum,fluency,diversity,bleu1,bleu2,bleu3,bleu4
+sonicdrivein_65,`` i'm going to give you a taste of my chocolate ice cream.,0,1,0.97307587,0.45263258,0.0,0.0,0.0,0.0
+sonicdrivein_373,"when i went to the grocery store and saw this ad for a 30% discount on bread rolls, but it said they had no gluten in them! lol!! 🤣🤷‍♂️👨🏻🧑🏽💰🎉🍞🥗🌿 🌱 🍜 🥤 😭😳😂 😂🙌",1,1,0.8571105,0.45263258,0.02941176470588235,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_495,"for the first time ever, we're going to have an ice cream party.",0,1,0.9667787,0.45263258,0.0,0.0,0.0,0.0
+sonicdrivein_497,"this is the #1 thing that makes me want to buy a new phone, and i don't know why.",2,1,0.96962154,0.45263258,0.10526315789473682,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_786,"i'm not a dentist, but i know what it feels like when you get your teeth whitened for the first time in years.",1,1,0.9812837,0.45263258,0.043478260869565216,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_505,i'm here to show you how easy it is.,0,1,0.980291,0.45263258,0.0,0.0,0.0,0.0
+sonicdrivein_78,"if you're looking for something fun to do in your free time, here’s a list of the most ridiculous things people say when they get home from work or school.",1,1,0.97709537,0.45263258,0.03333333333333333,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_290,"when you’re on your way home from work and someone says, “ i hope this is the best day of my life” it makes me smile.",2,1,0.9700298,0.45263258,0.07692307692307693,0.04000000000000001,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_376,"in 2019, the world’s most popular food brand was named after me! so you know what i mean.",1,1,0.96628976,0.45263258,0.05555555555555554,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1199,"when i was 10 years old, my mom told me to get a dog.",1,1,0.9720243,0.45263258,0.07142857142857141,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_893,"i'm not going to say this, but i am n’t sure if we can do it.",0,1,0.96290946,0.45263258,0.0,0.0,0.0,0.0
+sonicdrivein_784,"in the end of 2019, we’ ll be able to say goodbye to all those who made it through this year.",0,1,0.9791148,0.45263258,0.0,0.0,0.0,0.0
+sonicdrivein_91,"when you see a post like this, it’ s time to stop scrolling and start reading! </s> 👍👌😊🙏💪🏽— 📚📖🗣️🤷‍♂🎉🐶🍦🥔🌱❤️☺❓⛲🏻🔴🔥 <3",0,1,0.87333566,0.45263258,0.0,0.0,0.0,0.0
+sonicdrivein_560,"if you're going to buy a new phone this year, make sure it has at least one emoji on the home screen.",0,1,0.9738851,0.45263258,0.0,0.0,0.0,0.0
+sonicdrivein_98,"you’ re not going to like this, are you? </s> i know it sounds weird but we need your help.",0,1,0.9788083,0.45263258,0.0,0.0,0.0,0.0
+sonicdrivein_152,"mom, i'm here for you.",0,1,0.9448758,0.45263258,0.0,0.0,0.0,0.0
+sonicdrivein_457,why don't you try this? </s> because it makes me feel so good.,0,1,0.964413,0.45263258,0.0,0.0,0.0,0.0
+sonicdrivein_798,"""
+### Questions and Detailed Answers Related to the Extract:
+1.",1,1,0.6339909,0.45263258,0.0909090909090909,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_585,"i'm going to ask you a question: what is your favorite ice cream flavor? i love chocolate, but it does n’t really matter.",1,1,0.94851,0.45263258,0.043478260869565216,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_196,"it's like, oh my god i’m so happy to be here with you.",0,1,0.9606217,0.45263258,0.0,0.0,0.0,0.0
+sonicdrivein_691,"i'm not a doctor, but here’s what i would do for you: get an appointment with your gp today.",0,1,0.975943,0.45263258,0.0,0.0,0.0,0.0
+sonicdrivein_522,today's the day we’ re going to show you how much fun it is when a dog turns into an ice cream cone.,1,1,0.96612316,0.45263258,0.043478260869565216,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_670,"when i was a kid, my mom told me not to eat too much ice cream because it would make you fat.",1,1,0.9775385,0.45263258,0.04545454545454546,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_832,this is the 30th anniversary of this site and we want you to have a good time.,3,1,0.968827,0.45263258,0.17647058823529413,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1502,"a lot of people are freaking out about this, but i just want to let them know that it’ s all right.",1,1,0.9818841,0.45263258,0.04545454545454546,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_742,there's a lot of things you can do to make it better.,1,1,0.97854567,0.45263258,0.08333333333333333,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1384,"i've got a lot of food in my fridge, but i don’t want to eat it all at once.",2,1,0.9704856,0.45263258,0.10526315789473682,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1594,why don't you like this? it ’s the only thing i can think of right now.,1,1,0.967998,0.45263258,0.0625,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_571,and i'm going to ask you a question: what do u want for your birthday? and the answer is always yes.,1,1,0.96645176,0.45263258,0.047619047619047616,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_496,i'm going to show you a few of the most popular ones on this site.,1,1,0.97846574,0.45263258,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_89,"what’ s your favorite food? what do you like to eat the most on a friday night?? </s>
+.",0,1,0.905782,0.45263258,0.0,0.0,0.0,0.0
+sonicdrivein_51,"when i was 10 years old, my mom told me not to ask for a job interview.",0,1,0.97553056,0.45263258,0.0,0.0,0.0,0.0
+sonicdrivein_2031,"if you’ re not sure about it, just say “i like this” and they will be your best friend for the rest of the day.",0,1,0.9458198,0.45263258,0.0,0.0,0.0,0.0
+sonicdrivein_446,what are you going to do today? </s> it’ s the best day of your life.,0,1,0.97739834,0.45263258,0.0,0.0,0.0,0.0
+sonicdrivein_344,"i'm not sure if you like this, but i do n’t think so.",0,1,0.9639798,0.45263258,0.0,0.0,0.0,0.0
+sonicdrivein_596,it's not the best day of my life.,0,1,0.97779065,0.45263258,0.0,0.0,0.0,0.0
+sonicdrivein_234,"i'm not sure if you like this, but i do n’t know what to call it.",1,1,0.96702486,0.45263258,0.0625,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_491,"i'm not sure if you like this, but i do n’t know what to think about it.",0,1,0.97181094,0.45263258,0.0,0.0,0.0,0.0
+sonicdrivein_780,i'm not going to tell you how many times i’ve been on the wrong side of a barbie grill.,1,1,0.9776113,0.45263258,0.05263157894736841,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_566,"we're here to help you find your perfect ice cream flavor, but we do n’t know what it is.",0,1,0.9679939,0.45263258,0.0,0.0,0.0,0.0
+sonicdrivein_2052,`` i'm here for you.,0,1,0.9594368,0.45263258,0.0,0.0,0.0,0.0
+sonicdrivein_645,"`` i'm not sure if this is the best place to put an ice cream cone, but it doesn't matter.",0,1,0.9739308,0.45263258,0.0,0.0,0.0,0.0
+sonicdrivein_486,"when you go to the store and say, `` i love ice cream.",3,1,0.974019,0.45263258,0.23076923076923078,0.08333333333333333,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_534,when you're trying to find something in the fridge but can n’t remember what it is.,0,1,0.90628034,0.45263258,0.0,0.0,0.0,0.0
+sonicdrivein_690,"for the first time in 20 years, i was able to find my favorite ice cream flavor at a local shop.",0,1,0.9764945,0.45263258,0.0,0.0,0.0,0.0
+sonicdrivein_143,"yes, we're going to do it.",0,1,0.9647616,0.45263258,0.0,0.0,0.0,0.0
+sonicdrivein_85,i ’ m going to have a good time today! i am so excited for you and all of our friends who will be joining us at the beach this weekend.,0,1,0.9605215,0.45263258,0.0,0.0,0.0,0.0
+sonicdrivein_369,i'm going to make a pizza for you.,0,1,0.9835353,0.45263258,0.0,0.0,0.0,0.0
+sonicdrivein_69,#1 : i love you! the best thing about being a woman in this world is that it makes me feel so good when people say they like my clothes.,1,1,0.9756256,0.45263258,0.03333333333333333,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_697,"i'm here to help you find the perfect food for your next meal, so please let me know if there is anything else i can bring.",1,1,0.97578466,0.45263258,0.03846153846153846,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_414,"it's not just about the food, it’ s also all your friends who are going to be there for you when u need them most.",3,1,0.9433444,0.45263258,0.12000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_80,"i'm not sure if it’s just me, but i think this is the best emoji of all time.",3,1,0.9687593,0.45263258,0.16666666666666669,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_163,`` i'm not going to be in this restaurant.,0,1,0.9693833,0.45263258,0.0,0.0,0.0,0.0
+sonicdrivein_572,today i’ m going to show you what it feels like when a dog bites your face.,3,1,0.9742414,0.45263258,0.17647058823529413,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_408,you know what i want to talk about today is the best ice cream flavor in history! and it's mint chocolate chip.,2,1,0.9479281,0.45263258,0.0909090909090909,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_283,"what’ s wrong with you? </s> i don't know what it is, but there are more than a thousand of them.",1,1,0.96515787,0.45263258,0.047619047619047616,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308

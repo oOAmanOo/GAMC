@@ -1,0 +1,578 @@
+image_id,caption,fitCount,gtNum,fluency,diversity,bleu1,bleu2,bleu3,bleu4
+mcdonalds_switzerland_50,"what do you want to have for lunch?... and what are your thoughts on the mcdonald’ s menu!
+What kind of pizza would u like? 🤔🤗👍😊🥪🍕🧀🐶🌮💃🏼🇺🇸 🇫🇷 🇨🇹 🇳🇴",1,1,0.9526818,0.36268368,0.034482758620689655,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_824,"yes, it's mcdonalds.",0,1,0.9541299,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_800,"i'm going to show you some of my favorite places in paris, and then i will take a photo with me as we walk around the city.",3,1,0.9787192,0.36268368,0.11111111111111109,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_379,"it's not just about the taste, it’ s also all about how much we love you.",2,1,0.96709543,0.36268368,0.09145195361833024,1.627898810444522e-308,1.627898810444522e-308,1.627898810444522e-308
+mcdonalds_switzerland_661,i 'd like to try it out for myself.,0,1,0.98249394,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_503,"if you're looking for the best restaurant in your area and want to know where it is, just take a look at this app.",4,1,0.97791916,0.36268368,0.16666666666666669,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1919,you're right.,0,1,0.96877265,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_165,"if you're going to take a photo with your phone, make sure it is on the left side of your face.",3,1,0.9716169,0.36268368,0.14285714285714285,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_421,it's been a long time since we were able to eat ice cream together.,1,1,0.983189,0.36268368,0.03755628745898426,1.1699171882659805e-308,1.1699171882659805e-308,1.1699171882659805e-308
+mcdonalds_switzerland_533,"it's cool to know that there are more than a million people in the world who can’t read text messages, even if they own an mcdonald s smartphone.",4,1,0.97999465,0.36268368,0.14285714285714285,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_230,"you're not the only one who feels this way, are you? i know what it’ s like to have a bad day.",2,1,0.9846032,0.36268368,0.0909090909090909,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_447,what do you think of the's menu at mcdonald�#39; s today? what are your favorite dishes and how much did they cost for each person in a family with two or three people on board.,2,1,0.81393737,0.36268368,0.057142857142857134,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_673,we all know it's ok to ask for help when you need one! 👍👌🤝😊🍽️🎶🧔🏻♂⏳💪🏼🙈🇫🇷 🇨🇹 🦅🥗 🍲 🥇🌱 🌟 🤩 📸 ⛋️,1,1,0.9535545,0.36268368,0.04545454545454546,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_353,you're not the only one who wants to know when your next meal will be.,1,1,0.9822942,0.36268368,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_589,i'm glad you like it.,1,1,0.9764597,0.36268368,0.004474154371233121,4.97766196517843e-310,4.97766196517843e-310,4.97766196517843e-310
+mcdonalds_switzerland_1988,"i've seen it a few times before, but now you know what i mean.",0,1,0.9637256,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_864,"we ’ re glad to have you on our side, so we can make it a little easier for everyone who is struggling with covid-19 in hong kong and around the world.",0,1,0.96976286,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_468,there's no need to feel bad about it.,0,1,0.9787264,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_464,"yes, it's true.",0,1,0.9690871,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_597,"it's all about you, isn’t it? we are here to make your dreams come true and help turn them into reality.",4,1,0.9781262,0.36268368,0.18161846758732886,2.121601148366249e-308,2.121601148366249e-308,2.121601148366249e-308
+mcdonalds_switzerland_432,use the app to find out what you're really good at.,1,1,0.97567284,0.36268368,0.057703310812752893,1.412335412826535e-308,1.412335412826535e-308,1.412335412826535e-308
+mcdonalds_switzerland_1071,i've never been so hungry before.,0,1,0.9777444,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_359,"mcdonald's menu is full of delicious options, but there’ s only one way to enjoy them all at the same time.",2,1,0.9688158,0.36268368,0.09080923379366444,2.121601148366249e-308,2.121601148366249e-308,2.121601148366249e-308
+mcdonalds_switzerland_2002,we're here to help you find the perfect mcdonald™s t-shirt that matches your style and preferences.,2,1,0.97184294,0.36268368,0.11031211282307446,1.9636207881546135e-308,1.9636207881546135e-308,1.9636207881546135e-308
+mcdonalds_switzerland_1944,"what are you looking forward to? if it's chocolate, here’ s the recipe for one of my all-time favorite hot cocoa recipes.",0,1,0.9737835,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_906,i'm not going to tell you what i ate for breakfast.,3,1,0.975713,0.36268368,0.09161208579249883,7.474267431407837e-309,7.474267431407837e-309,7.474267431407837e-309
+mcdonalds_switzerland_1999,the mcdonald's french fries are so good that you just can n’t wait to try them out.,1,1,0.957424,0.36268368,0.0588235294117647,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_2025,"yes, it's good to see you again after all these years.",0,1,0.97255,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_2062,"don't worry, we've got you covered.",0,1,0.9747736,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1967,"what do you want to eat for dinner tonight? if it's too late, we can order your favorite meal from our delivery app and have the food delivered right at home.",2,1,0.9798192,0.36268368,0.06451612903225806,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_232,here's your chance to show us what you ca n’t wait for on valentine s day.,1,1,0.9627828,0.36268368,0.0625,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_369,"i'm not sure if this is the best way to explain it, but let me tell you what i know about mcdonald’s.",3,1,0.9704845,0.36268368,0.13030405040022058,0.045503001727061156,2.1261983321563865e-308,2.1261983321563865e-308
+mcdonalds_switzerland_622,there's more to it than meets the eye.,3,1,0.9700252,0.36268368,0.08367381005566119,4.9648108639081e-309,4.9648108639081e-309,4.9648108639081e-309
+mcdonalds_switzerland_742,"if you're looking for something fun to do at home, here are a few ideas.",1,1,0.97345257,0.36268368,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1974,let's talk about your mcdonald’ s.,0,1,0.96478534,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1957,"it's not just about the food, it’ s also all of us who are struggling to make ends meet in these tough economic times.",3,1,0.9753641,0.36268368,0.12500000000000003,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1322,"don't be afraid to try something new, even if you don t like it at first.",1,1,0.971905,0.36268368,0.048675048941962805,1.7328892633971685e-308,1.7328892633971685e-308,1.7328892633971685e-308
+mcdonalds_switzerland_1908,"yes, it's possible! but how do you know when to stop and take a picture? 🤔🤷‍♂️🙏👍😂😊🍲🥳🧘🏽🇺🇸 🇩🇪 🦅 🍰 🥇🌱 🌟 👨💻 📹📶✈",1,1,0.9270816,0.36268368,0.043478260869565216,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_492,"i'm not going to tell you all the details, but i’ m pretty sure it will be fun.",2,1,0.98074293,0.36268368,0.11111111111111109,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_828,i 'd like to tell you a little bit more about the mcdonald dog.,2,1,0.9746425,0.36268368,0.14285714285714285,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_363,what do you eat for lunch? it's the most important question of your life.,0,1,0.9818667,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_414,it's been a long time since we were able to taste the best french fries on our way home from work.,4,1,0.9803079,0.36268368,0.04150100644249951,4.847997238189725e-309,4.847997238189725e-309,4.847997238189725e-309
+mcdonalds_switzerland_1947,"today's challenge is to find out what you eat for breakfast, lunch and dinner.",2,1,0.9787523,0.36268368,0.12383969996431167,1.928867353251809e-308,1.928867353251809e-308,1.928867353251809e-308
+mcdonalds_switzerland_373,it's time to get back in the game.,2,1,0.9702022,0.36268368,0.09196986029286058,8.18558927632837e-309,8.18558927632837e-309,8.18558927632837e-309
+mcdonalds_switzerland_2069,we 'd like to thank all our customers who have sent in their orders for this week! we hope you had a great shopping experience and will be back soon with more delicious french fries.,0,1,0.9629161,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1890,"if you like this, please share it with your friends on twitter! </s> thank you very much.",1,1,0.9708035,0.36268368,0.04649049194008812,1.7585612308455557e-308,1.7585612308455557e-308,1.7585612308455557e-308
+mcdonalds_switzerland_713,"don't worry, we ’ ve got you covered.",0,1,0.9766669,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_2006,"it's not about the price, it ’ s how much you love your pizza! let us know in the comments below and we will try to make more of them for everyone.",0,1,0.9455879,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_480,it's time to get back in the game.,0,1,0.9702022,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1985,let's have a look at the mcdonald’ s menu and see if you like it or not.,0,1,0.9712116,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_172,"yes, it's true! the mcdonald’ s has a special offer for you.",0,1,0.97509176,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1959,"it's not about who you are, but it is how much we care for each other.",1,1,0.97244114,0.36268368,0.048675048941962805,1.7328892633971685e-308,1.7328892633971685e-308,1.7328892633971685e-308
+mcdonalds_switzerland_444,"don't forget to tag us in the comments if you have any questions, suggestions or thoughts about this video! </s> we love hearing from our community.",1,1,0.9526806,0.36268368,0.03846153846153846,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_418,i've never felt so hungry in my life.,0,1,0.978148,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_528,"in the next 24 hours, you will be able to enjoy a delicious meal at one of our restaurants.",2,1,0.9786758,0.36268368,0.10526315789473682,0.05555555555555554,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_2020,"it's not about the number of likes or retweets, it’ s more fun to share a meme with your friends and family.",0,1,0.96571714,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_615,i'm here to help you find the perfect place for your mcdonald s.,2,1,0.9772299,0.36268368,0.044933511337140644,6.49872479406874e-309,6.49872479406874e-309,6.49872479406874e-309
+mcdonalds_switzerland_376,it's been a long time.,0,1,0.98165923,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1871,"it's not about the food, it’ s all of us who are waiting for you.",0,1,0.9735151,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1907,there's more than one way to do it.,0,1,0.9715944,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_541,"yes, i don't have a lot of money in my bank account right now.",1,1,0.9519689,0.36268368,0.07142857142857141,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_582,"did you know that 80% of the people who apply for jobs on our app don't actually get hired? but don’ t worry, we have your back.",5,1,0.9785971,0.36268368,0.18518518518518515,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1962,what’ s the best way to watch your favorite mcdonald ‘s commercials? just click on them.,1,1,0.9746587,0.36268368,0.0625,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_540,don't worry.,0,1,0.97853196,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1934,"if you're in the mood for something different, check out this video: https://t.",2,1,0.9525004,0.36268368,0.15384615384615385,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1942,it ’ s time for you to make your dreams come true! choose one of the michelin award winners from this year and tell us about it in a comment below or on social media.,6,1,0.95184314,0.36268368,0.1714285714285714,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1928,"it's a beautiful day, isn’t it? let me show you how to make the most out of this moment.",4,1,0.9780086,0.36268368,0.21052631578947367,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_694,"when you're out for a walk in the park or on your way home from work, don’t forget to take advantage of all these delicious french fries.",2,1,0.979596,0.36268368,0.07407407407407407,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_607,"if you're not sure about your choice, just click on one of the options and see how it turns out.",0,1,0.97007096,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_682,"i'm excited to see you again, and i hope we can get back together in the near future.",1,1,0.9766144,0.36268368,0.05555555555555554,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_220,there's a good chance that you will be able to order your favorite meal at any time of the day.,2,1,0.9786309,0.36268368,0.10000000000000002,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1946,"yes, it's true.",0,1,0.9690871,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_368,what's on your mind when you’ re in the middle of a mcdonald& amp; co.,2,1,0.94830054,0.36268368,0.08361187803640749,0.044792077519504,1.395319530596309e-308,1.395319530596309e-308
+mcdonalds_switzerland_823,you're not the only one who feels this way.,0,1,0.98192227,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1891,"what's wrong with you? if your credit score is too low to get approved for a car loan, why don't ask the bank how much it will cost just before signing up?! 🤦‍♂️🤷🏻🧔🏽 🏠👨 👩 💰💼📱 📸 📺 📲",3,1,0.93462646,0.36268368,0.07692307692307693,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_539,we're always here for you.,1,1,0.9699888,0.36268368,0.018143590657882503,2.018541463615545e-309,2.018541463615545e-309,2.018541463615545e-309
+mcdonalds_switzerland_578,"if you're looking for the perfect place to grab a drink with your loved one, check out our menu.",3,1,0.9794917,0.36268368,0.014025483947932169,1.976490053412284e-309,1.976490053412284e-309,1.976490053412284e-309
+mcdonalds_switzerland_516,"it ’ s not just about the mcdonald's anymore, is it? check out all of our favorite places to grab a bite and see what they have in store for you this week.",3,1,0.9627093,0.36268368,0.0909090909090909,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_385,"`` i'm sorry, but you can n’t do that.",0,1,0.93113464,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_2042,use it or lose it.,0,1,0.9231184,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_761,there's more to it than meets the eye.,2,1,0.9700252,0.36268368,0.055782540037107455,4.9648108639081e-309,4.9648108639081e-309,4.9648108639081e-309
+mcdonalds_switzerland_605,there's a chance you ca n’ t miss it.,0,1,0.93892086,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_794,"if you're not sure where to go, look at the menu on your phone.",1,1,0.9818751,0.36268368,0.07142857142857141,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_364,there's more to it than meets the eye.,0,1,0.9700252,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_380,"let's have a go at it! grab your phone and count how many times you smile in the morning, throughout the day or before going to bed.",1,1,0.9467898,0.36268368,0.037037037037037035,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_579,"if you're having a hard time finding your way out of the house, just turn around and see where it leads.",5,1,0.97872925,0.36268368,0.11113725753611461,1.038612147089151e-308,1.038612147089151e-308,1.038612147089151e-308
+mcdonalds_switzerland_764,don't worry about it.,0,1,0.9796346,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_457,it's all about you.,0,1,0.9707178,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_430,it's not just about money.,0,1,0.96886784,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_358,what do you want to eat for lunch today? choose one of the 10 options below and let us know how it goes.,3,1,0.9667714,0.36268368,0.13043478260869565,0.04545454545454546,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_422,how do you feel about this? is it the first time i've felt like that in my whole life.,3,1,0.97518957,0.36268368,0.15789473684210523,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_509,what's your favorite mcdonald’ s meal of the day? let us know in a comment below! 👍👏🍔🎉🤩😀 🤦‍♂🧘🏼 🕑💰🥳 🥤 🍟 😅 🙌🙈🌞 🌙 🔥 📱📸,2,1,0.85372066,0.36268368,0.07692307692307693,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_684,"it's not just for french people, it’ s all over the world.",1,1,0.7704377,0.36268368,0.0649000652559504,1.7328892633971685e-308,1.7328892633971685e-308,1.7328892633971685e-308
+mcdonalds_switzerland_1935,"what do you want to eat? '' i asked my mom, and she told me that it was the most delicious sandwich of all time! so now we know how much they love mcdonald's.",1,1,0.9306003,0.36268368,0.02941176470588235,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_45,"you're not the only one who wants to eat a lot of food, are you? let us know what your favorite dish is and where it comes from! 🥗🍴🥦🕑️🎉🇫🇷 🇪🇸 🧅 🍲 🤣 👨👩 🙌🙏😍🤔😂",0,1,0.9319555,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1961,it's the moment when you turn off your phone and go to sleep.,1,1,0.974969,0.36268368,0.05236249217872196,1.5146353626711476e-308,1.5146353626711476e-308,1.5146353626711476e-308
+mcdonalds_switzerland_567,we're here to show you how delicious our food is.,2,1,0.97367585,0.36268368,0.014854715642866776,1.65264197262509e-309,1.65264197262509e-309,1.65264197262509e-309
+mcdonalds_switzerland_830,"it's not just about the price, it is also a great way to show your love for someone you really like.",2,1,0.9671261,0.36268368,0.09523809523809525,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_585,"you can't tell me that you ’ ve never tried a milkshake before, can ya? check out this list of the best ice-creams in your area.",6,1,0.977581,0.36268368,0.1780694382004454,2.060331790082205e-308,2.060331790082205e-308,2.060331790082205e-308
+mcdonalds_switzerland_603,"yes, we've got you! check it out and see if your reaction is the same as mine:👀😍😂🤷🏻‍♂️🙌🎉🇺🇦 🇪🇸🇮🇹✈🏼🚶 🧔🍽 🍲🥗 🥇🌱 🌳�",0,1,0.9365093,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1956,it's time to get back on track.,2,1,0.97592807,0.36268368,0.029057540658350523,2.262931093899267e-309,2.262931093899267e-309,2.262931093899267e-309
+mcdonalds_switzerland_1943,"if you're not sure about it, just click on me and i will show you what to do.",0,1,0.958966,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_2011,"if you want to learn more about this, just click the link below and we’ ll send it straight into your inbox! </s> 🤩🤷‍♂️ pic.",2,1,0.9236722,0.36268368,0.07999999999999999,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_435,"it's been a long time since i have had the chance to eat my lunch in front of me, but now it looks even better than before.",2,1,0.97006446,0.36268368,0.07407407407407407,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_569,"if you want to get the most out of this experience, join us for a 30-question test in just under an hour.",4,1,0.9811655,0.36268368,0.11027830176593335,1.3495755153097447e-308,1.3495755153097447e-308,1.3495755153097447e-308
+mcdonalds_switzerland_1904,"we're going to do this in the next few days, so make sure you pay attention.",0,1,0.97903913,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_348,"i'm not sure if this is what i want for dinner, but at least it feels good to have a smile on my face.",1,1,0.9759663,0.36268368,0.041666666666666664,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_52,it's time to get the most out of your meal.,2,1,0.9752871,0.36268368,0.2,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_508,"yes, it's mcdonald’ s.",0,1,0.9430592,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_610,"if you're looking for something special, check this out.",0,1,0.97844166,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_256,we're here to help you find the perfect place for your dog! just give us a call and we will be there in less than an hour.,1,1,0.9647695,0.36268368,0.037037037037037035,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_841,"in 2017, we sent our first batch of the famous mcdonald's french fries to customers all over the world.",0,1,0.97763044,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1992,"it's time to show your support for the mcdonald’ s team! tweet, like and share this video as much as you can: https://www.",0,1,0.94318426,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_792,it's not just the smell of ice cream that makes you happy.,3,1,0.9838108,0.36268368,0.2116204312226535,1.8834843577582417e-308,1.8834843577582417e-308,1.8834843577582417e-308
+mcdonalds_switzerland_393,"it's not about the money, it ’ s more than that.",1,1,0.96253324,0.36268368,0.03053736193083294,7.474267431407837e-309,7.474267431407837e-309,7.474267431407837e-309
+mcdonalds_switzerland_650,"when you're in the middle of a conversation with your partner, it can be hard to know what they want.",5,1,0.97942513,0.36268368,0.21517699410626448,0.04530041981184515,1.9151388181520816e-308,1.9151388181520816e-308
+mcdonalds_switzerland_1977,"i'm not going to tell you all the details, but i know where it is.",1,1,0.97741264,0.36268368,0.06236713233544119,2.081572136844798e-308,2.081572136844798e-308,2.081572136844798e-308
+mcdonalds_switzerland_1894,what's the difference between you and me? 👩👨🧔‍♂️🤷🏽⏳ ⌖🇺🇸 🇪🇹 🇦🇫 🛠 ✈✊ 💰 🍲 🥇🍅🥗🌱 🌿 🐾🐶💕📚 �,3,1,0.93532735,0.36268368,0.1421190988819356,2.002761447539757e-308,2.002761447539757e-308,2.002761447539757e-308
+mcdonalds_switzerland_497,"it's not just about the taste, it’ s also about how you feel when your favorite ice cream melts on a hot summer day.",4,1,0.9754715,0.36268368,0.16666666666666669,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_572,don't you think it ’ s time for a new menu? do u want to have your favorite dish again or would like something different this week?? 👍👎 🤔🤗🍴🧀🥘 🍲 🥇 🦅 😱😭 🙌🙋🏻‍♂️💪🏽🎉,5,1,0.94338226,0.36268368,0.11622622985022033,1.7585612308455557e-308,1.7585612308455557e-308,1.7585612308455557e-308
+mcdonalds_switzerland_512,it's time to make your dreams come true.,1,1,0.96722156,0.36268368,0.021721742931305646,3.86659858861305e-309,3.86659858861305e-309,3.86659858861305e-309
+mcdonalds_switzerland_1963,it's mcdonald& amp; co.,0,1,0.6417529,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_440,"don't forget to check out our app, where you can earn points for shopping at mcdonalds.",2,1,0.9684977,0.36268368,0.07122285309136539,1.267808868335202e-308,1.267808868335202e-308,1.267808868335202e-308
+mcdonalds_switzerland_753,it's time for you to choose your favorite ice cream flavor.,1,1,0.979127,0.36268368,0.007809293912534207,1.911388131199775e-309,1.911388131199775e-309,1.911388131199775e-309
+mcdonalds_switzerland_715,"if you're in the mood for something sweet, here’s your chance to get one of our favorite mcdonald¹™s hot fudge sundae.",3,1,0.96189815,0.36268368,0.14285714285714285,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_718,"if you're curious, just click on the link below and see for yourself: https://t.",0,1,0.9331689,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_467,"it's not about who you are, it’ s all in your hands.",1,1,0.96569765,0.36268368,0.0649000652559504,1.7328892633971685e-308,1.7328892633971685e-308,1.7328892633971685e-308
+mcdonalds_switzerland_419,"we're here to help you with all your questions and doubts, so don’ t be shy.",0,1,0.97403485,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_666,"if you're not signed up for our loyalty program, get in touch with us before it’ s too late.",2,1,0.9778196,0.36268368,0.10526315789473682,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_700,"it's been a long day at the office, but now it is time to relax and have fun.",1,1,0.97022533,0.36268368,0.05555555555555554,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1931,it's all about you.,1,1,0.9707178,0.36268368,0.0027772491345605765,2.4718337791491e-310,2.4718337791491e-310,2.4718337791491e-310
+mcdonalds_switzerland_1955,"yes, it's mcdonalds.",0,1,0.9541299,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_506,it's great to see you again.,0,1,0.9808606,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1037,"what's the best way to get a photo with your dog? do you have any tips on where and when i should take it, so that we can share them here too?! 🤗🤣😍👨‍❤️🧔🏾️🐶🙏💕📸 📷 🦄🥳 🥇🍲 �",1,1,0.88956326,0.36268368,0.02702702702702703,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_449,"if you're not sure what to do next, just ask me.",1,1,0.98110294,0.36268368,0.04392955283543867,1.07521149593053e-308,1.07521149593053e-308,1.07521149593053e-308
+mcdonalds_switzerland_701,don't worry if you can ’ t afford it.,0,1,0.9718023,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_434,"feel free to use this app on your mobile phone and order a burger from any restaurant in the world! </s> don’ t worry, it will be there for you.",2,1,0.9477649,0.36268368,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_350,"don't worry, we're here for you.",0,1,0.9662536,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_450,"it's like this: when you feel lonely in the middle of a party, there is always someone who wants to be your friend.",3,1,0.97751766,0.36268368,0.13043478260869565,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_349,there's more to it than meets the eye.,1,1,0.9700252,0.36268368,0.07581633246407919,1.3495755153097447e-308,1.3495755153097447e-308,1.3495755153097447e-308
+mcdonalds_switzerland_724,what’s the difference between “a” and “an”? think about it for a few seconds before you answer.,2,1,0.9030216,0.36268368,0.08266100266623476,1.563378107280424e-308,1.563378107280424e-308,1.563378107280424e-308
+mcdonalds_switzerland_1,it depends on who you are and where your feet land.,0,1,0.9558345,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_381,"don't worry, we ’ ve got you covered.",0,1,0.9766669,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_719,"it's not the end of your day, it’ s just about to begin.",2,1,0.9657214,0.36268368,0.08314353792100525,1.2025033327569346e-308,1.2025033327569346e-308,1.2025033327569346e-308
+mcdonalds_switzerland_2052,"yes, i've seen a few of them before.",0,1,0.96759987,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_2044,there's nothing wrong with it.,0,1,0.9710097,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_816,"you're not the only one who can make it through these tough times, are you? check out this video to see for yourself: https://www.",1,1,0.96993655,0.36268368,0.03677070427435814,1.9636207881546135e-308,1.9636207881546135e-308,1.9636207881546135e-308
+mcdonalds_switzerland_1203,we've got you covered.,0,1,0.9745058,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_571,did you know that 90% of customers who use our mobile app leave a positive review? check it out and see for yourself.,5,1,0.98221403,0.36268368,0.20814203653660454,0.04352060763947187,2.1304044600286865e-308,2.1304044600286865e-308
+mcdonalds_switzerland_392,it's your turn.,1,1,0.9652072,0.36268368,0.0008262507255554528,5.5154066700184e-311,5.5154066700184e-311,5.5154066700184e-311
+mcdonalds_switzerland_1749,"if you're looking for something special, why don’t we try to find it in one of our collections? mcdonald& amp; co.",1,1,0.9333754,0.36268368,0.047619047619047616,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1458,"yes, i'm ready for it.",0,1,0.96630156,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1948,"i'm sorry, but i do n’t know where to look for it.",0,1,0.95517415,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_478,"it's not the food that makes you feel hungry, it’ s your mood.",3,1,0.97540987,0.36268368,0.14545688921462768,1.402493394168772e-308,1.402493394168772e-308,1.402493394168772e-308
+mcdonalds_switzerland_1897,"it's hard to tell the difference, but i don't know if you have a ring or not.",4,1,0.96913904,0.36268368,0.20917876833006488,1.9781123889553905e-308,1.9781123889553905e-308,1.9781123889553905e-308
+mcdonalds_switzerland_699,i'm sure you have seen this meme before.,0,1,0.9748949,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_879,"it's not about the money, it is love.",3,1,0.95299244,0.36268368,0.06516522879391692,3.86659858861305e-309,3.86659858861305e-309,3.86659858861305e-309
+mcdonalds_switzerland_388,"yes, it's true.",1,1,0.9690871,0.36268368,0.0004242112671132693,2.831704202814e-311,2.831704202814e-311,2.831704202814e-311
+mcdonalds_switzerland_153,"don't worry, we've got you covered.",1,1,0.9747736,0.36268368,0.10108844328543891,1.3495755153097447e-308,1.3495755153097447e-308,1.3495755153097447e-308
+mcdonalds_switzerland_69,"when you think of all the words that come to your mind when looking at this emoji, but they don 't make any sense.",0,1,0.9540266,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_387,"i'm not sure if you know it, but here’s what to do: take a bite out of your burger and enjoy the rest.",2,1,0.98167634,0.36268368,0.08695652173913045,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_633,"what do you want to eat? let us know in the comment section below! </s>
+Q: what are we talking about when it comes out of your mouth.",2,1,0.9598141,0.36268368,0.07142857142857141,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_443,what's wrong with you? don't worry about it.,1,1,0.980371,0.36268368,0.021721742931305646,3.86659858861305e-309,3.86659858861305e-309,3.86659858861305e-309
+mcdonalds_switzerland_654,you're not the only one.,2,1,0.9750813,0.36268368,0.17973158564688863,9.997901319273777e-309,9.997901319273777e-309,9.997901319273777e-309
+mcdonalds_switzerland_625,"yes, you're right.",0,1,0.9555392,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_529,"what are you looking for? if it's in the corner of your eyes, just tap on them and see what happens.",0,1,0.97366536,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_399,"don't worry about it! </s> if you have any questions or comments, please let us know in the comment section below and we will do our best to answer them.",3,1,0.95806855,0.36268368,0.10000000000000002,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_756,you're right.,0,1,0.96877265,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_412,it's time to get rid of all the mcdonald ’ s loyalty points.,1,1,0.9751179,0.36268368,0.04489580601104416,1.2986542960532383e-308,1.2986542960532383e-308,1.2986542960532383e-308
+mcdonalds_switzerland_1926,"it's the first day of school, and it’ s great to see you again.",2,1,0.98121935,0.36268368,0.14285714285714285,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_426,"when you're ready to start your day, just click on one of the links in this post.",3,1,0.97659475,0.36268368,0.1394714758202644,0.049396147686343636,1.7585612308455557e-308,1.7585612308455557e-308
+mcdonalds_switzerland_740,we're going to show you what it feels like when your favorite food arrives in front of the door.,2,1,0.9772018,0.36268368,0.10526315789473682,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_583,"it's not about the food, it’ s more than that.",0,1,0.96236485,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_417,"it's not about the money, but it couldn't be any other way.",1,1,0.96141773,0.36268368,0.07667036788577694,2.0471667756573244e-308,2.0471667756573244e-308,2.0471667756573244e-308
+mcdonalds_switzerland_1918,"what are you waiting for? let's get in touch with the mcdonald’ s team and see if they want to be part of this great celebration!
+Q: what do i expect from them when we meet up at your restaurant on october 15th, 2023.",4,1,0.9765138,0.36268368,0.0909090909090909,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1914,"don't forget that there are 10 of them in each box! if you want to get one for free, send us a tweet with your order number and we will give it away at no additional cost.",1,1,0.9653356,0.36268368,0.02702702702702703,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1429,we're here to show you how easy it can be.,0,1,0.97490203,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_747,"imagine you're at a restaurant, and the waiter comes to take your order but doesn’t know what it is.",1,1,0.94742113,0.36268368,0.05263157894736841,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_439,let's take a look at what we can do to make the most out of your day! here are just some ideas you might like.,2,1,0.97248346,0.36268368,0.07999999999999999,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_437,"it's not about the food, it’ s more fun to have a good time with your friends and family while watching mcdonald& amp; co.",3,1,0.8330897,0.36268368,0.12500000000000003,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_519,"it's not just the mcdonald’ s, is it? you know what i am talking about.",0,1,0.9485465,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_487,what's for dinner tonight? let us know in the comments below.,1,1,0.90078527,0.36268368,0.03053736193083294,7.474267431407837e-309,7.474267431407837e-309,7.474267431407837e-309
+mcdonalds_switzerland_398,"what do you think? i'm not sure if this is the right thing to say, but it’s so cute.",1,1,0.9705175,0.36268368,0.05263157894736841,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_859,what's your favorite meal of the day? let us know in a comment below and we will share it with all our followers.,0,1,0.93379235,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_733,we're going to show you how easy it can be with this new feature! click on the link below and see for yourself 👍👌🤗 🤓 🙋🏼‍♂️🙏🏻🧔🎉.,2,1,0.9559076,0.36268368,0.06854025974581203,1.9825928228041517e-308,1.9825928228041517e-308,1.9825928228041517e-308
+mcdonalds_switzerland_584,don't worry about it.,0,1,0.9796346,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_453,what's wrong with you? don't be afraid.,0,1,0.97649616,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1901,what's wrong with you? do n’t know what to say.,1,1,0.9415641,0.36268368,0.060653065971263354,1.3495755153097447e-308,1.3495755153097447e-308,1.3495755153097447e-308
+mcdonalds_switzerland_1883,"if you're looking for something different, why not check out our new menu? we have a lot of options to choose from.",1,1,0.97952294,0.36268368,0.04545454545454546,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_178,we're here to help you find the best french fries in your area.,2,1,0.97654724,0.36268368,0.15384615384615385,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_515,i'm here to help you find your dream job.,2,1,0.9804391,0.36268368,0.00012992907397255888,1.3009580368036e-311,1.3009580368036e-311,1.3009580368036e-311
+mcdonalds_switzerland_1969,we're here to help you get back on track.,0,1,0.9799477,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1168,"i'm sure you wo n’t believe it, but this is the first time in my life that i have seen such a high-quality mcdonald ‘s menu at an italian restaurant.",0,1,0.93877405,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1882,you're right.,0,1,0.96877265,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_621,"don't worry, we ’ re here for you.",0,1,0.9682502,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_472,"what do you think? is this the best way to enjoy a delicious dinner with your loved ones on christmas eve 2019?! 🤗🤔😉👨‍🍳 👩🏻🧑🏽 🦰
+Q: what are they thinking of having for their Christmas Eve meal tonight??
+A: we don't know",4,1,0.94074553,0.36268368,0.09523809523809525,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1984,don't worry.,0,1,0.97853196,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1949,it's time to get back in the game.,3,1,0.9702022,0.36268368,0.09481484842677992,5.625867750206837e-309,5.625867750206837e-309,5.625867750206837e-309
+mcdonalds_switzerland_662,i'm so happy to have you in my life.,1,1,0.97089875,0.36268368,0.08897082254631197,1.7816998627591863e-308,1.7816998627591863e-308,1.7816998627591863e-308
+mcdonalds_switzerland_547,it's time to get rid of all the leftovers in your fridge.,2,1,0.97747874,0.36268368,0.10108844328543891,1.3495755153097447e-308,1.3495755153097447e-308,1.3495755153097447e-308
+mcdonalds_switzerland_543,"what's wrong with you? don't worry, we are here to help! get in touch and let us know if there’ s something that could use a little more love.",2,1,0.9635903,0.36268368,0.06896551724137931,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_573,"don't worry, we can help you find it.",0,1,0.966729,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_122,"it's time to eat, but you can do it on your own.",0,1,0.97529125,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_559,"if you're having a hard time staying awake in class, here are some tips to help keep your energy up: drink lots of water; eat healthy snacks like nuts and dried fruits.",1,1,0.9736352,0.36268368,0.03125,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_374,we're here to show you how easy it can be.,2,1,0.97490203,0.36268368,0.0493193927883213,5.486964580537266e-309,5.486964580537266e-309,5.486964580537266e-309
+mcdonalds_switzerland_1920,it's time to get back in the game! join us for our next live stream on mcdonald’ s.,4,1,0.9721214,0.36268368,0.2222222222222222,0.0588235294117647,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_80,"don't worry, we're here for you.",0,1,0.9662536,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1964,"if you're looking for a little something to eat with your dinner tonight, here’s one of my favorites.",4,1,0.97232944,0.36268368,0.21021321531261453,2.1048296854718573e-308,2.1048296854718573e-308,2.1048296854718573e-308
+mcdonalds_switzerland_681,here it is: </s> https://t.,0,1,0.8431604,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_810,"if you're looking for a quick and easy way to celebrate the end of summer, why n’t i tell ya about it? ⏳ pic.",4,1,0.9027656,0.36268368,0.16666666666666669,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_714,"what are you going to do with your mcdonald's sandwich? it looks delicious, doesn’t it?! 👌🍔🥪 🥦🧀🤩👨💰🎉😍 😅 🙋🏼‍♂️🙏 🤤 🛠 🍣☀️🌞 🌟�",2,1,0.9384632,0.36268368,0.08695652173913045,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_565,"for example, if you have 50 euros in your bank account and want to buy a burger for only €1.",4,1,0.92843664,0.36268368,0.10440915535220321,1.161590410815055e-308,1.161590410815055e-308,1.161590410815055e-308
+mcdonalds_switzerland_1815,"if you're looking for a mcdonald’ s menu, here it is.",1,1,0.9701506,0.36268368,0.08300915602566021,2.031716533983919e-308,2.031716533983919e-308,2.031716533983919e-308
+mcdonalds_switzerland_234,you're right.,0,1,0.96877265,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_601,"if you're in a hurry, just click the button on your phone and we will deliver it to mcdonald’ s.",3,1,0.9685648,0.36268368,0.15,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_737,"you've got a lot of questions, so let me help you sort them out! just click on the like button below each question to mark it as correct or incorrect.",3,1,0.9546942,0.36268368,0.10000000000000002,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_522,we're here to help you find your perfect pair of shoes! just tell us a little bit about yourself and we wo n’t leave anything out.,3,1,0.9235177,0.36268368,0.1153846153846154,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_2016,what are you looking for? </s> what do u want to eat with your dinner tonight?? 👍👌🤷🏻‍♂️🍴🥗🧔🏼 🦅🐶 🐰 🍲 😱😭 🙄🙈 🤣😂 😂 🥳💕 💖 📸📺 🎉,0,1,0.9456164,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_560,"if you're looking for something different, why don’ t check out our menu? we have a lot of options to choose from.",3,1,0.979454,0.36268368,0.13636363636363635,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1968,"it's all about you, mcdonald’ s.",0,1,0.9511052,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_789,yes or no: do you want to be part of mcdonald's future? tweet us your answer using the hashtag #mcmdd2018 and we’ ll share it with all our customers.,3,1,0.9696639,0.36268368,0.10344827586206899,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_168,i'm here to show you how easy it is.,1,1,0.980291,0.36268368,0.08897082254631197,1.7816998627591863e-308,1.7816998627591863e-308,1.7816998627591863e-308
+mcdonalds_switzerland_623,"have a good time at the mcdonald's! we’ re here to help you enjoy your meal, so why not play some games with us? 🤩🤔🕰️🇹🇦 🇺🇸 🇮🇪 🇳🇷 🏠🎲🥗🍴 🥤 🍣 😱�",1,1,0.9515418,0.36268368,0.03125,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_646,"if you're feeling a little hungry, check out this video! it will make your mouth water.",0,1,0.98181766,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1960,what do you think about this? what are your thoughts on the 2019 mcdonald’ s world cup match between france and belgium?? 👍👅🤔 🤣😊🙌 🙋‍♂️🇫🇷 🇦🇪 �󠁧󠄹󠃾�,2,1,0.9427143,0.36268368,0.07407407407407407,0.03846153846153846,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1576,"it's not about who you know, it’ s how well they do.",0,1,0.9595194,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_163,"don't you think it would be cool if there was an app that could tell us what we want to eat before going out for a meal, and then suggest the best places in town based on our preferences? </s> let me know your thoughts.",2,1,0.97410893,0.36268368,0.04444444444444445,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1842,"first of all, let's see if we can get you in the car.",0,1,0.96623516,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_489,mcdonald’ s 2019 menu is here! check it out and share your thoughts with us in the comments section below.,3,1,0.9407146,0.36268368,0.0783068665141524,1.161590410815055e-308,1.161590410815055e-308,1.161590410815055e-308
+mcdonalds_switzerland_1215,"yes, you're right.",0,1,0.9555392,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_31,"don't worry, we 'll get you the right one.",1,1,0.96488565,0.36268368,0.11111111111111109,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_402,"if you're looking for something different, here’s a look at some of our other dogs:♥️🐶🕊🏻♀️🍲👨🏼‍♂⏳🤣😍🙌💚🌈🥇🎉📷 📸 🧠 🐾 🤔 👀 🙄 �",0,1,0.9282525,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_637,"it's not about the food, is it? we all know what happens when you go out for dinner at a fancy restaurant with your friends or family.",0,1,0.98523754,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_484,"if you're curious, check out this video: https://youtu.",1,1,0.9506375,0.36268368,0.01691691040457659,3.01131000863463e-309,3.01131000863463e-309,3.01131000863463e-309
+mcdonalds_switzerland_722,"if you're a fan of the mcdonalds menu, here are some tips on how to impress your friends and family at dinner time.",1,1,0.9757638,0.36268368,0.043478260869565216,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_382,you're not the only one who’s had a bad experience with mcdonald s.,0,1,0.97351515,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_2077,"if you're in the mood for something sweet, here are a few ideas to get your mcdonalds happy:• order an extra-large mac and cheese sandwich.",1,1,0.97068864,0.36268368,0.04000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_357,"if you're looking for something different, why not check out our new channel and see what we have to say about the world of mcdonald’ s?
+Q: What do they want us to show them in this video?
+Options are: a). yes; b). no; c) it is impossible to tell without more context.",9,1,0.9492451,0.36268368,0.1320754716981132,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_410,"yes, it's true.",0,1,0.9690871,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_90,there's always more than one way to do it.,1,1,0.96921253,0.36268368,0.08897082254631197,1.7816998627591863e-308,1.7816998627591863e-308,1.7816998627591863e-308
+mcdonalds_switzerland_524,"it's not about money, it ’ s more than that.",0,1,0.9631189,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_839,"don't worry, we've got you covered.",1,1,0.9747736,0.36268368,0.007023973918212732,9.3773164489512e-310,9.3773164489512e-310,9.3773164489512e-310
+mcdonalds_switzerland_1932,"don't worry, we've got you.",0,1,0.9684058,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_581,"when you're waiting for your anniversary, and then it arrives on the same day as valentine’s! i love this mcdonald& amp; company loyalty program.",3,1,0.9435478,0.36268368,0.12500000000000003,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_377,"yes, it's true! we don't know what to expect when you open the door on your first day at work.",3,1,0.98232657,0.36268368,0.15,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_818,"i'm so excited to see you all next time, even if it doesn’ t look exactly the same as before.",0,1,0.96567255,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_548,it's time to have a good laugh.,1,1,0.9650016,0.36268368,0.02230257790228158,3.473741814738195e-309,3.473741814738195e-309,3.473741814738195e-309
+mcdonalds_switzerland_608,i'm glad you like this meme.,0,1,0.9698832,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_534,don't forget.,0,1,0.96995,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_285,"if you're not sure what to do, why don’ t take a bite out of your sandwich and see how it goes.",0,1,0.9774304,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_499,"yes, it's true.",0,1,0.9690871,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1006,i 'd like to thank you for all of your support in the past few months.,2,1,0.9743455,0.36268368,0.12500000000000003,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_759,"yes, that's right.",0,1,0.9179299,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1263,you don't have to worry about it.,0,1,0.97845435,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_22,"if you're in the mood for something sweet, here’s a list of our favorite restaurants and bars across europe.",0,1,0.9782614,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_614,1 out of 5 people say they like this post.,1,1,0.91208816,0.36268368,0.05488116360940265,1.221146424717419e-308,1.221146424717419e-308,1.221146424717419e-308
+mcdonalds_switzerland_372,it's not always easy to know who you love.,1,1,0.9799074,0.36268368,0.036576998645322836,7.32478711575271e-309,7.32478711575271e-309,7.32478711575271e-309
+mcdonalds_switzerland_16,"if you're in the mood for something different, check out this video.",0,1,0.980959,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_466,please don't worry about it.,0,1,0.97526544,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_475,"i'm not sure if you like it, but i am pretty certain that this app will make your life a little bit easier.",3,1,0.97993374,0.36268368,0.13043478260869565,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_356,it's your turn to try it out for yourself! what do you think of our new menu? share a comment and let us know in the comments section below.,5,1,0.9564029,0.36268368,0.1724137931034483,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_518,i 'd like to tell you this: it’s not just about mcdonald’ s.,2,1,0.97005963,0.36268368,0.10472498435744391,1.5146353626711476e-308,1.5146353626711476e-308,1.5146353626711476e-308
+mcdonalds_switzerland_293,i'm not going to miss you.,0,1,0.9709373,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_498,"don't worry, we've got you covered.",1,1,0.9747736,0.36268368,0.02255588053943545,3.01131000863463e-309,3.01131000863463e-309,3.01131000863463e-309
+mcdonalds_switzerland_13,"in 2019, we were able to get a better idea of what an iphone looks like when it’s in your pocket! check out the video below for more details on this surprise: https://t.",0,1,0.9237676,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_413,"it's been a while since i watched this movie at the cinema, but now you can enjoy it on your phone.",5,1,0.97877973,0.36268368,0.23809523809523808,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1184,"i'm sorry, but you can not do that.",0,1,0.96704614,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_741,don't worry.,0,1,0.97853196,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_526,"if you're still here, let us know in the comments below.",3,1,0.9446488,0.36268368,0.0016779338812191436,0.0006152424231136862,1.36895983231493e-310,1.36895983231493e-310
+mcdonalds_switzerland_2045,"if you're looking for something special, check it out.",0,1,0.97983336,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1972,i'm not going to tell you all about it.,1,1,0.97700024,0.36268368,0.029288570901747406,5.86523101198632e-309,5.86523101198632e-309,5.86523101198632e-309
+mcdonalds_switzerland_362,"if you're not sure where to go, just click on the menu at top of this page and see what pops up.",2,1,0.96991247,0.36268368,0.0909090909090909,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_600,don't worry.,0,1,0.97853196,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_676,"don't worry, we've got you covered.",0,1,0.9747736,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1009,"it's not about the food, it’ s all about how you feel after a meal.",1,1,0.97208947,0.36268368,0.054582050205198795,1.8217363958297824e-308,1.8217363958297824e-308,1.8217363958297824e-308
+mcdonalds_switzerland_1877,it's time to try something new! here are a few ideas you might find interesting.,4,1,0.97772276,0.36268368,0.16722375607281498,0.044792077519504,1.395319530596309e-308,1.395319530596309e-308
+mcdonalds_switzerland_624,"it's not about the food, it ’ s how you feel when your favorite mcdonald& amp; co.",1,1,0.7567212,0.36268368,0.052294692082516206,1.9781123889553905e-308,1.9781123889553905e-308,1.9781123889553905e-308
+mcdonalds_switzerland_1923,what's the best way to surprise your partner on valentine’ s day? here are a few ideas you can try.,3,1,0.9742332,0.36268368,0.13572561270539393,0.0476230220018926,2.0133300850710214e-308,2.0133300850710214e-308
+mcdonalds_switzerland_1132,"when you think about it, the mcdonald's team is one of our favorite teams in europe.",2,1,0.97301686,0.36268368,0.12500000000000003,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1917,"if you've been following us on instagram for the past few months, we want to say thank you! but there’s still a lot of food left in your bag.",2,1,0.9786894,0.36268368,0.06896551724137931,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_2012,i'm going to show you how it’s done.,0,1,0.97144854,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1209,what do you want to eat for dinner tonight? is there something on your plate that catches the attention of someone else at home.,2,1,0.9811724,0.36268368,0.08333333333333333,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_703,you're right.,0,1,0.96877265,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_706,i'm glad you liked it.,1,1,0.9777029,0.36268368,0.1637461506155964,1.8217363958297824e-308,1.8217363958297824e-308,1.8217363958297824e-308
+mcdonalds_switzerland_521,you're in the right place.,1,1,0.973308,0.36268368,0.014854715642866776,1.65264197262509e-309,1.65264197262509e-309,1.65264197262509e-309
+mcdonalds_switzerland_265,it's time to get back in the game.,2,1,0.9702022,0.36268368,0.22062422564614886,0.12607098608351364,1.9636207881546135e-308,1.9636207881546135e-308
+mcdonalds_switzerland_554,what's your take on the new mcdonald’ s menu? tell us in a comment below and we will share it with all of you.,7,1,0.93324095,0.36268368,0.27976359165683196,2.1342673863693166e-308,2.1342673863693166e-308,2.1342673863693166e-308
+mcdonalds_switzerland_2039,"if you've had a hankering for something sweet, here’s your go-to recipe to kick off the new year.",0,1,0.9594257,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_482,mcdonald's mcdonalds are ready for you! order now and we will deliver it to your door in just a few minutes.,3,1,0.89071614,0.36268368,0.14285714285714285,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_395,we're so happy to have you with us.,0,1,0.9685508,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1940,"it's not about the money, it’ s more than that.",0,1,0.96253324,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_783,"don't worry, we're here to help you find the best app for mcdonald’ s.",2,1,0.9710036,0.36268368,0.08067401742967989,1.25653953070478e-308,1.25653953070478e-308,1.25653953070478e-308
+mcdonalds_switzerland_436,"if you're looking for an app that makes your life easier and more fun, check out the mcdonald ’ s menu.",1,1,0.97962785,0.36268368,0.047619047619047616,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_631,it's all about you.,0,1,0.9707178,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_767,let's see if you can make it to the end of this episode.,5,1,0.9604083,0.36268368,0.0065229110543982526,0.0014132973951196213,3.7736293058125e-310,3.7736293058125e-310
+mcdonalds_switzerland_476,"we're here to help you enjoy your meal, so let’s make it even more delicious with our special offer!🎉🍽️ pic.",2,1,0.7638608,0.36268368,0.10000000000000002,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_566,it's time to celebrate the end of this year with your favorite mcdonald’ s.,3,1,0.9745565,0.36268368,0.07339689751993832,7.621297505133727e-309,7.621297505133727e-309,7.621297505133727e-309
+mcdonalds_switzerland_370,imagine you're at a fancy restaurant with your best friend.,0,1,0.9564063,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_683,there’ s no doubt in my mind that it's going to be one of the most talked-about movies this year.,1,1,0.9779133,0.36268368,0.05000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_433,"it's not just about the money, but it is also a way to enjoy your free time with friends and loved ones.",4,1,0.96877444,0.36268368,0.1737387338669608,2.1261983321563865e-308,2.1261983321563865e-308,2.1261983321563865e-308
+mcdonalds_switzerland_632,"it's not just about the food, is it? get ready to try something new.",1,1,0.97293574,0.36268368,0.07142857142857141,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_451,"yes, that's right.",0,1,0.9179299,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_527,i'm sorry to hear that.,0,1,0.97505367,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_118,"you 'll be able to feel the impact of your choice, and you can enjoy it for a long time.",1,1,0.9822124,0.36268368,0.05000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_401,it's time to get back on the right side of your phone.,1,1,0.97051966,0.36268368,0.0549367191833703,1.4668590927248608e-308,1.4668590927248608e-308,1.4668590927248608e-308
+mcdonalds_switzerland_493,"it's not about the price, it’ s all mcdonald.",0,1,0.8216388,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1939,it's been a long time since i have felt like this.,0,1,0.97908074,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1023,let's have a try.,1,1,0.95851433,0.36268368,0.0205212496559747,1.826451846136416e-309,1.826451846136416e-309,1.826451846136416e-309
+mcdonalds_switzerland_463,"we're going to have a taste test of the new mcdonalds ice cream this weekend, and we want your opinion on which one you like best.",1,1,0.97410077,0.36268368,0.03846153846153846,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1927,it's time to get out of your comfort zone and try something new.,3,1,0.9758483,0.36268368,0.106931392899502,1.0310310703092875e-308,1.0310310703092875e-308,1.0310310703092875e-308
+mcdonalds_switzerland_732,"what's on your mind? do you have a question or an answer to something we said in this post, tweet it here and i’ ll get back as soon as possible.",2,1,0.96085256,0.36268368,0.06451612903225806,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_643,i'm sorry to hear that.,0,1,0.97505367,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_665,i'm going to tell you a story.,1,1,0.98022604,0.36268368,0.03423586234882512,5.33241256350767e-309,5.33241256350767e-309,5.33241256350767e-309
+mcdonalds_switzerland_502,"it's not just about the taste, but also how it looks and feels when you take your first bite.",3,1,0.96099687,0.36268368,0.14979939158154268,2.110993164779763e-308,2.110993164779763e-308,2.110993164779763e-308
+mcdonalds_switzerland_1915,"it's not just about the taste, but also how it feels when you eat your favorite ice cream on a hot summer day.",1,1,0.974495,0.36268368,0.043478260869565216,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_500,"don't you think that? is there an app on your phone to make sure it works well in the winter season, even when temperatures drop below zero ° celsius and above minus ten degrees fahrenheit?! 🤦‍♂⬇️🤷🏼🇺🇸 🇩🇪 🧔🚨❄",2,1,0.9481476,0.36268368,0.05263157894736841,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1922,"if you're in a hurry, ask your phone to take an image of yourself.",3,1,0.97231466,0.36268368,0.1499298294375279,1.556823072428848e-308,1.556823072428848e-308,1.556823072428848e-308
+mcdonalds_switzerland_2075,"don't worry, we ’ re here to help you.",0,1,0.9734544,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1925,"i'm so hungry that i want to take a bite out of my sandwich, but you don t know where it came from.",2,1,0.9778698,0.36268368,0.08695652173913045,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_695,"i'm not sure if you like it, but i don't know what to say.",1,1,0.9768314,0.36268368,0.034967261396925214,1.0892663493304385e-308,1.0892663493304385e-308,1.0892663493304385e-308
+mcdonalds_switzerland_774,what's on your mind? what do you eat for lunch every day at school or in a restaurant and how much does it cost to make that meal.,1,1,0.9600219,0.36268368,0.03571428571428572,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_411,it's time for you to choose.,1,1,0.9708204,0.36268368,0.07243303475117972,9.670131127031886e-309,9.670131127031886e-309,9.670131127031886e-309
+mcdonalds_switzerland_169,"don't worry, we're here for you.",0,1,0.9662536,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1990,it's time to have some fun! can you think of a better solution for your mcdonald’ s meal? let us know in the comments below.,3,1,0.9548761,0.36268368,0.12000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_394,"when you're in a bad mood, don’ t forget to check out these memes.",1,1,0.9771828,0.36268368,0.05367694950537755,1.6720924800836196e-308,1.6720924800836196e-308,1.6720924800836196e-308
+mcdonalds_switzerland_408,don't forget... do not miss out on the moment when your favorite show comes to you! follow us and we will deliver it right in front of your door.,5,1,0.9490182,0.36268368,0.1724137931034483,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_563,it's time to get out of your comfort zone and try something new.,1,1,0.9758483,0.36268368,0.035643797633167336,1.0310310703092875e-308,1.0310310703092875e-308,1.0310310703092875e-308
+mcdonalds_switzerland_797,"if you're in the mood for something sweet, here are a couple of ideas to try out at home.",2,1,0.9763763,0.36268368,0.10526315789473682,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_739,i've heard this phrase so many times that it’s starting to sound a little cheesy.,0,1,0.974214,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_727,"if you're in a hurry and don’t have time to read this, just click on the link below.",5,1,0.9718999,0.36268368,0.24856647689288047,0.052637606871433505,1.991083571408152e-308,1.991083571408152e-308
+mcdonalds_switzerland_1979,i'm going to show you a few tricks that will make your cheese last longer.,2,1,0.9795491,0.36268368,0.10212377844861982,1.704247123185085e-308,1.704247123185085e-308,1.704247123185085e-308
+mcdonalds_switzerland_1913,"we're here to help you find the best restaurant in your area! just tell us where it is, and we won't leave anything out.",4,1,0.9712767,0.36268368,0.16666666666666669,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_655,you 'll be able to track your orders in real-time.,1,1,0.97899115,0.36268368,0.10000000000000002,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_409,"it's been a while, isn’ t it? what do you like to eat for lunch or dinner with your family every day of the week.",1,1,0.97488356,0.36268368,0.04000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_793,"if you're in the mood for something sweet, here’s a quick and easy recipe to satisfy your cravings: chocolate avocado mousse! it only takes two minutes of preparation time.",2,1,0.96911454,0.36268368,0.06896551724137931,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_638,"if you're still hungry, check out our new menu for lunch today! we have so many delicious options to choose from and it’s the perfect time of year.",1,1,0.96679157,0.36268368,0.03571428571428572,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1219,there's more than one way to do it.,0,1,0.9715944,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_173,"what do you think? </s> what’ s your favorite ice cream topping for a mcdonald& amp; cheese sandwich with chocolate sauce on top of it?<sup style=""font-size:12px"">i would love to find out.",1,1,0.94972783,0.36268368,0.03225806451612903,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_117,"i'm not sure if this is the best way to express my gratitude, but i do n’t know where it came from.",0,1,0.96526307,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_904,it's time for you to try it.,1,1,0.97682357,0.36268368,0.10735389901075512,1.6720924800836196e-308,1.6720924800836196e-308,1.6720924800836196e-308
+mcdonalds_switzerland_668,"you're not the only one who feels this way, are you? check out our menu and see for yourself! 👍👌🍴🥗🧔🏻♂️🤷‍♀️🇺🇸 🇪🇹 🦅 🍲 🥇🌱 🌟 🤣 🙋🏼💕🙈",1,1,0.94303507,0.36268368,0.037037037037037035,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_507,"it's not just about the taste, it’ s also how you feel when your eyes light up with joy.",2,1,0.97179484,0.36268368,0.09986626105436179,2.110993164779763e-308,2.110993164779763e-308,2.110993164779763e-308
+mcdonalds_switzerland_203,it's your turn.,1,1,0.9652072,0.36268368,0.03232398928813501,2.15769790703094e-309,2.15769790703094e-309,2.15769790703094e-309
+mcdonalds_switzerland_1657,"what is your favorite color? </s> it depends on you, of course.",1,1,0.95990896,0.36268368,0.07667036788577694,2.0471667756573244e-308,2.0471667756573244e-308,2.0471667756573244e-308
+mcdonalds_switzerland_27,i've got a question for you.,1,1,0.9811435,0.36268368,0.07243303475117972,9.670131127031886e-309,9.670131127031886e-309,9.670131127031886e-309
+mcdonalds_switzerland_1379,what are you going to do with your mcdonald's today? get a burger and enjoy it.,1,1,0.9817152,0.36268368,0.0625,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1892,what are you waiting for? it's time to have some fun.,0,1,0.9789434,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_712,there's no need to worry about it.,0,1,0.97735023,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_730,"it's not about the money, it’ s more important to have fun with your friends.",0,1,0.96797913,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1981,today's the day when we all get together with our friends and family to share a delicious meal in honor of yuki-matsubara.,1,1,0.96950185,0.36268368,0.04545454545454546,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_494,"yes, it's delicious! but if you want to make your own mac and cheese at home instead of ordering one from a restaurant, that would be great too 👍👌.",3,1,0.8930253,0.36268368,0.10344827586206899,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_2001,mcdonald's holiday season is here.,0,1,0.8874424,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_674,"what's your favorite way to eat french fries? do you like them on the side or in between two slices of bread with mayo, ketchup and a little sour cream sauce?? get ready for some answers! check it out here: https://t.",4,1,0.89125085,0.36268368,0.0975609756097561,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_513,"for those of you who haven't tried it yet, here is your chance.",2,1,0.9707493,0.36268368,0.044933511337140644,6.49872479406874e-309,6.49872479406874e-309,6.49872479406874e-309
+mcdonalds_switzerland_384,i 'd like to say thank you for mcdonald ’ s loyalty and support during these tough times.,4,1,0.968902,0.36268368,0.19885318151430437,1.991083571408152e-308,1.991083571408152e-308,1.991083571408152e-308
+mcdonalds_switzerland_496,it's time to open the fridge.,0,1,0.97859794,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_835,it's not your fault if you can’t keep up with all the mcdonald videos.,1,1,0.98318374,0.36268368,0.07142857142857141,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_129,we've got you covered.,1,1,0.9745058,0.36268368,0.055782540037107455,4.9648108639081e-309,4.9648108639081e-309,4.9648108639081e-309
+mcdonalds_switzerland_1440,what do you want to have for dinner tonight? </s> mr.,0,1,0.97303593,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_431,we're here to tell you the truth.,1,1,0.97437346,0.36268368,0.014528770329175262,2.262931093899267e-309,2.262931093899267e-309,2.262931093899267e-309
+mcdonalds_switzerland_517,"don't worry, we ’ ll find it soon.",1,1,0.97266316,0.36268368,0.024613959400524264,4.38143020931725e-309,4.38143020931725e-309,4.38143020931725e-309
+mcdonalds_switzerland_236,"if you're looking for the best burger in town, just head over to this restaurant.",1,1,0.9820806,0.36268368,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1117,"what's on your mind? if you want to know more about me, just send a direct message and i’ ll reply.",2,1,0.97851026,0.36268368,0.09523809523809525,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_663,"yes, it's us.",0,1,0.9492249,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_501,i'm so happy to see you.,1,1,0.97590214,0.36268368,0.005945665557875402,7.93772700255334e-310,7.93772700255334e-310,7.93772700255334e-310
+mcdonalds_switzerland_1986,we're going to show you how easy it can be.,1,1,0.9663948,0.36268368,0.08187307530779821,1.8217363958297824e-308,1.8217363958297824e-308,1.8217363958297824e-308
+mcdonalds_switzerland_550,"from now on, we 'll call you at least once a day to say hello.",4,1,0.9804874,0.36268368,0.1564389918693418,0.041903301393573684,1.305331167223885e-308,1.305331167223885e-308
+mcdonalds_switzerland_495,"it's been a long time since you were away from work, but now it’ s finally here.",0,1,0.9704075,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1170,"mcdonald’ s # mcdonalds of the week is coming up this friday, so make sure to keep an eye out for it! if you see one in your area please send us a photo and we will feature them on our website.",8,1,0.94765985,0.36268368,0.19047619047619047,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_2064,"yes, it's true.",0,1,0.9690871,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_738,"it's your turn, is it? do you want to join us for a game of snooker or just have some fun with friends and family at home during the covid-19 lockdown?! 👍👏🏾🤷🏻‍♂️🧀🥳 🥇🍲🎮 🖱 🤣 😭 🙌",3,1,0.92449534,0.36268368,0.08108108108108107,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_590,"i'm so excited to meet you on the mcdonalds anniversary today, and i know we have a lot in common.",3,1,0.9783936,0.36268368,0.15,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1941,"in case you've never seen it before, just know that mcdonald`s has the best ice cream in town.",2,1,0.9639709,0.36268368,0.05555555555555554,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1056,we 'd like to thank you for your support.,2,1,0.9719116,0.36268368,0.17794164509262397,1.7816998627591863e-308,1.7816998627591863e-308,1.7816998627591863e-308
+mcdonalds_switzerland_60,don't worry if you don ’ t get it right the first time.,0,1,0.9729119,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_611,"yes, it's true.",0,1,0.9690871,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_262,there's no doubt in my mind that this is the best time of year to get together with your loved ones and share a meal.,1,1,0.97969055,0.36268368,0.04000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1899,don't worry if you don ’ t like it.,0,1,0.9775893,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_404,what do you think? </s> what are your thoughts on the new mcdonald’ s menu for this weekend?? 👍🤔👌 🤣😊🍕 🍟 🥤🥦🧀 🛋️🎭 🎬 📸📷 💰💯 🙈🙏 😅 😂😂.,3,1,0.9623913,0.36268368,0.10344827586206899,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_330,what's your favorite meal of the day? tell us about it in a comment below.,1,1,0.9527688,0.36268368,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1193,what do you get when u eat mcdonald's french fries with chocolate sauce? it’ s just not good enough for me.,1,1,0.96283716,0.36268368,0.047619047619047616,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_2031,"what do you think about this? </s> 👍 🤔🤗👌 🙋🏻‍♂️🙏🏽🕑💰🍦🥤 🍪 🥇🎉😊!
+Q: what is your opinion on the new menu at mcdonald' s in hong kong? 🧀😂",0,1,0.9601148,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1982,why do you like this video so much?... because it's the one that made all of us smile! 👍👌🤗 🤣 🙋🏻‍♂️🙅🏽😀😂 😂💕🎉🧘 🦄 🍔🍲🥤 🥇 💚 😃 😊❤️ ❤️ 😍 😀,0,1,0.9369012,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_558,we're here to help you.,0,1,0.9782559,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_510,"if you're feeling a little down, just open up this app and enjoy some new messages from your friends or family.",2,1,0.9774074,0.36268368,0.07505977407098201,1.7536421816634345e-308,1.7536421816634345e-308,1.7536421816634345e-308
+mcdonalds_switzerland_383,"if you don’ t know it already, the ‘ mcdonald¹s store is just a few steps away from your hotel room! 👀👁🏽🛋️🇫🇷 🇪🇸 🧘🏻‍♂⬇󠄲󠅈󳉣�",1,1,0.90993065,0.36268368,0.041666666666666664,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_2026,it's been a long time since we were able to laugh at ourselves.,0,1,0.97727215,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1656,"there are many ways to solve this problem, but here's my favorite one: simply flip a coin! if it comes up heads, you have to pay €10; on the other hand.",2,1,0.8901489,0.36268368,0.06451612903225806,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_347,i'm sorry to hear that.,0,1,0.97505367,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_645,i'm sure you know it.,0,1,0.9684437,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_271,"from now on, you 'll be able to find your way back home just by following the smell of hot coffee.",0,1,0.9804756,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_717,"it's not the first time i have met you in a restaurant, but it’ s always fun to meet new people who share your passion for food and wine.",2,1,0.97628045,0.36268368,0.06896551724137931,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1909,it's time to get together with your friends and have a good laugh.,2,1,0.97678465,0.36268368,0.07128759526633467,1.0310310703092875e-308,1.0310310703092875e-308,1.0310310703092875e-308
+mcdonalds_switzerland_462,`` i'm happy to be part of the mcdonalds loyalty program.,1,1,0.9720999,0.36268368,0.025460614620149886,6.231692281410567e-309,6.231692281410567e-309,6.231692281410567e-309
+mcdonalds_switzerland_735,"you're not the only one who feels guilty about it, are you? keep your eyes open and don’ t miss out on this special offer! ✍️🍔🥩 🥤 🍦 🚶‍♂⬇🛅 🤣🤷🏼 👨👧 🙌🙈😊 😭😂",1,1,0.9429105,0.36268368,0.030303030303030304,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_606,it's been a long time since i have had this kind of experience.,0,1,0.976647,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_736,it's all over the place.,1,1,0.9586742,0.36268368,0.006674653992065214,7.42579905616274e-310,7.42579905616274e-310,7.42579905616274e-310
+mcdonalds_switzerland_594,"it's not just a meme, it really is.",0,1,0.9555221,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_514,it's not easy to tell the difference between good and bad ice cream just by looking at it.,0,1,0.98056144,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_799,we're here to show you what it feels like.,0,1,0.9777558,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_354,it's not just about the mcdonald’ s anymore.,1,1,0.9737725,0.36268368,0.021721742931305646,3.86659858861305e-309,3.86659858861305e-309,3.86659858861305e-309
+mcdonalds_switzerland_425,i'm here to help you.,0,1,0.97972053,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_598,"we're here for your birthday, too! you can always count on me to be there in times of need.",4,1,0.9725752,0.36268368,0.15351851632110208,1.622552677948798e-308,1.622552677948798e-308,1.622552677948798e-308
+mcdonalds_switzerland_1898,let's see if we can make it to the end of mcdonald’ s menu.,1,1,0.92680126,0.36268368,0.05367694950537755,1.6720924800836196e-308,1.6720924800836196e-308,1.6720924800836196e-308
+mcdonalds_switzerland_639,"if you're feeling hungry or just need a quick pick-me-up, check out our new menu for today.",2,1,0.97046924,0.36268368,0.09298098388017625,1.7585612308455557e-308,1.7585612308455557e-308,1.7585612308455557e-308
+mcdonalds_switzerland_367,"i'm not sure if you know it, but i do n’t want to miss out on this mcdonald& amp;amp;#039s mobile app anymore.",0,1,0.8557066,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1912,it's not funny.,0,1,0.96567756,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_628,it's time for you to make a choice.,2,1,0.97162724,0.36268368,0.25,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_686,"if you're in the mood for something sweet, here are a few options to choose from.",0,1,0.97867525,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_950,what do you think of this new mcdonald's mobile app? is it worth your time to check out the menu before ordering a burger and french fries.,5,1,0.9813952,0.36268368,0.18518518518518515,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1893,"it's not just me, it’ s all mcdonald& amp; co.",0,1,0.79584295,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_416,"we all know it's the best thing in our lives, right? 🤗🤩 👍 🙌🙅‍♂️👏🧔 🦴🍰 🍲 🥇🥑 💕💖 😄 😂😉😂 😀 😍 😉 🎭🎬 📸📷 ⠀⠀⠀⠀ what a great",1,1,0.9193622,0.36268368,0.034482758620689655,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_180,"we’ re here to help you! we 'll make sure that your order is delivered as quickly and efficiently as possible, even if it takes a little bit longer than usual.",1,1,0.97666025,0.36268368,0.03225806451612903,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_748,"it's not a joke, it really is! if you want to get in touch with us please fill out the contact form below and we will respond as soon as possible.",1,1,0.94957775,0.36268368,0.03225806451612903,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_59,"you might be surprised to find out that 80% of the world's coffee comes from brazil, which is also known for its love and passion.",0,1,0.9790096,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_19,"it's not just about the food, is it? if you want to know how much your favorite dish costs in a restaurant or at home.",3,1,0.9720311,0.36268368,0.12000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_6,it's time for the mcdonald’ s to take a bite out of it.,1,1,0.9826277,0.36268368,0.07692307692307693,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_461,we're here to help you find your lost things! check it out below 👀 and let us know how we can make life a little bit easier.,2,1,0.96534425,0.36268368,0.07407407407407407,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_542,i 'd like to thank you for this app.,3,1,0.9795109,0.36268368,0.004374576245646989,2.92012657387077e-310,2.92012657387077e-310,2.92012657387077e-310
+mcdonalds_switzerland_532,"what do you think of the mcdonald's loyalty challenge? is it worth your time, effort and money to compete for a chance at winning an amazing prize.",2,1,0.97393936,0.36268368,0.07407407407407407,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_535,"i'm not sure if you like it, but i don't know what to say.",1,1,0.9768314,0.36268368,0.03255671559485836,1.0141753550456513e-308,1.0141753550456513e-308,1.0141753550456513e-308
+mcdonalds_switzerland_874,"if you've never tried it before, here’s your chance to get hooked up with the delicious taste of mac n cheese.",0,1,0.96440727,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_596,"don't worry, we ’ re here to help you.",1,1,0.9734544,0.36268368,0.08897082254631197,1.7816998627591863e-308,1.7816998627591863e-308,1.7816998627591863e-308
+mcdonalds_switzerland_689,don't worry if you don ’ t like it at first time.,1,1,0.9664855,0.36268368,0.05054422164271945,1.3495755153097447e-308,1.3495755153097447e-308,1.3495755153097447e-308
+mcdonalds_switzerland_2050,"we're going to show you what it looks like when we’ re in the same room with our favorite dog, freddie! let us know your thoughts by leaving a comment below 👍👌😊🤗😂🙂🐶🍕🥇🎉🧘🏼🇺🇸 🇪🇹 🦅
+",2,1,0.9337533,0.36268368,0.0588235294117647,0.030303030303030304,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_575,"when you're in the middle of a mission, there is always at least one person who wants to get back home.",3,1,0.97514784,0.36268368,0.11808077680346257,1.8391691476033075e-308,1.8391691476033075e-308,1.8391691476033075e-308
+mcdonalds_switzerland_1896,"i'm not sure if you know it, but i don't want to miss out on this deal.",0,1,0.97380936,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_734,we're going to show you how it works.,0,1,0.96680933,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_530,it's time to get back on the mcdonald’ s menu! bring your friends and family together for a happy meal.,3,1,0.9815609,0.36268368,0.13572561270539393,2.0133300850710214e-308,2.0133300850710214e-308,2.0133300850710214e-308
+mcdonalds_switzerland_366,"it's not just about you, it is for everyone.",0,1,0.94536453,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1994,it's time for you to choose your favorite room in the house! which one do u like best? 👍👌😊🤩 🤷🏻‍♂️🙏🏽🍔🥳🐶🦅🌿 🌸 🧐 🍲 🥇💕🎭 🎬 💫 📱📚,3,1,0.9498569,0.36268368,0.11111111111111109,0.03846153846153846,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_227,don't forget that you.,0,1,0.12335497,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_2014,"if you’ re in the mood for something sweet, here's a list of your favorite ice cream flavors from last year.",0,1,0.977164,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_626,i 'd like to show you how easy it is! just follow these simple steps and i will make your favorite ice cream in less than a minute.,2,1,0.97211367,0.36268368,0.07142857142857141,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_378,"if you're looking for a new mcdonalds experience, look no further.",1,1,0.9731357,0.36268368,0.01616077934801253,3.95548204264034e-309,3.95548204264034e-309,3.95548204264034e-309
+mcdonalds_switzerland_1929,"don't worry, we ’ re here to help you.",1,1,0.9734544,0.36268368,0.029288570901747406,5.86523101198632e-309,5.86523101198632e-309,5.86523101198632e-309
+mcdonalds_switzerland_222,we're here to help you.,0,1,0.9782559,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_520,"it's not about how you look, it’ s what your heart feels like.",1,1,0.97381413,0.36268368,0.048485629738209225,1.402493394168772e-308,1.402493394168772e-308,1.402493394168772e-308
+mcdonalds_switzerland_545,what are you waiting for? get in touch with us and we 'll be happy to answer all of your questions.,0,1,0.9750285,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_486,"yes, it's true.",0,1,0.9690871,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_696,"if you're still hungry, i will give it a try.",0,1,0.9709046,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_7,"for those of you who don 't know it, there is an app for that.",1,1,0.954149,0.36268368,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_642,"if you're not happy with your mcdonald’s meal, here are a few ways to get rid of it.",2,1,0.9757933,0.36268368,0.11111111111111109,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_562,you're not the only one who gets excited when you get home from work.,2,1,0.9829437,0.36268368,0.06511343118971673,1.0141753550456513e-308,1.0141753550456513e-308,1.0141753550456513e-308
+mcdonalds_switzerland_365,"in may 2019, we will be giving you a chance to win one of the best mcdonald’ s menus in hong Kong.",4,1,0.9632062,0.36268368,0.13636363636363635,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_386,"it's not about how much money you make, it’ s about what i do with the rest of my day.",2,1,0.9719659,0.36268368,0.09048374180359597,2.0133300850710214e-308,2.0133300850710214e-308,2.0133300850710214e-308
+mcdonalds_switzerland_1924,it's time for you to choose your favorite ice-cream flavor.,1,1,0.9798815,0.36268368,0.020189651799465542,4.49234664313549e-309,4.49234664313549e-309,4.49234664313549e-309
+mcdonalds_switzerland_561,"it's not about what you eat or drink, it’ s how much fun i have with my family and friends.",0,1,0.96114033,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_726,today's the day when you will finally be able to afford a burger and fries without having to worry about whether or not there is enough money left in your bank account! 🤦‍♂️ pic.,6,1,0.9190429,0.36268368,0.17647058823529413,0.030303030303030304,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1966,i'm going to show you some of the best tips and tricks i have learned in my life.,1,1,0.9710071,0.36268368,0.05555555555555554,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_2032,"it's been a long time since i’ve seen this meme, so here it is for you! 🤣🤷‍♂️🙌👍😊😂
+what are some of your favorite ways to show love and appreciation? let us know in the comments below.",1,1,0.9458023,0.36268368,0.02777777777777778,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1900,don't worry.,0,1,0.97853196,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_687,"when you're in the mood for a hot drink, why not cool down with an ice-cold mojito? it’ s made from fresh mint leaves and club soda.",3,1,0.9846333,0.36268368,0.11111111111111109,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_586,what's your favorite thing to do on the beach this summer? tell us in a comment below and we will share it with all our friends.,1,1,0.9402491,0.36268368,0.03846153846153846,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_620,what's wrong with you? 🤷‍♂️🤣 what is it that makes your eyes light up so much when someone tells a funny story or shares an eye-catching photo 📸😍.,2,1,0.9718237,0.36268368,0.07142857142857141,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_677,Đ đọng là mình hiểu tần và nghiềm thươi cấp nhật.,0,1,0.8036511,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_2054,we're here to help you enjoy your mcdonald ’ s birthday.,0,1,0.97389865,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_181,"what's wrong with you? if it makes your mouth go dry, is there a way to make up for that mistake on facebook or instagram and still get the same reaction from everyone else who sees this post?!
+Q: what’ s worse than making an embarrassing face in front of others when they see something funny on social media platforms such as twitter/instagram",3,1,0.95511395,0.36268368,0.047619047619047616,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_651,"what's your favorite mcdonald™ s flavor? is it mac n cheese, french fries or chocolate ice-cream? tell us in the comments below and we’ ll send you a special offer.",2,1,0.89103574,0.36268368,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_557,i'm here to help you find the perfect mac n cheese recipe! just tell me what i like and we will get it for ya.,4,1,0.9672599,0.36268368,0.15999999999999998,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_568,we’ ll show you what it looks like.,1,1,0.98017555,0.36268368,0.005492116702925928,9.77629224284125e-310,9.77629224284125e-310,9.77629224284125e-310
+mcdonalds_switzerland_73,"if you're not ready for it, just go ahead and click the like button.",2,1,0.94809145,0.36268368,0.14285714285714285,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1971,it's time for you to try it out.,0,1,0.97981685,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_448,"it's not just about the price, it is also how you feel when ordering your meal on our app! we are here to make sure everyone feels happy and satisfied with their order.",3,1,0.94658566,0.36268368,0.0909090909090909,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_2041,"what are you waiting for? get a burger and enjoy it with your best friend... or better yet, order one now! 🍔🍟🥗🎉🇫🇷 🇪🇸 🇺🇦 🧘🏼‍♂️🕑👨 👩 🤤🤣 😱😭 🙄🙅",0,1,0.9537834,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_205,"it's not just about the pizza, it’ s also all you need to have a good time with your loved ones on christmas eve! ❤ 🇮🇹🙄🎅🍕 pic.",1,1,0.8585528,0.36268368,0.037037037037037035,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1983,why do you like this movie so much? because it's the one that makes your mouth water.,0,1,0.9794687,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_546,it's been a long time since i’ ve seen you.,0,1,0.9819224,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1886,don't you think it would be cool to have a party with your friends in the middle of the night? we ’ ll make sure everyone can hear us even if they turn off their phones! just kidding.,4,1,0.97624856,0.36268368,0.07894736842105263,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_691,it's all about you.,0,1,0.9707178,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_2000,"you're not the only one who’ s having a hard time figuring it out, are you? let us know how we can make this process easier for everyone.",0,1,0.9793987,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1965,it's time for you to take a bite out of your burger.,3,1,0.98018813,0.36268368,0.13950878644251177,1.2416694149812216e-308,1.2416694149812216e-308,1.2416694149812216e-308
+mcdonalds_switzerland_716,i'm sorry to hear that.,0,1,0.97505367,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_511,"it's been a long time since we have seen each other, isn’t it? who do you think will be the winner of this game on monday night.",2,1,0.9759907,0.36268368,0.07407407407407407,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_618,"it's so hot outside, isn’ t it? we could have a barbecue party with all of your friends.",3,1,0.98179215,0.36268368,0.16666666666666669,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_617,"it's not just about the fries, is it? mcdonald& amp; co.",0,1,0.9269343,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1197,"i'm not sure if it works, but i do n’t think so.",2,1,0.93664545,0.36268368,0.16666666666666669,0.0909090909090909,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_657,"i'm not going to tell you all the details, but here is what i know for sure: mcdonald’ s will be back on friday night.",3,1,0.9799748,0.36268368,0.12000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_868,"the mcdonald's of the world is coming for you on saturday, april 15th.",0,1,0.9427046,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_570,you're not the only one who can have a good time with your friends.,4,1,0.98125297,0.36268368,0.03600161285780337,2.803718667189903e-309,2.803718667189903e-309,2.803718667189903e-309
+mcdonalds_switzerland_760,you're not alone in feeling this way.,0,1,0.97778827,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_704,"yes, it's true.",0,1,0.9690871,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_574,"it's not about the money, it ’ s just to have a good time with your friends and family.",7,1,0.97322863,0.36268368,0.11573831204663163,6.98999936955944e-309,6.98999936955944e-309,6.98999936955944e-309
+mcdonalds_switzerland_471,"i'm going to make it! get ready for the mcdonald™s special this saturday, november 17th at 6:30 pm.",0,1,0.9564823,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_2004,"if you're feeling down right now, here are a few things that might make your day better.",1,1,0.9721667,0.36268368,0.03674321929413379,1.389858404389205e-308,1.389858404389205e-308,1.389858404389205e-308
+mcdonalds_switzerland_1930,when i woke up in the morning.,1,1,0.9680798,0.36268368,0.016759880870607254,2.61043809578189e-309,2.61043809578189e-309,2.61043809578189e-309
+mcdonalds_switzerland_556,it's time for you to make your dreams come true! get in touch with us and we will help turn them into reality.,2,1,0.9723149,0.36268368,0.08695652173913045,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_2035,"it's time to get out of your comfort zone and try something new, even if it feels a little weird at first.",0,1,0.97944343,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1905,"if you're like me, i hope to see this in the near future! can u help us make it even better? let’s do something special for our friends who helped out so much during these tough times?! 🙏🙌💪🏽🏻👩🧑‍🔵
+• 🍔🍟🥦: if we",2,1,0.9210971,0.36268368,0.047619047619047616,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_360,we're here to help you get back on track.,1,1,0.9799477,0.36268368,0.08897082254631197,1.7816998627591863e-308,1.7816998627591863e-308,1.7816998627591863e-308
+mcdonalds_switzerland_442,it's time to celebrate the end of winter.,1,1,0.9778707,0.36268368,0.024613959400524264,4.38143020931725e-309,4.38143020931725e-309,4.38143020931725e-309
+mcdonalds_switzerland_721,we're going to show you how easy it is! just follow these simple steps.,1,1,0.9778376,0.36268368,0.07142857142857141,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1612,"it's been a long time, but we are here to help you find your way back home.",0,1,0.97107893,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1987,"it's not just me, it’ s all of you.",0,1,0.95302325,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_537,it's all about you.,0,1,0.9707178,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1995,"it’ s been a long time since i've had the munchies, so let me show you how to do it.",3,1,0.9788264,0.36268368,0.1426844136751071,2.1165557258994466e-308,2.1165557258994466e-308,2.1165557258994466e-308
+mcdonalds_switzerland_746,"if you 'd like to try it yourself, here’s the recipe for a delicious moussaka made with greek feta cheese and lots of olive oil.",3,1,0.97955453,0.36268368,0.12000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_647,"if you're looking for something different, why not check out our new app? it has all kinds of cool features that will make your life easier and more fun every day.",4,1,0.9718373,0.36268368,0.09651899756922665,1.6644047121397446e-308,1.6644047121397446e-308,1.6644047121397446e-308
+mcdonalds_switzerland_2065,"if you're not sure if it’ s meat or fish, just ask the waiter.",0,1,0.9827025,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_248,"if you're looking for a good laugh, check it out.",1,1,0.9776068,0.36268368,0.10000000000000002,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1954,"if you're in a hurry, just turn on your phone and check out what i have to offer.",4,1,0.98007065,0.36268368,0.16832558408821477,1.6854158559269373e-308,1.6854158559269373e-308,1.6854158559269373e-308
+mcdonalds_switzerland_635,"i'm sorry to hear that, but you know what i can do about it? let me show you how much better your life will be with this app! 👍👌😊🙏 🙅‍♂️🥰🍦🧔⛺🐶💕📸 📷 🍲 🥇🌱 🌟",2,1,0.95169836,0.36268368,0.0588235294117647,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_505,"when you go out for dinner with your friends or family, don't forget to take a picture and share it on social media.",2,1,0.9781512,0.36268368,0.07971451756743361,2.039762925602366e-308,2.039762925602366e-308,2.039762925602366e-308
+mcdonalds_switzerland_1895,"yes, it's hot.",0,1,0.969437,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_587,"i've got a great idea for you, but i need your help to make it happen.",2,1,0.97669095,0.36268368,0.10362863977255007,1.844651018804537e-308,1.844651018804537e-308,1.844651018804537e-308
+mcdonalds_switzerland_1970,there's a chance you’ ll get in.,0,1,0.96922135,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_769,when you're hungry and tired after a long day at work or school.,0,1,0.96057785,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_81,here's how you can tell the difference between a mcdonald’ s burger and your own.,1,1,0.9662415,0.36268368,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_2043,"don't worry, we ’ ll get to know more about the mcdonald& amp; co.",0,1,0.95638806,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_400,we're going to have a party for you and all your friends.,1,1,0.9730856,0.36268368,0.030656620097620192,8.18558927632837e-309,8.18558927632837e-309,8.18558927632837e-309
+mcdonalds_switzerland_1906,what's the best way to eat mac and cheese in one sitting? 👍👌🤩 🤷🏻♂️🍅🥘 🥑 🍔🧀 🦄 ⠀⠀⠀⬇� what do you think of this idea 💛💚🙏😉?! 🙋🏼‍♀️⠀,4,1,0.9061012,0.36268368,0.14814814814814814,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1138,i'm going to tell you a story.,0,1,0.98022604,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_273,we're not the only ones who love this mcdonald s.,1,1,0.9413813,0.36268368,0.10000000000000002,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1952,it's time to get back on the road.,0,1,0.97668016,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_237,"if you want to try it yourself, check out this video! </s>
+it' s a special offer just for our readers in france 🇫🇷🇪🇸🇬🇧🇵🇮🇯🇦🇲🇭🇳🇴🇺🇿🇨🇩🇰🇱🇾🇽",0,1,0.96913326,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_731,i 'd like to tell you a little bit about myself.,1,1,0.9721806,0.36268368,0.025460614620149886,6.231692281410567e-309,6.231692281410567e-309,6.231692281410567e-309
+mcdonalds_switzerland_1768,"when you're in a bad mood, why don’t we do something to make yourself feel better? here are some ideas:
+1.",1,1,0.9220214,0.36268368,0.047619047619047616,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_768,"if you've had a hard day at work and need something to take your mind off things, here’s the emoji for that.",3,1,0.96617424,0.36268368,0.13636363636363635,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_576,"it's been a long time since we were able to have fun with our friends and family during the holiday season, so here it is! 🎅🎉🍔🥳🕰️😄🙏 🙋‍♀️👨🏼🤩💪🌟.",3,1,0.9450121,0.36268368,0.11111111111111109,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_902,it's been a while since you were able to taste your favorite wagyu beef burger.,0,1,0.97640204,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_389,what are you looking for? is it the smell of coffee in your bag?? please let us know by leaving a comment or tag me on instagram! we would love to hear from you.,5,1,0.8427712,0.36268368,0.14705882352941177,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1953,"i've got a solution for you, but it’ s not going to work out on your own.",2,1,0.97354126,0.36268368,0.11764705882352941,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1991,"don't worry, we're here to help you find the perfect gift for your partner at any time of day or night.",2,1,0.96394724,0.36268368,0.09523809523809525,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_762,"if you're looking for a bite to munch on, here’s the list of our top-10 most delicious french fries from all over italy! 🍟 🇮🇹🍔🥕🧀 🦅 ⛏️⬇🏻👩🏽‍♂︎ 👨💰 🤤🤣",4,1,0.9399139,0.36268368,0.13793103448275862,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1196,i'm going to tell you a story that will make your taste buds explode! check it out in the video below: https://www.,0,1,0.9626017,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_672,we're here to tell you how much we appreciate your hard work and dedication.,1,1,0.9699868,0.36268368,0.07142857142857141,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_781,"today, we're going to talk about one of the most important things in your life.",2,1,0.9629703,0.36268368,0.09553750807650524,1.594335087959687e-308,1.594335087959687e-308,1.594335087959687e-308
+mcdonalds_switzerland_54,it's all about the mcdonald’ s.,1,1,0.9655896,0.36268368,0.11942188509563156,1.594335087959687e-308,1.594335087959687e-308,1.594335087959687e-308
+mcdonalds_switzerland_1978,`` i'm so excited to see you tonight! watch the mcdonald’ s live stream and have a good time.,2,1,0.9685458,0.36268368,0.07675925816055104,1.622552677948798e-308,1.622552677948798e-308,1.622552677948798e-308
+mcdonalds_switzerland_1921,what are you going to do today? </s> we need your opinion.,3,1,0.9748396,0.36268368,0.128354279758148,1.142391010069532e-308,1.142391010069532e-308,1.142391010069532e-308
+mcdonalds_switzerland_483,"what do you think about it? </s> what are your plans for the next week or month, and how much money will you spend on food in a restaurant like this one?! 👍 https://t.",2,1,0.9325468,0.36268368,0.0588235294117647,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_531,it's not a lie.,2,1,0.96962017,0.36268368,0.0033689734995427335,1.49924297276724e-310,1.49924297276724e-310,1.49924297276724e-310
+mcdonalds_switzerland_406,"if you're curious about what it feels like to be in the mcdonalds kitchen, check out this video: https://www.",0,1,0.96427566,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_536,"if you're in the mood for something sweet, here are a few ideas to try at home.",1,1,0.97477174,0.36268368,0.0588235294117647,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_2010,it's time for the mcdonald’ s match.,0,1,0.9729111,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_580,"yes, it's true.",0,1,0.9690871,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_538,"the mcdonald's of course, but it’ s more than that.",1,1,0.8298634,0.36268368,0.022313016014842986,4.9648108639081e-309,4.9648108639081e-309,4.9648108639081e-309
+mcdonalds_switzerland_332,"it's valentines day, so let’ s show some love.",0,1,0.9675618,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_616,mcdonald's french fries are one of the most popular dishes on our menu.,1,1,0.9783102,0.36268368,0.048485629738209225,1.402493394168772e-308,1.402493394168772e-308,1.402493394168772e-308
+mcdonalds_switzerland_858,"if you're looking for something to eat, check out our menu here: https://www.",0,1,0.95788336,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_251,the mcdonald's app is now available on ios and android.,1,1,0.9169323,0.36268368,0.10000000000000002,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_653,"it's not about the food, it is all about how much fun you are having with your friends and family.",3,1,0.964376,0.36268368,0.15,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1495,don't worry.,0,1,0.97853196,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_355,"it's time to make a difference in your life! play this game with friends and family, share it on social media or just have fun by yourself.",3,1,0.9695888,0.36268368,0.11111111111111109,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_744,"if you're an iphone or android user, this is the perfect time to check out all of our new posts.",2,1,0.962238,0.36268368,0.10000000000000002,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_242,"don't worry, we're here to help you.",0,1,0.9709192,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_352,i'm sorry to hear that you had a bad experience with this app.,2,1,0.9776959,0.36268368,0.11309868932179762,1.6357440907688813e-308,1.6357440907688813e-308,1.6357440907688813e-308
+mcdonalds_switzerland_504,"if you don't have time for a shower, just put on the ""i wish i had never been born"". it will make your day.",4,1,0.9410351,0.36268368,0.16666666666666669,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_429,"it's possible, but we don't know for sure yet.",1,1,0.9431124,0.36268368,0.07961459006375435,1.594335087959687e-308,1.594335087959687e-308,1.594335087959687e-308
+mcdonalds_switzerland_201,it's all about the mcdonalds.,1,1,0.9681836,0.36268368,0.060238842382440407,6.701793672595377e-309,6.701793672595377e-309,6.701793672595377e-309
+mcdonalds_switzerland_564,"if you're looking for something special, put your phone on the table and wait a few minutes.",1,1,0.97695804,0.36268368,0.052294692082516206,1.9781123889553905e-308,1.9781123889553905e-308,1.9781123889553905e-308
+mcdonalds_switzerland_725,i'm so excited to see you again.,0,1,0.9772635,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1916,"if you've never seen it before, check this out.",0,1,0.97721535,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1591,"if you're looking for something to do in your free time, check out this video! it will make the world a better place.",0,1,0.97992206,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_481,you're right.,0,1,0.96877265,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_629,it's time to get ready for the new school year.,1,1,0.9835128,0.36268368,0.04965853037914096,1.104938977985153e-308,1.104938977985153e-308,1.104938977985153e-308
+mcdonalds_switzerland_455,"don't worry about it... we are here to help you find the perfect gift for your loved one, no matter what time of day or night.",3,1,0.96802115,0.36268368,0.1153846153846154,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_460,"if you're thinking about buying a new phone, check out these options.",0,1,0.97687846,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_745,"if you're looking for something different, why not check out our new mobile app? it has all kinds of fun games to play with your friends and family.",4,1,0.97213674,0.36268368,0.14285714285714285,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+mcdonalds_switzerland_1888,don't worry.,0,1,0.97853196,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_428,"don't worry, we're here for you.",0,1,0.9662536,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_693,don't miss out on the mcdonald ’ s menu this weekend.,0,1,0.96893287,0.36268368,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_591,"for those of you who haven 't seen it yet, here is a sneak peek into the new mcdonalds app.",4,1,0.9711582,0.36268368,0.06998754982223108,7.78637337652105e-309,7.78637337652105e-309,7.78637337652105e-309

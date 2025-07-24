@@ -1,0 +1,60 @@
+image_id,caption,fitCount,gtNum,fluency,diversity,bleu1,bleu2,bleu3,bleu4
+sonicdrivein_283,"when you’ re at a restaurant and the waiter asks, “ what would u like to order? just point your phone in front of them.",1,1,0.96633655,0.45519423,0.04000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_670,the only thing i want to eat for breakfast is a bacon and egg sandwich.,1,1,0.98329115,0.45519423,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1384,"it's not about what you look like, it’ s who u are.",0,1,0.94375557,0.45519423,0.0,0.0,0.0,0.0
+sonicdrivein_344,"i'm not sure if you like it or i do, but this is the best ice cream ever.",1,1,0.97336406,0.45519423,0.05555555555555554,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_491,"yes, i don't like this.",1,1,0.96539336,0.45519423,0.1637461506155964,1.8217363958297824e-308,1.8217363958297824e-308,1.8217363958297824e-308
+sonicdrivein_408,we all know what it feels like to be hungry.,1,1,0.9825798,0.45519423,0.10000000000000002,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_572,today i’ m going to show you what it feels like when your dog's mouth is full of food after a hard day at the office.,4,1,0.9730899,0.45519423,0.15384615384615385,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_780,"for the first time in 2017, we’re going to be doing our own version of this meme.",1,1,0.97466236,0.45519423,0.0588235294117647,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_80,"it’ s like, “ i love you so much.",0,1,0.8510761,0.45519423,0.0,0.0,0.0,0.0
+sonicdrivein_1594,it’ s not the only thing i can think of when you hear “ this is my mom 😂😂🤷‍♂️👨🏻🧑🏽💕#momofthemonth pic.,2,1,0.80076194,0.45519423,0.10000000000000002,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_497,the only thing i couldn't stop thinking about was this.,0,1,0.9718683,0.45519423,0.0,0.0,0.0,0.0
+sonicdrivein_51,"when i was a kid, my mom told me not to ask for 30 minutes of sleep in one night.",1,1,0.9732317,0.45519423,0.05000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_2031,"for those of you who don’ t know what we mean, here are a few things to keep in mind when ordering your coffee: </s> ☕️☔️🍫.",1,1,0.94567263,0.45519423,0.03846153846153846,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_691,"i'm not going to tell you what it is, but i’ m pretty sure this will be the most popular app of all time.",1,1,0.97379196,0.45519423,0.041666666666666664,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_98,"you’ re not going to like this, are you? </s> don’ t worry about it.",0,1,0.9833076,0.45519423,0.0,0.0,0.0,0.0
+sonicdrivein_163,"i'm not going to go in, but if you can’ t get me out of my car then i will.",1,1,0.9565836,0.45519423,0.05000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_697,"we're going to have a taco party at my house tonight, so make sure you bring your own food and drinks!# 👨‍🍳👩🏻🧑🏾️🙌🎉🥗🤣 🤦♀️😊☕⛅
+Q: what are we having for dinner? A: tacos.",0,1,0.972881,0.45519423,0.0,0.0,0.0,0.0
+sonicdrivein_376,you're not the only one in this room.,2,1,0.9723158,0.45519423,0.25,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_690,"for the 1st time in almost a decade, we’ re going to be having an ice cream party at our favorite spot! ♥️ pic.",0,1,0.8738033,0.45519423,0.0,0.0,0.0,0.0
+sonicdrivein_495,"for those of you who can’ t wait to get your hands on this, we've got a ton more coming soon.",1,1,0.9618655,0.45519423,0.047619047619047616,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_585,"for those of you who don’ t know it, we have a new menu for the 2019 holiday season.",2,1,0.96925956,0.45519423,0.10526315789473682,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_571,and you know what? we're going to have a party! get ready for it.,0,1,0.98215216,0.45519423,0.0,0.0,0.0,0.0
+sonicdrivein_65,`` i'm going to give you a taste of my new dog biscuit.,0,1,0.97516656,0.45519423,0.0,0.0,0.0,0.0
+sonicdrivein_234,"don't know what to do with this, so here are some ideas you might like: </s>
+what is the definition of a good friend? someone who makes your day better than it was before they were there.",1,1,0.9725539,0.45519423,0.02702702702702703,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_566,"we're here to help you find your perfect ice cream flavor, but we do n’t know what it is.",0,1,0.9679939,0.45519423,0.0,0.0,0.0,0.0
+sonicdrivein_486,when you go to the store and see a 10% off sale on everything but there is no ice cream in it.,2,1,0.7010573,0.45519423,0.0909090909090909,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_534,when you can’t decide what ice cream flavor to get.,0,1,0.78009635,0.45519423,0.0,0.0,0.0,0.0
+sonicdrivein_457,"we’ re not going to be here for the rest of your life, but we are gonna make sure you have a good time! </s>
+What is it with this picture? I don't get what they mean by that.",0,1,0.97487336,0.45519423,0.0,0.0,0.0,0.0
+sonicdrivein_496,10 of the 25 most popular memes on instagram this week.,0,1,0.9263544,0.45519423,0.0,0.0,0.0,0.0
+sonicdrivein_2052,you know what i'm going to do.,0,1,0.974312,0.45519423,0.0,0.0,0.0,0.0
+sonicdrivein_786,"i'm not sure if you like it or hate this, but i do know one thing for certain: we can get to work in no time.",0,1,0.97756714,0.45519423,0.0,0.0,0.0,0.0
+sonicdrivein_832,# 15 of the year’ s most popular ways to celebrate your anniversary with a little help from home.,2,1,0.89103365,0.45519423,0.10526315789473682,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_290,"you know when you’ re about to order a burger and the cashier says, “ i hope this is on your left side because it looks better that way.",3,1,0.8893118,0.45519423,0.10344827586206899,0.03571428571428572,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1199,"when i was 10 years old, my mom told me to get a dog.",1,1,0.9720243,0.45519423,0.07142857142857141,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_89,"it’ s the end of summer, and it's time to say goodbye.",0,1,0.9793681,0.45519423,0.0,0.0,0.0,0.0
+sonicdrivein_373,when i went to the grocery store with my mom and saw this ad for a $10 ice cream sundae.,0,1,0.9677441,0.45519423,0.0,0.0,0.0,0.0
+sonicdrivein_505,this is what we're going to do today.,0,1,0.9761162,0.45519423,0.0,0.0,0.0,0.0
+sonicdrivein_596,"it's my first day of school, and i am so excited to meet you all again.",1,1,0.9722773,0.45519423,0.0625,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_414,"it’ s like, “ i know what you guys are thinking right now.",1,1,0.91168284,0.45519423,0.07692307692307693,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_69,# 10 of the best things i’ve ever written in my life.,0,1,0.90206856,0.45519423,0.0,0.0,0.0,0.0
+sonicdrivein_78,"if you're looking for a way to add some fun and excitement into your day, check out this video.",1,1,0.9806903,0.45519423,0.05263157894736841,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1502,"a lot of people say they don’ t like it, but we don't.",1,1,0.96837324,0.45519423,0.07692307692307693,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_196,"it's not like we’ re going to have a party this weekend, is it? but i don't think so! let me know what you had for dinner last night.",0,1,0.97755057,0.45519423,0.0,0.0,0.0,0.0
+sonicdrivein_91,when you’ re in the mood for something sweet but don ‘t know what to do with it.,1,1,0.9604665,0.45519423,0.05555555555555554,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_522,"today's your day, everyone’ s going to be the first person who will get a taste of our new flavors.",1,1,0.9378348,0.45519423,0.05000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_784,we’ re here to help you find your way home.,0,1,0.980626,0.45519423,0.0,0.0,0.0,0.0
+sonicdrivein_152,"i'm not going to say no, but if you have any questions or comments please leave them in the comment section and i will get back with an answer.",0,1,0.94995844,0.45519423,0.0,0.0,0.0,0.0
+sonicdrivein_369,why don't you try this? </s> 👨‍♂️👩🏻🧑🏽 🦅🍰 🍲🥗🎉🤣 🤔😂😀💚 💛 😄 🥳 🙌🙏🌈 🌊 🇺🇸 🇪🇹 🇮🇱 �,0,1,0.9346394,0.45519423,0.0,0.0,0.0,0.0
+sonicdrivein_742,we're not going to let you down.,0,1,0.97290355,0.45519423,0.0,0.0,0.0,0.0
+sonicdrivein_798,"when you’ re not sure what to do, just think about it for a minute and i 'll be there with an idea.",2,1,0.9657061,0.45519423,0.08695652173913045,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_446,"it’ s the time of year to get your hair done, but i don' t know if you want it or not! </s> 🧖‍♂️ pic.",0,1,0.86797863,0.45519423,0.0,0.0,0.0,0.0
+sonicdrivein_560,"when you’ re about to buy a birthday gift for your best friend, check out this list of the 2018 most popular gifts in america.",0,1,0.96739924,0.45519423,0.0,0.0,0.0,0.0
+sonicdrivein_893,"it's not just a meme, it’ s an experience.",0,1,0.9596618,0.45519423,0.0,0.0,0.0,0.0
+sonicdrivein_645,"when you walk into the store and see a sign that says, `` please don't bring your kids in here!'' it makes me want to scream.",0,1,0.969068,0.45519423,0.0,0.0,0.0,0.0
+sonicdrivein_143,we're not going to be the only ones who can do this.,0,1,0.9734398,0.45519423,0.0,0.0,0.0,0.0
+sonicdrivein_85,you know what i’ m going to do? </s> go for a run with your dog.,0,1,0.98073673,0.45519423,0.0,0.0,0.0,0.0

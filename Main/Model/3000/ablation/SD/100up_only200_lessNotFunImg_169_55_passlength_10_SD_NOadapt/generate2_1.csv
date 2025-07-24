@@ -1,0 +1,65 @@
+image_id,caption,fitCount,gtNum,fluency,diversity,bleu1,bleu2,bleu3,bleu4
+sonicdrivein_486,i wrote the following words in my beer:.,3,1,0.9212218,0.46152988,0.3309363384692233,1.9636207881546135e-308,1.9636207881546135e-308,1.9636207881546135e-308
+sonicdrivein_655,it’ s not the first time this has happened to me.,0,1,0.975149,0.46152988,0.0,0.0,0.0,0.0
+sonicdrivein_69,s for the or i think it’ s going to be hard on me.,1,1,0.82720697,0.46152988,0.0714285714285714,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_1996,you’ re going to be a big part of our next movie night! watch it with your team and have fun.,3,1,0.97317207,0.46152988,0.1428571428571428,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_789,the big question is : what do you want to eat? it has a little bit of everything.,0,1,0.8055127,0.46152988,0.0,0.0,0.0,0.0
+sonicdrivein_780,contact us at 2016-3598 and we will follow you to your new restaurant.,0,1,0.765608,0.46152988,0.0,0.0,0.0,0.0
+sonicdrivein_791,we know what you’ re thinking.,0,1,0.97087777,0.46152988,0.0,0.0,0.0,0.0
+sonicdrivein_414,ika you like this? it’s the same game with a different name.,1,1,0.65443635,0.46152988,0.0833333333333333,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_952,this is what i’ ll be doing this weekend.,1,1,0.9840134,0.46152988,0.0016295574573918,3.26329712944047e-310,3.26329712944047e-310,3.26329712944047e-310
+sonicdrivein_594,i’ m going to go on a trip with my family.,0,1,0.9831803,0.46152988,0.0,0.0,0.0,0.0
+sonicdrivein_135,"it’ s time for the, so let me know what you think.",0,1,0.8453521,0.46152988,0.0,0.0,0.0,0.0
+sonicdrivein_2095,"i wasn't sure what to do with my stuff, so i turned on the stove and it’s still there.",2,1,0.9208419,0.46152988,0.1052631578947368,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_1635,we know you’ re excited for your new taste buds but we also want to make sure they don ‘t get messy with this one.,4,1,0.97177607,0.46152988,0.0379084413891394,5.271817621983064e-309,5.271817621983064e-309,5.271817621983064e-309
+sonicdrivein_1755,this is a recipe for the perfect summer salad.,2,1,0.9760065,0.46152988,0.04690490839802,4.69650984804505e-309,4.69650984804505e-309,4.69650984804505e-309
+sonicdrivein_1254,the workout is over.,1,1,0.9604463,0.46152988,0.0058794364640022,5.23287215152236e-310,5.23287215152236e-310,5.23287215152236e-310
+sonicdrivein_80,"ish, when you’ re like 70+ years old and your favorite thing to do is go for a run.",0,1,0.9120684,0.46152988,0.0,0.0,0.0,0.0
+sonicdrivein_1778,"lamora the hacker, '' aka ryan stevenson! what’ s your thoughts on this?
+why not share it with everyone who's got time to spare tonight?! x""
+Questions and Answers:
+1.",2,1,0.80224437,0.46152988,0.0666666666666666,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_196,"i just found out that my new phone is better than a 30 year old sonic shadowbox! — tom wolfson 🔥 →
+.",0,1,0.8714029,0.46152988,0.0,0.0,0.0,0.0
+sonicdrivein_1765,Q: what do you call the wi-fi in your house?? A: 2017#4598; Q: whats it called when people start talking to each other? a: st.,3,1,0.68509305,0.46152988,0.12,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_614,it’ s just a couple of words to describe this amazing meal.,2,1,0.96077013,0.46152988,0.141080287481769,1.8834843577582417e-308,1.8834843577582417e-308,1.8834843577582417e-308
+sonicdrivein_339,a little bit of joy to keep you on track with your coffee and the days left in summer.,6,1,0.63233835,0.46152988,0.2302777744816531,1.622552677948798e-308,1.622552677948798e-308,1.622552677948798e-308
+sonicdrivein_1849,m going to make you a new turin.,1,1,0.59624475,0.46152988,0.0405815584197937,7.223757182189463e-309,7.223757182189463e-309,7.223757182189463e-309
+sonicdrivein_2078,today we’ re going to be doing something different.,0,1,0.980874,0.46152988,0.0,0.0,0.0,0.0
+sonicdrivein_470,"ok, my mom is the 'll do it now!# ice cream ride this week* i will post a video of how we did on sunday.",1,1,0.64772344,0.46152988,0.04,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_89,"la-zed, la zed! we’ ll get back to the ghost in a week.",0,1,0.96734613,0.46152988,0.0,0.0,0.0,0.0
+sonicdrivein_316,"they’ re gonna have to buy a new dog because they ‘re not even in the car!# nowshouloveyournewdognow!!# thinktankz@ us& you just need it?
+i like this so much i want my own hot tub with all these other things attached too.",2,1,0.8530744,0.46152988,0.0476190476190476,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_877,"a, the present you with your own unicorn at work.",1,1,0.20787881,0.46152988,0.1,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_1737,ill change the stock to your favorite 2014-edition taco bell.,2,1,0.8635152,0.46152988,0.0735758882342884,8.18558927632837e-309,8.18558927632837e-309,8.18558927632837e-309
+sonicdrivein_543,i’ m just about to have a meeting with the masters of charge.,2,1,0.97532153,0.46152988,0.0969712594764184,1.402493394168772e-308,1.402493394168772e-308,1.402493394168772e-308
+sonicdrivein_1197,the # fda-1605 is still waiting for the white of your little one.,1,1,0.42506722,0.46152988,0.0565493446608988,1.6357440907688813e-308,1.6357440907688813e-308,1.6357440907688813e-308
+sonicdrivein_926,we need to get this for you.,0,1,0.9682626,0.46152988,0.0,0.0,0.0,0.0
+sonicdrivein_311,you don't have to do it.,1,1,0.97464615,0.46152988,0.0613132401952404,8.18558927632837e-309,8.18558927632837e-309,8.18558927632837e-309
+sonicdrivein_1854,"oh yeah, it’ s been a while since i wrote this blog.",0,1,0.976599,0.46152988,0.0,0.0,0.0,0.0
+sonicdrivein_1102,"#1, you.",0,1,0.35596123,0.46152988,0.0,0.0,0.0,0.0
+sonicdrivein_2185,look at those # dreamcat s you can buy in store.,1,1,0.86153036,0.46152988,0.0366263928662848,8.964607222800593e-309,8.964607222800593e-309,8.964607222800593e-309
+sonicdrivein_743,"hey's the thing you do when your mom is in town? just walk into a store and grab everything off of her desk! so get up there, kick it down to ya’ or something.",5,1,0.7932337,0.46152988,0.1095865907372765,1.6581001563886476e-308,1.6581001563886476e-308,1.6581001563886476e-308
+sonicdrivein_1729,"we get the home, and we got to like three of these.",3,1,0.54123294,0.46152988,0.1180916381852536,1.051050468137224e-308,1.051050468137224e-308,1.051050468137224e-308
+sonicdrivein_1367,ya'm not hungry.,0,1,0.4543174,0.46152988,0.0,0.0,0.0,0.0
+sonicdrivein_478,the's a food bomb.,0,1,0.21386103,0.46152988,0.0,0.0,0.0,0.0
+sonicdrivein_2052,"oh oh, no! Oh my god.",0,1,0.95553553,0.46152988,0.0,0.0,0.0,0.0
+sonicdrivein_491,"a message from my boyfriend: "" i love you so much and I can get a full day off for me too!"" 😱😭🤦‍♂️😂@iam_lisa.",1,1,0.933314,0.46152988,0.0434782608695652,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_204,you# 039; re gonna love this store! the guys in charge of delivery and stocking are so cool.,1,1,0.95637107,0.46152988,0.0555555555555555,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_1471,"when i said no to the hype, they gave me their s’s for my birthday.",2,1,0.95103276,0.46152988,0.0893760061380852,1.491511611267286e-308,1.491511611267286e-308,1.491511611267286e-308
+sonicdrivein_344,"i got you a, i hope this is what u wanted! just in case we have to do it again.",3,1,0.9470811,0.46152988,0.15,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_2189,we bet this is the first time you've had to ask for a drink before chinnati pizza.,1,1,0.94810766,0.46152988,0.0588235294117647,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+sonicdrivein_532,what you ate for lunch? the can’s new! just wait and see if it works on a dog.,3,1,0.92363244,0.46152988,0.1194218850956315,1.594335087959687e-308,1.594335087959687e-308,1.594335087959687e-308
+sonicdrivein_1459,"the new menu is called, but you have to watch this with your feet.",2,1,0.9327337,0.46152988,0.1238396999643116,1.928867353251809e-308,1.928867353251809e-308,1.928867353251809e-308
+sonicdrivein_1566,"this summer's grill app is coming out, so make sure you get yours early!
+the question of the week: what was your favorite childhood game? mine was always tag.",0,1,0.9717336,0.46152988,0.0,0.0,0.0,0.0
+sonicdrivein_1221,"when i'm not thinking about my car: have a sitter waiting at the front door of our house in to hell with us!
+what is your favourite word?<|endoftext|>A study published by The Lancet on Monday, June 17th found that an estimated one billion people worldwide are living without access to safe drinking water.",9,1,0.9495812,0.46152988,0.1426367421353344,0.0181724695508959,2.1026245209953283e-308,2.1026245209953283e-308
+sonicdrivein_1623,a's a little bigger than the rest of them.,0,1,0.89303803,0.46152988,0.0,0.0,0.0,0.0
+sonicdrivein_1666,"spielberg says, “ i was with my mom on pizza for the first time.",0,1,0.95151514,0.46152988,0.0,0.0,0.0,0.0
+sonicdrivein_1084,we are now.,0,1,0.8914272,0.46152988,0.0,0.0,0.0,0.0
+sonicdrivein_556,"the mother of all donuts is here, and it s also time for a late-night sweet.",3,1,0.9597697,0.46152988,0.106834279637048,1.267808868335202e-308,1.267808868335202e-308,1.267808868335202e-308
+sonicdrivein_1138,what do you think? i 'll tell my story and let it pass.,1,1,0.9790836,0.46152988,0.0242631749722267,7.018356326161624e-309,7.018356326161624e-309,7.018356326161624e-309
+sonicdrivein_2181,i’ m thinking of the `` our forever dog we got from us.,1,1,0.90647435,0.46152988,0.0610709736783039,1.7665365515873297e-308,1.7665365515873297e-308,1.7665365515873297e-308
+sonicdrivein_842,"caught the last soda at that restaurant on your way home from work? ‘ we’re going to make you some more!# purrsitive
+This is a photo of this post.",3,1,0.93974715,0.46152988,0.1034482758620689,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308

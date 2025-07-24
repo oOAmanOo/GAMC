@@ -1,0 +1,57 @@
+image_id,caption,fitCount,gtNum,fluency,diversity,bleu1,bleu2,bleu3,bleu4
+sonicdrivein_290,when you post a new tweet and it's the first thing that pops into your head.,1,1,0.9492384,0.41092348,0.0625,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_522,"when you’re about to buy a new car, i will show it in your hand.",1,1,0.96813345,0.41092348,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_344,"i'm not a fan, but i love you! and the only way to get me like is by buying this post.",1,1,0.7193596,0.41092348,0.047619047619047616,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_69,#1.,0,1,0.90399945,0.41092348,0.0,0.0,0.0,0.0
+sonicdrivein_414,"i'm not gonna lie, but i think this is the best way to keep your kids entertained for a week.",1,1,0.9749452,0.41092348,0.05000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_163,`` i'm not going to be a restaurant.,0,1,0.95814455,0.41092348,0.0,0.0,0.0,0.0
+sonicdrivein_571,"and i'm gonna have a little bit of ice cream, and we’re going to get it! ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪ ♪",0,1,0.8547527,0.41092348,0.0,0.0,0.0,0.0
+sonicdrivein_1384,"i'm not a mom, but i’ve been trying to find out what my son likes and when he does n’t like it.",2,1,0.9552775,0.41092348,0.0909090909090909,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_497,"today i saw a 30-year old man in the store, and he was looking at me.",1,1,0.977042,0.41092348,0.0625,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_780,a's a guy who just did n’t post his blog for like two hours and then he was on the road to get it off.,1,1,0.80404025,0.41092348,0.04000000000000001,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1502,"the first time i saw this, my mom said `` you know what it is? and the other guy was on a mission.",0,1,0.97052765,0.41092348,0.0,0.0,0.0,0.0
+sonicdrivein_51,a:'s a good idea for the rest of us.,1,1,0.87480515,0.41092348,0.11111111111111109,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_832,so i just got a little bit of fun and the's on my way to work.,2,1,0.24938521,0.41092348,0.12500000000000003,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_491,"f you just got a new car, and i'm going to get the next one! this is my boyfriend.",1,1,0.9760321,0.41092348,0.05263157894736841,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_786,"i'm not a dentist, but i can do it for you.",0,1,0.9751448,0.41092348,0.0,0.0,0.0,0.0
+sonicdrivein_486,i have a feeling of the ocean.,3,1,0.9630329,0.41092348,0.32206169703226534,1.6720924800836196e-308,1.6720924800836196e-308,1.6720924800836196e-308
+sonicdrivein_505,i'm not saying you should eat this but i am just telling people to get rid of it.,0,1,0.95081294,0.41092348,0.0,0.0,0.0,0.0
+sonicdrivein_560,a new year's event! a day when we can all meet up and talk about what you want to do this coming years.,2,1,0.96205163,0.41092348,0.08695652173913045,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_143,"in the, you can't eat it! but i love to do this.",0,1,0.6847835,0.41092348,0.0,0.0,0.0,0.0
+sonicdrivein_566,this is a new word for the people who have been trying to find their place.,0,1,0.9664578,0.41092348,0.0,0.0,0.0,0.0
+sonicdrivein_1199,"when i was 10 years old, my mom said: `` you should get a job in the store!'' so now it's like this.",1,1,0.9528093,0.41092348,0.043478260869565216,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_373,"and i said, `` oh yeah man! this is the best car show ever.",0,1,0.9164896,0.41092348,0.0,0.0,0.0,0.0
+sonicdrivein_534,posted on the internet 24 hours later.,0,1,0.94035786,0.41092348,0.0,0.0,0.0,0.0
+sonicdrivein_376,"you know, i'm not a fan of this.",1,1,0.97865456,0.41092348,0.12500000000000003,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_495,"you know, you're not a mom; i just got to get your hair cut.",2,1,0.95584995,0.41092348,0.14285714285714285,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_645,"`` no, i'm not the one who walks in and out of a store.",0,1,0.966907,0.41092348,0.0,0.0,0.0,0.0
+sonicdrivein_91,a guy who’ s been dating my girlfriend for 2 years and hasn't told me she is pregnant.,0,1,0.94388986,0.41092348,0.0,0.0,0.0,0.0
+sonicdrivein_596,"i'm not a doctor, but i can see you have an app for your eye and hearing problems.",2,1,0.96278566,0.41092348,0.11111111111111109,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_1594,why don't you like this? i ’m the only one who can keep a dog in your house all day.,2,1,0.9739283,0.41092348,0.10000000000000002,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_283,"i’m not a lawyer, i am the king of all.",1,1,0.95987207,0.41092348,0.10000000000000002,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_80,"i just got a new phone number and i’m like, “oh my god this is so cute! y up to you guys.",2,1,0.8105143,0.41092348,0.0909090909090909,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_369,i'm not going to be a pizza chef this year.,0,1,0.97676647,0.41092348,0.0,0.0,0.0,0.0
+sonicdrivein_798,""" i'm not a man.",0,1,0.8729007,0.41092348,0.0,0.0,0.0,0.0
+sonicdrivein_585,"i'm going to be the best of this year, and i am n’t gonna go out on it.",2,1,0.9250331,0.41092348,0.11111111111111109,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_893,"the last time i was here, we were just a little bit of ice cream.",1,1,0.9352719,0.41092348,0.06666666666666667,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_89,"a, a day of rest.",0,1,0.92152613,0.41092348,0.0,0.0,0.0,0.0
+sonicdrivein_446,"a's a joke, but it is n’t.",0,1,0.75814676,0.41092348,0.0,0.0,0.0,0.0
+sonicdrivein_691,"i'm not a doctor, but i’ve got some good news for you.",0,1,0.977998,0.41092348,0.0,0.0,0.0,0.0
+sonicdrivein_697,"i'm not going to eat this food, but i love you and my family.",0,1,0.9686905,0.41092348,0.0,0.0,0.0,0.0
+sonicdrivein_85,"a couple of years ago, i was on a trip to the beach.",0,1,0.9836083,0.41092348,0.0,0.0,0.0,0.0
+sonicdrivein_457,"`` i'm not going to be here tonight, but you know what? it is a sign that they are coming back! and the only thing we can do now.",0,1,0.9524473,0.41092348,0.0,0.0,0.0,0.0
+sonicdrivein_408,and i'm not saying you like this.,0,1,0.9548855,0.41092348,0.0,0.0,0.0,0.0
+sonicdrivein_98,"a, a day before the end of school year and i’m going to go out for ice cream.",0,1,0.9702232,0.41092348,0.0,0.0,0.0,0.0
+sonicdrivein_234,"mom, i'm not a mom and you’ re just me.",0,1,0.77528125,0.41092348,0.0,0.0,0.0,0.0
+sonicdrivein_784,"when you're done with your day, i say: like this.",0,1,0.9402989,0.41092348,0.0,0.0,0.0,0.0
+sonicdrivein_670,"a, a little kid: i just want to eat my food.",1,1,0.9303752,0.41092348,0.0909090909090909,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_496,1.,0,1,0.8619599,0.41092348,0.0,0.0,0.0,0.0
+sonicdrivein_152,"mom, i'm not going to go out and get a job.",0,1,0.9753235,0.41092348,0.0,0.0,0.0,0.0
+sonicdrivein_742,i'm going to have a good time.,1,1,0.9793147,0.41092348,0.10735389901075512,1.6720924800836196e-308,1.6720924800836196e-308,1.6720924800836196e-308
+sonicdrivein_2031,"yeah, yeah.",0,1,0.889115,0.41092348,0.0,0.0,0.0,0.0
+sonicdrivein_572,"i'm not a farmer, but i’ve got to be able of do this.",2,1,0.719231,0.41092348,0.15384615384615385,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_65,`` i'm going to have a dog for you.,0,1,0.9684742,0.41092348,0.0,0.0,0.0,0.0
+sonicdrivein_690,"a, a day when you can see what your friends are doing just because they’re not seeing it.",0,1,0.9652072,0.41092348,0.0,0.0,0.0,0.0
+sonicdrivein_78,"when you see a post on twitter that says, `` i love cats! and dogs are my favorite animals.",0,1,0.9695453,0.41092348,0.0,0.0,0.0,0.0
+sonicdrivein_196,i'm not going to be a good friend if i can n’t get my phone out of your hand.,1,1,0.9567703,0.41092348,0.05263157894736841,2.2250738585072626e-308,2.2250738585072626e-308,2.2250738585072626e-308
+sonicdrivein_2052,`` i'm not going to be a ghost.,0,1,0.96519566,0.41092348,0.0,0.0,0.0,0.0

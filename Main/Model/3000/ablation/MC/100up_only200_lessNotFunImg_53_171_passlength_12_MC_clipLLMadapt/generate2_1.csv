@@ -1,0 +1,58 @@
+image_id,caption,fitCount,gtNum,fluency,diversity,bleu1,bleu2,bleu3,bleu4
+mcdonalds_switzerland_409,i am hungry.,1,1,0.9774694,0.4912394,0.0043745762456469,2.92012657387077e-310,2.92012657387077e-310,2.92012657387077e-310
+mcdonalds_switzerland_1988,i'm here to give you a little taste of the new season with my signature coffee.,3,1,0.95078385,0.4912394,0.106834279637048,1.267808868335202e-308,1.267808868335202e-308,1.267808868335202e-308
+mcdonalds_switzerland_1985,"always remember that in the middle of a meal, you 'll see me waving my arm around and shouting: if it was an apple or mango.",0,1,0.90492404,0.4912394,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_242,"in a few seconds, check out our new ad! to the people who helped us create it: 👏👍🏻 🇺🇲 🇦🇷 🇸 # friedrichgut 🥗 pic.",0,1,0.8990315,0.4912394,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_248,`` the time you are not paying attention to your phone and have no idea what's going on.,0,1,0.6651062,0.4912394,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_725,"a good, beautiful haircut with mcdonald s fries! we are here to help you get ready for your next meal.",0,1,0.96551526,0.4912394,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_358,you can enjoy this experience with our delicious ice cream.,3,1,0.9495124,0.4912394,0.0998613251094238,7.4066274658958e-309,7.4066274658958e-309,7.4066274658958e-309
+mcdonalds_switzerland_16,"la, if you love the fried chicken with a spicy kick and have your own unique flavor combination.",0,1,0.74666023,0.4912394,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_402,"when you're done with the first round, take a look at what’s left.",1,1,0.9785001,0.4912394,0.0523624921787219,1.5146353626711476e-308,1.5146353626711476e-308,1.5146353626711476e-308
+mcdonalds_switzerland_13,"'s your lucky day? '' means that you’ve got a great idea for an app or game, and the team will try to make it happen.",1,1,0.94478947,0.4912394,0.0384615384615384,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+mcdonalds_switzerland_1919,we have some good news for you.,0,1,0.97409296,0.4912394,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1904,"in the m i of 2019, you may have noticed that there is a lot in this channel.",0,1,0.8627012,0.4912394,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_841,what's your name? this is the end of instagram.,1,1,0.9679548,0.4912394,0.0637503800819369,1.2766437377119805e-308,1.2766437377119805e-308,1.2766437377119805e-308
+mcdonalds_switzerland_31,we are going to do something different this year.,2,1,0.9796342,0.4912394,0.2222222222222222,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+mcdonalds_switzerland_558,why are you still waiting for the mcdonald's theme? send your message in italian and we will make it cheesy.,3,1,0.9663332,0.4912394,0.1357256127053939,2.0133300850710214e-308,2.0133300850710214e-308,2.0133300850710214e-308
+mcdonalds_switzerland_605,this is a good meme! 🥰 this emoji means: « i love you so much.,0,1,0.91686934,0.4912394,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_568,"when you see this, it's because of the high price of your mcdonald& amp; company food.",2,1,0.86540556,0.4912394,0.0431988440721218,7.689649493008776e-309,7.689649493008776e-309,7.689649493008776e-309
+mcdonalds_switzerland_360,what's the app for? check it out! this is mcdonald’ s now in italian.,0,1,0.8048787,0.4912394,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1942,you are not the only one who can tell you how much your #tajife has done for this beautiful city of malta.,2,1,0.89702725,0.4912394,0.0692091260633521,1.6939495889106837e-308,1.6939495889106837e-308,1.6939495889106837e-308
+mcdonalds_switzerland_629,"well, it's not the end of this day.",1,1,0.9657877,0.4912394,0.0405815584197937,7.223757182189463e-309,7.223757182189463e-309,7.223757182189463e-309
+mcdonalds_switzerland_2065,"so you’ ve got the whole list of “ i eat this for my lunch? or don't u, and then it looks like me in a t-shirt.",2,1,0.2919019,0.4912394,0.074074074074074,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+mcdonalds_switzerland_1940,the story of the indian man who went to live with his mother after 30 years is still a must-see.,2,1,0.97071767,0.4912394,0.1,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+mcdonalds_switzerland_693,it’ s not a joke.,1,1,0.96689814,0.4912394,0.0735758882342884,8.18558927632837e-309,8.18558927632837e-309,8.18558927632837e-309
+mcdonalds_switzerland_2014,"for example, if you’ re watching a movie with your partner and it starts to become “really good” then the next time they eat together at home is also likely very enjoyable.",0,1,0.90850097,0.4912394,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_608,"i'm not the only one who eats food, but i also love it.",1,1,0.9747131,0.4912394,0.0565493446608988,1.6357440907688813e-308,1.6357440907688813e-308,1.6357440907688813e-308
+mcdonalds_switzerland_762,this is what the new apple menu looks like.,2,1,0.9809982,0.4912394,0.0817509869269871,8.18558927632837e-309,8.18558927632837e-309,8.18558927632837e-309
+mcdonalds_switzerland_1912,"it's a funny way to start the day, but it s not like we have some of that food.",2,1,0.9605261,0.4912394,0.0898883858551089,1.9000788267213607e-308,1.9000788267213607e-308,1.9000788267213607e-308
+mcdonalds_switzerland_1962,what’ s the most romantic thing you can do in mcdonald ‘s? just use your app to make love.,2,1,0.9765584,0.4912394,0.1052631578947368,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+mcdonalds_switzerland_631,"a mcdonald’ s what you see in the window, and they don't have time to make a reservation.",1,1,0.8324929,0.4912394,0.0555555555555555,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+mcdonalds_switzerland_1888,the second and third teams have signed their m.,0,1,0.7610662,0.4912394,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_461,this is my favourite mcdonald's.,2,1,0.9722515,0.4912394,0.010929488978917,6.07973005345788e-310,6.07973005345788e-310,6.07973005345788e-310
+mcdonalds_switzerland_586,"my mom told me about the big one, and i knew it was coming.",0,1,0.97538155,0.4912394,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_646,"30 seconds after the first word, it's all over! have you ever tried to use your phone for something else? check out this cool video of a burger from swedish restaurant yoma.",1,1,0.96711284,0.4912394,0.03125,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+mcdonalds_switzerland_1612,we have to do it.,0,1,0.9545237,0.4912394,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_481,why are you so mad? '' that's because the red wine was used to bake some delicious cookies with a very long shelf life! cheers for all those who enjoy them.,2,1,0.91798955,0.4912394,0.064516129032258,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+mcdonalds_switzerland_367,"the more you like something, the less it will be on your calendar.",3,1,0.96760076,0.4912394,0.0831435379210052,1.2025033327569346e-308,1.2025033327569346e-308,1.2025033327569346e-308
+mcdonalds_switzerland_769,"when the us's food safety agency says you have to go outside, there is no need for it.",1,1,0.9696358,0.4912394,0.0555555555555555,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+mcdonalds_switzerland_453,do you want to know the best way of eating ice cream? just click on this link and we 'll see what your choice is.,1,1,0.97768617,0.4912394,0.04,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+mcdonalds_switzerland_598,"this is the best time of year to go out and have a good meal with your friends, even if you're in debt! don ',s take it as soon at possible.",6,1,0.8682651,0.4912394,0.1935483870967742,0.0333333333333333,2.225073858507262e-308,2.225073858507262e-308
+mcdonalds_switzerland_616,russia has just been the most impressive partner in 2019.,0,1,0.783231,0.4912394,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_672,"so, i'm not saying that your cat is an slave.",0,1,0.96710324,0.4912394,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_203,i'm not sure if you are ready for this.,1,1,0.98168373,0.4912394,0.0994265907571521,1.991083571408152e-308,1.991083571408152e-308,1.991083571408152e-308
+mcdonalds_switzerland_736,"when you see a song that is getting more and more popular, choose the one with most votes!#mymusic.",2,1,0.9468016,0.4912394,0.0889708225463119,1.7816998627591863e-308,1.7816998627591863e-308,1.7816998627591863e-308
+mcdonalds_switzerland_902,"hey, there's a video for you! the ""in-your lane is here.",2,1,0.74514663,0.4912394,0.1818181818181818,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+mcdonalds_switzerland_1899,"mme how excited i get when the weather is sunny and there's a party in our apartment! you can count on me, m’ amonde.",3,1,0.96881795,0.4912394,0.1198986821386423,2.134267386369317e-308,2.134267386369317e-308,2.134267386369317e-308
+mcdonalds_switzerland_716,"it's not only about your favorite food, but also a list of languages that are hard to learn! 🥰🇨🇳 🇹🇪 🇸 🇷🇺 👩👦 📝🍲🥗🌱 🌿 🍅 🧘🏽️ ⛏⬇🏻🐾 🐴 🤣",1,1,0.89646965,0.4912394,0.0333333333333333,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+mcdonalds_switzerland_2052,"yes, i know that'm in this place! the king of crna is making a film for us every month.",0,1,0.48877975,0.4912394,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_566,the new year 2019 is here! let us know what you ate at the party and how it went with our menu.,6,1,0.95039076,0.4912394,0.1984010479157137,0.0692829056213603,0.0363735254512141,1.618675612464905e-308
+mcdonalds_switzerland_655,i m 't going to have a lot of free time.,0,1,0.97963035,0.4912394,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_584,"look, you got a job? yes.",1,1,0.9215276,0.4912394,0.0266466243466156,3.55744243506706e-309,3.55744243506706e-309,3.55744243506706e-309
+mcdonalds_switzerland_1895,"and the rule of thumb is: eat your food with a fork, not on it.",2,1,0.90035623,0.4912394,0.0955375080765052,1.594335087959687e-308,1.594335087959687e-308,1.594335087959687e-308
+mcdonalds_switzerland_700,this's the one i have been waiting for.,1,1,0.9611928,0.4912394,0.0669076785648738,1.190996212064859e-308,1.190996212064859e-308,1.190996212064859e-308
+mcdonalds_switzerland_478,"when you're not sure what to eat or where, just press this button and the mcdonald s will come right at your feet.",2,1,0.96271724,0.4912394,0.0869565217391304,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
+mcdonalds_switzerland_429,"this app is now available in the following languages: english, french ( with me), german and spanish.",0,1,0.90180624,0.4912394,0.0,0.0,0.0,0.0
+mcdonalds_switzerland_1995,"today, we’ ll have the chance to explore our options and see which one suits us best.",3,1,0.98058355,0.4912394,0.1394714758202644,1.7585612308455557e-308,1.7585612308455557e-308,1.7585612308455557e-308
+mcdonalds_switzerland_80,"if you're in the mood for some me, try to check out this menu!# mcdonalds 🍔
+this app is great if u wanna eat 😎😂🍕🥗 and then go back home 👍👌.",2,1,0.9127512,0.4912394,0.064516129032258,2.225073858507262e-308,2.225073858507262e-308,2.225073858507262e-308
