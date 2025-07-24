@@ -18,50 +18,38 @@
 
 # Code
 ### GAMC [![DOI](https://zenodo.org/badge/DOI/10.6342/NTU202501318.svg)](https://doi.org/10.6342/NTU202501318)
-* Step 1 : `Main model` [oxford_train_BLEU_minigpt4.py](Main/oxford_train_BLEU_minigpt4.py)
-* Step 2 : `Adaptation` [oxford_train_BLEU_adapter_minigpt4.py](Main/oxford_train_BLEU_adapter_minigpt4.py)
-* Step 3 : `Test result` [oxford_predict_minigpt4.py](Main/oxford_predict_minigpt4.py)
+* Step 0 : `Preprocess` 
+  * Data reformat & Augmentation: 
+    * [tool.ipynb](Main/ipynb_tools/tool.ipynb)
+    * [test_model.ipynb](Main/ipynb_tools/test_model.ipynb)
+  * Data parsing: 
+    * [parse_oxford.py](Data/Oxford_HIC/parse_oxford.py)
+    * [parse_ins.py](Data/Instagram/parse_ins.py)[oxford_hic_dataset.zip](Main/oxford_hic_dataset.zip) 
+<br><br>
+* Step 1 : `Main model` 
+  * code: [oxford_train_BLEU_minigpt4.py](Main/oxford_train_BLEU_minigpt4.py)
+  * checkpoint: [checkpoint-004.pt](Main/Model/final/GAMC/20250421_oxford_3000_only1_300_82_ESH_bert_cross_concat/checkpoint-004.pt)
+<br><br>
+* Step 2 : `Adaptation` 
+  * code: [oxford_train_BLEU_adapter_minigpt4.py](Main/oxford_train_BLEU_adapter_minigpt4.py)
+  * checkpoint-MC: [checkpoint-002.pt](Main/Model/final/GAMC/MC/100up_only200_lessNotFunImg_53_171_passlength_12_MC_/all/checkpoint-002.pt)
+  * checkpoint-SD: [checkpoint-011.pt](Main/Model/final/GAMC/SD/100up_only200_lessNotFunImg_169_55_passlength_10_SD_/all/checkpoint-011.pt)
+<br><br>
+* Step 3 : `Test result`
+  * code: [oxford_predict_minigpt4.py](Main/oxford_predict_minigpt4.py)
+  * organization: [result.ipynb](Main/ipynb_tools/result.ipynb)
 ### Evaluation
 * `Humor Score` >> [humor_score.py](Main/humor_score.py)
 * `Benign Score` >> Vilio [![DOI](https://zenodo.org/badge/DOI/10.48550/arXiv.2012.07788.svg)](https://doi.org/10.48550/arXiv.2012.07788) 
 [![GitHub](https://img.shields.io/badge/GitHub-Muennighoff/vilio-darkgreen)](https://github.com/Muennighoff/vilio)
-* `Fluency score` >> Parrot [![GitHub](https://img.shields.io/badge/GitHub-PrithivirajDamodaran/Parrot_Paraphraser-darkgreen)](https://github.com/PrithivirajDamodaran/Parrot_Paraphraser)
-* `Diversity score` >> cosine similarity of image caption pairs clip embeddings
+* `Fluency Score` >> Parrot [![GitHub](https://img.shields.io/badge/GitHub-PrithivirajDamodaran/Parrot_Paraphraser-darkgreen)](https://github.com/PrithivirajDamodaran/Parrot_Paraphraser)
+* `Diversity Score` >> [result.ipynb](Main/ipynb_tools/result.ipynb) (cosine similarity of image caption pairs clip embeddings)
 
 # Baseline
 ### 1. ClipCap
 [![DOI](https://zenodo.org/badge/DOI/10.48550/arXiv.2111.09734.svg)](https://doi.org/10.48550/arXiv.2111.09734) 
 [![GitHub](https://img.shields.io/badge/GitHub-rmokady/CLIP_prefix_caption-darkgreen)](https://github.com/rmokady/CLIP_prefix_caption.git)
-### 2. BITA
+### 2. BITA 
 [![DOI](https://zenodo.org/badge/DOI/10.1109/TGRS.2024.3359316.svg)](https://doi.org/10.1109/TGRS.2024.3359316) 
-[![GitHub](https://img.shields.io/badge/GitHub-yangcong356/BITA-darkgreen)](https://github.com/yangcong356/BITA.git)
-
-## Download repo
-### Install coco-caption
-#### 1. Install the model
-
-[Data](#my-custom-anchor-point)   
-
-- [x] #739
-- [ ] https://github.com/octo-org/octo-repo/issues/740
-- [ ] Add delight to the experience when all tasks are complete :tada:
-To properly obtain the CIDE
-> To properly obtain the CIDE
->
-The background color is `#ffffff` for light mode and `#000000` for dark mode.
-### dataset
-3. Set the environment variable in `~/.bashrc` by adding the following lines
-[Rico](https://interactionmining.org/rico) / [Rico UI Screenshots and View Hierarchies dataset](https://storage.googleapis.com/crowdstf-rico-uiuc-4540/rico_dataset_v0.1/unique_uis.tar.gz)
-
-Screen2Words: [paper](https://arxiv.org/abs/2108.03353) / [code](https://github.com/google-research/google-research/tree/master/screen2words) / [dataset](https://github.com/google-research-datasets/screen2words)
-```
-git clone --recursive https://github.com/RainYuGG/image-captioning-based-on-Screen2Words.git
-```
-* Install [coco-caption](#install-coco-caption) for evaluation (BLEU, CIDEr).
-## Build Environment & Requirement
-* ```adapter_type: "vit"``` : vit adapter ("vit", "vit_grayscale")
-* Use conda to build the environment
-```
-conda env create -f environment.yml
-```
-[Install the model](#Data)
+[![GitHub](https://img.shields.io/badge/GitHub-yangcong356/BITA-darkgreen)](https://github.com/yangcong356/BITA.git) <br>
+Note: Due to the import packages, BITA can only run on linux system.
