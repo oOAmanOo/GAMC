@@ -1,2 +1,0 @@
-mcdonald_loss,sonic_loss,mcdonald_accuracy,sonic_accuracy,mcdonald_precision,sonic_precision,mcdonald_recall,sonic_recall,mcdonald_f1,sonic_f1,mcdonald_tp,sonic_tp,mcdonald_tn,sonic_tn,mcdonald_fp,sonic_fp,mcdonald_fn,sonic_fn
-0.05847882101792962,0.06687768368220698,0.7741935483870968,0.7311827956989247,0.7636211514472961,0.7247862815856934,0.774193525314331,0.7311828136444092,0.7600876092910767,0.6997929811477661,22,21,98,115,10,9,25,41
