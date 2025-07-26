@@ -1,2 +1,0 @@
-bleu_threshold,trainData_size,testData_size,train_loss,train_bleu,test_loss,test_bleu,save
-0.05,320000,30000,1.5491206665039063,0.8219162109374953,3.5694348958333335,0.7891604166666654,V
