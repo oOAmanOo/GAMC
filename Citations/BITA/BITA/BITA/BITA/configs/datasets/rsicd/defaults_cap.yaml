@@ -1,0 +1,25 @@
+datasets:
+  rsicd_caption: # name of the dataset builder
+    dataset_card: dataset_card/rsicd_caption.md
+    # data_dir: ${env.data_dir}/datasets
+    data_type: images # [images|videos|features]
+
+    build_info:
+      # Pre-training phase annotates away validation and test sets
+      annotations:
+#        train:
+#          storage: /usr/data/RSIC/RSICD/annotations/RSICD_train.json
+#          storage: BITA/BITA_weights/data/RSICD/annotations/RSICD_train.json
+#          storage: BITA/BITA_weights/data/mcdonalds_switzerland/annotations/mcdonalds_switzerland_train.json
+#          storage: BITA/BITA_weights/data/mcdonalds_switzerland/annotations/mcdonalds_switzerland_test.json
+#          storage: BITA/BITA_weights/data/sonicdrivein/annotations/sonicdrivein_test.json
+#        val:
+#          storage: /usr/data/RSIC/RSICD/annotations/RSICD_val.json
+        test:
+#          storage: /usr/data/RSIC/RSICD/annotations/RSICD_test.json
+#          storage: BITA/BITA_weights/data/RSICD/annotations/RSICD_test.json
+#          storage: BITA/BITA_weights/data/sonicdrivein/annotations/sonicdrivein_testAll.json
+          storage: BITA/BITA_weights/data/mcdonalds_switzerland/annotations/mcdonalds_switzerland_testAll.json
+      images:
+#        storage: BITA/BITA_weights/data/RSICD/images/
+        storage: BITA/BITA_weights/data/oxford_img/
