@@ -1,0 +1,65 @@
+image_id,caption,fitCount,gtNum,fluency,diversity,bleu1,bleu2,bleu3,bleu4,benign,humor_score,humor
+sonicdrivein_339,"if you're not sure what the next step is, just hop on your phone and see how many reviews are posted.",3,1,0.97545606,0.505635,0.1180807768034625,1.8391691476033075e-308,1.8391691476033075e-308,1.8391691476033075e-308,-9.877781,0.4446928799152374,0
+sonicdrivein_594,"""'you don’ t know what i look like when we get there? oh my god! this is the worst thing ever.",1,1,0.9482526,0.505635,0.0476190476190476,2.2250738585072617e-308,2.2250738585072617e-308,2.2250738585072617e-308,-3.7479181,0.1893828511238098,0
+sonicdrivein_454,"@ #ilovemycar: we’ re not going to be able to go back home for a while, so i guess its time you all start driving around in your car.",0,1,0.9477974,0.505635,0.0,0.0,0.0,0.0,-3.9600441,0.0399613641202449,0
+sonicdrivein_470,i'm just going to say hi and i hope you guys like this! the song is called car oil.,1,1,0.96775985,0.505635,0.0526315789473684,2.2250738585072617e-308,2.2250738585072617e-308,2.2250738585072617e-308,-9.321135,0.0175532829016447,0
+sonicdrivein_791,it’ s like this.,0,1,0.9724815,0.505635,0.0,0.0,0.0,0.0,-8.725577,0.6863173842430115,1
+sonicdrivein_2189,"i got this for you! </s>
+.",0,1,0.9423579,0.505635,0.0,0.0,0.0,0.0,-8.604744,0.7013233304023743,1
+sonicdrivein_1996,"i'm going to make a foam potion for you! just like i said, this is the best way ever.",0,1,0.96690416,0.505635,0.0,0.0,0.0,0.0,-9.562449,0.086920253932476,0
+sonicdrivein_1793,"what are you thinking? the first bite of a burger on your desk! :o
+i am not talking about it.",4,1,0.84983844,0.505635,0.1340640092071278,1.491511611267286e-308,1.491511611267286e-308,1.491511611267286e-308,-4.155289,0.0400357097387313,0
+sonicdrivein_1567,"in 2016, i was the first to say that with a full pack of pepsi.",0,1,0.93017775,0.505635,0.0,0.0,0.0,0.0,-9.2939625,0.0995680689811706,0
+sonicdrivein_1090,this is what the #40 of us looks like.,0,1,0.91036093,0.505635,0.0,0.0,0.0,0.0,-7.3817267,0.187717005610466,0
+sonicdrivein_91,"yes, it’ s a new - and you can get your own unicorn wings! but only if u don't have to walk around in them for like an hour or two.",0,1,0.8518134,0.505635,0.0,0.0,0.0,0.0,-4.779268,0.1378950327634811,0
+sonicdrivein_1138,"in the future, we’ll be able to eat a meal in our microwave and not get sick.",6,1,0.97638595,0.505635,0.1539951369749991,1.1650118823090733e-308,1.1650118823090733e-308,1.1650118823090733e-308,-8.935568,0.2862736582756042,0
+sonicdrivein_529,# 10 of the best ways to say no in japanese.,0,1,0.91124755,0.505635,0.0,0.0,0.0,0.0,-9.077129,0.8456857204437256,1
+sonicdrivein_1678,this is the most expensive thing i’ve ever bought at a sushi bar.,2,1,0.98072815,0.505635,0.0660095386066321,9.546946419773297e-309,9.546946419773297e-309,9.546946419773297e-309,-7.718656,0.5967403054237366,0
+sonicdrivein_2168,"so i'm not a fan of this shit, but we do n’t know why.",3,1,0.93253,0.505635,0.1299708556527071,1.3495755153097447e-308,1.3495755153097447e-308,1.3495755153097447e-308,-8.194243,0.8534427285194397,1
+sonicdrivein_1094,"pick a color for your new pad (or phone) and see how many you can fit in it!
+just think about all the things that could go bump into this thing.",3,1,0.92837405,0.505635,0.096774193548387,2.2250738585072617e-308,2.2250738585072617e-308,2.2250738585072617e-308,-7.835878,0.0139248901978135,0
+sonicdrivein_1367,"it's not just a new song, it’ s also the best thing you ever ate on your way home from work.",3,1,0.95754135,0.505635,0.1428571428571428,2.2250738585072617e-308,2.2250738585072617e-308,2.2250738585072617e-308,-9.139561,0.0477298125624656,0
+sonicdrivein_1884,i got this.,0,1,0.9652667,0.505635,0.0,0.0,0.0,0.0,-8.678528,0.5903553366661072,0
+sonicdrivein_1376,"this is a, of the show.",0,1,0.6081805,0.505635,0.0,0.0,0.0,0.0,-7.8314404,0.8566232323646545,1
+sonicdrivein_1307,i'm not going to do this.,0,1,0.9757135,0.505635,0.0,0.0,0.0,0.0,-7.4065666,0.4033913314342499,0
+sonicdrivein_556,"in the past year, we’ve been on a mission to get you all of your favorite #drills and more.",5,1,0.91876143,0.505635,0.1918981454013776,0.0405118306958463,1.622552677948798e-308,1.622552677948798e-308,-9.359317,0.0049779010005295,0
+sonicdrivein_546,"this is the, this year for more video game reviews.",1,1,0.4828121,0.505635,0.0332871083698079,7.4066274658958e-309,7.4066274658958e-309,7.4066274658958e-309,-8.835766,0.4696241021156311,0
+sonicdrivein_69,and the last thing i want to say is that this sounds like a really good idea.,0,1,0.976552,0.505635,0.0,0.0,0.0,0.0,-9.275227,0.5515047907829285,0
+sonicdrivein_1635,"when you’re like, “i don t know if i can handle this,” and your best friend says something along the lines of, ” well maybe we should try it out for a while.",2,1,0.8922338,0.505635,0.0259432134050409,9.524718382283254e-309,9.524718382283254e-309,9.524718382283254e-309,-7.6736236,0.1251606941223144,0
+sonicdrivein_926,have a look at this.,1,1,0.96921635,0.505635,0.040379303598931,4.49234664313549e-309,4.49234664313549e-309,4.49234664313549e-309,-8.335787,0.222842276096344,0
+sonicdrivein_1077,"yeaa aahhh, you know what i mean? that it’s like the most annoying thing in this world is when your mom asks for breakfast and then she goes to bed.",3,1,0.93802494,0.505635,0.1,2.2250738585072617e-308,2.2250738585072617e-308,2.2250738585072617e-308,-8.5883255,0.8061985373497009,1
+sonicdrivein_325,and you think that’ s funny? just watch this.,0,1,0.9748346,0.505635,0.0,0.0,0.0,0.0,-6.071054,0.3327875733375549,0
+sonicdrivein_1209,this's the perfect emoji for this moment.,0,1,0.96861523,0.505635,0.0,0.0,0.0,0.0,-0.00045491836,0.2041698992252349,0
+sonicdrivein_952,we’ re not going to be eating all of our food.,2,1,0.9760023,0.505635,0.0068914389819924,8.4336783994811e-310,8.4336783994811e-310,8.4336783994811e-310,-8.52463,0.9278247356414796,1
+sonicdrivein_1765,"you know, i’ m not even 10 years old and they just took my breath away!
+why do you have to take your kids out for a walk in the park? its like being drunk with their parents.",4,1,0.90766245,0.505635,0.1052631578947368,2.2250738585072617e-308,2.2250738585072617e-308,2.2250738585072617e-308,-6.1277323,0.0180212296545505,0
+sonicdrivein_2080,i have a question for you: what’ s your favorite after-dinner drink? ” the answer is always something with alcohol.,2,1,0.9680066,0.505635,0.1,2.2250738585072617e-308,2.2250738585072617e-308,2.2250738585072617e-308,-1.0699325,0.0289457086473703,0
+sonicdrivein_1197,"what a, what is this? you know that it’ s not the first time i saw this smell.",0,1,0.9472902,0.505635,0.0,0.0,0.0,0.0,-7.6374393,0.2292070537805557,0
+sonicdrivein_1866,i'm going to make you stay up late tonight and go on a camping trip.,1,1,0.9801721,0.505635,0.0510618892243099,1.704247123185085e-308,1.704247123185085e-308,1.704247123185085e-308,-8.450077,0.7662426829338074,1
+sonicdrivein_743,"you know, we have a lot of stuff to do today.",2,1,0.9822313,0.505635,0.0090521942487025,1.10779904317048e-309,1.10779904317048e-309,1.10779904317048e-309,-7.916346,0.901894211769104,1
+sonicdrivein_283,a: you know what i’m going to do? get a burger from your favorite fast food chain and eat it in the car.,1,1,0.983805,0.505635,0.0434782608695652,2.2250738585072617e-308,2.2250738585072617e-308,2.2250738585072617e-308,-8.281842,0.0696936324238777,0
+sonicdrivein_1435,"i’ m, and i just got back from my first ever meme contest! check it out<3&lt;p style=quot;; quot>like this? </s></blockquote><img src="""" alt=""the new trend is the taco bell logo"" width='105' height='' title=""&gt;&amp;""taco bells#4",3,1,0.81718475,0.505635,0.0909090909090909,2.2250738585072617e-308,2.2250738585072617e-308,2.2250738585072617e-308,-7.6521516,0.0183656997978687,0
+sonicdrivein_786,"a, you know what they say about a burger? it’s just not good enough! if your local restaurant is far away from where its all the fun then that means this place isn t even worth going to.",1,1,0.78049916,0.505635,0.0263157894736842,2.2250738585072617e-308,2.2250738585072617e-308,2.2250738585072617e-308,-8.128874,0.1360604465007782,0
+sonicdrivein_1809,"i’ m going to get a lot of people on the, i just like that.",2,1,0.68389267,0.505635,0.0113156371960023,1.88835963878829e-309,1.88835963878829e-309,1.88835963878829e-309,-8.542445,0.9502933621406556,1
+sonicdrivein_491,"you know, you can't just leave your car unlocked in the parking lot! it's like a unicorn.",0,1,0.9581537,0.505635,0.0,0.0,0.0,0.0,-0.035631314,0.5158300399780273,0
+sonicdrivein_1566,your phone number is your lifeline.,0,1,0.9780595,0.505635,0.0,0.0,0.0,0.0,-9.962466,0.4299947619438171,0
+sonicdrivein_311,"when you’ re done with your workout, why not do it again.",1,1,0.9776944,0.505635,0.0833333333333333,2.2250738585072617e-308,2.2250738585072617e-308,2.2250738585072617e-308,-8.402612,0.4970051646232605,0
+sonicdrivein_196,"this is what you get when u buy a new sonic barbie with the cutest unicorn on it!
+> just in case : lol.",1,1,0.8674169,0.505635,0.0416666666666666,2.2250738585072617e-308,2.2250738585072617e-308,2.2250738585072617e-308,-7.5586042,0.9317705035209656,1
+sonicdrivein_558,"i just found out my best friend is pregnant!
+it's like, ""hey u wanna come with me for christmas?""#thequeen of the world has decided to be a mom.",3,1,0.8975263,0.505635,0.1071428571428571,2.2250738585072617e-308,2.2250738585072617e-308,2.2250738585072617e-308,-6.905355,0.0949637815356254,0
+sonicdrivein_163,"@ kristy lynn, we’ re not going to be in the same restaurant as you guys.",1,1,0.96789896,0.505635,0.0625,2.2250738585072617e-308,2.2250738585072617e-308,2.2250738585072617e-308,-7.2659893,0.7343429327011108,1
+sonicdrivein_655,"if you're not sure what to get your friend for their birthday, here are some ideas.",0,1,0.9681855,0.505635,0.0,0.0,0.0,0.0,-8.906847,0.6043832898139954,0
+sonicdrivein_742,i'm not sure if i should eat this or just chew on it.,1,1,0.976556,0.505635,0.0769230769230769,2.2250738585072617e-308,2.2250738585072617e-308,2.2250738585072617e-308,-8.392439,0.8731348514556885,1
+sonicdrivein_2185,"a, i wasn't going to make it.",1,1,0.97320515,0.505635,0.0193336118909446,3.01131000863463e-309,3.01131000863463e-309,3.01131000863463e-309,-7.8670855,0.8107062578201294,1
+sonicdrivein_866,"if you’ re shopping for a ton of swag, just add in “ like this” to your cart.",2,1,0.8294697,0.505635,0.111111111111111,2.2250738585072617e-308,2.2250738585072617e-308,2.2250738585072617e-308,-8.6329775,0.1586711108684539,0
+sonicdrivein_532,"in the winter, when you’ re out for a walk and there's no dog food to find.",6,1,0.9737559,0.505635,0.2338165183743268,1.474067231045377e-308,1.474067231045377e-308,1.474067231045377e-308,-9.175462,0.110592283308506,0
+sonicdrivein_2181,"i'm not gonna be leaving until i get to the last episode of this show!
+# you know what they say about a little bit long.",1,1,0.9335142,0.505635,0.0384615384615384,2.2250738585072617e-308,2.2250738585072617e-308,2.2250738585072617e-308,-8.303154,0.0223859343677759,0
+sonicdrivein_788,"a little something to say: "" i love you! and a bunch of other things that are just plain weird.",2,1,0.8236492,0.505635,0.05,2.2250738585072617e-308,2.2250738585072617e-308,2.2250738585072617e-308,-8.849973,0.0401025004684925,0
+sonicdrivein_2201,i’ m going to put this out on a can of beer.,0,1,0.9750632,0.505635,0.0,0.0,0.0,0.0,-7.229623,0.4685706794261932,0
+sonicdrivein_1452,what is this? ” we’ re the new soup.,2,1,0.6460925,0.505635,0.0654610729578016,6.55450749847085e-309,6.55450749847085e-309,6.55450749847085e-309,-0.01736684,0.2902178764343261,0
+sonicdrivein_830,"it's the perfect time of year to get your hair done and enjoy some ice cream! # bestmomoftheyear
+i am so happy for you.",5,1,0.93998957,0.505635,0.0178286377662229,1.90416171966807e-309,1.90416171966807e-309,1.90416171966807e-309,-9.269802,0.0345545448362827,0
+sonicdrivein_1755,this is a simple and easy way to make your own strawberry cheesecake.,3,1,0.97563726,0.505635,0.106931392899502,1.0310310703092875e-308,1.0310310703092875e-308,1.0310310703092875e-308,-0.7968038,0.3292610347270965,0
+sonicdrivein_80,"i’m not even, i was like oh my god hes so cute! then the guy just said no thanks and walked away.",1,1,0.77647746,0.505635,0.0454545454545454,2.2250738585072617e-308,2.2250738585072617e-308,2.2250738585072617e-308,-6.6040874,0.9774509072303772,1
