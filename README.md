@@ -1,4 +1,6 @@
-# Data
+# GAMC - Adaptable Advertising Meme Caption Generation Model
+
+## Data
 ### 1. Oxford_HIC
 [![DOI](https://zenodo.org/badge/DOI/10.1109/ICCV51070.2023.01856.svg)](https://doi.org/10.1109/ICCV51070.2023.01856) 
 [![GitHub](https://img.shields.io/badge/GitHub-runjiali--rl/Oxford_HIC-darkgreen)](https://github.com/runjiali-rl/Oxford_HIC)
@@ -16,8 +18,8 @@
 [![GitHub](https://img.shields.io/badge/GitHub-Vision--CAIR/MiniGPT--4-darkgreen)](https://github.com/Vision-CAIR/MiniGPT-4.git)
 [![Code](https://img.shields.io/badge/Code-instagram.ipynb-green)](Citations/minigpt4/demo_getdata.py)
 
-# Code
-### GAMC [![DOI](https://zenodo.org/badge/DOI/10.6342/NTU202501318.svg)](https://doi.org/10.6342/NTU202501318)
+## Code
+### GAMC 
 * Step 0 : `Preprocess` 
   * Data reformat & Augmentation: 
     * [tool.ipynb](Main/ipynb_tools/tool.ipynb)
@@ -45,7 +47,10 @@
 * `Fluency Score` >> Parrot [![GitHub](https://img.shields.io/badge/GitHub-PrithivirajDamodaran/Parrot_Paraphraser-darkgreen)](https://github.com/PrithivirajDamodaran/Parrot_Paraphraser)
 * `Diversity Score` >> [result.ipynb](Main/ipynb_tools/result.ipynb) (cosine similarity of image caption pairs clip embeddings)
 
-# Baseline
+## Framework
+![alt text](./framework_detail.png)
+
+## Baseline
 ### 1. ClipCap
 [![DOI](https://zenodo.org/badge/DOI/10.48550/arXiv.2111.09734.svg)](https://doi.org/10.48550/arXiv.2111.09734) 
 [![GitHub](https://img.shields.io/badge/GitHub-rmokady/CLIP_prefix_caption-darkgreen)](https://github.com/rmokady/CLIP_prefix_caption.git)
